@@ -36,14 +36,14 @@ using EEngine::TList;
 using EEngine::TQueue;
 using EEngine::TDictionary;
 
-#ifdef ES_PLATFORM_CUDA
+#ifdef EE_PLATFORM_CUDA
 #include <cuda_runtime.h>
 #define HOST_DEVICE __host__ __device__
 #else
 #define HOST_DEVICE
 #endif
 
-#ifdef ES_PLATFORM_APPLE
+#ifdef EE_PLATFORM_APPLE
 #define FORCEINLINE inline
 #else
 #define FORCEINLINE __forceinline

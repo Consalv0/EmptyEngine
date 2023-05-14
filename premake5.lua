@@ -1,124 +1,114 @@
 workspace "EmptyEngine"
-	architecture "x64"
+    architecture "x64"
     startproject "EmptyEngine"
 
-	configurations
-	{
-		"Debug",
-		"Release",
-		"Shipping"
-	}
-	---%{cfg.system}
-	outputdir = "%{cfg.buildcfg}_%{cfg.architecture}"
+    configurations
+    {
+        "Debug",
+        "Release",
+        "Shipping"
+    }
+    ---%{cfg.system}
+    outputdir = "%{cfg.buildcfg}_%{cfg.architecture}"
 
-	-- Include directories relative to root folder (solution directory)
-	IncludeDir = {}
+    -- Include directories relative to root folder (solution directory)
+    IncludeDir = {}
 
-	project "EmptyEngine"
-		location "Engine"
-		kind "StaticLib"
-		language "C++"
-		cppdialect "C++17"
-		staticruntime "on"
+    project "EmptyEngine"
+        location "Engine"
+        kind "StaticLib"
+        language "C++"
+        cppdialect "C++17"
+        staticruntime "on"
 
-		targetdir ("%{prj.location}/Build/" .. outputdir)
-		objdir ("%{prj.location}/BinObjs/" .. outputdir)
+        targetdir ("%{prj.location}/Build/" .. outputdir)
+        objdir ("%{prj.location}/BinObjs/" .. outputdir)
 
-		pchsource "%{prj.location}/Source/Runtime/Public/CoreMinimal.cpp"
-		pchheader "CoreMinimal.h"
+        pchsource "%{prj.location}/Source/Runtime/Public/CoreMinimal.cpp"
+        pchheader "CoreMinimal.h"
 
-		files {
-			"%{prj.location}/Source/**.h",
-			"%{prj.location}/Source/**.inl",
-			"%{prj.location}/Source/**.cpp",
-		}
+        files {
+            "%{prj.location}/Source/**.h",
+            "%{prj.location}/Source/**.inl",
+            "%{prj.location}/Source/**.cpp",
+        }
 
-		includedirs {
-			"%{prj.location}/Source",
-			"%{prj.location}/Source/Runtime",
-			"%{prj.location}/Source/Runtime/Public",
-		}      
+        includedirs {
+            "%{prj.location}/Source",
+            "%{prj.location}/Source/Runtime",
+            "%{prj.location}/Source/Runtime/Public",
+        }      
 
-	    libdirs { 
-	        "%{prj.location}/Libraries"
-	    }
+        libdirs { 
+            "%{prj.location}/Libraries"
+        }
 
-	    links {
-	        --"SDL2.lib"
-	    }
+        links {
+            --"SDL2.lib"
+        }
 
-		filter "system:windows"
-			systemversion "latest"
+        filter "system:windows"
+            systemversion "latest"
 
-			defines {
-	            "ES_PLATFORM_WINDOWS",
-				"ES_DLLEXPORT",
-			}
+            defines {
+                "EE_PLATFORM_WINDOWS",
+                "EE_DLLEXPORT",
+            }
 
-		filter "configurations:Debug"
-			defines { 
-				"ES_DEBUG", "ES_ENABLE_ASSERTS"
-			}
-			runtime "Debug"
-	        symbols "on"
+        filter "configurations:Debug"
+            defines { 
+                "EE_DEBUG", "EE_ENABLE_ASSERTS"
+            }
+            runtime "Debug"
+            symbols "on"
 
-		filter "configurations:Release"
-			defines "ES_RELEASE"
-			runtime "Release"
-			optimize "on"
+        filter "configurations:Release"
+            defines "EE_RELEASE"
+            runtime "Release"
+            optimize "on"
 
-		filter "configurations:Shipping"
-			defines "ES_SHIPPING"
-			runtime "Release"
-			optimize "on"
+        filter "configurations:Shipping"
+            defines "EE_SHIPPING"
+            runtime "Release"
+            optimize "on"
 
-	project "dos"
-		location "External/dos"
-		kind "StaticLib"
-		language "C++"
-		cppdialect "C++20"
-		staticruntime "on"
+    project "dos"
+        location "External/dos"
+        kind "StaticLib"
+        language "C++"
+        cppdialect "C++20"
+        staticruntime "on"
 
-		targetdir ("%{prj.location}/Build/" .. outputdir)
-		objdir ("%{prj.location}/BinObjs/" .. outputdir)
+        targetdir ("%{prj.location}/Build/" .. outputdir)
+        objdir ("%{prj.location}/BinObjs/" .. outputdir)
 
-		files {
-			"%{prj.location}/Source/**.h",
-			"%{prj.location}/Source/**.c",
-		}
+        files {
+            "%{prj.location}/Source/**.h",
+            "%{prj.location}/Source/**.c",
+        }
 
-		includedirs {
-			"%{prj.location}/Include",
-		}
-		
-		libdirs { 
-			"%{prj.location}/Libraries"
-		}
+        includedirs {
+            "%{prj.location}/Include",
+        }
+        
+        libdirs { 
+            "%{prj.location}/Libraries"
+        }
 
-		links {
-		}
+        links {
+        }
 
-		filter "system:windows"
-			systemversion "latest"
+        filter "system:windows"
+            systemversion "latest"
 
-		defines {
-            "ES_PLATFORM_WINDOWS",
-			"ES_DLLEXPORT",
-		}
+        filter "configurations:Debug"
+            runtime "Debug"
+            symbols "on"
 
-		filter "configurations:Debug"
-			defines { 
-				"ES_DEBUG", "ES_ENABLE_ASSERTS"
-			}
-			runtime "Debug"
-        	symbols "on"
+        filter "configurations:Release"
+            runtime "Release"
+            optimize "on"
 
-		filter "configurations:Release"
-			defines "ES_RELEASE"
-			runtime "Release"
-			optimize "on"
-
-		filter "configurations:Shipping"
-			defines "ES_SHIPPING"
-			runtime "Release"
-			optimize "on"
+        filter "configurations:Shipping"
+            runtime "Release"
+            optimize "on"
