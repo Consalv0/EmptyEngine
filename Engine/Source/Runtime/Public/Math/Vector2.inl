@@ -104,6 +104,18 @@ namespace EEngine
 		return Polarity ? Vector2( -Y / Length, X / Length ) : Vector2( Y / Length, -X / Length );
 	}
 
+	inline Vector2 Vector2::Rotate( Vector2& A, const Vector2& Center, float Radians ) const
+	{
+		Vector2 rot;
+		A.X -= Center.X;
+		A.Y -= Center.Y;
+		rot.X = round( A.X * cos( Radians ) - A.Y * sin( Radians ) );
+		rot.Y = round( A.X * sin( Radians ) + A.Y * cos( Radians ) );
+		rot.X += Center.X;
+		rot.Y += Center.Y;
+		return rot;
+	}
+
 	inline const float* Vector2::PointerToValue() const
 	{
 		return &X;

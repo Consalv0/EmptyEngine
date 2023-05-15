@@ -15,7 +15,7 @@ namespace EEngine
 		union
 		{
 			struct { float X, Y; };
-			struct { float u, v; };
+			struct { float U, V; };
 		};
 
 		HOST_DEVICE FORCEINLINE Vector2();
@@ -40,6 +40,8 @@ namespace EEngine
 		HOST_DEVICE FORCEINLINE Vector2 Orthogonal( bool Polarity ) const;
 		HOST_DEVICE FORCEINLINE Vector2 Orthonormal( bool Polarity ) const;
 		HOST_DEVICE FORCEINLINE static Vector2 Lerp( const Vector2& Start, const Vector2& End, float t );
+
+		HOST_DEVICE FORCEINLINE Vector2 Rotate( Vector2& A, const Vector2& Center, float Radians ) const;
 
 		HOST_DEVICE inline float& operator[]( unsigned char i );
 		HOST_DEVICE inline float const& operator[]( unsigned char i ) const;
