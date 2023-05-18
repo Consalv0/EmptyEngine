@@ -15,21 +15,21 @@ namespace EEngine
 		m2[ 0 ] = 0; m2[ 1 ] = 0; m2[ 2 ] = 1;
 	}
 
-	FORCEINLINE Matrix3x3::Matrix3x3( const Matrix3x3& Matrix )
-		: m0( Matrix.m0 ), m1( Matrix.m1 ), m2( Matrix.m2 )
+	FORCEINLINE Matrix3x3::Matrix3x3( const Matrix3x3& matrix )
+		: m0( matrix.m0 ), m1( matrix.m1 ), m2( matrix.m2 )
 	{
 	}
 
-	FORCEINLINE Matrix3x3::Matrix3x3( const Matrix4x4& Matrix )
+	FORCEINLINE Matrix3x3::Matrix3x3( const Matrix4x4& matrix )
 	{
-		Matrix3x3( Matrix.GetRow( 0 ), Matrix.GetRow( 1 ), Matrix.GetRow( 2 ) );
+		Matrix3x3( matrix.GetRow( 0 ), matrix.GetRow( 1 ), matrix.GetRow( 2 ) );
 	}
 
-	FORCEINLINE Matrix3x3::Matrix3x3( const Vector3& Row0, const Vector3& Row1, const Vector3& Row2 )
+	FORCEINLINE Matrix3x3::Matrix3x3( const Vector3& row0, const Vector3& row1, const Vector3& row2 )
 	{
-		m0[ 0 ] = Row0.X; m0[ 1 ] = Row0.Y; m0[ 2 ] = Row0.Z;
-		m1[ 0 ] = Row1.X; m1[ 1 ] = Row1.Y; m1[ 2 ] = Row1.Z;
-		m2[ 0 ] = Row2.X; m2[ 1 ] = Row2.Y; m2[ 2 ] = Row2.Z;
+		m0[ 0 ] = row0.x; m0[ 1 ] = row0.y; m0[ 2 ] = row0.z;
+		m1[ 0 ] = row1.x; m1[ 1 ] = row1.y; m1[ 2 ] = row1.z;
+		m2[ 0 ] = row2.x; m2[ 1 ] = row2.y; m2[ 2 ] = row2.z;
 	}
 
 	inline Matrix3x3 Matrix3x3::Identity()
@@ -77,32 +77,32 @@ namespace EEngine
 		return ((Vector3*)this)[ i ];
 	}
 
-	FORCEINLINE Matrix3x3 Matrix3x3::operator*( const Matrix3x3& Other ) const
+	FORCEINLINE Matrix3x3 Matrix3x3::operator*( const Matrix3x3& other ) const
 	{
-		Matrix3x3 Result = Matrix3x3();
+		Matrix3x3 result = Matrix3x3();
 		const Vector3 Col0 = GetColumn( 0 ), Col1 = GetColumn( 1 ), Col2 = GetColumn( 2 );
 
-		Result.m0[ 0 ] = Other.m0.Dot( Col0 );
-		Result.m1[ 0 ] = Other.m1.Dot( Col0 );
-		Result.m2[ 0 ] = Other.m2.Dot( Col0 );
+		result.m0[ 0 ] = other.m0.Dot( Col0 );
+		result.m1[ 0 ] = other.m1.Dot( Col0 );
+		result.m2[ 0 ] = other.m2.Dot( Col0 );
 
-		Result.m0[ 1 ] = Other.m0.Dot( Col1 );
-		Result.m1[ 1 ] = Other.m1.Dot( Col1 );
-		Result.m2[ 1 ] = Other.m2.Dot( Col1 );
+		result.m0[ 1 ] = other.m0.Dot( Col1 );
+		result.m1[ 1 ] = other.m1.Dot( Col1 );
+		result.m2[ 1 ] = other.m2.Dot( Col1 );
 
-		Result.m0[ 2 ] = Other.m0.Dot( Col2 );
-		Result.m1[ 2 ] = Other.m1.Dot( Col2 );
-		Result.m2[ 2 ] = Other.m2.Dot( Col2 );
+		result.m0[ 2 ] = other.m0.Dot( Col2 );
+		result.m1[ 2 ] = other.m1.Dot( Col2 );
+		result.m2[ 2 ] = other.m2.Dot( Col2 );
 
-		return Result;
+		return result;
 	}
 
-	FORCEINLINE Vector3 Matrix3x3::operator*( const Vector3& Vector ) const
+	FORCEINLINE Vector3 Matrix3x3::operator*( const Vector3& vector ) const
 	{
 		Vector3 result(
-			GetColumn( 0 ).Dot( Vector ),
-			GetColumn( 1 ).Dot( Vector ),
-			GetColumn( 2 ).Dot( Vector )
+			GetColumn( 0 ).Dot( vector ),
+			GetColumn( 1 ).Dot( vector ),
+			GetColumn( 2 ).Dot( vector )
 		);
 
 		return result;

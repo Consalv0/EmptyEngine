@@ -6,58 +6,58 @@
 
 namespace EEngine
 {
-	FORCEINLINE Plane::Plane() : X(), Y(), Z(), D() { }
+	FORCEINLINE Plane::Plane() : x(), y(), z(), d() { }
 
-	FORCEINLINE Plane::Plane(const float & X, const float & Y, const float & Z, const float & D) : X(X), Y(Y), Z(Z), D(D) { }
+	FORCEINLINE Plane::Plane(const float & x, const float & y, const float & z, const float & d) : x(x), y(y), z(z), d(d) { }
 
-	FORCEINLINE Plane::Plane(const Vector3 & NormalizedNormal, float InD) {
-		X = NormalizedNormal.X;
-		Y = NormalizedNormal.Y;
-		Z = NormalizedNormal.Z;
-		D = InD;
+	FORCEINLINE Plane::Plane(const Vector3 & normalizedNormal, float inD) {
+		x = normalizedNormal.x;
+		y = normalizedNormal.y;
+		z = normalizedNormal.z;
+		d = inD;
 	}
 
-	FORCEINLINE Plane Plane::FromPointNormal(const Point3 & Point, const Vector3 & Normal) {
-		Vector3 NormalizedNormal = Normal.Normalized();
+	FORCEINLINE Plane Plane::FromPointNormal(const Point3 & point, const Vector3 & normal) {
+		Vector3 normalizedNormal = normal.Normalized();
 		return Plane(
-			NormalizedNormal.X,
-			NormalizedNormal.Y,
-			NormalizedNormal.Z,
-			-Vector3::Dot(Point, NormalizedNormal)
+			normalizedNormal.x,
+			normalizedNormal.y,
+			normalizedNormal.z,
+			-Vector3::Dot(point, normalizedNormal)
 		);
 	}
 
-	FORCEINLINE Plane Plane::From3Points(const Point3 & V0, const Point3 & V1, const Point3 & V2) {
-		Vector3 Normal = Vector3::Cross(V1 - V0, V2 - V0);
+	FORCEINLINE Plane Plane::From3Points(const Point3 & v0, const Point3 & v1, const Point3 & v2) {
+		Vector3 Normal = Vector3::Cross(v1 - v0, v2 - v0);
 		Normal.Normalize();
-		FromPointNormal(V0, Normal);
+		FromPointNormal(v0, Normal);
 	}
 
 	FORCEINLINE void Plane::Normalize() {
-		float Distance = sqrtf(X*X + Y*Y + Z*Z);
-		X /= Distance;
-		Y /= Distance;
-		Z /= Distance;
-		D /= Distance;
+		float distance = sqrtf(x*x + y*y + z*z);
+		x /= distance;
+		y /= distance;
+		z /= distance;
+		d /= distance;
 	}
 
-	FORCEINLINE float Plane::SignedDistance(const Vector3 &Pt) const {
-		return (X * Pt.X + Y * Pt.Y + Z * Pt.Z + D);
+	FORCEINLINE float Plane::SignedDistance(const Vector3 &p) const {
+		return (x * p.x + y * p.y + z * p.z + d);
 	}
 
-	FORCEINLINE float Plane::Dot(const Plane &P, const Vector4 &V) {
-		return P.X * V.X + P.Y * V.Y + P.Z * V.Z + P.D * V.W;
+	FORCEINLINE float Plane::Dot(const Plane &p, const Vector4 &v) {
+		return p.x * v.x + p.y * v.y + p.z * v.z + p.d * v.w;
 	}
 
-	FORCEINLINE float Plane::Dot(const Plane &P, const Vector3 &V) {
-		return P.X * V.X + P.Y * V.Y + P.Z * V.Z + P.D;
+	FORCEINLINE float Plane::Dot(const Plane &p, const Vector3 &v) {
+		return p.x * v.x + p.y * v.y + p.z * v.z + p.d;
 	}
 
-	FORCEINLINE float Plane::DotCoord(const Plane &P, const Vector3 &V) {
-		return P.X * V.X + P.Y * V.Y + P.Z * V.Z + P.D;
+	FORCEINLINE float Plane::DotCoord(const Plane &p, const Vector3 &v) {
+		return p.x * v.x + p.y * v.y + p.z * v.z + p.d;
 	}
 
-	FORCEINLINE float Plane::DotNormal(const Plane &P, const Vector3 &V) {
-		return P.X * V.X + P.Y * V.Y + P.Z * V.Z;
+	FORCEINLINE float Plane::DotNormal(const Plane &p, const Vector3 &v) {
+		return p.x * v.x + p.y * v.y + p.z * v.z;
 	}
 }

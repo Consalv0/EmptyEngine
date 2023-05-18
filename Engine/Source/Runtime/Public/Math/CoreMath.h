@@ -22,5 +22,7 @@ using EEngine::Matrix4x4;
 using EEngine::Matrix3x3;
 
 #include "Math/Box2D.h"
+#include "Math/IntBox2D.h"
 #include "Math/Box3D.h"
+#include "Math/IntBox3D.h"
 #include "Math/Plane.h"

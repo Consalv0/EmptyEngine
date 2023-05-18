@@ -11,60 +11,60 @@
 namespace EEngine
 {
 	FORCEINLINE Vector3::Vector3()
-		: X( 0 ), Y( 0 ), Z( 0 )
+		: x( 0 ), y( 0 ), z( 0 )
 	{
 	}
 
-	FORCEINLINE Vector3::Vector3( const Vector2& Vector )
-		: X( Vector.X ), Y( Vector.Y ), Z( 0 )
+	FORCEINLINE Vector3::Vector3( const Vector2& vector )
+		: x( vector.x ), y( vector.y ), z( 0 )
 	{
 	}
 
-	FORCEINLINE Vector3::Vector3( const IntVector3& Vector )
-		: X( float( Vector.X ) ), Y( float( Vector.Y ) ), Z( float( Vector.Z ) )
+	FORCEINLINE Vector3::Vector3( const IntVector3& vector )
+		: x( float( vector.x ) ), y( float( vector.y ) ), z( float( vector.z ) )
 	{
 	}
 
-	FORCEINLINE Vector3::Vector3( const Vector3& Vector )
-		: X( Vector.X ), Y( Vector.Y ), Z( Vector.Z )
+	FORCEINLINE Vector3::Vector3( const Vector3& vector )
+		: x( vector.x ), y( vector.y ), z( vector.z )
 	{
 	}
 
-	FORCEINLINE Vector3::Vector3( const Vector4& Vector )
-		: X( Vector.X ), Y( Vector.Y ), Z( Vector.Z )
+	FORCEINLINE Vector3::Vector3( const Vector4& vector )
+		: x( vector.x ), y( vector.y ), z( vector.z )
 	{
 	}
 
-	FORCEINLINE Vector3::Vector3( const float& X, const float& Y, const float& Z )
-		: X( X ), Y( Y ), Z( Z )
+	FORCEINLINE Vector3::Vector3( const float& x, const float& y, const float& z )
+		: x( x ), y( y ), z( z )
 	{
 	}
 
-	FORCEINLINE Vector3::Vector3( const float& X, const float& Y )
-		: X( X ), Y( Y ), Z( 0 )
+	FORCEINLINE Vector3::Vector3( const float& x, const float& y )
+		: x( x ), y( y ), z( 0 )
 	{
 	}
 
-	FORCEINLINE Vector3::Vector3( const float& Value )
-		: X( Value ), Y( Value ), Z( Value )
+	FORCEINLINE Vector3::Vector3( const float& value )
+		: x( value ), y( value ), z( value )
 	{
 	}
 
 	inline float Vector3::Magnitude() const
 	{
-		return sqrtf( X * X + Y * Y + Z * Z );
+		return sqrtf( x * x + y * y + z * z );
 	}
 
 	inline float Vector3::MagnitudeSquared() const
 	{
-		return X * X + Y * Y + Z * Z;
+		return x * x + y * y + z * z;
 	}
 
 	inline void Vector3::Normalize()
 	{
 		if ( MagnitudeSquared() == 0 )
 		{
-			X = 0; Y = 0; Z = 0;
+			x = 0; y = 0; z = 0;
 		}
 		else
 		{
@@ -78,42 +78,42 @@ namespace EEngine
 		return *this / Magnitude();
 	}
 
-	FORCEINLINE Vector3 Vector3::Cross( const Vector3& Other ) const
+	FORCEINLINE Vector3 Vector3::Cross( const Vector3& other ) const
 	{
 		return Vector3(
-			Y * Other.Z - Z * Other.Y,
-			Z * Other.X - X * Other.Z,
-			X * Other.Y - Y * Other.X
+			y * other.z - z * other.y,
+			z * other.x - x * other.z,
+			x * other.y - y * other.x
 		);
 	}
 
-	inline Vector3 Vector3::Cross( const Vector3& A, const Vector3& B )
+	inline Vector3 Vector3::Cross( const Vector3& a, const Vector3& b )
 	{
 		return Vector3(
-			A.Y * B.Z - A.Z * B.Y,
-			A.Z * B.X - A.X * B.Z,
-			A.X * B.Y - A.Y * B.X
+			a.y * b.z - a.z * b.y,
+			a.z * b.x - a.x * b.z,
+			a.x * b.y - a.y * b.x
 		);
 	}
 
-	FORCEINLINE float Vector3::Dot( const Vector3& Other ) const
+	FORCEINLINE float Vector3::Dot( const Vector3& other ) const
 	{
-		return (X * Other.X) + (Y * Other.Y) + (Z * Other.Z);
+		return (x * other.x) + (y * other.y) + (z * other.z);
 	}
 
-	inline float Vector3::Dot( const Vector3& A, const Vector3& B )
+	inline float Vector3::Dot( const Vector3& a, const Vector3& b )
 	{
-		return (A.X * B.X) + (A.Y * B.Y) + (A.Z * B.Z);
+		return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
 	}
 
 	inline const float* Vector3::PointerToValue() const
 	{
-		return &X;
+		return &x;
 	}
 
-	FORCEINLINE Vector3 Vector3::Lerp( const Vector3& Start, const Vector3& End, float t )
+	FORCEINLINE Vector3 Vector3::Lerp( const Vector3& start, const Vector3& end, float t )
 	{
-		return Vector3( (Start.X * (1.0F - t)) + (End.X * t), (Start.Y * (1.0F - t)) + (End.Y * t), (Start.Z * (1.0F - t)) + (End.Z * t) );
+		return Vector3( (start.x * (1.0F - t)) + (end.x * t), (start.y * (1.0F - t)) + (end.y * t), (start.z * (1.0F - t)) + (end.z * t) );
 	}
 
 	inline HOST_DEVICE Vector3 Vector3::Reflect( const Vector3& Incident, const Vector3& Normal )
@@ -133,115 +133,115 @@ namespace EEngine
 		return ((float*)this)[ i ];
 	}
 
-	FORCEINLINE Vector3 Vector3::operator * ( const Vector3& Other ) const
+	FORCEINLINE Vector3 Vector3::operator * ( const Vector3& other ) const
 	{
-		return Vector3( X * Other.X, Y * Other.Y, Z * Other.Z );
+		return Vector3( x * other.x, y * other.y, z * other.z );
 	}
 
-	FORCEINLINE Vector3 Vector3::operator/( const Vector3& Other ) const
+	FORCEINLINE Vector3 Vector3::operator/( const Vector3& other ) const
 	{
-		return Vector3( X / Other.X, Y / Other.Y, Z / Other.Z );
+		return Vector3( x / other.x, y / other.y, z / other.z );
 	}
 
-	FORCEINLINE bool Vector3::operator==( const Vector3& Other ) const
+	FORCEINLINE bool Vector3::operator==( const Vector3& other ) const
 	{
-		return (X == Other.X && Y == Other.Y && Z == Other.Z);
+		return (x == other.x && y == other.y && z == other.z);
 	}
 
-	FORCEINLINE bool Vector3::operator!=( const Vector3& Other ) const
+	FORCEINLINE bool Vector3::operator!=( const Vector3& other ) const
 	{
-		return (X != Other.X || Y != Other.Y || Z != Other.Z);
+		return (x != other.x || y != other.y || z != other.z);
 	}
 
-	FORCEINLINE Vector3 Vector3::operator+( const Vector3& Other ) const
+	FORCEINLINE Vector3 Vector3::operator+( const Vector3& other ) const
 	{
-		return Vector3( X + Other.X, Y + Other.Y, Z + Other.Z );
+		return Vector3( x + other.x, y + other.y, z + other.z );
 	}
 
-	FORCEINLINE Vector3 Vector3::operator-( const Vector3& Other ) const
+	FORCEINLINE Vector3 Vector3::operator-( const Vector3& other ) const
 	{
-		return Vector3( X - Other.X, Y - Other.Y, Z - Other.Z );
+		return Vector3( x - other.x, y - other.y, z - other.z );
 	}
 
 	FORCEINLINE Vector3 Vector3::operator-( void ) const
 	{
-		return Vector3( -X, -Y, -Z );
+		return Vector3( -x, -y, -z );
 	}
 
-	FORCEINLINE Vector3 Vector3::operator*( const float& Value ) const
+	FORCEINLINE Vector3 Vector3::operator*( const float& value ) const
 	{
-		return Vector3( X * Value, Y * Value, Z * Value );
+		return Vector3( x * value, y * value, z * value );
 	}
 
-	FORCEINLINE Vector3 Vector3::operator/( const float& Value ) const
+	FORCEINLINE Vector3 Vector3::operator/( const float& value ) const
 	{
-		if ( Value == 0 ) return Vector3();
-		return Vector3( X / Value, Y / Value, Z / Value );
+		if ( value == 0 ) return Vector3();
+		return Vector3( x / value, y / value, z / value );
 	}
 
-	FORCEINLINE Vector3& Vector3::operator+=( const Vector3& Other )
+	FORCEINLINE Vector3& Vector3::operator+=( const Vector3& other )
 	{
-		X += Other.X; Y += Other.Y;	Z += Other.Z;
+		x += other.x; y += other.y;	z += other.z;
 		return *this;
 	}
 
-	FORCEINLINE Vector3& Vector3::operator-=( const Vector3& Other )
+	FORCEINLINE Vector3& Vector3::operator-=( const Vector3& other )
 	{
-		X -= Other.X; Y -= Other.Y; Z -= Other.Z;
+		x -= other.x; y -= other.y; z -= other.z;
 		return *this;
 	}
 
-	FORCEINLINE Vector3& Vector3::operator*=( const Vector3& Other )
+	FORCEINLINE Vector3& Vector3::operator*=( const Vector3& other )
 	{
-		X *= Other.X; Y *= Other.Y; Z *= Other.Z;
+		x *= other.x; y *= other.y; z *= other.z;
 		return *this;
 	}
 
-	FORCEINLINE Vector3& Vector3::operator/=( const Vector3& Other )
+	FORCEINLINE Vector3& Vector3::operator/=( const Vector3& other )
 	{
-		X /= Other.X; Y /= Other.Y; Z /= Other.Z;
+		x /= other.x; y /= other.y; z /= other.z;
 		return *this;
 	}
 
-	FORCEINLINE Vector3& Vector3::operator*=( const float& Value )
+	FORCEINLINE Vector3& Vector3::operator*=( const float& value )
 	{
-		X *= Value; Y *= Value; Z *= Value;
+		x *= value; y *= value; z *= value;
 		return *this;
 	}
 
-	FORCEINLINE Vector3& Vector3::operator/=( const float& Value )
+	FORCEINLINE Vector3& Vector3::operator/=( const float& value )
 	{
-		if ( Value == 0 ) X = Y = Z = 0;
-		X /= Value; Y /= Value; Z /= Value;
+		if ( value == 0 ) x = y = z = 0;
+		x /= value; y /= value; z /= value;
 		return *this;
 	}
 
-	inline Vector3 operator*( float Value, const Vector3& Vector )
+	inline Vector3 operator*( float value, const Vector3& vector )
 	{
-		return Vector3( Value * Vector.X, Value * Vector.Y, Value * Vector.Z );
+		return Vector3( value * vector.x, value * vector.y, value * vector.z );
 	}
 
-	inline Vector3 operator/( float Value, const Vector3& Vector )
+	inline Vector3 operator/( float value, const Vector3& vector )
 	{
-		return Vector3( Value / Vector.X, Value / Vector.Y, Value / Vector.Z );
+		return Vector3( value / vector.x, value / vector.y, value / vector.z );
 	}
 
 }
 
-inline EEngine::Vector3 Math::NormalizeAngleComponents( EEngine::Vector3 EulerAngle )
+inline EEngine::Vector3 Math::NormalizeAngleComponents( EEngine::Vector3 eulerAngle )
 {
-	EulerAngle.X = NormalizeAngle( EulerAngle.X );
-	EulerAngle.Y = NormalizeAngle( EulerAngle.Y );
-	EulerAngle.Z = NormalizeAngle( EulerAngle.Z );
+	eulerAngle.x = NormalizeAngle( eulerAngle.x );
+	eulerAngle.y = NormalizeAngle( eulerAngle.y );
+	eulerAngle.z = NormalizeAngle( eulerAngle.z );
 
-	return EulerAngle;
+	return eulerAngle;
 }
 
-inline EEngine::Vector3 Math::ClampAngleComponents( EEngine::Vector3 EulerAngle )
+inline EEngine::Vector3 Math::ClampAngleComponents( EEngine::Vector3 eulerAngle )
 {
-	EulerAngle.X = ClampAngle( EulerAngle.X );
-	EulerAngle.Y = ClampAngle( EulerAngle.Y );
-	EulerAngle.Z = ClampAngle( EulerAngle.Z );
+	eulerAngle.x = ClampDegrees( eulerAngle.x );
+	eulerAngle.y = ClampDegrees( eulerAngle.y );
+	eulerAngle.z = ClampDegrees( eulerAngle.z );
 
-	return EulerAngle;
+	return eulerAngle;
 }

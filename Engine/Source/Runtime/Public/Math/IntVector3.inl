@@ -11,87 +11,87 @@
 namespace EEngine
 {
 	FORCEINLINE IntVector3::IntVector3()
-		: X( 0 ), Y( 0 ), Z( 0 )
+		: x( 0 ), y( 0 ), z( 0 )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const Vector2& Vector )
-		: X( (int)Vector.X ), Y( (int)Vector.Y ), Z( 0 )
+	FORCEINLINE IntVector3::IntVector3( const Vector2& vector )
+		: x( (int)vector.x ), y( (int)vector.y ), z( 0 )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const Vector3& Vector )
-		: X( (int)Vector.X ), Y( (int)Vector.Y ), Z( (int)Vector.Z )
+	FORCEINLINE IntVector3::IntVector3( const Vector3& vector )
+		: x( (int)vector.x ), y( (int)vector.y ), z( (int)vector.z )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const IntVector3& Vector )
-		: X( Vector.X ), Y( Vector.Y ), Z( Vector.Z )
+	FORCEINLINE IntVector3::IntVector3( const IntVector3& vector )
+		: x( vector.x ), y( vector.y ), z( vector.z )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const IntVector2& Vector )
-		: X( Vector.X ), Y( Vector.Y ), Z( 0 )
+	FORCEINLINE IntVector3::IntVector3( const IntVector2& vector )
+		: x( vector.x ), y( vector.y ), z( 0 )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const IntVector2& Vector, const int& Z )
-		: X( Vector.X ), Y( Vector.Y ), Z( Z )
+	FORCEINLINE IntVector3::IntVector3( const IntVector2& vector, const int& z )
+		: x( vector.x ), y( vector.y ), z( z )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const Vector4& Vector )
-		: X( (int)Vector.X ), Y( (int)Vector.Y ), Z( (int)Vector.Z )
+	FORCEINLINE IntVector3::IntVector3( const Vector4& vector )
+		: x( (int)vector.x ), y( (int)vector.y ), z( (int)vector.z )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const int& X, const int& Y, const int& Z )
-		: X( X ), Y( Y ), Z( Z )
+	FORCEINLINE IntVector3::IntVector3( const int& x, const int& y, const int& z )
+		: x( x ), y( y ), z( z )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const int& X, const int& Y )
-		: X( X ), Y( Y ), Z( 0 )
+	FORCEINLINE IntVector3::IntVector3( const int& x, const int& y )
+		: x( x ), y( y ), z( 0 )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const int& Value )
-		: X( Value ), Y( Value ), Z( Value )
+	FORCEINLINE IntVector3::IntVector3( const int& value )
+		: x( value ), y( value ), z( value )
 	{
 	}
 
 	inline float IntVector3::Magnitude() const
 	{
-		return sqrtf( X * float( X ) + Y * float( Y ) + Z * float( Z ) );
+		return sqrtf( x * float( x ) + y * float( y ) + z * float( z ) );
 	}
 
 	inline int IntVector3::MagnitudeSquared() const
 	{
-		return X * X + Y * Y + Z * Z;
+		return x * x + y * y + z * z;
 	}
 
-	FORCEINLINE IntVector3 IntVector3::Cross( const IntVector3& Other ) const
+	FORCEINLINE IntVector3 IntVector3::Cross( const IntVector3& other ) const
 	{
 		return IntVector3(
-			Y * Other.Z - Z * Other.Y,
-			Z * Other.X - X * Other.Z,
-			X * Other.Y - Y * Other.X
+			y * other.z - z * other.y,
+			z * other.x - x * other.z,
+			x * other.y - y * other.x
 		);
 	}
 
-	FORCEINLINE int IntVector3::Dot( const IntVector3& Other ) const
+	FORCEINLINE int IntVector3::Dot( const IntVector3& other ) const
 	{
-		return (X * Other.X) + (Y * Other.Y) + (Z * Other.Z);
+		return (x * other.x) + (y * other.y) + (z * other.z);
 	}
 
 	inline Vector3 IntVector3::FloatVector3() const
 	{
-		return Vector3( float( X ), float( Y ), float( Z ) );
+		return Vector3( float( x ), float( y ), float( z ) );
 	}
 
 	inline const int* IntVector3::PointerToValue() const
 	{
-		return &X;
+		return &x;
 	}
 
 	inline int& IntVector3::operator[]( unsigned char i )
@@ -106,116 +106,116 @@ namespace EEngine
 		return ((int*)this)[ i ];
 	}
 
-	FORCEINLINE IntVector3 IntVector3::operator * ( const IntVector3& Other ) const
+	FORCEINLINE IntVector3 IntVector3::operator * ( const IntVector3& other ) const
 	{
 		return IntVector3(
-			X * Other.X,
-			Y * Other.Y,
-			Z * Other.Z
+			x * other.x,
+			y * other.y,
+			z * other.z
 		);
 	}
 
-	FORCEINLINE IntVector3 IntVector3::operator/( const IntVector3& Other ) const
+	FORCEINLINE IntVector3 IntVector3::operator/( const IntVector3& other ) const
 	{
 		return IntVector3(
-			X / Other.X,
-			Y / Other.Y,
-			Z / Other.Z
+			x / other.x,
+			y / other.y,
+			z / other.z
 		);
 	}
 
-	FORCEINLINE bool IntVector3::operator==( const IntVector3& Other )
+	FORCEINLINE bool IntVector3::operator==( const IntVector3& other )
 	{
-		return (X == Other.X && Y == Other.Y && Z == Other.Z);
+		return (x == other.x && y == other.y && z == other.z);
 	}
 
-	FORCEINLINE bool IntVector3::operator!=( const IntVector3& Other )
+	FORCEINLINE bool IntVector3::operator!=( const IntVector3& other )
 	{
-		return (X != Other.X || Y != Other.Y || Z != Other.Z);
+		return (x != other.x || y != other.y || z != other.z);
 	}
 
-	FORCEINLINE IntVector3 IntVector3::operator+( const IntVector3& Other ) const
+	FORCEINLINE IntVector3 IntVector3::operator+( const IntVector3& other ) const
 	{
-		return IntVector3( X + Other.X, Y + Other.Y, Z + Other.Z );
+		return IntVector3( x + other.x, y + other.y, z + other.z );
 	}
 
-	FORCEINLINE IntVector3 IntVector3::operator-( const IntVector3& Other ) const
+	FORCEINLINE IntVector3 IntVector3::operator-( const IntVector3& other ) const
 	{
-		return IntVector3( X - Other.X, Y - Other.Y, Z - Other.Z );
+		return IntVector3( x - other.x, y - other.y, z - other.z );
 	}
 
 	FORCEINLINE IntVector3 IntVector3::operator-( void ) const
 	{
-		return IntVector3( -X, -Y, -Z );
+		return IntVector3( -x, -y, -z );
 	}
 
-	FORCEINLINE IntVector3 IntVector3::operator*( const int& Value ) const
+	FORCEINLINE IntVector3 IntVector3::operator*( const int& value ) const
 	{
-		return IntVector3( X * Value, Y * Value, Z * Value );
+		return IntVector3( x * value, y * value, z * value );
 	}
 
-	FORCEINLINE IntVector3 IntVector3::operator/( const int& Value ) const
+	FORCEINLINE IntVector3 IntVector3::operator/( const int& value ) const
 	{
-		if ( Value == 0 ) return IntVector3();
-		return IntVector3( X / Value, Y / Value, Z / Value );
+		if ( value == 0 ) return IntVector3();
+		return IntVector3( x / value, y / value, z / value );
 	}
 
-	FORCEINLINE IntVector3& IntVector3::operator+=( const IntVector3& Other )
+	FORCEINLINE IntVector3& IntVector3::operator+=( const IntVector3& other )
 	{
-		X += Other.X;
-		Y += Other.Y;
-		Z += Other.Z;
+		x += other.x;
+		y += other.y;
+		z += other.z;
 		return *this;
 	}
 
-	FORCEINLINE IntVector3& IntVector3::operator-=( const IntVector3& Other )
+	FORCEINLINE IntVector3& IntVector3::operator-=( const IntVector3& other )
 	{
-		X -= Other.X;
-		Y -= Other.Y;
-		Z -= Other.Z;
+		x -= other.x;
+		y -= other.y;
+		z -= other.z;
 		return *this;
 	}
 
-	FORCEINLINE IntVector3& IntVector3::operator*=( const IntVector3& Other )
+	FORCEINLINE IntVector3& IntVector3::operator*=( const IntVector3& other )
 	{
-		X *= Other.X;
-		Y *= Other.Y;
-		Z *= Other.Z;
+		x *= other.x;
+		y *= other.y;
+		z *= other.z;
 		return *this;
 	}
 
-	FORCEINLINE IntVector3& IntVector3::operator/=( const IntVector3& Other )
+	FORCEINLINE IntVector3& IntVector3::operator/=( const IntVector3& other )
 	{
-		X /= Other.X;
-		Y /= Other.Y;
-		Z /= Other.Z;
+		x /= other.x;
+		y /= other.y;
+		z /= other.z;
 		return *this;
 	}
 
-	FORCEINLINE IntVector3& IntVector3::operator*=( const int& Value )
+	FORCEINLINE IntVector3& IntVector3::operator*=( const int& value )
 	{
-		X *= Value;
-		Y *= Value;
-		Z *= Value;
+		x *= value;
+		y *= value;
+		z *= value;
 		return *this;
 	}
 
-	FORCEINLINE IntVector3& IntVector3::operator/=( const int& Value )
+	FORCEINLINE IntVector3& IntVector3::operator/=( const int& value )
 	{
-		if ( Value == 0 ) X = Y = Z = 0;
-		X /= Value;
-		Y /= Value;
-		Z /= Value;
+		if ( value == 0 ) x = y = z = 0;
+		x /= value;
+		y /= value;
+		z /= value;
 		return *this;
 	}
 
-	inline IntVector3 operator*( int Value, const IntVector3& Vector )
+	inline IntVector3 operator*( int value, const IntVector3& vector )
 	{
-		return IntVector3( Value * Vector.X, Value * Vector.Y, Value / Vector.Z );
+		return IntVector3( value * vector.x, value * vector.y, value / vector.z );
 	}
 
-	inline IntVector3 operator/( int Value, const IntVector3& Vector )
+	inline IntVector3 operator/( int value, const IntVector3& vector )
 	{
-		return IntVector3( Value / Vector.X, Value / Vector.Y, Value / Vector.Z );
+		return IntVector3( value / vector.x, value / vector.y, value / vector.z );
 	}
 }

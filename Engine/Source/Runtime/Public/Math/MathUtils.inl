@@ -1,235 +1,235 @@
 
 #include "Math/MathUtils.h"
 
-namespace MathUtils
+namespace Math
 {
-	int SolveQuadratic( float X[ 2 ], float A, float B, float C )
+	int SolveQuadratic( float x[ 2 ], float a, float b, float c )
 	{
-		if ( fabs( A ) < 1e-14F )
+		if ( fabs( a ) < 1e-14F )
 		{
-			if ( fabs( B ) < 1e-14F )
+			if ( fabs( b ) < 1e-14F )
 			{
-				if ( C == 0 )
+				if ( c == 0 )
 					return -1;
 				return 0;
 			}
-			X[ 0 ] = -C / B;
+			x[ 0 ] = -c / b;
 			return 1;
 		}
-		float dscr = B * B - 4 * A * C;
+		float dscr = b * b - 4 * a * c;
 		if ( dscr > 0 )
 		{
 			dscr = sqrtf( dscr );
-			X[ 0 ] = (-B + dscr) / (2 * A);
-			X[ 1 ] = (-B - dscr) / (2 * A);
+			x[ 0 ] = (-b + dscr) / (2 * a);
+			x[ 1 ] = (-b - dscr) / (2 * a);
 			return 2;
 		}
 		else if ( dscr == 0 )
 		{
-			X[ 0 ] = -B / (2 * A);
+			x[ 0 ] = -b / (2 * a);
 			return 1;
 		}
 		else
 			return 0;
 	}
 
-	int SolveCubicNormed( float* X, float A, float B, float C )
+	int SolveCubicNormed( float* x, float a, float b, float c )
 	{
-		float A2 = A * A;
-		float Q = (A2 - 3.F * B) / 9.F;
-		float R = (A * (2.F * A2 - 9.F * B) + 27.F * C) / 54.F;
-		float R2 = R * R;
-		float Q3 = Q * Q * Q;
-		if ( R2 < Q3 )
+		float a2 = a * a;
+		float q = (a2 - 3.F * b) / 9.F;
+		float r = (a * (2.F * a2 - 9.F * b) + 27.F * c) / 54.F;
+		float r2 = r * r;
+		float q3 = q * q * q;
+		if ( r2 < q3 )
 		{
-			float t = R / sqrtf( Q3 );
+			float t = r / sqrtf( q3 );
 			if ( t < -1.F ) t = -1.F;
 			if ( t > 1.F ) t = 1.F;
 			t = acosf( t );
-			A /= 3.F; Q = -2.F * sqrtf( Q );
-			X[ 0 ] = Q * cosf( t / 3.F ) - A;
-			X[ 1 ] = Q * cosf( (t + 2.F * MathConstants::Pi) / 3.F ) - A;
-			X[ 2 ] = Q * cosf( (t - 2.F * MathConstants::Pi) / 3.F ) - A;
+			a /= 3.F; q = -2.F * sqrtf( q );
+			x[ 0 ] = q * cosf( t / 3.F ) - a;
+			x[ 1 ] = q * cosf( (t + 2.F * Math::Pi) / 3.F ) - a;
+			x[ 2 ] = q * cosf( (t - 2.F * Math::Pi) / 3.F ) - a;
 			return 3;
 		}
 		else
 		{
-			float A1, B1;
-			A1 = -powf( fabs( R ) + sqrtf( R2 - Q3 ), 1 / 3.F );
-			if ( R < 0 ) A1 = -A1;
-			B1 = A1 == 0 ? 0 : Q / A1;
-			A /= 3;
-			X[ 0 ] = (A1 + B1) - A;
-			X[ 1 ] = -0.5F * (A1 + B1) - A;
-			X[ 2 ] = 0.5F * sqrtf( 3.F ) * (A1 - B1);
-			if ( fabs( X[ 2 ] ) < 1e-14F )
+			float a1, b1;
+			a1 = -powf( fabs( r ) + sqrtf( r2 - q3 ), 1 / 3.F );
+			if ( r < 0 ) a1 = -a1;
+			b1 = a1 == 0 ? 0 : q / a1;
+			a /= 3;
+			x[ 0 ] = (a1 + b1) - a;
+			x[ 1 ] = -0.5F * (a1 + b1) - a;
+			x[ 2 ] = 0.5F * sqrtf( 3.F ) * (a1 - b1);
+			if ( fabs( x[ 2 ] ) < 1e-14F )
 				return 2;
 			return 1;
 		}
 	}
 
-	int SolveCubic( float X[ 3 ], float A, float B, float C, float D )
+	int SolveCubic( float x[ 3 ], float a, float b, float c, float d )
 	{
-		if ( fabs( A ) < 1e-14F )
-			return SolveQuadratic( X, B, C, D );
-		return SolveCubicNormed( X, B / A, C / A, D / A );
+		if ( fabs( a ) < 1e-14F )
+			return SolveQuadratic( x, b, c, d );
+		return SolveCubicNormed( x, b / a, c / a, d / a );
 	}
 
 	template<typename T>
-	float Shoelace2( const T& A, const T& B )
+	float Shoelace2( const T& a, const T& b )
 	{
-		return (B[ 0 ] - A[ 0 ]) * (A[ 1 ] + B[ 1 ]);
+		return (b[ 0 ] - a[ 0 ]) * (a[ 1 ] + b[ 1 ]);
 	}
 }
 
 namespace Math
 {
 	//* The number is power of 2
-	inline int IsPow2( const int A )
+	inline int IsPow2( const int a )
 	{
-		return ((A & (A - 1)) == 0);
+		return ((a & (a - 1)) == 0);
 	}
 
 	//* Get the next power2 of the value
-	inline int NextPow2( int X )
+	inline int NextPow2( int x )
 	{
-		--X;
-		X |= X >> 1;
-		X |= X >> 2;
-		X |= X >> 4;
-		X |= X >> 8;
-		X |= X >> 16;
-		return ++X;
+		--x;
+		x |= x >> 1;
+		x |= x >> 2;
+		x |= x >> 4;
+		x |= x >> 8;
+		x |= x >> 16;
+		return ++x;
 	}
 }
 
 template <typename T>
-T Math::Min( const T A, const T B )
+T Math::Min( const T a, const T b )
 {
-	return B < A ? B : A;
+	return b < a ? b : a;
 }
 
 template <typename T>
-T Math::Max( const T A, const T B )
+T Math::Max( const T a, const T b )
 {
-	return A < B ? B : A;
+	return a < b ? b : a;
 }
 
 template <typename T, typename S>
-T Math::Median( const T A, const T B, const S Alpha )
+T Math::Median( const T a, const T b, const S alpha )
 {
-	return Max( Min( A, B ), Min( Max( A, B ), Alpha ) );
+	return Max( Min( a, b ), Min( Max( a, b ), alpha ) );
 }
 
 template <typename T, typename S>
-T Math::Mix( const T A, const T B, const S Weight )
+T Math::Mix( const T a, const T b, const S weight )
 {
-	return T( (S( 1 ) - Weight) * A + Weight * B );
+	return T( (S( 1 ) - weight) * a + weight * b );
 }
 
 template<typename T>
-T Math::Abs( const T Value )
+T Math::Abs( const T value )
 {
-	return fabs( Value );
+	return fabs( value );
 }
 
 template<typename T>
-T Math::Sign( const T Value )
+T Math::Sign( const T value )
 {
-	return (T( 0 ) < Value) - (Value < T( 0 ));
+	return (T( 0 ) < value) - (value < T( 0 ));
 }
 
 template<typename T>
-T Math::NonZeroSign( const T Value )
+T Math::NonZeroSign( const T value )
 {
-	return T( 2 ) * (Value > T( 0 )) - T( 1 );
+	return T( 2 ) * (value > T( 0 )) - T( 1 );
 }
 
 template<typename T>
-T Math::Square( const T Value )
+T Math::Square( const T value )
 {
-	return Value * Value;
+	return value * value;
 }
 
 template<typename T>
-T Math::Map( const T Value, const T MinA, const T MaxA, const T MinB, const T MaxB )
+T Math::Map( const T value, const T minA, const T maxA, const T minB, const T maxB )
 {
-	return MinB + (Value - MinA) * (MaxA - MinB) / (MaxB - MinA);
+	return minB + (value - minA) * (maxA - minB) / (maxB - minA);
 }
 
 template <typename T>
-T Math::Clamp( const T Value, const T A )
+T Math::Clamp( const T value, const T a )
 {
-	return Value >= T( 0 ) && Value <= A ? Value : T( Value > T( 0 ) ) * A;
+	return value >= T( 0 ) && value <= a ? value : T( value > T( 0 ) ) * a;
 }
 
 template <typename T>
-T Math::Clamp( const T Value, const T A, const T B )
+T Math::Clamp( const T value, const T a, const T b )
 {
-	return Value >= A && Value <= B ? Value : Value < A ? A : B;
+	return value >= a && value <= b ? value : value < a ? a : b;
 }
 
 template <typename T>
-T Math::Clamp01( const T Value )
+T Math::Clamp01( const T value )
 {
-	return Value >= T( 0 ) && Value <= T( 1 ) ? Value : Value < T( 0 ) ? T( 0 ) : T( 1 );
+	return value >= T( 0 ) && value <= T( 1 ) ? value : value < T( 0 ) ? T( 0 ) : T( 1 );
 }
 
-float Math::ClampAngle( float Degrees )
+float Math::ClampDegrees( float angle )
 {
-	Degrees = fmod( Degrees, 360.F );
+	angle = fmod( angle, 360.F );
 
-	if ( Degrees < 0.F )
+	if ( angle < 0.F )
 	{
 		// --- Shift to [0,360)
-		Degrees += 360.F;
+		angle += 360.F;
 	}
 
-	return Degrees;
+	return angle;
 }
 
-float Math::NormalizeAngle( float Degrees )
+float Math::NormalizeAngle( float degrees )
 {
-	Degrees = ClampAngle( Degrees );
+	degrees = ClampDegrees( degrees );
 
-	if ( Degrees > 180.f )
+	if ( degrees > 180.f )
 	{
 		// --- Shift to (-180,180]
-		Degrees -= 360.f;
+		degrees -= 360.f;
 	}
 
-	return Degrees;
+	return degrees;
 }
 
 float Math::Pow10( int Number )
 {
 	float Ret = 1.0F;
-	float R = 10.0F;
+	float r = 10.0F;
 	if ( Number < 0 )
 	{
 		Number = -Number;
-		R = 0.1F;
+		r = 0.1F;
 	}
 
 	while ( Number )
 	{
 		if ( Number & 1 )
 		{
-			Ret *= R;
+			Ret *= r;
 		}
-		R *= R;
+		r *= r;
 		Number >>= 1;
 	}
 	return Ret;
 }
 
 // Referenced from UE4 implementation
-float Math::Atan2( float Y, float X )
+float Math::Atan2( float y, float x )
 {
-	const float absX = Math::Abs( X );
-	const float absY = Math::Abs( Y );
+	const float absX = Math::Abs( x );
+	const float absY = Math::Abs( y );
 	const bool yAbsBigger = (absY > absX);
-	float t0 = yAbsBigger ? absY : absX; // Max(absY, absX)
+	float t0 = yAbsBigger ? absY : absX; // max(absY, absX)
 	float t1 = yAbsBigger ? absX : absY; // Min(absX, absY)
 
 	if ( t0 == 0.F )
@@ -257,9 +257,9 @@ float Math::Atan2( float Y, float X )
 	t0 = t0 * t4 + c[ 6 ];
 	t3 = t0 * t3;
 
-	t3 = yAbsBigger ? (0.5F * MathConstants::Pi) - t3 : t3;
-	t3 = (X < 0.0F) ? MathConstants::Pi - t3 : t3;
-	t3 = (Y < 0.0F) ? -t3 : t3;
+	t3 = yAbsBigger ? (0.5F * Math::Pi) - t3 : t3;
+	t3 = (x < 0.0F) ? Math::Pi - t3 : t3;
+	t3 = (y < 0.0F) ? -t3 : t3;
 
 	return t3;
 }

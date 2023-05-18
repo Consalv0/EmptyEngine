@@ -24,6 +24,12 @@
     <ClInclude Include="Source\Runtime\Public\Math\CoreMath.h">
       <Filter>Math</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Runtime\Public\Math\IntBox2D.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Runtime\Public\Math\IntBox3D.h">
+      <Filter>Math</Filter>
+    </ClInclude>
     <ClInclude Include="Source\Runtime\Public\Math\IntVector2.h">
       <Filter>Math</Filter>
     </ClInclude>

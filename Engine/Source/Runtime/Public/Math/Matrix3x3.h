@@ -14,9 +14,9 @@ namespace EEngine
 		};
 
 		HOST_DEVICE FORCEINLINE Matrix3x3();
-		HOST_DEVICE FORCEINLINE Matrix3x3( const Matrix3x3& Matrix );
-		HOST_DEVICE FORCEINLINE Matrix3x3( const Matrix4x4& Matrix );
-		HOST_DEVICE FORCEINLINE Matrix3x3( const Vector3& Row0, const Vector3& Row1, const Vector3& Row2 );
+		HOST_DEVICE FORCEINLINE Matrix3x3( const Matrix3x3& matrix );
+		HOST_DEVICE FORCEINLINE Matrix3x3( const Matrix4x4& matrix );
+		HOST_DEVICE FORCEINLINE Matrix3x3( const Vector3& row0, const Vector3& row1, const Vector3& row2 );
 
 		HOST_DEVICE inline static Matrix3x3 Identity();
 
@@ -30,8 +30,8 @@ namespace EEngine
 		HOST_DEVICE inline Vector3 const& operator[]( unsigned char i ) const;
 		HOST_DEVICE inline const float* PointerToValue( void ) const;
 
-		HOST_DEVICE FORCEINLINE Matrix3x3 operator*( const Matrix3x3& Other ) const;
-		HOST_DEVICE FORCEINLINE Vector3 operator*( const Vector3& Vector ) const;
+		HOST_DEVICE FORCEINLINE Matrix3x3 operator*( const Matrix3x3& other ) const;
+		HOST_DEVICE FORCEINLINE Vector3 operator*( const Vector3& vector ) const;
 	};
 }
 

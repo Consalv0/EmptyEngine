@@ -13,12 +13,12 @@ namespace EEngine
 		union
 		{
 			struct { Vector4 m0, m1, m2, m3; };
-			struct { Vector4 X, Y, Z, W; };
+			struct { Vector4 x, y, z, w; };
 		};
 
 		HOST_DEVICE FORCEINLINE Matrix4x4();
-		HOST_DEVICE FORCEINLINE Matrix4x4( const Matrix4x4& Other );
-		HOST_DEVICE FORCEINLINE Matrix4x4( const Vector4& Row0, const Vector4& Row1, const Vector4& Row2, const Vector4 Row3 );
+		HOST_DEVICE FORCEINLINE Matrix4x4( const Matrix4x4& other );
+		HOST_DEVICE FORCEINLINE Matrix4x4( const Vector4& row0, const Vector4& row1, const Vector4& row2, const Vector4 Row3 );
 		HOST_DEVICE FORCEINLINE Matrix4x4(
 			float m00, float m01, float m02, float m03,
 			float m10, float m11, float m12, float m13,
@@ -29,17 +29,17 @@ namespace EEngine
 		HOST_DEVICE inline static Matrix4x4 Identity();
 
 		//* Creates a perspective matrix, FOV is the aperture angle in radians
-		HOST_DEVICE inline static Matrix4x4 Perspective( const float& Aperture, const float& Aspect, const float& Near, const float& Far );
+		HOST_DEVICE inline static Matrix4x4 Perspective( const float& aperture, const float& aspect, const float& near, const float& far );
 		//* Creates a orthographic matrix
-		HOST_DEVICE inline static Matrix4x4 Orthographic( const float& Left, const float& Right, const float& Bottom, const float& Top );
+		HOST_DEVICE inline static Matrix4x4 Orthographic( const float& left, const float& right, const float& bottom, const float& top );
 		//* Creates a orthographic matrix with zClamping
-		HOST_DEVICE inline static Matrix4x4 Orthographic( const float& Left, const float& Right, const float& Bottom, const float& Top, const float& Near, const float& Far );
-		HOST_DEVICE inline static Matrix4x4 LookAt( const Vector3& Position, const Vector3& Direction, const Vector3& Up );
-		HOST_DEVICE inline static Matrix4x4 Translation( const Vector3& Vector );
-		HOST_DEVICE inline static Matrix4x4 Scaling( const Vector3& Vector );
-		HOST_DEVICE inline static Matrix4x4 Rotation( const Vector3& Axis, const float& Angle );
-		HOST_DEVICE inline static Matrix4x4 Rotation( const Vector3& EulerAngles );
-		HOST_DEVICE inline static Matrix4x4 Rotation( const Quaternion& Quat );
+		HOST_DEVICE inline static Matrix4x4 Orthographic( const float& left, const float& right, const float& bottom, const float& top, const float& near, const float& far );
+		HOST_DEVICE inline static Matrix4x4 LookAt( const Vector3& position, const Vector3& direction, const Vector3& up );
+		HOST_DEVICE inline static Matrix4x4 Translation( const Vector3& vector );
+		HOST_DEVICE inline static Matrix4x4 Scaling( const Vector3& vector );
+		HOST_DEVICE inline static Matrix4x4 Rotation( const Vector3& axis, const float& angle );
+		HOST_DEVICE inline static Matrix4x4 Rotation( const Vector3& eulerAngles );
+		HOST_DEVICE inline static Matrix4x4 Rotation( const Quaternion& quat );
 
 		HOST_DEVICE inline void Transpose();
 		HOST_DEVICE inline Matrix4x4 Transposed() const;
@@ -55,14 +55,14 @@ namespace EEngine
 		HOST_DEVICE inline Vector4 const& operator[]( unsigned char i ) const;
 		HOST_DEVICE inline const float* PointerToValue( void ) const;
 
-		HOST_DEVICE inline Vector3 MultiplyPoint( const Vector3& Vector ) const;
-		HOST_DEVICE inline Vector3 MultiplyVector( const Vector3& Vector ) const;
+		HOST_DEVICE inline Vector3 MultiplyPoint( const Vector3& vector ) const;
+		HOST_DEVICE inline Vector3 MultiplyVector( const Vector3& vector ) const;
 
-		HOST_DEVICE FORCEINLINE Matrix4x4 operator*( const Matrix4x4& Other ) const;
-		HOST_DEVICE FORCEINLINE Vector4 operator*( const Vector4& Vector ) const;
-		HOST_DEVICE FORCEINLINE Vector3 operator*( const Vector3& Vector ) const;
-		HOST_DEVICE FORCEINLINE Matrix4x4 operator*( const float& Value ) const;
-		HOST_DEVICE FORCEINLINE Matrix4x4 operator/( const float& Value ) const;
+		HOST_DEVICE FORCEINLINE Matrix4x4 operator*( const Matrix4x4& other ) const;
+		HOST_DEVICE FORCEINLINE Vector4 operator*( const Vector4& vector ) const;
+		HOST_DEVICE FORCEINLINE Vector3 operator*( const Vector3& vector ) const;
+		HOST_DEVICE FORCEINLINE Matrix4x4 operator*( const float& value ) const;
+		HOST_DEVICE FORCEINLINE Matrix4x4 operator/( const float& value ) const;
 	};
 }
 
