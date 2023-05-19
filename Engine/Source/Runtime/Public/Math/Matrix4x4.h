@@ -55,7 +55,7 @@ namespace EEngine
 		HOST_DEVICE inline Vector4 const& operator[]( unsigned char i ) const;
 		HOST_DEVICE inline const float* PointerToValue( void ) const;
 
-		HOST_DEVICE inline Vector3 MultiplyPoint( const Vector3& vector ) const;
+		HOST_DEVICE inline Vector4 MultiplyPoint( const Vector3& vector ) const;
 		HOST_DEVICE inline Vector3 MultiplyVector( const Vector3& vector ) const;
 
 		HOST_DEVICE FORCEINLINE Matrix4x4 operator*( const Matrix4x4& other ) const;

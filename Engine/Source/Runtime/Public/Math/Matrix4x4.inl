@@ -297,7 +297,7 @@ namespace EEngine
 		return ((Vector4*)this)[ i ];
 	}
 
-	inline HOST_DEVICE Vector3 Matrix4x4::MultiplyPoint( const Vector3& vector ) const
+	inline HOST_DEVICE Vector4 Matrix4x4::MultiplyPoint( const Vector3& vector ) const
 	{
 		return *this * Vector4( vector, 1.F );
 	}
