@@ -1,114 +1,97 @@
-workspace "EmptyEngine"
-    architecture "x64"
-    startproject "EmptyEngine"
+include "dependencies.lua"
 
-    configurations
-    {
-        "Debug",
-        "Release",
-        "Shipping"
+project "EmptyEngine"
+    kind "StaticLib"
+    language "C++"
+    cppdialect "C++20"
+    staticruntime "on"
+
+    targetdir ("%{prj.location}/Build/" .. outputdir)
+    objdir ("%{prj.location}/BinObjs/" .. outputdir)
+
+    pchsource "%{prj.location}/Source/Runtime/Public/CoreMinimal.cpp"
+    pchheader "CoreMinimal.h"
+
+    files {
+        "%{prj.location}/Source/**.h",
+        "%{prj.location}/Source/**.inl",
+        "%{prj.location}/Source/**.cpp",
     }
-    ---%{cfg.system}
-    outputdir = "%{cfg.buildcfg}_%{cfg.architecture}"
 
-    -- Include directories relative to root folder (solution directory)
-    IncludeDir = {}
+    includedirs {
+        "%{prj.location}/Source",
+        "%{prj.location}/Source/Runtime",
+        "%{prj.location}/Source/Runtime/Public",
+    }      
 
-    project "EmptyEngine"
-        location "Engine"
-        kind "StaticLib"
-        language "C++"
-        cppdialect "C++17"
-        staticruntime "on"
+    libdirs { 
+        "%{prj.location}/Libraries"
+    }
 
-        targetdir ("%{prj.location}/Build/" .. outputdir)
-        objdir ("%{prj.location}/BinObjs/" .. outputdir)
+    links {
+        --"SDL2.lib"
+    }
 
-        pchsource "%{prj.location}/Source/Runtime/Public/CoreMinimal.cpp"
-        pchheader "CoreMinimal.h"
-
-        files {
-            "%{prj.location}/Source/**.h",
-            "%{prj.location}/Source/**.inl",
-            "%{prj.location}/Source/**.cpp",
+    filter "system:windows"
+        systemversion "latest"
+        defines {
+            "EE_PLATFORM_WINDOWS",
+            "EE_DLLEXPORT",
         }
 
-        includedirs {
-            "%{prj.location}/Source",
-            "%{prj.location}/Source/Runtime",
-            "%{prj.location}/Source/Runtime/Public",
-        }      
-
-        libdirs { 
-            "%{prj.location}/Libraries"
+    filter "configurations:Debug"
+        defines { 
+            "EE_DEBUG", "EE_ENABLE_ASSERTS"
         }
+        runtime "Debug"
+        symbols "on"
 
-        links {
-            --"SDL2.lib"
-        }
+    filter "configurations:Release"
+        defines "EE_RELEASE"
+        runtime "Release"
+        optimize "on"
 
-        filter "system:windows"
-            systemversion "latest"
+    filter "configurations:Shipping"
+        defines "EE_SHIPPING"
+        runtime "Release"
+        optimize "on"
 
-            defines {
-                "EE_PLATFORM_WINDOWS",
-                "EE_DLLEXPORT",
-            }
-
-        filter "configurations:Debug"
-            defines { 
-                "EE_DEBUG", "EE_ENABLE_ASSERTS"
-            }
-            runtime "Debug"
-            symbols "on"
-
-        filter "configurations:Release"
-            defines "EE_RELEASE"
-            runtime "Release"
-            optimize "on"
-
-        filter "configurations:Shipping"
-            defines "EE_SHIPPING"
-            runtime "Release"
-            optimize "on"
-
-    project "dos"
-        location "External/dos"
-        kind "StaticLib"
-        language "C++"
-        cppdialect "C++20"
-        staticruntime "on"
-
-        targetdir ("%{prj.location}/Build/" .. outputdir)
-        objdir ("%{prj.location}/BinObjs/" .. outputdir)
-
-        files {
-            "%{prj.location}/Source/**.h",
-            "%{prj.location}/Source/**.c",
-        }
-
-        includedirs {
-            "%{prj.location}/Include",
-        }
-        
-        libdirs { 
-            "%{prj.location}/Libraries"
-        }
-
-        links {
-        }
-
-        filter "system:windows"
-            systemversion "latest"
-
-        filter "configurations:Debug"
-            runtime "Debug"
-            symbols "on"
-
-        filter "configurations:Release"
-            runtime "Release"
-            optimize "on"
-
-        filter "configurations:Shipping"
-            runtime "Release"
-            optimize "on"
+--project "SDL"
+--    location "%{IncludeDir.SDL}"
+--    kind "StaticLib"
+--    language "C"
+--    staticruntime "on"
+--
+--    targetdir ("%{prj.location}/Build/" .. outputdir)
+--    objdir ("%{prj.location}/BinObjs/" .. outputdir)
+--    
+--    files {
+--        "%{prj.location}/src/**.h",
+--        "%{prj.location}/src/**.c",
+--    }
+--
+--    includedirs {
+--        "%{prj.location}/include",
+--    }
+--        
+--    libdirs { 
+--        "%{prj.location}/Libraries"
+--    }
+--
+--    links {
+--    }
+--
+--    filter "system:windows"
+--        systemversion "latest"
+--
+--    filter "configurations:Debug"
+--        runtime "Debug"
+--        symbols "on"
+--
+--    filter "configurations:Release"
+--        runtime "Release"
+--        optimize "on"
+--
+--    filter "configurations:Shipping"
+--        runtime "Release"
+--        optimize "on"

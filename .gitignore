@@ -128,6 +128,7 @@ ipch/
 # Visual Studio Solution
 *.sln
 *.vcxproj
+*.vcxproj.filters
 
 ## Xcode User settings
 xcuserdata/
