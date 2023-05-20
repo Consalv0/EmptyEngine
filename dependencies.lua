@@ -3,3 +3,6 @@
 
 IncludeDir = {}
 IncludeDir["SDL"] = "External/SDL";
+
+LibrariesDir = {}
+LibrariesDir["SDL"] = "%{prj.location}/Libraries/SDL";

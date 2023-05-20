@@ -1,5 +1,7 @@
 include "dependencies.lua"
 
+
+
 project "EmptyEngine"
     kind "StaticLib"
     language "C++"
@@ -22,18 +24,23 @@ project "EmptyEngine"
         "%{prj.location}/Source",
         "%{prj.location}/Source/Runtime",
         "%{prj.location}/Source/Runtime/Public",
+        "%{IncludeDir.SDL}/include"
     }      
 
     libdirs { 
-        "%{prj.location}/Libraries"
+        "%{prj.location}/Libraries",
+        "%{LibrariesDir.SDL}/%{cfg.buildcfg}"
     }
 
     links {
-        --"SDL2.lib"
+        "SDL3.lib"
     }
 
     filter "system:windows"
         systemversion "latest"
+        postbuildcommands {
+          "{COPY} %{LibrariesDir.SDL}/%{cfg.buildcfg}/*.dll %{wks.location}"
+        }
         defines {
             "EE_PLATFORM_WINDOWS",
             "EE_DLLEXPORT",
@@ -48,11 +55,6 @@ project "EmptyEngine"
 
     filter "configurations:Release"
         defines "EE_RELEASE"
-        runtime "Release"
-        optimize "on"
-
-    filter "configurations:Shipping"
-        defines "EE_SHIPPING"
         runtime "Release"
         optimize "on"
 
