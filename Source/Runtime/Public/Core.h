@@ -14,6 +14,5 @@
 #endif
 #endif // EMPTYENGINE_CORE_LOG
 
-// #include "Platform/Platform.h"
 #include "CoreTypes.h"
 

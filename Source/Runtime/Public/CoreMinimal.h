@@ -26,9 +26,9 @@
 
 // Core classes
 #include "Core.h"
-// #include "Core/Name.h"
-// #include "Core/CoreTime.h"
+#include "Core/Name.h"
+#include "Core/CoreTime.h"
 #include "Math/CoreMath.h"
 
 // #include "Events/Event.h"
-// #include "Platform/DeviceFunctions.h"
+#include "Platform/DeviceFunctions.h"
