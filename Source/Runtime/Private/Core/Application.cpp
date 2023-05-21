@@ -6,26 +6,25 @@
 #include "Core/Input.h"
 
 #include "Math/CoreMath.h"
-#include "Rendering/RenderPipeline.h"
+#include "Graphics/RenderPipeline.h"
 
 #if defined(ES_PLATFORM_WINDOWS) & defined(ES_PLATFORM_CUDA)
 #include "CUDA/CoreCUDA.h"
 #endif
 
-
 namespace EEngine
 {
 	Application::Application()
 	{
-		bInitialized = false;
-		bRunning = false;
+		initialized_ = false;
+		running_ = false;
 	}
 
 	void Application::Run()
 	{
-		if ( bRunning ) return;
+		if ( running_ ) return;
 
-		bRunning = true;
+		running_ = true;
 		LOG_CORE_INFO( L"Initalizing Application:\n" );
 		Initalize();
 		Awake();
@@ -41,8 +40,8 @@ namespace EEngine
 
 	RenderPipeline& Application::GetRenderPipeline()
 	{
-		static RenderPipeline Pipeline;
-		return Pipeline;
+		static RenderPipeline* Pipeline;
+		return *Pipeline;
 	}
 
 	void Application::WindowEventCallback( WindowEvent& WinEvent )
@@ -65,35 +64,35 @@ namespace EEngine
 
 	void Application::Initalize()
 	{
-		if ( bInitialized ) return;
+		if ( initialized_ ) return;
 
-		WindowInstance = std::unique_ptr<Window>( Window::Create() );
-		WindowInstance->SetWindowEventCallback( std::bind( &Application::WindowEventCallback, this, std::placeholders::_1 ) );
-		WindowInstance->SetInputEventCallback( std::bind( &Application::InputEventCallback, this, std::placeholders::_1 ) );
+		windowInstance_ = std::unique_ptr<Window>( Window::Create() );
+		windowInstance_->SetWindowEventCallback( std::bind( &Application::WindowEventCallback, this, std::placeholders::_1 ) );
+		windowInstance_->SetInputEventCallback( std::bind( &Application::InputEventCallback, this, std::placeholders::_1 ) );
 
 		if ( !GetWindow().IsRunning() ) return;
 
 #ifdef ES_PLATFORM_CUDA
 		CUDA::FindCudaDevice();
 #endif
-		AudioDeviceInstance = std::make_unique<AudioDevice>();
-		DeviceFunctionsInstance = std::unique_ptr<DeviceFunctions>( DeviceFunctions::Create() );
+		audioDeviceInstance_ = std::make_unique<AudioDevice>();
+		deviceFunctionsInstance_ = std::unique_ptr<DeviceFunctions>( DeviceFunctions::Create() );
 
 		OnInitialize();
 
-		bInitialized = true;
+		initialized_ = true;
 	}
 
 	void Application::Awake()
 	{
-		if ( !bInitialized ) return;
+		if ( !initialized_ ) return;
 
 		OnAwake();
 	}
 
 	void Application::UpdateLoop()
 	{
-		if ( !bInitialized ) return;
+		if ( !initialized_ ) return;
 
 		do
 		{
@@ -104,17 +103,17 @@ namespace EEngine
 			if ( !Time::bSkipRender )
 			{
 				GetWindow().BeginFrame();
-				GetRenderPipeline().BeginFrame();
+				// GetRenderPipeline().BeginFrame();
 
 				OnRender();
 				OnPostRender();
 
-				GetRenderPipeline().EndOfFrame();
+				// GetRenderPipeline().EndOfFrame();
 				GetWindow().EndFrame();
 			}
 
 		} while (
-			bRunning == true
+			running_ == true
 			);
 	}
 
@@ -123,8 +122,8 @@ namespace EEngine
 		ShouldClose();
 		OnTerminate();
 
-		DeviceFunctionsInstance.reset( NULL );
-		WindowInstance.reset( NULL );
+		deviceFunctionsInstance_.reset( NULL );
+		windowInstance_.reset( NULL );
 	}
 
 	void Application::OnWindowClose( WindowCloseEvent& CloseEvent )

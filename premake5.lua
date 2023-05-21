@@ -1,7 +1,5 @@
 include "dependencies.lua"
 
-
-
 project "EmptyEngine"
     kind "StaticLib"
     language "C++"

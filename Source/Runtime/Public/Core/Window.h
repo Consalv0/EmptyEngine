@@ -3,15 +3,15 @@
 #include "CoreMinimal.h"
 #include "Events/WindowEvent.h"
 #include "Events/InputEvent.h"
-#include "Rendering/RenderingDefinitions.h"
-#include "Rendering/GraphicContext.h"
+#include "Graphics/Graphics.h"
+#include "Graphics/GraphicsDevice.h"
 
 namespace EEngine
 {
 	enum EWindowMode 
 	{
-		WM_Windowed = 0,
-		WM_FullScreen = 1
+		WindowMode_Windowed = 0,
+		WindowMode_FullScreen = 1
 	};
 
 	template <typename T>
@@ -20,17 +20,17 @@ namespace EEngine
 	struct WindowProperties 
 	{
 		//* Name displayed in header window
-		WString Name;
-		uint32_t Width;
-		uint32_t Height;
-		EWindowMode WindowMode;
+		WString name;
+		uint32_t width;
+		uint32_t height;
+		EWindowMode windowMode;
 
 		WindowProperties(
-			const WString& Title = L"ESource",
-			uint32_t Width = 1280,
-			uint32_t Height = 720,
-			EWindowMode WindowMode = WM_Windowed)
-			: Name(Title), Width(Width), Height(Height), WindowMode(WindowMode) {
+			const WString& title = L"Empty Engine",
+			uint32_t width = 1280,
+			uint32_t height = 720,
+			EWindowMode mode = WindowMode_Windowed )
+			: name(title), width(width), height(height), windowMode(mode) {
 		}
 
 	};
@@ -38,6 +38,15 @@ namespace EEngine
 	//* Cointains the properties and functions of a window
 	class Window
 	{
+	protected:
+		EWindowMode mode_;
+
+		void* windowHandle_;
+
+		std::unique_ptr<GraphicsDevice> device_;
+
+		SwapChain swapChain_;
+
 	public:
 		using WindowEventCallbackFunction = std::function<void(WindowEvent&)>;
 		using InputEventCallbackFunction = std::function<void(InputEvent&)>;
@@ -89,10 +98,11 @@ namespace EEngine
 		//* Get Window Pointer
 		virtual void* GetHandle() const = 0;
 
-		virtual GraphicContext * GetContext() const = 0;
-
 		//* Creates a Window with a Name, Width and Height
-		static Window * Create(const WindowProperties& Parameters = WindowProperties());
+		static Window* Create(const WindowProperties& Parameters = WindowProperties());
+
+	public:
+		virtual FORCEINLINE GraphicsDevice& GetDevice() const { return *device_; };
 	};
 
 }

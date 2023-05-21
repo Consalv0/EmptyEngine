@@ -1,58 +1,73 @@
 
 #include "CoreMinimal.h"
 #include "Core/Application.h"
-#include "Rendering/RenderingDefinitions.h"
-#include "Rendering/PixelMap.h"
+
+#include "Graphics/GraphicsDevice.h"
+#include "Graphics/CPU/CPUGraphicsDevice.h"
+#include "Graphics/PixelMap.h"
 
 #include "Utils/TextFormatting.h"
 
 #include "Platform/Windows/WindowsWindow.h"
+#include "Platform/Windows/WindowsInput.h"
 
 #include <SDL3/SDL_events.h>
-#include "Platform/Windows/WindowsInput.h"
 #include <SDL3/SDL.h>
 
 
 namespace EEngine
 {
+	int OnSDLWindowInputEvent( void* userData, SDL_Event* eventPtr )
+	{
+		return WindowInputEventHandler( userData, eventPtr );
+	}
+
 	void WindowsWindow::Initialize()
 	{
-		if ( Context != NULL || WindowHandle != NULL ) return;
+		if ( device_ != NULL || windowHandle_ != NULL ) return;
 
-		if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC ) != 0 )
+		if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_HAPTIC ) != 0 )
 		{
-			LOG_CORE_CRITICAL( L"Failed to initialize SDL 2.0.9: {0}\n", Text::NarrowToWide( SDL_GetError() ) );
+			LOG_CORE_CRITICAL( L"Failed to initialize SDL3: {0}\n", Text::NarrowToWide( SDL_GetError() ) );
 			return;
 		}
-
-		if ( (WindowHandle = SDL_CreateWindow(
-			Text::WideToNarrow( Name ).c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, Width, Height,
-			SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | Mode
-		)) == NULL )
-		{
-			LOG_CORE_CRITICAL( L"Window: \"{0}\" could not be initialized: {1}", Name, Text::NarrowToWide( SDL_GetError() ) );
-			return;
-		}
-
-		SDL_SetWindowData( (SDL_Window*)WindowHandle, "WindowData", this );
-
-		Context = std::unique_ptr<OpenGLContext>( new OpenGLContext( (SDL_Window*)WindowHandle, 4, 6 ) );
 
 		SDL_AddEventWatch( OnSDLWindowInputEvent, (void*)this );
 
+		if ( (windowHandle_ = SDL_CreateWindowWithPosition(
+			Text::WideToNarrow( name ).c_str(),
+			SDL_WINDOWPOS_CENTERED,
+			SDL_WINDOWPOS_CENTERED,
+			width, height,
+			SDL_WINDOW_RESIZABLE | SDL_WINDOW_KEYBOARD_GRABBED | mode_ // | GraphicsDevice::GetWindowMode()
+		)) == NULL )
+		{
+			LOG_CORE_CRITICAL( L"Window: \"{0}\" could not be initialized: {1}", name, Text::NarrowToWide( SDL_GetError() ) );
+			return;
+		}
+
+		SDL_SetWindowData( (SDL_Window*)windowHandle_, "WindowData", this );
+
+		device_ = std::unique_ptr<CPUGraphicsDevice>( new CPUGraphicsDevice() );
+
 		WindowsInput::GetInputInstance()->CheckForConnectedJoysticks();
 
-		Context->Initialize();
+		SwapChainDescription swapChainDesc {};
+		swapChainDesc.width = width;
+		swapChainDesc.height = height;
+		swapChainDesc.fullscreen = mode_;
+		swapChainDesc.vsync = vsync;
+		device_->CreateSwapChain( swapChainDesc, windowHandle_, swapChain_ );
 	}
 
 	WindowsWindow::WindowsWindow( const WindowProperties& Parameters )
 	{
-		Context = NULL;
-		WindowHandle = NULL;
-		Width = Parameters.Width;
-		Height = Parameters.Height;
-		Name = Parameters.Name;
-		Mode = Parameters.WindowMode;
+		device_ = NULL;
+		windowHandle_ = NULL;
+		width = Parameters.width;
+		height = Parameters.height;
+		name = Parameters.name;
+		mode_ = Parameters.windowMode;
 		Initialize();
 	}
 
@@ -64,25 +79,25 @@ namespace EEngine
 
 	void WindowsWindow::Resize( const uint32_t& Wth, const uint32_t& Hht )
 	{
-		if ( Width != Wth || Height != Hht )
+		if ( width != Wth || height != Hht )
 		{
-			Width = Wth; Height = Hht;
-			SDL_SetWindowSize( (SDL_Window*)(WindowHandle), Wth, Hht );
+			width = Wth; height = Hht;
+			SDL_SetWindowSize( (SDL_Window*)(windowHandle_), Wth, Hht );
 
-			WindowResizeEvent Event( Width, Height );
+			WindowResizeEvent Event( width, height );
 			WindowEventCallback( Event );
 		}
 	}
 
 	void WindowsWindow::SetName( const WString& NewName )
 	{
-		Name = NewName;
-		SDL_SetWindowTitle( (SDL_Window*)(WindowHandle), Text::WideToNarrow( Name ).c_str() );
+		name = NewName;
+		SDL_SetWindowTitle( (SDL_Window*)(windowHandle_), Text::WideToNarrow( name ).c_str() );
 	}
 
 	Vector2 WindowsWindow::GetMousePosition( bool Clamp )
 	{
-		int MouseX, MouseY;
+		float MouseX, MouseY;
 		if ( Clamp )
 		{
 			SDL_GetMouseState( &MouseX, &MouseY );
@@ -91,7 +106,7 @@ namespace EEngine
 		{
 			int WindowX, WindowY;
 			SDL_GetGlobalMouseState( &MouseX, &MouseY );
-			SDL_GetWindowPosition( (SDL_Window*)(WindowHandle), &WindowX, &WindowY );
+			SDL_GetWindowPosition( (SDL_Window*)(windowHandle_), &WindowX, &WindowY );
 			MouseX -= WindowX;
 			MouseY -= WindowY;
 		}
@@ -100,41 +115,41 @@ namespace EEngine
 
 	void WindowsWindow::SetWindowMode( EWindowMode Mode )
 	{
-		this->Mode = Mode;
-		SDL_SetWindowFullscreen( (SDL_Window*)(WindowHandle), Mode );
+		this->mode_ = Mode;
+		SDL_SetWindowFullscreen( (SDL_Window*)(windowHandle_), (SDL_bool)Mode );
 	}
 
 	EWindowMode WindowsWindow::GetWindowMode() const
 	{
-		return Mode;
+		return mode_;
 	}
 
 	void WindowsWindow::SetIcon( PixelMap* Icon )
 	{
-		if ( Icon->GetColorFormat() != PF_RGBA8 ) return;
-		SDL_Surface* Surface = SDL_CreateRGBSurfaceFrom(
+		if ( Icon->GetColorFormat() != PixelFormat_RGBA8 ) return;
+		SDL_Surface* Surface = SDL_CreateSurfaceFrom(
 			(void*)Icon->PointerToValue(),
 			Icon->GetWidth(), Icon->GetHeight(),
-			32, 4 * Icon->GetWidth(),
-			0xF000, 0x0F00, 0x00F0, 0x000F
+			NULL, SDL_PIXELFORMAT_RGBA32
 		);
-		SDL_SetWindowIcon( static_cast<SDL_Window*>(WindowHandle), Surface );
-		SDL_FreeSurface( Surface );
+		SDL_SetWindowIcon( static_cast<SDL_Window*>(windowHandle_), Surface );
+		SDL_DestroySurface( Surface );
 	}
 
 	void WindowsWindow::BeginFrame()
 	{
 		CheckInputState();
+		device_->RenderPassBegin( swapChain_, 0 );
 	}
 
 	void WindowsWindow::EndFrame()
 	{
-		Context->SwapBuffers();
+		device_->RenderPassEnd( swapChain_, 0 );
 	}
 
 	uint64_t WindowsWindow::GetFrameCount() const
 	{
-		return Context->GetFrameCount();
+		return device_->GetFrameCount();
 	}
 
 	void WindowsWindow::Terminate()
@@ -144,89 +159,87 @@ namespace EEngine
 #ifdef EE_DEBUG
 			LOG_CORE_DEBUG( L"Window: \"{}\" closed!", GetName() );
 #endif // EE_DEBUG
-			SDL_DestroyWindow( (SDL_Window*)(WindowHandle) );
-			WindowHandle = NULL;
+			SDL_DestroyWindow( (SDL_Window*)(windowHandle_) );
+			windowHandle_ = NULL;
 			SDL_DelEventWatch( OnSDLWindowInputEvent, (void*)this );
-			Context.reset( NULL );
-			// SDL_DelEventWatch(OnResizeWindow, this);
+			device_.reset( NULL );
+			// SDL_DelEventWatch( OnResizeWindow, this);
 		}
 	}
 
 	void WindowsWindow::CheckInputState()
 	{
+		SDL_Event sdlEvent;
+		while ( SDL_PollEvent( &sdlEvent ) ) { }
+
 		auto InputInstance = WindowsInput::GetInputInstance();
-		for ( auto& KeyStateIt : InputInstance->KeyboardInputState )
+		for ( auto& KeyStateIt : InputInstance->keyboardInputState )
 		{
-			if ( KeyStateIt.second.State & BS_Pressed )
+			if ( KeyStateIt.second.State & ButtonState_Pressed )
 			{
 				KeyStateIt.second.FramePressed = Application::GetInstance()->GetWindow().GetFrameCount();
 			}
-			KeyStateIt.second.State &= ~(BS_Pressed | BS_Released | BS_Typed);
+			KeyStateIt.second.State &= ~(ButtonState_Pressed | ButtonState_Released | ButtonState_Typed);
 		}
-		for ( auto& MouseButtonIt : InputInstance->MouseInputState )
+		for ( auto& MouseButtonIt : InputInstance->mouseInputState )
 		{
-			if ( MouseButtonIt.second.State & BS_Pressed )
+			if ( MouseButtonIt.second.State & ButtonState_Pressed )
 			{
 				MouseButtonIt.second.FramePressed = Application::GetInstance()->GetWindow().GetFrameCount();
 			}
-			MouseButtonIt.second.State &= ~(BS_Pressed | BS_Released);
+			MouseButtonIt.second.State &= ~(ButtonState_Pressed | ButtonState_Released);
 		}
-		for ( auto& JoystickIt : InputInstance->JoystickButtonState )
+		for ( auto& JoystickIt : InputInstance->joystickButtonState )
 		{
 			for ( auto& JoystickButtonIt : JoystickIt.second )
 			{
-				if ( JoystickButtonIt.second.State & BS_Pressed )
+				if ( JoystickButtonIt.second.State & ButtonState_Pressed )
 				{
 					JoystickButtonIt.second.FramePressed = Application::GetInstance()->GetWindow().GetFrameCount();
 				}
-				JoystickButtonIt.second.State &= ~(BS_Pressed | BS_Released);
+				JoystickButtonIt.second.State &= ~(ButtonState_Pressed | ButtonState_Released);
 			}
 		}
 	}
 
 	bool WindowsWindow::IsRunning()
 	{
-		return WindowHandle != NULL && Context->IsValid();
+		return windowHandle_ != NULL && device_;
 	}
 
 	WString WindowsWindow::GetName() const
 	{
-		return Name;
+		return name;
 	}
 
 	float WindowsWindow::GetAspectRatio() const
 	{
-		return (float)Width / (float)Height;
+		return (float)width / (float)height;
 	}
 
 	int WindowsWindow::GetWidth() const
 	{
-		return Width;
+		return width;
 	}
 
 	int WindowsWindow::GetHeight() const
 	{
-		return Height;
+		return height;
 	}
 
 	IntVector2 WindowsWindow::GetSize() const
 	{
-		return IntVector2( Width, Height );
+		return IntVector2( width, height );
 	}
 
 	IntBox2D WindowsWindow::GetViewport() const
 	{
-		return IntBox2D( 0, 0, Width, Height );
+		return IntBox2D( 0, 0, width, height );
 	}
 
 	void* WindowsWindow::GetHandle() const
 	{
-		return WindowHandle;
-	}
-
-	GraphicContext* WindowsWindow::GetContext() const
-	{
-		return Context.get();
+		return windowHandle_;
 	}
 
 	Window* Window::Create( const WindowProperties& Parameters )

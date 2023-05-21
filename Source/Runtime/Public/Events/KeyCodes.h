@@ -4,21 +4,24 @@
 
 namespace EEngine
 {
-	enum EButtonState : char {
-		BS_Up = 0,
-		BS_Down = 1,
-		BS_Pressed = 2,
-		BS_Released = 4,
-		BS_Typed = 8,
+	enum EButtonState : char
+	{
+		ButtonState_Up = 0,
+		ButtonState_Down = 1,
+		ButtonState_Pressed = 2,
+		ButtonState_Released = 4,
+		ButtonState_Typed = 8,
 	};
 
-	struct InputScancodeState {
+	struct InputScancodeState
+	{
 		int State;
 		uint64_t FramePressed;
 		int TypeRepeticions;
 	};
 
-	enum class EMouseButton {
+	enum class EMouseButton
+	{
 		Mouse0 = 1,
 		Mouse1,
 		Mouse2,
@@ -27,13 +30,15 @@ namespace EEngine
 		Mouse5
 	};
 
-	struct InputJoystickState {
+	struct InputJoystickState
+	{
 		int State;
 		uint64_t FramePressed;
 	};
-	
+
 	// Taken from SDL Joystick for easy compatibility
-	enum class EJoystickButton {
+	enum class EJoystickButton
+	{
 		Invalid = -1,
 		RightPadDown,
 		RightPadRight,
@@ -52,7 +57,8 @@ namespace EEngine
 		LeftPadRight
 	};
 
-	enum class EJoystickAxis {
+	enum class EJoystickAxis
+	{
 		Invalid = -1,
 		LeftX,
 		LeftY,
@@ -62,7 +68,8 @@ namespace EEngine
 		TriggerRight
 	};
 
-	struct InputMouseButtonState {
+	struct InputMouseButtonState
+	{
 		int State;
 		uint64_t FramePressed;
 		int Clicks;
@@ -73,9 +80,10 @@ namespace EEngine
 	 *  The values in this enumeration are based on the USB usage page standard:
 	 *  https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
 	 */
-	enum class EScancode {
+	enum class EScancode
+	{
 		Unknown = 0,
-		
+
 		A = 4,
 		B = 5,
 		C = 6,

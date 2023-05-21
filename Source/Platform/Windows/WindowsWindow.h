@@ -1,60 +1,52 @@
 
 #include "Core/Window.h"
-#include "Rendering/GraphicContext.h"
+#include "Graphics/GraphicsDevice.h"
 #include "Platform/DeviceFunctions.h"
 #include "Events/Property.h"
-#include "Math/MathUtility.h"
+#include "Math/MathUtils.h"
 #include "Math/IntVector2.h"
 
 namespace EEngine
 {
-	class WindowsWindow : public Window {
+	class WindowsWindow : public Window
+	{
 	public:
 		typedef Window Super;
 
-		struct {
-			WString Name;
-			int Width;
-			int Height;
-			bool VSync;
+		struct
+		{
+			WString name;
+			int width;
+			int height;
+			bool vsync;
 			WindowEventCallbackFunction WindowEventCallback;
 			InputEventCallbackFunction InputEventCallback;
 		};
 
-	private:
-		EWindowMode Mode;
-
-		void * WindowHandle;
-
-		std::unique_ptr<GraphicContext> Context;
-
 		void Initialize();
 
 	public:
-		
-		WindowsWindow(const WindowProperties & Parameters = WindowProperties());
+		WindowsWindow( const WindowProperties& parameters = WindowProperties() );
 
 		virtual ~WindowsWindow();
 
-		inline GraphicContext & GetContext() { return *Context; };
-
 		//* Resize the size of the window
-		void Resize(const uint32_t& Width, const uint32_t& Height);
+		void Resize( const uint32_t& Width, const uint32_t& Height );
 
 		//* Rename the window title
-		void SetName(const WString & NewName);
+		void SetName( const WString& NewName );
 
 		//* Get mouse position in screen coordinates relative to the upper left position of this window
-		struct Vector2 GetMousePosition(bool Clamp = false);
+		struct Vector2 GetMousePosition( bool Clamp = false );
 
 		//* Set the window display mode
-		void SetWindowMode(EWindowMode Mode) override;
+		void SetWindowMode( EWindowMode Mode ) override;
 
 		//* Get the window display mode
 		EWindowMode GetWindowMode() const override;
 
 		//* Sets the window icon
-		void SetIcon(class PixelMap * Icon);
+		void SetIcon( class PixelMap* Icon );
 
 		//* Window update events
 		virtual void BeginFrame() override;
@@ -94,14 +86,11 @@ namespace EEngine
 		//* Get the platform Window pointer
 		virtual void* GetHandle() const override;
 
-		virtual GraphicContext* GetContext() const override;
-
 		//* Set callback communication with window events
-		inline void SetWindowEventCallback(const WindowEventCallbackFunction& Callback) override { WindowEventCallback = Callback; }
+		inline void SetWindowEventCallback( const WindowEventCallbackFunction& Callback ) override { WindowEventCallback = Callback; }
 
 		//* Set callback communication with input events
-		inline void SetInputEventCallback(const InputEventCallbackFunction& Callback) override { InputEventCallback = Callback; }
+		inline void SetInputEventCallback( const InputEventCallbackFunction& Callback ) override { InputEventCallback = Callback; }
 
 	};
-
 }

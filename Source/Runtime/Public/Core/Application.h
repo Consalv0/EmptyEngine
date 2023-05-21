@@ -8,28 +8,28 @@ namespace EEngine
 	class Application {
 
 	public:
-		static Application * GetInstance();
+		static Application* GetInstance();
 
-		class RenderPipeline & GetRenderPipeline();
+		class RenderPipeline& GetRenderPipeline();
 
 		void WindowEventCallback( WindowEvent& WinEvent );
 
 		void InputEventCallback( InputEvent& InEvent );
 
 		//* Appication Instance
-		inline Window & GetWindow() { return *WindowInstance; };
+		FORCEINLINE Window& GetWindow() { return *windowInstance_; };
 
 		//* Application Device Functions
-		inline DeviceFunctions & GetDeviceFunctions() { return *DeviceFunctionsInstance; };
+		FORCEINLINE DeviceFunctions& GetDeviceFunctions() { return *deviceFunctionsInstance_; };
 
 		//* Application Audio Output
-		inline AudioDevice & GetAudioDevice() { return *AudioDeviceInstance; }
+		FORCEINLINE AudioDevice& GetAudioDevice() { return *audioDeviceInstance_; }
 
 		//* Call this to close the application
-		inline void ShouldClose() { bRunning = false; };
+		FORCEINLINE void ShouldClose() { running_ = false; };
 
 		//* The application is running
-		bool IsRunning() { return bRunning; }
+		bool IsRunning() { return running_; }
 
 		//* Entry point of the application
 		void Run();
@@ -37,11 +37,11 @@ namespace EEngine
 		virtual ~Application() = default;
 
 	protected:
-		std::unique_ptr<Window> WindowInstance;
+		std::unique_ptr<Window> windowInstance_;
 
-		std::unique_ptr<DeviceFunctions> DeviceFunctionsInstance;
+		std::unique_ptr<DeviceFunctions> deviceFunctionsInstance_;
 
-		std::unique_ptr<AudioDevice> AudioDeviceInstance;
+		std::unique_ptr<AudioDevice> audioDeviceInstance_;
 
 		Application();
 
@@ -53,17 +53,17 @@ namespace EEngine
 
 		virtual void OnPostRender() {};
 
-		virtual void OnUpdate( Timestamp Stamp ) {};
+		virtual void OnUpdate( Timestamp stamp ) {};
 
-		virtual void OnWindowEvent( WindowEvent& WinEvent ) {};
+		virtual void OnWindowEvent( WindowEvent& winEvent ) {};
 
-		virtual void OnInputEvent( InputEvent& InEvent ) {};
+		virtual void OnInputEvent( InputEvent& inEvent ) {};
 
 		virtual void OnTerminate() {};
 	private:
-		bool bInitialized;
+		bool initialized_;
 
-		bool bRunning;
+		bool running_;
 
 		//* Initialize the application, it creates a window, a context and loads GL functions.
 		void Initalize();
@@ -80,6 +80,5 @@ namespace EEngine
 		void OnWindowClose(WindowCloseEvent & CloseEvent);
 	};
 
-	Application * CreateApplication();
-
+	Application* CreateApplication();
 }

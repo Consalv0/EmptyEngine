@@ -17,8 +17,8 @@ namespace EEngine
 
 		IntBox3D()
 		{
-			minX = minY = minZ = Math::BigNumber;
-			maxX = maxY = maxZ = -Math::BigNumber;
+			minX = minY = minZ = Math::MaxNumber;
+			maxX = maxY = maxZ = -Math::MaxNumber;
 		}
 
 		IntBox3D( int minX, int minY, int minZ, int maxX, int maxY, int maxZ )
@@ -36,7 +36,7 @@ namespace EEngine
 		inline IntVector3 GetSize() const { return IntVector3( GetWidth(), GetHeight(), GetDepth() ); }
 
 		//* Get the center position of the bounding box
-		inline IntVector3 GetCenter() const { return IntVector3( minX + maxX, minY + maxY, minZ + maxZ ) * .5F; }
+		inline IntVector3 GetCenter() const { return IntVector3( minX + maxX, minY + maxY, minZ + maxZ ) / 2; }
 
 		//* Get the lower point of the bounding box
 		inline IntPoint3 GetMinPoint() const { return { Math::Min( left, right ), Math::Min( top, bottom ), Math::Min( front, back ) }; }
@@ -57,7 +57,7 @@ namespace EEngine
 		inline int GetArea() const { return GetWidth() * GetHeight() * GetDepth(); }
 
 		//* Get the perimeter of the bounding box
-		inline int GetPerimeter() const { return GetWidth() * 2.F + GetHeight() * 2.F + GetDepth() * 2.F; }
+		inline int GetPerimeter() const { return GetWidth() * 2 + GetHeight() * 2 + GetDepth() * 2; }
 
 	};
 }

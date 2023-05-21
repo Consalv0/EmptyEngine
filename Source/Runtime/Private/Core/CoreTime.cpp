@@ -1,6 +1,5 @@
 
 #include "CoreMinimal.h"
-#include "Rendering/RenderingDefinitions.h"
 #include "Core/Application.h"
 #include "Core/CoreTime.h"
 #include <chrono>

@@ -48,6 +48,8 @@ namespace EEngine
 	private:
 		bool bInitialized;
 
+		uint32_t deviceID_;
+
 		TDictionary<size_t, SamplePlayInfo *> PlayInfoList;
 	};
 

@@ -22,14 +22,14 @@ namespace EEngine
 
 	bool WindowsInput::IsKeyStateNative( EScancode KeyCode, int State )
 	{
-		if ( State == BS_Down ) return KeyboardInputState[ KeyCode ].FramePressed;
-		return KeyboardInputState[ KeyCode ].State & State;
+		if ( State == ButtonState_Down ) return keyboardInputState[ KeyCode ].FramePressed;
+		return keyboardInputState[ KeyCode ].State & State;
 	}
 
 	bool WindowsInput::IsMouseStateNative( EMouseButton Button, int State )
 	{
-		if ( State == BS_Down ) return MouseInputState[ Button ].FramePressed;
-		return MouseInputState[ Button ].State & State;
+		if ( State == ButtonState_Down ) return mouseInputState[ Button ].FramePressed;
+		return mouseInputState[ Button ].State & State;
 	}
 
 	bool WindowsInput::IsButtonStateNative( int Index, EJoystickButton Button, int State )
@@ -41,8 +41,8 @@ namespace EEngine
 			if ( Indices.empty() ) Index = 0;
 			else Index = Indices[ 0 ];
 		}
-		if ( State == BS_Down ) return JoystickButtonState[ Index ][ Button ].FramePressed;
-		return JoystickButtonState[ Index ][ Button ].State & State;
+		if ( State == ButtonState_Down ) return joystickButtonState[ Index ][ Button ].FramePressed;
+		return joystickButtonState[ Index ][ Button ].State & State;
 	}
 
 	float WindowsInput::GetAxisNative( int Index, EJoystickAxis Axis )
@@ -212,19 +212,21 @@ namespace EEngine
 		return MouseY;
 	}
 
-	int OnSDLWindowInputEvent( void* userData, SDL_Event* sdlEvent )
+	int WindowInputEventHandler( void* userData, void* eventPtr )
 	{
-		auto& KeyState = WindowsInput::GetInputInstance()->KeyboardInputState[ (EScancode)sdlEvent->key.keysym.scancode ];
-		auto& MouseState = WindowsInput::GetInputInstance()->MouseInputState[ (EMouseButton)sdlEvent->button.button ];
-		WindowsWindow& data = *(WindowsWindow*)userData;
-		static int32_t MouseButtonPressedCount[ 255 ] = {
+		SDL_Event* sdlEvent = (SDL_Event*)eventPtr;
+		WindowsWindow& window = *(WindowsWindow*)userData;
+
+		auto& keyState = WindowsInput::GetInputInstance()->keyboardInputState[ (EScancode)sdlEvent->key.keysym.scancode ];
+		auto& mouseState = WindowsInput::GetInputInstance()->mouseInputState[ (EMouseButton)sdlEvent->button.button ];
+		static int32_t mouseButtonPressedCount[ 255 ] = {
 			(int32_t)-1, (int32_t)-1, (int32_t)-1, (int32_t)-1, (int32_t)-1,
 			(int32_t)-1, (int32_t)-1, (int32_t)-1, (int32_t)-1, (int32_t)-1
 		};
 
 		if ( sdlEvent->type >= SDL_EVENT_WINDOW_FIRST && sdlEvent->type <= SDL_EVENT_WINDOW_LAST )
 		{
-			if ( sdlEvent->window.windowID != SDL_GetWindowID( (SDL_Window*)data.GetHandle() ) )
+			if ( sdlEvent->window.windowID != SDL_GetWindowID( (SDL_Window*)window.GetHandle() ) )
 				return 0;
 		}
 
@@ -233,25 +235,16 @@ namespace EEngine
 		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
 		case SDL_EVENT_WINDOW_RESIZED:
 		{
-			data.Resize( sdlEvent->window.data1, sdlEvent->window.data2 );
+			window.Resize( sdlEvent->window.data1, sdlEvent->window.data2 );
 			break;
 		}
-		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-		{
-			WindowCloseEvent WinEvent;
-			data.WindowEventCallback( WinEvent );
-			break;
-		}
+
 		case SDL_EVENT_WINDOW_FOCUS_GAINED:
-		{
-			WindowGainFocusEvent WinEvent;
-			data.WindowEventCallback( WinEvent );
-			break;
-		}
+		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
 		case SDL_EVENT_WINDOW_FOCUS_LOST:
 		{
-			WindowLostFocusEvent WinEvent;
-			data.WindowEventCallback( WinEvent );
+			WindowCloseEvent windowEvent;
+			window.WindowEventCallback( windowEvent );
 			break;
 		}
 
@@ -324,7 +317,7 @@ namespace EEngine
 				JoystickConnectionEvent InEvent(
 					joystickDeviceState->InstanceID, 1
 				);
-				data.InputEventCallback( InEvent );
+				window.InputEventCallback( InEvent );
 			}
 			break;
 		}
@@ -357,7 +350,7 @@ namespace EEngine
 				JoystickConnectionEvent InEvent(
 					joystickDeviceState->InstanceID, 0
 				);
-				data.InputEventCallback( InEvent );
+				window.InputEventCallback( InEvent );
 
 				SDL_HapticClose( (SDL_Haptic*)joystickDeviceState->HapticDevice );
 				SDL_CloseJoystick( joystick );
@@ -385,14 +378,14 @@ namespace EEngine
 				}
 				if ( joystickDeviceState == NULL ) break;
 
-				auto& joyButtonState = WindowsInput::GetInputInstance()->JoystickButtonState[ Index ][ (EJoystickButton)sdlEvent->jbutton.button ];
-				joyButtonState.State = BS_Released;
+				auto& joyButtonState = WindowsInput::GetInputInstance()->joystickButtonState[ Index ][ (EJoystickButton)sdlEvent->jbutton.button ];
+				joyButtonState.State = ButtonState_Released;
 				joyButtonState.FramePressed = 0;
 
 				JoystickButtonReleasedEvent inEvent(
 					joystickDeviceState->InstanceID, (EJoystickButton)sdlEvent->gbutton.button
 				);
-				data.InputEventCallback( inEvent );
+				window.InputEventCallback( inEvent );
 			}
 			break;
 		}
@@ -424,15 +417,15 @@ namespace EEngine
 				}
 				if ( joystickDeviceState == NULL ) break;
 
-				auto& JoyButtonState = WindowsInput::GetInputInstance()->JoystickButtonState[ index ][ (EJoystickButton)sdlEvent->gbutton.button ];
-				JoyButtonState.State = BS_Pressed;
+				auto& JoyButtonState = WindowsInput::GetInputInstance()->joystickButtonState[ index ][ (EJoystickButton)sdlEvent->gbutton.button ];
+				JoyButtonState.State = ButtonState_Pressed;
 
 				LOG_CORE_INFO( "{} Button pressed {}", sdlEvent->cbutton.which, sdlEvent->cbutton.button );
 
 				JoystickButtonPressedEvent InEvent(
 					joystickDeviceState->InstanceID, (EJoystickButton)sdlEvent->gbutton.button
 				);
-				data.InputEventCallback( InEvent );
+				window.InputEventCallback( InEvent );
 			}
 			break;
 		}
@@ -459,7 +452,7 @@ namespace EEngine
 				JoystickAxisEvent inEvent(
 					joystickDeviceState->InstanceID, (EJoystickAxis)sdlEvent->gaxis.axis, sdlEvent->gaxis.value / 32768.F
 				);
-				data.InputEventCallback( inEvent );
+				window.InputEventCallback( inEvent );
 			}
 			break;
 		}
@@ -467,10 +460,10 @@ namespace EEngine
 		case SDL_EVENT_KEY_DOWN:
 		{
 			if ( sdlEvent->key.repeat == 0 )
-				KeyState.State = BS_Pressed | BS_Typed;
+				keyState.State = ButtonState_Pressed | ButtonState_Typed;
 			else
-				KeyState.State = BS_Typed;
-			KeyState.TypeRepeticions = sdlEvent->key.repeat;
+				keyState.State = ButtonState_Typed;
+			keyState.TypeRepeticions = sdlEvent->key.repeat;
 
 			KeyPressedEvent inEvent(
 				sdlEvent->key.keysym.scancode,
@@ -480,15 +473,15 @@ namespace EEngine
 				(SDL_GetModState() & SDL_KMOD_GUI) != 0,
 				sdlEvent->key.repeat
 			);
-			data.InputEventCallback( inEvent );
+			window.InputEventCallback( inEvent );
 			break;
 		}
 
 		case SDL_EVENT_KEY_UP:
 		{
-			KeyState.State = BS_Released;
-			KeyState.FramePressed = 0;
-			KeyState.TypeRepeticions = 0;
+			keyState.State = ButtonState_Released;
+			keyState.FramePressed = 0;
+			keyState.TypeRepeticions = 0;
 
 			KeyReleasedEvent InEvent(
 				sdlEvent->key.keysym.scancode,
@@ -497,44 +490,44 @@ namespace EEngine
 				(SDL_GetModState() & SDL_KMOD_ALT) != 0,
 				(SDL_GetModState() & SDL_KMOD_GUI) != 0
 			);
-			data.InputEventCallback( InEvent );
+			window.InputEventCallback( InEvent );
 			break;
 		}
 
 		case SDL_EVENT_TEXT_INPUT:
 		{
 			KeyTypedEvent inEvent( sdlEvent->text.text );
-			data.InputEventCallback( inEvent );
+			window.InputEventCallback( inEvent );
 			break;
 		}
 
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 		{
-			MouseState.State = BS_Pressed;
-			MouseState.Clicks = sdlEvent->button.clicks;
+			mouseState.State = ButtonState_Pressed;
+			mouseState.Clicks = sdlEvent->button.clicks;
 
-			MouseButtonPressedCount[ sdlEvent->button.button ]++;
-			MouseButtonPressedEvent inEvent( sdlEvent->button.button, sdlEvent->button.clicks == 2, MouseButtonPressedCount[ sdlEvent->button.button ] );
-			data.InputEventCallback( inEvent );
+			mouseButtonPressedCount[ sdlEvent->button.button ]++;
+			MouseButtonPressedEvent inEvent( sdlEvent->button.button, sdlEvent->button.clicks == 2, mouseButtonPressedCount[ sdlEvent->button.button ] );
+			window.InputEventCallback( inEvent );
 			break;
 		}
 
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 		{
-			MouseState.State = BS_Released;
-			MouseState.FramePressed = 0;
-			MouseState.Clicks = 0;
+			mouseState.State = ButtonState_Released;
+			mouseState.FramePressed = 0;
+			mouseState.Clicks = 0;
 
-			MouseButtonPressedCount[ sdlEvent->button.button ] = -1;
+			mouseButtonPressedCount[ sdlEvent->button.button ] = -1;
 			MouseButtonReleasedEvent inEvent( sdlEvent->button.button );
-			data.InputEventCallback( inEvent );
+			window.InputEventCallback( inEvent );
 			break;
 		}
 
 		case SDL_EVENT_MOUSE_MOTION:
 		{
 			MouseMovedEvent inEvent( (float)sdlEvent->motion.x, (float)sdlEvent->motion.y, (float)sdlEvent->motion.xrel, (float)sdlEvent->motion.yrel );
-			data.InputEventCallback( inEvent );
+			window.InputEventCallback( inEvent );
 			break;
 		}
 
@@ -544,7 +537,7 @@ namespace EEngine
 				(float)sdlEvent->wheel.x, (float)sdlEvent->wheel.y,
 				sdlEvent->wheel.direction == SDL_MOUSEWHEEL_FLIPPED
 			);
-			data.InputEventCallback( inEvent );
+			window.InputEventCallback( inEvent );
 			break;
 		}
 		}

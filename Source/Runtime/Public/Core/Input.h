@@ -21,25 +21,25 @@ namespace EEngine
 	class Input 
 	{
 	public:
-		inline static bool IsKeyDown(EScancode Code) { return Instance->IsKeyStateNative(Code, BS_Down); }
+		inline static bool IsKeyDown(EScancode Code) { return Instance->IsKeyStateNative(Code, ButtonState_Down); }
 
-		inline static bool IsKeyPressed(EScancode Code) { return Instance->IsKeyStateNative(Code, BS_Pressed); }
+		inline static bool IsKeyPressed(EScancode Code) { return Instance->IsKeyStateNative(Code, ButtonState_Pressed); }
 
-		inline static bool IsKeyReleased(EScancode Code) { return Instance->IsKeyStateNative(Code, BS_Released); }
+		inline static bool IsKeyReleased(EScancode Code) { return Instance->IsKeyStateNative(Code, ButtonState_Released); }
 
-		inline static bool IsMouseDown(EMouseButton Button) { return Instance->IsMouseStateNative(Button, BS_Down); }
+		inline static bool IsMouseDown(EMouseButton Button) { return Instance->IsMouseStateNative(Button, ButtonState_Down); }
 
-		inline static bool IsMousePressed(EMouseButton Button) { return Instance->IsMouseStateNative(Button, BS_Pressed); }
+		inline static bool IsMousePressed(EMouseButton Button) { return Instance->IsMouseStateNative(Button, ButtonState_Pressed); }
 
-		inline static bool IsMouseReleased(EMouseButton Button) { return Instance->IsMouseStateNative(Button, BS_Released); }
+		inline static bool IsMouseReleased(EMouseButton Button) { return Instance->IsMouseStateNative(Button, ButtonState_Released); }
 
 		inline static float GetAxis(int Index, EJoystickAxis Axis) { return Instance->GetAxisNative(Index, Axis); }
 
-		inline static bool IsButtonDown(int Index, EJoystickButton Code) { return Instance->IsButtonStateNative(Index, Code, BS_Down); }
+		inline static bool IsButtonDown(int Index, EJoystickButton Code) { return Instance->IsButtonStateNative(Index, Code, ButtonState_Down); }
 
-		inline static bool IsButtonPressed(int Index, EJoystickButton Code) { return Instance->IsButtonStateNative(Index, Code, BS_Pressed); }
+		inline static bool IsButtonPressed(int Index, EJoystickButton Code) { return Instance->IsButtonStateNative(Index, Code, ButtonState_Pressed); }
 
-		inline static bool IsButtonReleased(int Index, EJoystickButton Code) { return Instance->IsButtonStateNative(Index, Code, BS_Released); }
+		inline static bool IsButtonReleased(int Index, EJoystickButton Code) { return Instance->IsButtonStateNative(Index, Code, ButtonState_Released); }
 
 		inline static bool IsJoystickConnected(int Index) { return Instance->GetJoystickStateNative(Index).bConnected; };
 

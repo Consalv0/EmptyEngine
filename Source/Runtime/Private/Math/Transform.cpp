@@ -45,7 +45,7 @@ namespace EEngine
 		Vector3 const side( forward.Cross( rotation * Vector3( 0, 1 ) ) );
 		Vector3 const upper( side.Cross( forward ) );
 		
-		Matrix4x4 view
+		return Matrix4x4
 		(
 		    side.x, upper.x, -forward.x, 0,
 		    side.y, upper.y, -forward.y, 0,

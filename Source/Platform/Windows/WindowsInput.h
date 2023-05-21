@@ -4,46 +4,46 @@
 
 namespace EEngine
 {
-	class WindowsInput : public Input {
+	class WindowsInput : public Input
+	{
 	public:
-		static WindowsInput * GetInputInstance();
+		static WindowsInput* GetInputInstance();
 
 		TArray<DeviceJoystickState> joystickDeviceState;
 
-		TDictionary<int, TDictionary<EJoystickButton, InputJoystickState>> JoystickButtonState;
+		TDictionary<int, TDictionary<EJoystickButton, InputJoystickState>> joystickButtonState;
 
-		TDictionary<EScancode, InputScancodeState> KeyboardInputState;
+		TDictionary<EScancode, InputScancodeState> keyboardInputState;
 
-		TDictionary<EMouseButton, InputMouseButtonState> MouseInputState;
+		TDictionary<EMouseButton, InputMouseButtonState> mouseInputState;
 
 	protected:
 		friend class WindowsWindow;
 
-		virtual bool IsKeyStateNative(EScancode KeyCode, int State) override;
+		virtual bool IsKeyStateNative( EScancode keyCode, int state ) override;
 
-		virtual bool IsMouseStateNative(EMouseButton Button, int State) override;
+		virtual bool IsMouseStateNative( EMouseButton button, int state ) override;
 
-		virtual bool IsButtonStateNative(int Index, EJoystickButton KeyCode, int State) override;
+		virtual bool IsButtonStateNative( int index, EJoystickButton keyCode, int state ) override;
 
-		virtual float GetAxisNative(int Index, EJoystickAxis Axis) override;
+		virtual float GetAxisNative( int index, EJoystickAxis axis ) override;
 
-		virtual DeviceJoystickState & GetJoystickStateNative(int Index) override;
+		virtual DeviceJoystickState& GetJoystickStateNative( int index ) override;
 
-		virtual void SendHapticImpulseNative(int Index, int Channel, float Amplitude, int Duration) override;
+		virtual void SendHapticImpulseNative( int index, int channel, float amplitude, int duration ) override;
 
 		virtual TArray<int> GetJoysticksConnected() override;
 
 		virtual void CheckForConnectedJoysticks() override;
 
-		virtual Vector2 GetMousePositionNative(bool Clamp) override;
+		virtual Vector2 GetMousePositionNative( bool clamp ) override;
 
-		virtual float GetMouseXNative(bool Clamp) override;
+		virtual float GetMouseXNative( bool clamp ) override;
 
-		virtual float GetMouseYNative(bool Clamp) override;
+		virtual float GetMouseYNative( bool clamp ) override;
 
 	};
 
-	int OnSDLWindowInputEvent(void * UserData, SDL_Event * Event);
-
+	int WindowInputEventHandler( void* userData, void* sdlEvent );
 }
 

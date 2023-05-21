@@ -7,8 +7,8 @@ namespace Math
 {
 	static constexpr float Pi = 3.1415926535897932F;
 	static constexpr float TendencyZero = 1e-6F;
-	static constexpr float SmallNumber = 1.e-8F;
-	static constexpr float BigNumber = 3.4e+38f;
+	static constexpr float Epsilon = FLT_EPSILON;
+	static constexpr float MaxNumber = FLT_MAX;
 	static constexpr float Euler = 2.71828182845904523536F;
 	static constexpr float InversePi = 0.31830988618F;
 	static constexpr float HalfPi = 1.57079632679F;

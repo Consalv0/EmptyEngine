@@ -17,8 +17,8 @@ namespace EEngine
 
 		Box3D()
 		{
-			minX = minY = minZ = Math::BigNumber;
-			maxX = maxY = maxZ = -Math::BigNumber;
+			minX = minY = minZ = Math::MaxNumber;
+			maxX = maxY = maxZ = -Math::MaxNumber;
 		}
 
 		Box3D( float minX, float minY, float minZ, float maxX, float maxY, float maxZ )

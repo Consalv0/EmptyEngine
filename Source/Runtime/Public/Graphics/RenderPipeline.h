@@ -2,7 +2,7 @@
 
 #include "CoreTypes.h"
 #include "Math/Transform.h"
-#include "Rendering/RenderTarget.h"
+#include "Graphics/Graphics.h"
 
 namespace EEngine
 {
@@ -25,7 +25,7 @@ namespace EEngine
 
 		virtual void SetRenderScale( float scale ) = 0;
 
-		virtual TexturePtr GetFramebuffer() const = 0;
+		virtual Texture* GetFramebuffer() const = 0;
 
 		template <typename T>
 		bool CreateStage( const IName& stageName );
@@ -39,22 +39,22 @@ namespace EEngine
 		virtual void EndOfFrame() = 0;
 
 	protected:
-		TDictionary<size_t, class RenderStage*> _renderStages;
+		TDictionary<size_t, class RenderStage*> renderStages_;
 
-		RenderTargetPtr _mainScreenTarget;
+		Texture* mainScreenTarget_;
 
-		TexturePtr _frameBuffer;
+		Texture* frameBuffer_;
 
 		// Render Scale Target
-		float _renderScale;
+		float renderScale_;
 	};
 
 	template<typename T>
 	bool RenderPipeline::CreateStage( const IName& stageName )
 	{
-		if ( _renderStages.find( stageName.GetID() ) == _renderStages.end() )
+		if ( renderStages_.find( stageName.GetID() ) == renderStages_.end() )
 		{
-			_renderStages.insert( std::pair<size_t, RenderStage*>( stageName.GetID(), new T( stageName, this ) ) );
+			renderStages_.insert( std::pair<size_t, RenderStage*>( stageName.GetID(), new T( stageName, this ) ) );
 			return true;
 		}
 		return false;
