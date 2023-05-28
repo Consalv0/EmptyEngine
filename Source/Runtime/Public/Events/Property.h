@@ -20,27 +20,27 @@ namespace ESource {
 		Property() : InternalValue() {
 		}
 
-		Property(const T & Value) : InternalValue(Value) {
+		Property(const T & value) : InternalValue(value) {
 		}
 
 		T virtual inline Get() const { return InternalValue; }
 		inline operator T() const { return InternalValue; }
 
-		T virtual inline Set(const T & Value) {
-			InternalValue = Value;
+		T virtual inline Set(const T & value) {
+			InternalValue = value;
 			NotifyChange();
 			return InternalValue;
 		}
-		T virtual inline operator=(const T & Value) { return Set(Value); }
+		T virtual inline operator=(const T & value) { return Set(value); }
 
 		bool virtual inline operator==(const T & ValueOne) { return ValueOne == InternalValue; }
 
-		virtual inline void AttachObserver(const Observer* Value) {
-			Observers.push_back(Value);
+		virtual inline void AttachObserver(const Observer* value) {
+			Observers.push_back(value);
 		}
 
-		virtual inline void DetachObserver(const Observer* Value) {
-			Observers.erase(std::remove(Observers.begin(), Observers.end(), Value), Observers.end());
+		virtual inline void DetachObserver(const Observer* value) {
+			Observers.erase(std::remove(Observers.begin(), Observers.end(), value), Observers.end());
 		}
 	};
 

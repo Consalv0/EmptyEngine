@@ -1,18 +1,18 @@
 #pragma once
 
-namespace EEngine
+namespace EE
 {
-	class IName {
+	class EName {
 	public:
-		IName(const WString & Text);
+		EName(const WString & Text);
 
-		IName(const WChar * Text);
+		EName(const WChar * Text);
 
-		IName(size_t Number);
+		EName(size_t number);
 
-		IName(const WString & Text, size_t Number);
+		EName(const WString & Text, size_t number);
 
-		~IName();
+		~EName();
 
 		WString GetDisplayName() const;
 
@@ -28,19 +28,20 @@ namespace EEngine
 		
 		size_t GetID() const;
 
-		bool operator<(const IName& Other) const;
+		bool operator<(const EName& Other) const;
 
-		bool operator==(const IName& Other) const;
+		bool operator==(const EName& Other) const;
 
-		bool operator!=(const IName& Other) const;
+		bool operator!=(const EName& Other) const;
 
 	private:
-		size_t Number;
-		WString EntryName;
-		size_t ID;
+		size_t number;
+		WString entryName;
+		size_t id;
 
-		static TDictionary<size_t, WString> NamesTable;
-		static TDictionary<size_t, size_t> NameCountTable;
+		static TDictionary<size_t, WString> GNamesTable;
+		static TDictionary<size_t, size_t> GNameCountTable;
 	};
 
+    extern EE::EName GEmptyName;
 }

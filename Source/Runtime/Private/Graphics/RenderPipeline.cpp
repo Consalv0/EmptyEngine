@@ -2,7 +2,7 @@
 #include "CoreMinimal.h"
 #include "Graphics/RenderPipeline.h"
 
-namespace EEngine
+namespace EE
 {
 
 }

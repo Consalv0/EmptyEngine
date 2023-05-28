@@ -8,7 +8,7 @@
 #include "Math/IntVector3.h"
 #include "Math/Vector4.h"
 
-namespace EEngine
+namespace EE
 {
 	FORCEINLINE Vector3::Vector3()
 		: x( 0 ), y( 0 ), z( 0 )
@@ -228,7 +228,7 @@ namespace EEngine
 
 }
 
-inline EEngine::Vector3 Math::NormalizeAngleComponents( EEngine::Vector3 eulerAngle )
+inline EE::Vector3 Math::NormalizeAngleComponents( EE::Vector3 eulerAngle )
 {
 	eulerAngle.x = NormalizeAngle( eulerAngle.x );
 	eulerAngle.y = NormalizeAngle( eulerAngle.y );
@@ -237,7 +237,7 @@ inline EEngine::Vector3 Math::NormalizeAngleComponents( EEngine::Vector3 eulerAn
 	return eulerAngle;
 }
 
-inline EEngine::Vector3 Math::ClampAngleComponents( EEngine::Vector3 eulerAngle )
+inline EE::Vector3 Math::ClampAngleComponents( EE::Vector3 eulerAngle )
 {
 	eulerAngle.x = ClampDegrees( eulerAngle.x );
 	eulerAngle.y = ClampDegrees( eulerAngle.y );

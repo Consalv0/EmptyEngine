@@ -2,7 +2,7 @@
 
 #include "CoreTypes.h"
 
-namespace EEngine
+namespace EE
 {
 	struct Vector3;
 	struct Vector4;

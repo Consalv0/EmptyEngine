@@ -7,7 +7,7 @@
 #include "Math/Vector4.h"
 #include "Math/Vector2.h"
 
-namespace EEngine
+namespace EE
 {
 
 	FORCEINLINE Vector2::Vector2()

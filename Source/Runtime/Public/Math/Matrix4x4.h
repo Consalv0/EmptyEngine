@@ -1,6 +1,6 @@
 #pragma once
 
-namespace EEngine
+namespace EE
 {
 	struct Vector4;
 	struct Vector3;

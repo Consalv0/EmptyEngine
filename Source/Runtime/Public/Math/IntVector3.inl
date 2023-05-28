@@ -8,7 +8,7 @@
 #include "Vector3.h"
 #include "Vector4.h"
 
-namespace EEngine
+namespace EE
 {
 	FORCEINLINE IntVector3::IntVector3()
 		: x( 0 ), y( 0 ), z( 0 )

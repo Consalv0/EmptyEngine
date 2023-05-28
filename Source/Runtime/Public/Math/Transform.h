@@ -6,7 +6,7 @@
 #include "Math/Quaternion.h"
 #include "Math/Matrix4x4.h"
 
-namespace EEngine
+namespace EE
 {
 	class Transform
 	{

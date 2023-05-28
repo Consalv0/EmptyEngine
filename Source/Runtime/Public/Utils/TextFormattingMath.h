@@ -3,58 +3,58 @@
 #include "Math/CoreMath.h"
 #include "Utils/TextFormatting.h"
 
-namespace EEngine
+namespace EE
 {
 	namespace Text
 	{
-		inline WString FormatMath( const IntVector2& Value )
+		inline WString FormatMath( const IntVector2& value )
 		{
-			return Formatted( L"{%d, %d}", Value.x, Value.y );
+			return Formatted( L"{%d, %d}", value.x, value.y );
 		}
 
-		inline WString FormatMath( const IntVector3& Value )
+		inline WString FormatMath( const IntVector3& value )
 		{
-			return Formatted( L"{%d, %d, %d}", Value.x, Value.y, Value.z );
+			return Formatted( L"{%d, %d, %d}", value.x, value.y, value.z );
 		}
 
-		inline WString FormatMath( const Quaternion& Value )
+		inline WString FormatMath( const Quaternion& value )
 		{
-			return Formatted( L"{%.3f, %.3f, %.3f, %.3f}", Value.w, Value.x, Value.y, Value.z );
+			return Formatted( L"{%.3f, %.3f, %.3f, %.3f}", value.w, value.x, value.y, value.z );
 		}
 
-		inline WString FormatMath( const Vector2& Value )
+		inline WString FormatMath( const Vector2& value )
 		{
-			return Formatted( L"{%.3f, %.3f}", Value.x, Value.y );
+			return Formatted( L"{%.3f, %.3f}", value.x, value.y );
 		}
 
-		inline WString FormatMath( const Vector3& Value )
+		inline WString FormatMath( const Vector3& value )
 		{
-			return Formatted( L"{%.3f, %.3f, %.3f}", Value.x, Value.y, Value.z );
+			return Formatted( L"{%.3f, %.3f, %.3f}", value.x, value.y, value.z );
 		}
 
-		inline WString FormatMath( const Vector4& Value )
+		inline WString FormatMath( const Vector4& value )
 		{
-			return Formatted( L"{%.3f, %.3f, %.3f, %.3f}", Value.x, Value.y, Value.z, Value.w );
+			return Formatted( L"{%.3f, %.3f, %.3f, %.3f}", value.x, value.y, value.z, value.w );
 		}
 
-		inline WString FormatMath( const Matrix4x4& Value, bool ColumnMajor = false )
+		inline WString FormatMath( const Matrix4x4& value, bool ColumnMajor = false )
 		{
 			if ( ColumnMajor )
 			{
 				return Formatted( L"{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
-					Value.m0.x, Value.m1.x, Value.m2.x, Value.m3.x,
-					Value.m0.y, Value.m1.y, Value.m2.y, Value.m3.y,
-					Value.m0.z, Value.m1.z, Value.m2.z, Value.m3.z,
-					Value.m0.w, Value.m1.w, Value.m2.w, Value.m3.w
+					value.m0.x, value.m1.x, value.m2.x, value.m3.x,
+					value.m0.y, value.m1.y, value.m2.y, value.m3.y,
+					value.m0.z, value.m1.z, value.m2.z, value.m3.z,
+					value.m0.w, value.m1.w, value.m2.w, value.m3.w
 				);
 			}
 			else
 			{
 				return Formatted( L"{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
-					Value.m0.x, Value.m0.y, Value.m0.z, Value.m0.w,
-					Value.m1.x, Value.m1.y, Value.m1.z, Value.m1.w,
-					Value.m2.x, Value.m2.y, Value.m2.z, Value.m2.w,
-					Value.m3.x, Value.m3.y, Value.m3.z, Value.m3.w
+					value.m0.x, value.m0.y, value.m0.z, value.m0.w,
+					value.m1.x, value.m1.y, value.m1.z, value.m1.w,
+					value.m2.x, value.m2.y, value.m2.z, value.m2.w,
+					value.m3.x, value.m3.y, value.m3.z, value.m3.w
 				);
 			}
 		}

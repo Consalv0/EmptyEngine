@@ -1,35 +1,32 @@
 
 #include "CoreMinimal.h"
-#include "Core/Application.h"
-#include "Core/CoreTime.h"
+#include "Engine/Ticker.h"
 #include <chrono>
 #include <ctime>
 
-namespace EEngine
+namespace EE
 {
-	unsigned long long Time::LastUpdateMicro = GetEpochTimeMicro();
-	unsigned long long Time::LastDeltaMicro = 0;
+	uint64 Ticker::LastUpdateMicro = GetEpochTimeMicro();
+	uint64 Ticker::LastDeltaMicro = 0;
 
-	bool Time::bHasInitialized = false;
+	uint32 Ticker::TickCount = 0;
+	uint64 Ticker::TickBuffer[ MaxTickSamples ];
+	uint64 Ticker::TickAverage = 30;
 
-	unsigned int Time::TickCount = 0;
-	unsigned long long Time::TickBuffer[ MaxTickSamples ];
-	unsigned long long Time::TickAverage = 30;
+	uint64 Ticker::MaxUpdateDeltaMicro = Ticker::Second::GetSizeInMicro() / 60;
+	uint64 Ticker::MaxRenderDeltaMicro = Ticker::Second::GetSizeInMicro() / 70;
 
-	unsigned long long Time::MaxUpdateDeltaMicro = Time::Second::GetSizeInMicro() / 60;
-	unsigned long long Time::MaxRenderDeltaMicro = Time::Second::GetSizeInMicro() / 70;
+	bool Ticker::SkipRender = false;
+	uint64 Ticker::RenderDeltaTimeSum = 0;
 
-	bool Time::bSkipRender = false;
-	unsigned long long Time::RenderDeltaTimeSum = 0;
-
-	void Time::Tick()
+	void Ticker::Tick()
 	{
-		unsigned long long TickTime = GetEpochTimeMicro();
+		uint64 TickTime = GetEpochTimeMicro();
 		LastDeltaMicro = TickTime - LastUpdateMicro;
 
 		if ( LastDeltaMicro < MaxUpdateDeltaMicro )
 		{
-			unsigned long long Delta = MaxUpdateDeltaMicro - LastDeltaMicro;
+			uint64 Delta = MaxUpdateDeltaMicro - LastDeltaMicro;
 			std::this_thread::sleep_for( std::chrono::microseconds( Delta - 1000 ) );
 		}
 
@@ -37,8 +34,8 @@ namespace EEngine
 		LastDeltaMicro += LastUpdateMicro - TickTime;
 
 		RenderDeltaTimeSum += LastDeltaMicro;
-		bSkipRender = RenderDeltaTimeSum < MaxRenderDeltaMicro;
-		if ( !bSkipRender )
+		SkipRender = RenderDeltaTimeSum < MaxRenderDeltaMicro;
+		if ( !SkipRender )
 		{
 			RenderDeltaTimeSum = 0;
 		}
@@ -55,12 +52,12 @@ namespace EEngine
 		TickCount = (TickCount + 1) % MaxTickSamples;
 	}
 
-	Timestamp Time::GetTimeStamp()
+	Timestamp Ticker::GetTimeStamp()
 	{
 		return Timestamp( LastUpdateMicro, LastUpdateMicro + LastDeltaMicro );
 	}
 
-	unsigned long long Time::GetEpochTimeMicro()
+	uint64 Ticker::GetEpochTimeMicro()
 	{
 		using namespace std::chrono;
 		return time_point_cast<microseconds>(steady_clock::now()).time_since_epoch().count();
@@ -69,12 +66,12 @@ namespace EEngine
 
 	void Timestamp::Begin()
 	{
-		LastEpochTime = Time::GetEpochTime<Time::Micro>();
+		LastEpochTime = Ticker::GetEpochTime<Ticker::Micro>();
 	}
 
 	void Timestamp::Stop()
 	{
-		NowEpochTime = Time::GetEpochTime<Time::Micro>();
+		NowEpochTime = Ticker::GetEpochTime<Ticker::Micro>();
 	}
 
 	Timestamp Timestamp::operator+( const Timestamp& Other )

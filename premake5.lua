@@ -9,7 +9,7 @@ project "EmptyEngine"
     targetdir ("%{prj.location}/Build/" .. outputdir)
     objdir ("%{prj.location}/BinObjs/" .. outputdir)
 
-    pchsource "%{prj.location}/Source/Runtime/Public/CoreMinimal.cpp"
+    pchsource "%{prj.location}/Source/Runtime/Private/CoreMinimal.cpp"
     pchheader "CoreMinimal.h"
 
     files {

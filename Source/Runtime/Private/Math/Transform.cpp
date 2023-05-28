@@ -1,7 +1,7 @@
 #include "CoreMinimal.h"
 #include "Math/Transform.h"
 
-namespace EEngine
+namespace EE
 {
 	Transform::Transform() : position(), rotation(), scale( 1.F )
 	{

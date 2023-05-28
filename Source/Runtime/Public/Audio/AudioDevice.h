@@ -3,7 +3,7 @@
 #include "CoreTypes.h"
 #include "Audio/AudioSample.h"
 
-namespace EEngine
+namespace EE
 {
 	class AudioDevice
 	{
@@ -17,8 +17,8 @@ namespace EEngine
 			uint32_t Pos;
 			const size_t Identifier;
 			
-			SamplePlayInfo(AudioSamplePtr Sample, float Volume, bool Loop, bool Pause, const size_t & ID) :
-				Sample(Sample), Volume(Volume), bLoop(Loop), bPause(Pause), Pos(0), Identifier(ID) {
+			SamplePlayInfo(AudioSamplePtr Sample, float Volume, bool Loop, bool Pause, const size_t & id) :
+				Sample(Sample), Volume(Volume), bLoop(Loop), bPause(Pause), Pos(0), Identifier(id) {
 			}
 		};
 

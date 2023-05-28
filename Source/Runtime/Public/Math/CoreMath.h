@@ -12,14 +12,14 @@
 #include "Math/Matrix3x3.h"
 #include "Math/Matrix4x4.h"
 
-using EEngine::Vector2;
-using EEngine::Vector3;
-using EEngine::Vector4;
-using EEngine::Quaternion;
-using EEngine::IntVector2;
-using EEngine::IntVector3;
-using EEngine::Matrix4x4;
-using EEngine::Matrix3x3;
+using EE::Vector2;
+using EE::Vector3;
+using EE::Vector4;
+using EE::Quaternion;
+using EE::IntVector2;
+using EE::IntVector3;
+using EE::Matrix4x4;
+using EE::Matrix3x3;
 
 #include "Math/Box2D.h"
 #include "Math/IntBox2D.h"

@@ -2,17 +2,17 @@
 #include "CoreMinimal.h"
 #include "Utils/TextFormatting.h"
 
-namespace EEngine::Text
+namespace EE::Text
 {
 	NString WideToNarrow( const WChar* From )
 	{
 		if ( From == NULL )
 			return "";
 
-		std::mbstate_t State = std::mbstate_t();
-		size_t SizeNeeded = std::wcsrtombs( NULL, &From, 0, &State );
+		std::mbstate_t state = std::mbstate_t();
+		size_t SizeNeeded = std::wcsrtombs( NULL, &From, 0, &state );
 		NString To = NString( SizeNeeded, '\0' );
-		std::wcsrtombs( &To[ 0 ], &From, SizeNeeded, &State );
+		std::wcsrtombs( &To[ 0 ], &From, SizeNeeded, &state );
 
 		return To;
 	}
@@ -22,10 +22,10 @@ namespace EEngine::Text
 		if ( From == NULL )
 			return L"";
 
-		std::mbstate_t State = std::mbstate_t();
-		size_t SizeNeeded = std::mbsrtowcs( NULL, &From, 0, &State );
+		std::mbstate_t state = std::mbstate_t();
+		size_t SizeNeeded = std::mbsrtowcs( NULL, &From, 0, &state );
 		WString To = WString( SizeNeeded, L'\0' );
-		std::mbsrtowcs( &To[ 0 ], &From, SizeNeeded, &State );
+		std::mbsrtowcs( &To[ 0 ], &From, SizeNeeded, &state );
 
 		return To;
 	}

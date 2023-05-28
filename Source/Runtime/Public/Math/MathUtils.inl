@@ -201,24 +201,24 @@ float Math::NormalizeAngle( float degrees )
 	return degrees;
 }
 
-float Math::Pow10( int Number )
+float Math::Pow10( int number )
 {
 	float Ret = 1.0F;
 	float r = 10.0F;
-	if ( Number < 0 )
+	if ( number < 0 )
 	{
-		Number = -Number;
+		number = -number;
 		r = 0.1F;
 	}
 
-	while ( Number )
+	while ( number )
 	{
-		if ( Number & 1 )
+		if ( number & 1 )
 		{
 			Ret *= r;
 		}
 		r *= r;
-		Number >>= 1;
+		number >>= 1;
 	}
 	return Ret;
 }

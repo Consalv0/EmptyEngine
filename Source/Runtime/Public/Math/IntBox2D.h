@@ -3,7 +3,7 @@
 #include "Math/MathUtils.h"
 #include "Math/IntVector2.h"
 
-namespace EEngine
+namespace EE
 {
 	struct IntBox2D
 	{

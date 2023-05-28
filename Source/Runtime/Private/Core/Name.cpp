@@ -2,97 +2,99 @@
 #include "CoreMinimal.h"
 #include "Utils/Hasher.h"
 #include "Utils/TextFormatting.h"
-#include "Core\Name.h"
+#include "Core/Name.h"
 
-namespace EEngine
+namespace EE
 {
-	TDictionary<size_t, WString> IName::NamesTable = TDictionary<size_t, WString>();
-	TDictionary<size_t, size_t> IName::NameCountTable = TDictionary<size_t, size_t>();
+	TDictionary<size_t, WString> EName::GNamesTable = TDictionary<size_t, WString>();
+	TDictionary<size_t, size_t> EName::GNameCountTable = TDictionary<size_t, size_t>();
+    
+    EName GEmptyName = { L"", 0 };
 
-	IName::IName(const WString & Text) : EntryName(Text) {
-		ID = WStringToHash(Text);
-		if (NamesTable.try_emplace(ID, Text).second) {
-			NameCountTable.emplace(ID, 0);
-			Number = 0;
+	EName::EName(const WString & Text) : entryName(Text) {
+		id = WStringToHash(Text);
+		if (GNamesTable.try_emplace(id, Text).second) {
+			GNameCountTable.emplace(id, 0);
+			number = 0;
 		}
 		else {
-			Number = ++NameCountTable[ID];
+			number = ++GNameCountTable[id];
 		}
 	}
 
-	IName::IName(const WChar * Text) : EntryName(Text) {
-		ID = WStringToHash(Text);
-		if (NamesTable.try_emplace(ID, Text).second) {
-			NameCountTable.emplace(ID, 0);
-			Number = 0;
-		}
-		else {
-			Number = ++NameCountTable[ID];
-		}
-	}
-
-	IName::IName(size_t InNumber) {
-		if (NamesTable.find(InNumber) == NamesTable.end()) {
-			EntryName = L"";
-			Number = 0;
+	EName::EName(const WChar * Text) : entryName(Text) {
+		id = WStringToHash(Text);
+		if (GNamesTable.try_emplace(id, Text).second) {
+			GNameCountTable.emplace(id, 0);
+			number = 0;
 		}
 		else {
-			EntryName = NamesTable[InNumber];
-			Number = ++NameCountTable[InNumber];
+			number = ++GNameCountTable[id];
 		}
 	}
 
-	IName::IName(const WString & Text, size_t Number) : EntryName(Text), Number(Number) {
-		ID = WStringToHash(Text);
-		NamesTable.try_emplace(ID, Text);
+	EName::EName(size_t InNumber) {
+		if (GNamesTable.find(InNumber) == GNamesTable.end()) {
+			entryName = L"";
+			number = 0;
+		}
+		else {
+			entryName = GNamesTable[InNumber];
+			number = ++GNameCountTable[InNumber];
+		}
 	}
 
-	IName::~IName() { }
-
-	WString IName::GetDisplayName() const {
-		return EntryName;
+	EName::EName(const WString & Text, size_t number) : entryName(Text), number(number) {
+		id = WStringToHash(Text);
+		GNamesTable.try_emplace(id, Text);
 	}
 
-	NString IName::GetNarrowDisplayName() const {
-		return Text::WideToNarrow(EntryName);
+	EName::~EName() { }
+
+	WString EName::GetDisplayName() const {
+		return entryName;
 	}
 
-	WString IName::GetInstanceName() const {
-		return EntryName + L"_" + std::to_wstring(Number);
+	NString EName::GetNarrowDisplayName() const {
+		return Text::WideToNarrow(entryName);
 	}
 
-	NString IName::GetNarrowInstanceName() const {
-		return Text::WideToNarrow(EntryName) + "_" + std::to_string(Number);
+	WString EName::GetInstanceName() const {
+		return entryName + L"_" + std::to_wstring(number);
 	}
 
-	size_t IName::GetNumber() const {
-		return Number;
+	NString EName::GetNarrowInstanceName() const {
+		return Text::WideToNarrow(entryName) + "_" + std::to_string(number);
 	}
 
-	size_t IName::GetInstanceID() const {
-		return WStringToHash(EntryName + L"_" + std::to_wstring(Number));
+	size_t EName::GetNumber() const {
+		return number;
 	}
 
-	size_t IName::GetID() const {
-		return ID;
+	size_t EName::GetInstanceID() const {
+		return WStringToHash(entryName + L"_" + std::to_wstring(number));
 	}
 
-	bool IName::operator<(const IName & Other) const {
+	size_t EName::GetID() const {
+		return id;
+	}
+
+	bool EName::operator<(const EName & Other) const {
 		uint32_t i = 0;
-		while ((i < EntryName.length()) && (i < Other.EntryName.length())) {
-			if (tolower(EntryName[i]) < tolower(Other.EntryName[i])) return true;
-			else if (tolower(EntryName[i]) > tolower(Other.EntryName[i])) return false;
+		while ((i < entryName.length()) && (i < Other.entryName.length())) {
+			if (tolower(entryName[i]) < tolower(Other.entryName[i])) return true;
+			else if (tolower(entryName[i]) > tolower(Other.entryName[i])) return false;
 			++i;
 		}
-		return (EntryName.length() + Number < Other.EntryName.length() + Other.Number);
+		return (entryName.length() + number < Other.entryName.length() + Other.number);
 	}
 
-	bool IName::operator!=(const IName & Other) const {
-		return ID != Other.ID || Number != Number;
+	bool EName::operator!=(const EName & Other) const {
+		return id != Other.id || number != number;
 	}
 
-	bool IName::operator==(const IName & Other) const {
-		return ID == Other.ID && Number == Number;
+	bool EName::operator==(const EName & Other) const {
+		return id == Other.id && number == number;
 	}
 
 }

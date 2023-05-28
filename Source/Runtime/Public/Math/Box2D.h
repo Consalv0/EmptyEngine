@@ -3,7 +3,7 @@
 #include "Math/MathUtils.h"
 #include "Math/Vector2.h"
 
-namespace EEngine
+namespace EE
 {
 	struct Box2D
 	{

@@ -2,7 +2,7 @@
 
 #include "Platform/DeviceFunctions.h"
 
-namespace EEngine 
+namespace EE 
 {
 	class WindowsDeviceFunctions : public DeviceFunctions {
 	public:

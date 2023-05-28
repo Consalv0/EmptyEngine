@@ -2,14 +2,14 @@
 #include "CoreMinimal.h"
 #include "Audio/AudioSample.h"
 
-namespace EEngine
+namespace EE
 {
 	AudioSample::AudioSample( unsigned char* Buffer, uint32_t SampleSize, uint32_t BufferLength, uint32_t Frecuency, uint32_t ChannelCount )
 		: SampleSize( SampleSize ), BufferLength( BufferLength ), Frecuency( Frecuency ), ChannelCount( ChannelCount ), Format( EAudioFormat::Float32 )
 	{
 		this->Buffer = new unsigned char[ BufferLength ];
 		memcpy( this->Buffer, Buffer, BufferLength );
-		Duration = (Time::Micro::ReturnType)(((BufferLength * 8u / (SampleSize * ChannelCount)) / (float)Frecuency) * Time::Second::GetSizeInMicro());
+		Duration = (Ticker::Micro::ReturnType)(((BufferLength * 8u / (SampleSize * ChannelCount)) / (float)Frecuency) * Ticker::Second::GetSizeInMicro());
 	}
 
 	AudioSample::~AudioSample()

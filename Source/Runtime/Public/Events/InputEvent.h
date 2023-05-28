@@ -1,267 +1,246 @@
 #pragma once
 
 #include "Events/Event.h"
-#include "Events/KeyCodes.h"
+#include "Core/KeyCodes.h"
 #include "Math/CoreMath.h"
 
-namespace EEngine
+namespace EE
 {
-	enum class EInputEventType 
-	{
-		KeyPressed,
-		KeyReleased,
-		KeyTyped,
-		MouseButtonPressed,
-		MouseButtonReleased,
-		MouseMoved,
-		MouseScrolled,
-		JoystickConnection,
-		JoystickAxis,
-		JoystickButtonPressed,
-		JoystickButtonReleased,
-	};
+    enum class EInputEvent
+    {
+        InputEvent_KeyPress,
+        InputEvent_KeyRelease,
+        InputEvent_KeyType,
+        InputEvent_MousePressed,
+        InputEvent_MouseReleased,
+        InputEvent_MouseMoved,
+        InputEvent_MouseScrolled,
+        InputEvent_JoystickConnection,
+        InputEvent_JoystickAxis,
+        InputEvent_JoystickButtonPressed,
+        InputEvent_JoystickButtonReleased,
+    };
 
-	enum EInputEventCategory : char
-	{
-		None = 0u,
-		IEC_Keyboard = 1u << 0,
-		IEC_Mouse    = 1u << 1,
-		IEC_Joystick = 1u << 2
-	};
+    enum EInputCategory : char
+    {
+        None = 0u,
+        InputCategory_Keyboard = 1u << 0,
+        InputCategory_Mouse = 1u << 1,
+        InputCategory_Joystick = 1u << 2
+    };
 
-	class InputEvent : public Event
-	{
-	public:
-		virtual EInputEventType GetEventType() const = 0;
+    class InputEvent : public Event
+    {
+    public:
+        virtual EInputEvent GetEventType() const = 0;
 
-		inline bool IsInCategory(EInputEventCategory Category) {
-			return GetCategoryFlags() & Category;
-		}
-	};
+        inline bool IsInCategory( EInputCategory category )
+        {
+            return GetCategoryFlags() & category;
+        }
+    };
 
-	// Key Events //
+    // Key Events //
 
-	class KeyEvent : public InputEvent
-	{
-	public:
-		inline int GetKeyCode() const { return EventKeyCode; }
+    const class KeyEvent : public InputEvent
+    {
+    public:
+        const int keyCode;
+        const bool modKeyShift, modKeyCtrl, modKeyAlt, modKeySuper;
+        
+        FORCEINLINE bool GetKeyModifierSuper() const { return modKeySuper; };
 
-		inline bool GetKeyShiftModifier() const { return ModKeyShift; };
-		inline bool GetKeyCtrlModifier() const { return ModKeyCtrl; };
-		inline bool GetKeyAltModifier() const { return ModKeyAlt; };
-		inline bool GetKeySuperModifier() const { return ModKeySuper; };
+        EE_IMPLEMENT_EVENT_CATEGORY( InputCategory_Keyboard )
 
-		IMPLEMENT_EVENT_CATEGORY(IEC_Keyboard)
+    protected:
+        KeyEvent( int code, bool shift, bool ctrl, bool alt, bool super )
+            : keyCode( code ), modKeyShift( shift ), modKeyCtrl( ctrl ), modKeyAlt( alt ), modKeySuper( super )
+        {
+        }
+    };
 
-	protected:
-		KeyEvent(int Code, bool Shift, bool Ctrl, bool Alt, bool Super)
-			: EventKeyCode(Code), ModKeyShift(Shift), ModKeyCtrl(Ctrl), ModKeyAlt(Alt), ModKeySuper(Super) {
-		}
+    const class KeyPressedEvent : public KeyEvent
+    {
+    public:
+        KeyPressedEvent( int code, bool shift, bool ctrl, bool alt, bool super, bool isRepeated )
+            : KeyEvent( code, shift, ctrl, alt, super ), isRepeated( isRepeated )
+        {
+        }
 
-		int EventKeyCode;
-		bool ModKeyShift; bool ModKeyCtrl; bool ModKeyAlt; bool ModKeySuper;
-	};
+        //* The key event was fired by maintaining the key pressed?
+        const bool isRepeated;
 
-	class KeyPressedEvent : public KeyEvent
-	{
-	public:
-		KeyPressedEvent(int Code, bool Shift, bool Ctrl, bool Alt, bool Super, bool Repeated)
-			: KeyEvent(Code, Shift, Ctrl, Alt, Super), bRepeat(Repeated) {}
+        EE_IMPLEMENT_EVENT_ENUMTYPE( EInputEvent, InputEvent_KeyPress )
+    };
 
-		//* The key event was fired by maintaining the key pressed?
-		inline bool IsRepeated() const { return bRepeat; }
+    class KeyReleasedEvent : public KeyEvent
+    {
+    public:
+        KeyReleasedEvent( int code, bool shift, bool ctrl, bool alt, bool super )
+            : KeyEvent( code, shift, ctrl, alt, super )
+        {
+        }
 
-		IMPLEMENT_EVENT_ENUMTYPE(EInputEventType, KeyPressed)
+        EE_IMPLEMENT_EVENT_ENUMTYPE( EInputEvent, InputEvent_KeyRelease )
+    };
 
-	private:
-		bool bRepeat;
-	};
+    const class KeyTypedEvent : public KeyEvent
+    {
+    public:
+        KeyTypedEvent( const NChar text[ 32 ] )
+            : KeyEvent( 0, false, false, false, false ), eventText( text )
+        {
+        }
+        const NChar* eventText;
 
-	class KeyReleasedEvent : public KeyEvent
-	{
-	public:
-		KeyReleasedEvent(int Code, bool Shift, bool Ctrl, bool Alt, bool Super)
-			: KeyEvent(Code, Shift, Ctrl, Alt, Super) {}
+        EE_IMPLEMENT_EVENT_ENUMTYPE( EInputEvent, InputEvent_KeyType )
+    };
 
-		IMPLEMENT_EVENT_ENUMTYPE(EInputEventType, KeyReleased)
-	};
+    // Mouse Events //
 
-	class KeyTypedEvent : public KeyEvent
-	{
-	public:
-		KeyTypedEvent(const NChar Text[32])
-			: KeyEvent(0, false, false, false, false) {
-			for (size_t i = 0; i < 32; ++i) EventText[i] = Text[i];
-		}
+    const class MouseEvent : public InputEvent
+    {
+    public:
+        EE_IMPLEMENT_EVENT_CATEGORY( InputCategory_Mouse )
 
-		inline NString GetText() const { return EventText; }
-
-		IMPLEMENT_EVENT_ENUMTYPE(EInputEventType, KeyTyped)
-
-	private:
-		NChar EventText[32];
-	};
-
-	// Mouse Events //
-
-	class MouseEvent : public InputEvent
-	{
-	public:
-		IMPLEMENT_EVENT_CATEGORY(IEC_Mouse)
-
-	protected:
-		MouseEvent() {}
-	};
+    protected:
+        MouseEvent() {}
+    };
 
 
-	class MouseMovedEvent : public MouseEvent
-	{
-	public:
-		MouseMovedEvent(float x, float y, float relativeX, float relativeY)
-			: mouseX(x), mouseY(y), mouseRelativeX(relativeX), mouseRelativeY(relativeY) {}
+    const class MouseMovedEvent : public MouseEvent
+    {
+    public:
+        MouseMovedEvent( float x, float y, float relativeX, float relativeY )
+            : mouseX( x ), mouseY( y ), mouseRelativeX( relativeX ), mouseRelativeY( relativeY )
+        {
+        }
+        const float mouseX, mouseY;
+        const float mouseRelativeX, mouseRelativeY;
 
-		inline float GetX() const { return mouseX; }
-		inline float GetY() const { return mouseY; }
-		inline float GetXRelative() const { return mouseRelativeX; }
-		inline float GetYRelative() const { return mouseRelativeY; }
-		inline Point2 GetMousePosition() const { return { mouseX, mouseY }; }
-		inline Point2 GetMouseRelativeMotion() const { return { mouseRelativeX, mouseRelativeY }; }
+        FORCEINLINE Point2 GetMousePosition() const { return { mouseX, mouseY }; }
+        FORCEINLINE Point2 GetMouseRelativeMotion() const { return { mouseRelativeX, mouseRelativeY }; }
 
-		IMPLEMENT_EVENT_ENUMTYPE(EInputEventType, MouseMoved)
+        EE_IMPLEMENT_EVENT_ENUMTYPE( EInputEvent, InputEvent_MouseMoved )
+    };
 
-	private:
-		float mouseX, mouseY;
-		float mouseRelativeX, mouseRelativeY;
-	};
+    const class MouseScrolledEvent : public MouseEvent
+    {
+    public:
+        MouseScrolledEvent( float offsetX, float offsetY, bool isFlipped )
+            : offsetX( offsetX ), offsetY( offsetY ), isFlipped( isFlipped )
+        {
+        }
+        const float offsetX, offsetY;
+        const bool isFlipped;
 
-	class MouseScrolledEvent : public MouseEvent
-	{
-	public:
-		MouseScrolledEvent(float OffsetX, float OffsetY, bool Flipped)
-			: OffsetX(OffsetX), OffsetY(OffsetY), bFlipped(Flipped) {}
+        EE_IMPLEMENT_EVENT_ENUMTYPE( EInputEvent, InputEvent_MouseScrolled )
+    };
 
-		inline float GetOffsetX() const { return OffsetX; }
-		inline float GetOffsetY() const { return OffsetY; }
-		inline bool IsFlipped() const { return bFlipped; }
+    const class MouseButtonEvent : public MouseEvent
+    {
+    public:
+        const int eventButton;
+        const bool isDoubleClick;
+        const int repeatCount;
+        
+    protected:
+        MouseButtonEvent( int button, bool isDoubleClick, int repeatCount )
+            : eventButton( button ), isDoubleClick( isDoubleClick ), repeatCount( repeatCount )
+        {
+        }
+    };
 
-		IMPLEMENT_EVENT_ENUMTYPE(EInputEventType, MouseScrolled)
-	
-	private:
-		float OffsetX, OffsetY;
-		bool bFlipped;
-	};
+    const class MouseButtonPressedEvent : public MouseButtonEvent
+    {
+    public:
+        MouseButtonPressedEvent( int button, bool doubleClick, int repeatCount )
+            : MouseButtonEvent( button, doubleClick, repeatCount )
+        {
+        }
 
-	class MouseButtonEvent : public MouseEvent
-	{
-	public:
-		inline int GetMouseButton() const { return EventButton; }
+        EE_IMPLEMENT_EVENT_ENUMTYPE( EInputEvent, InputEvent_MousePressed )
+    };
 
-		inline int IsDoubleClick() const { return bDoubleClick; }
+    const class MouseButtonReleasedEvent : public MouseButtonEvent
+    {
+    public:
+        MouseButtonReleasedEvent( int button )
+            : MouseButtonEvent( button, false, 0 )
+        {
+        }
 
-		inline int GetRepeatCount() const { return RepeatCount; }
+        EE_IMPLEMENT_EVENT_ENUMTYPE( EInputEvent, InputEvent_MouseReleased )
+    };
 
-	protected:
-		MouseButtonEvent(int Button, bool DoubleClick, int RepeatCount)
-			: EventButton(Button), bDoubleClick(DoubleClick), RepeatCount(RepeatCount) {}
+    // Joystick Event
 
-		int EventButton;
-		bool bDoubleClick;
-		int RepeatCount;
-	};
+    const class JoystickEvent : public InputEvent
+    {
+    public:
+        const int joystickID;
+        
+        EE_IMPLEMENT_EVENT_CATEGORY( InputCategory_Joystick )
 
-	class MouseButtonPressedEvent : public MouseButtonEvent
-	{
-	public:
-		MouseButtonPressedEvent(int Button, bool DoubleClick, int RepeatCount)
-			: MouseButtonEvent(Button, DoubleClick, RepeatCount) {}
+    protected:
+        JoystickEvent( int joystickID )
+            : joystickID( joystickID )
+        {
+        }
+    };
 
-		IMPLEMENT_EVENT_ENUMTYPE(EInputEventType, MouseButtonPressed)
-	};
+    class JoystickConnectionEvent : public JoystickEvent
+    {
+    public:
+        const int isConnected;
 
-	class MouseButtonReleasedEvent : public MouseButtonEvent {
-	public:
-		MouseButtonReleasedEvent(int Button)
-			: MouseButtonEvent(Button, false, 0) {}
-		
-		IMPLEMENT_EVENT_ENUMTYPE(EInputEventType, MouseButtonReleased)
-	};
+        JoystickConnectionEvent( int joystickID, int isConnected )
+            : JoystickEvent( joystickID ), isConnected( isConnected )
+        {
+        }
 
-	// Joystick Event
+        EE_IMPLEMENT_EVENT_ENUMTYPE( EInputEvent, InputEvent_JoystickConnection )
+    };
 
-	class JoystickEvent : public InputEvent
-	{
-	public:
-		inline int GetJoystickID() const { return JoystickID; }
+    class JoystickButtonPressedEvent : public JoystickEvent
+    {
+    public:
+        const EGamepadButton buttonCode;
 
-		IMPLEMENT_EVENT_CATEGORY(IEC_Joystick)
+        EE_IMPLEMENT_EVENT_ENUMTYPE( EInputEvent, InputEvent_JoystickButtonPressed )
 
-	protected:
-		JoystickEvent(int JoystickID)
-			: JoystickID(JoystickID) {
-		}
+            JoystickButtonPressedEvent( int joystickID, EGamepadButton buttonCode )
+            : JoystickEvent( joystickID ), buttonCode( buttonCode )
+        {
+        }
+    };
 
-		int JoystickID;
-	};
+    class JoystickButtonReleaseEvent : public JoystickEvent
+    {
+    public:
+        const EGamepadButton buttonCode;
+        
+        EE_IMPLEMENT_EVENT_ENUMTYPE( EInputEvent, InputEvent_JoystickButtonReleased )
 
-	class JoystickConnectionEvent : public JoystickEvent
-	{
-	public:
-		JoystickConnectionEvent(int JoystickID, int Connected)
-			: JoystickEvent(JoystickID), ConnectionState(Connected) {}
+            JoystickButtonReleaseEvent( int joystickID, EGamepadButton buttonCode )
+            : JoystickEvent( joystickID ), buttonCode( buttonCode )
+        {
+        }
+    };
 
-		IMPLEMENT_EVENT_ENUMTYPE(EInputEventType, JoystickConnection)
+    class JoystickAxisEvent : public JoystickEvent
+    {
+    public:
+        const EGamepadAxis axis;
+        const float value;
 
-		bool IsConnected() const { return ConnectionState; };
+        JoystickAxisEvent( int joystickID, EGamepadAxis axis, float value )
+            : JoystickEvent( joystickID ), axis( axis ), value( value )
+        {
+        }
 
-	protected:
-		int ConnectionState;
-	};
+        EE_IMPLEMENT_EVENT_ENUMTYPE( EInputEvent, InputEvent_JoystickAxis )
 
-	class JoystickButtonPressedEvent : public JoystickEvent
-	{
-	public:
-		inline EJoystickButton GetButton() const { return ButtonCode; }
-
-		IMPLEMENT_EVENT_ENUMTYPE(EInputEventType, JoystickButtonPressed)
-
-		JoystickButtonPressedEvent(int JoystickID, EJoystickButton ButtonCode)
-			: JoystickEvent(JoystickID), ButtonCode(ButtonCode) {
-		}
-
-	protected:
-		EJoystickButton ButtonCode;
-	};
-
-	class JoystickButtonReleasedEvent : public JoystickEvent
-	{
-	public:
-		inline EJoystickButton GetButton() const { return ButtonCode; }
-
-		IMPLEMENT_EVENT_ENUMTYPE(EInputEventType, JoystickButtonReleased)
-
-		JoystickButtonReleasedEvent(int JoystickID, EJoystickButton ButtonCode)
-			: JoystickEvent(JoystickID), ButtonCode(ButtonCode) {
-		}
-
-	protected:
-		EJoystickButton ButtonCode;
-	};
-
-	class JoystickAxisEvent : public JoystickEvent
-	{
-	public:
-		JoystickAxisEvent(int JoystickID, EJoystickAxis Axis, float Value)
-			: JoystickEvent(JoystickID), Axis(Axis), Value(Value) {}
-
-		IMPLEMENT_EVENT_ENUMTYPE(EInputEventType, JoystickAxis)
-
-		EJoystickAxis GetAxis() const { return Axis; };
-
-		float GetValue() const { return Value; }
-
-	protected:
-		EJoystickAxis Axis;
-		float Value;
-	};
-
+            EGamepadAxis GetAxis() const { return axis; };
+    };
 }

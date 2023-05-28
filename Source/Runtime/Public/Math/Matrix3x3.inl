@@ -6,7 +6,7 @@
 #include "Math/Matrix4x4.h"
 #include "Math/Matrix3x3.h"
 
-namespace EEngine
+namespace EE
 {
 	FORCEINLINE Matrix3x3::Matrix3x3()
 	{

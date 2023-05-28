@@ -2,7 +2,7 @@
 
 #include "CoreTypes.h"
 
-namespace EEngine
+namespace EE
 {
 
 	struct IntVector3;
@@ -72,10 +72,10 @@ namespace EEngine
 namespace Math
 {
 	//* Get the angles in degrees in the range of (-180, 180) 
-	inline EEngine::Vector3 NormalizeAngleComponents( EEngine::Vector3 eulerAngle );
+	inline EE::Vector3 NormalizeAngleComponents( EE::Vector3 eulerAngle );
 
 	//* Get the angles in degrees in the range of [0, 360)
-	inline EEngine::Vector3 ClampAngleComponents( EEngine::Vector3 eulerAngle );
+	inline EE::Vector3 ClampAngleComponents( EE::Vector3 eulerAngle );
 }
 
 #include "Math/Vector3.inl"

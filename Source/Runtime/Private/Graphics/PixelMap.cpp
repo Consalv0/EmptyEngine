@@ -3,9 +3,9 @@
 #include "Graphics/Graphics.h"
 #include "Graphics/PixelMap.h"
 
-namespace EEngine
+namespace EE
 {
-	constexpr EEngine::PixelFormatInfo PixelFormats[ PixelFormat_COUNT + 1 ] = {
+	constexpr EE::PixelFormatInfo PixelFormats[ EPixelFormat::Private_Num + 1 ] = {
 		// Name                   Size  Channels  Supported  EPixelFormat
 		{ L"PixelFormat_Unknown",           0,      0,       false,    PixelFormat_Unknown           },
 		{ L"PixelFormat_R8",                1,      1,        true,    PixelFormat_R8                },

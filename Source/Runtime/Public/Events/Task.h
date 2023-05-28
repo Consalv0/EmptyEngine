@@ -33,12 +33,12 @@ namespace ESource {
 			NotifyFinished();
 		}
 
-		void AttachObserver(const Observer* Value) {
-			Observers.push_back(Value);
+		void AttachObserver(const Observer* value) {
+			Observers.push_back(value);
 		}
 
-		void DetachObserver(const Observer* Value) {
-			Observers.erase(std::remove(Observers.begin(), Observers.end(), Value), Observers.end());
+		void DetachObserver(const Observer* value) {
+			Observers.erase(std::remove(Observers.begin(), Observers.end(), value), Observers.end());
 		}
 	};
 

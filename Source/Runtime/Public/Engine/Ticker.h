@@ -1,20 +1,20 @@
 #pragma once
 
-namespace EEngine
-{
-	class Time;
+#include "CoreMinimal.h"
 
+namespace EE
+{
 	struct Timestamp
 	{
 	public:
 		Timestamp() { }
 
-		Timestamp(unsigned long long Last, unsigned long long Now)
+		Timestamp( uint64 Last, uint64 Now)
 			: LastEpochTime(Last), NowEpochTime(Now) { };
 
 	public:
 		template<typename T>
-		inline typename T::ReturnType GetDeltaTime() const
+		FORCEINLINE typename T::ReturnType GetDeltaTime() const
 		{ 
 			return (NowEpochTime - LastEpochTime) / (typename T::ReturnType)T::GetSizeInMicro();
 		};
@@ -23,31 +23,31 @@ namespace EEngine
 
 		void Stop();
 
-		unsigned long long GetLastEpoch() const { return LastEpochTime; };
-		unsigned long long GetNowEpoch() const { return NowEpochTime; };
+		uint64 GetLastEpoch() const { return LastEpochTime; };
+		uint64 GetNowEpoch() const { return NowEpochTime; };
 
 		Timestamp operator+(const Timestamp& Other);
 
 	private:
-		unsigned long long LastEpochTime;
-		unsigned long long NowEpochTime;
+		uint64 LastEpochTime;
+		uint64 NowEpochTime;
 	};
 
-	class Time
+	class Ticker
 	{
 	public:
-		template<unsigned long long Size, typename Type>
-		struct Duration { static constexpr unsigned long long GetSizeInMicro() { return Size; }; using ReturnType = Type; };
+		template<uint64 Size, typename Type>
+		struct Duration { static constexpr uint64 GetSizeInMicro() { return Size; }; using ReturnType = Type; };
 
-		using Micro  = Duration<1, unsigned long long>;
+		using Micro  = Duration<1, uint64>;
 		using Mili   = Duration<1000, double>;
 		using Second = Duration<1000000, float>;
 		using Minute = Duration<166666667, float>;
 
-		static unsigned long long MaxUpdateDeltaMicro;
-		static unsigned long long MaxRenderDeltaMicro;
+		static uint64 MaxUpdateDeltaMicro;
+		static uint64 MaxRenderDeltaMicro;
 
-		static bool SkippingRender() { return bSkipRender; };
+		FORCEINLINE static bool IsSkippingRender() { return SkipRender; };
 
 	private:
 		friend class Application;
@@ -60,20 +60,20 @@ namespace EEngine
 		// static void FixedTick();
 
 		// Time since the last tick callback
-		static unsigned long long LastUpdateMicro;
-		static unsigned long long LastDeltaMicro;
+		static uint64 LastUpdateMicro;
+		static uint64 LastDeltaMicro;
 
-		static bool bHasInitialized;
+		static bool HasStarted;
 
-		static unsigned int TickCount;
-		static unsigned long long TickAverage;
-		static const unsigned int MaxTickSamples = 25;
-		static unsigned long long TickBuffer[MaxTickSamples];
+		static uint32 TickCount;
+		static uint64 TickAverage;
+		static const uint32 MaxTickSamples = 25;
+		static uint64 TickBuffer[MaxTickSamples];
 		
-		static unsigned long long RenderDeltaTimeSum;
-		static bool bSkipRender;
+		static uint64 RenderDeltaTimeSum;
+		static bool SkipRender;
 
-		static unsigned long long GetEpochTimeMicro();
+		static uint64 GetEpochTimeMicro();
 
 	public:
 

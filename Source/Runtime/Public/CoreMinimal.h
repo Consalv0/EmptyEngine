@@ -19,15 +19,17 @@
 #include <float.h>
 #include <string.h>
 
+#include "Core.h"
 #include "CoreTypes.h"
-
+#include "Core/Name.h"
 // Core basic log functions
 #include "Core/Log.h"
 
-// Core classes
-#include "Core.h"
-#include "Core/Name.h"
-#include "Core/CoreTime.h"
+
+// Engine classes
+#include "Engine/Ticker.h"
+
+// Math
 #include "Math/CoreMath.h"
 
 // #include "Events/Event.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace EEngine
+namespace EE
 {	
 	typedef struct UCharRed  { typedef unsigned char Range; static constexpr unsigned char Channels = 1; Range R; } UCharRed;
 	typedef struct UCharRG   { typedef unsigned char Range; static constexpr unsigned char Channels = 2; Range R; Range G; } UCharRG;
@@ -145,7 +145,7 @@ namespace EEngine
 		PixelFormat_DepthComponent24,
 		PixelFormat_DepthStencil,
 		PixelFormat_ShadowDepth,
-		PixelFormat_COUNT = PixelFormat_ShadowDepth + 1,
+		Private_Num = PixelFormat_ShadowDepth + 1,
 	};
 
 	enum ESamplerAddressMode

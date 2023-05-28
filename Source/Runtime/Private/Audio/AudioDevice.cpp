@@ -5,7 +5,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_audio.h>
 
-namespace EEngine
+namespace EE
 {
 	AudioDevice::AudioDevice() : PlayInfoList()
 	{
@@ -43,7 +43,7 @@ namespace EEngine
 			}
 
 			memcpy( Device.CurrentSample, Stream, Length );
-			Device.LastAudioUpdate = Time::GetEpochTime<Time::Micro>();
+			Device.LastAudioUpdate = Ticker::GetEpochTime<Ticker::Micro>();
 		};
 
 		SampleSpecs.userdata = this;

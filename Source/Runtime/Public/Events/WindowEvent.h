@@ -2,77 +2,74 @@
 
 #include "Events/Event.h"
 
-namespace EEngine 
+namespace EE 
 {
-	enum class EWindowEventType 
-	{
-		WindowClose,
-		WindowResize,
-		WindowGainFocus,
-		WindowLostFocus,
-		WindowMoved
-	};
+    enum class EEventWindow 
+    {
+        EventWindow_Close,
+        EventWindow_Resize,
+        EventWindow_GainFocus,
+        EventWindow_LostFocus,
+        EventWindow_Moved
+    };
 
-	class WindowEvent : public Event
-	{
-	public:
-		virtual EWindowEventType GetEventType() const = 0;
+#ifdef IGNORE_EVENT
+    const class WindowEvent : public Event
+    {
+    public:
+        virtual EEventWindow GetEventType() const = 0;
 
-		IMPLEMENT_EVENT_CATEGORY(0u);
+        EE_IMPLEMENT_EVENT_CATEGORY(0u);
 
-	protected:
-		WindowEvent() {};
-	};
+    protected:
+        WindowEvent() {};
+    };
 
-	class WindowCloseEvent : public WindowEvent
-	{
-	public:
-		WindowCloseEvent() {}
+    const class WindowCloseEvent : public WindowEvent
+    {
+    public:
+        WindowCloseEvent() {}
 
-		IMPLEMENT_EVENT_ENUMTYPE(EWindowEventType, WindowClose);
-	};
+        EE_IMPLEMENT_EVENT_ENUMTYPE( EEventWindow, EventWindow_Close );
+    };
 
-	class WindowResizeEvent : public WindowEvent
-	{
-	public:
-		WindowResizeEvent(uint32_t Width, uint32_t Height)
-			: Width(Width), Height(Height) {}
+    const class WindowResizeEvent : public WindowEvent
+    {
+    public:
+        WindowResizeEvent(uint32 width, uint32 height)
+            : width(width), height(height) {}
 
-		inline uint32_t GetWidth() const { return Width; }
-		inline uint32_t GetHeight() const { return Height; }
+        EE_IMPLEMENT_EVENT_ENUMTYPE( EEventWindow, EventWindow_Resize );
 
-		IMPLEMENT_EVENT_ENUMTYPE(EWindowEventType, WindowResize);
+    public:
+        const uint32 width, height;
+    };
 
-	private:
-		uint32_t Width, Height;
-	};
+    class WindowGainFocusEvent : public WindowEvent
+    {
+    public:
+        WindowGainFocusEvent() {}
 
-	class WindowGainFocusEvent : public WindowEvent
-	{
-	public:
-		WindowGainFocusEvent() {}
+        EE_IMPLEMENT_EVENT_ENUMTYPE(EEventWindow, EventWindow_GainFocus );
+    };
 
-		inline uint32_t GetWidth() const { return Width; }
-		inline uint32_t GetHeight() const { return Height; }
+    class WindowLostFocusEvent : public WindowEvent
+    {
+    public:
+        WindowLostFocusEvent() {};
 
-		IMPLEMENT_EVENT_ENUMTYPE(EWindowEventType, WindowGainFocus);
+        EE_IMPLEMENT_EVENT_ENUMTYPE(EEventWindow, EventWindow_LostFocus );
+    };
 
-	private:
-		uint32_t Width, Height;
-	};
+    class WindowMovedEvent : public WindowEvent
+    {
+    public:
+        WindowMovedEvent( uint32 x, uint32 y) : x( x ), y( y ) {}
 
-	class WindowLostFocusEvent : public WindowEvent
-	{
-	public:
-		WindowLostFocusEvent() {}
+        EE_IMPLEMENT_EVENT_ENUMTYPE( EEventWindow, EventWindow_Moved );
 
-		inline uint32_t GetWidth() const { return Width; }
-		inline uint32_t GetHeight() const { return Height; }
-
-		IMPLEMENT_EVENT_ENUMTYPE(EWindowEventType, WindowLostFocus);
-
-	private:
-		uint32_t Width, Height;
-	};
-
+    public:
+        const uint32 x, y;
+    };
+#endif
 }

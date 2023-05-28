@@ -2,7 +2,7 @@
 
 #include "CoreTypes.h"
 
-namespace EEngine
+namespace EE
 {
 	inline void HashCombine(std::size_t& seed) { }
 
@@ -22,7 +22,7 @@ namespace EEngine
 	// Generate CRC lookup table
 	template <unsigned C, int K = 8>
 	struct GenCRCTable : GenCRCTable<((C & 1) ? 0xedb88320 : 0) ^ (C >> 1), K - 1> {};
-	template <unsigned C> struct GenCRCTable<C, 0> { enum { Value = C }; };
+	template <unsigned C> struct GenCRCTable<C, 0> { enum { value = C }; };
 
 #define A(x) B(x) B(x + 128)
 #define B(x) C(x) C(x +  64)
@@ -32,7 +32,7 @@ namespace EEngine
 #define F(x) G(x) G(x +   4)
 #define G(x) H(x) H(x +   2)
 #define H(x) I(x) I(x +   1)
-#define I(x) GenCRCTable<x>::Value,
+#define I(x) GenCRCTable<x>::value,
 
 	constexpr unsigned CRCTable[] = { A(0) };
 

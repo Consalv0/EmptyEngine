@@ -3,7 +3,7 @@
 #include "CoreTypes.h"
 #include <algorithm>
 
-namespace EEngine
+namespace EE
 {
 	namespace Text
 	{
@@ -168,9 +168,9 @@ namespace EEngine
 		}
 
 		template<class Num>
-		inline WString FormatUnit( const Num& Number, const int& Decimals )
+		inline WString FormatUnit( const Num& number, const int& Decimals )
 		{
-			double PrecisionNumber = (double)Number;
+			double PrecisionNumber = (double)number;
 			WString Suffix = L"";
 			if ( PrecisionNumber > 1e3 && PrecisionNumber <= 1e6 )
 			{
@@ -207,9 +207,9 @@ namespace EEngine
 		}
 
 		template<class Num>
-		inline WString FormatData( const Num& Number, const int& MaxDecimals )
+		inline WString FormatData( const Num& number, const int& MaxDecimals )
 		{
-			double PrecisionNumber = (double)Number;
+			double PrecisionNumber = (double)number;
 			WString Suffix = L"b";
 			if ( PrecisionNumber > 1 << 10 && PrecisionNumber <= 1 << 20 )
 			{

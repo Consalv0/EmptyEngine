@@ -1,7 +1,7 @@
 
 #include "Graphics/GraphicsDevice.h"
 
-namespace EEngine
+namespace EE
 {
 	class CPUGraphicsDevice : public GraphicsDevice
 	{

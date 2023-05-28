@@ -4,7 +4,7 @@
 #include "Math/Transform.h"
 #include "Graphics/Graphics.h"
 
-namespace EEngine
+namespace EE
 {
 	class RenderPipeline
 	{
@@ -28,11 +28,11 @@ namespace EEngine
 		virtual Texture* GetFramebuffer() const = 0;
 
 		template <typename T>
-		bool CreateStage( const IName& stageName );
+		bool CreateStage( const EName& stageName );
 
-		virtual void RemoveStage( const IName& stageName ) = 0;
+		virtual void RemoveStage( const EName& stageName ) = 0;
 
-		virtual class RenderStage* GetStage( const IName& stageName ) const = 0;
+		virtual class RenderStage* GetStage( const EName& stageName ) const = 0;
 
 		virtual void BeginFrame() = 0;
 
@@ -50,7 +50,7 @@ namespace EEngine
 	};
 
 	template<typename T>
-	bool RenderPipeline::CreateStage( const IName& stageName )
+	bool RenderPipeline::CreateStage( const EName& stageName )
 	{
 		if ( renderStages_.find( stageName.GetID() ) == renderStages_.end() )
 		{

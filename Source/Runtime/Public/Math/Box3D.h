@@ -4,7 +4,7 @@
 #include "Math/Matrix4x4.h"
 #include "Math/Vector3.h"
 
-namespace EEngine
+namespace EE
 {
 	struct Box3D
 	{

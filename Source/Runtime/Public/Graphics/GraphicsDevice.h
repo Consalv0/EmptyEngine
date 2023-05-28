@@ -3,7 +3,7 @@
 #include "Math/CoreMath.h"
 #include "Graphics/Graphics.h"
 
-namespace EEngine
+namespace EE
 {
 	typedef uint8_t CommandList;
 	static const CommandList COMMANDLIST_COUNT = 32;
@@ -12,11 +12,11 @@ namespace EEngine
 	class GraphicsDevice
 	{
 	protected:
-		static const uint32_t bufferCount = 2;
-		uint64_t frameCount = 0;
-		bool debugDevice = false;
-		uint32_t capabilities = 0;
-		uint64_t timeStampFrecuency = 0;
+		static const uint32_t bufferCount_ = 2;
+		uint64_t frameCount_ = 0;
+		bool debugDevice_ = false;
+		uint32_t capabilities_ = 0;
+		uint64_t timeStampFrecuency_ = 0;
 
 	public:
 		virtual ~GraphicsDevice() = default;
@@ -54,15 +54,15 @@ namespace EEngine
 		virtual void WaitForDevice() const = 0;
 		virtual void ClearPipelineStateCache() {};
 
-		constexpr uint64_t GetFrameCount() const { return frameCount; }
+		constexpr uint64_t GetFrameCount() const { return frameCount_; }
 
-		FORCEINLINE bool CheckCapability( EGraphicDeviceCapability capability ) const { return capabilities & capability; }
+		FORCEINLINE bool CheckCapability( EGraphicDeviceCapability capability ) const { return capabilities_ & capability; }
 
-		static constexpr uint32_t GetBufferCount() { return bufferCount; }
+		static constexpr uint32_t GetBufferCount() { return bufferCount_; }
 
-		constexpr bool IsDebugDevice() const { return debugDevice; }
+		constexpr bool IsDebugDevice() const { return debugDevice_; }
 
-		constexpr uint64_t GetTimestampFrequency() const { return timeStampFrecuency; }
+		constexpr uint64_t GetTimestampFrequency() const { return timeStampFrecuency_; }
 
 		virtual EShaderFormat GetShaderFormat() const { return ShaderFormat_None; }
 

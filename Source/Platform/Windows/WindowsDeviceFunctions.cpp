@@ -7,7 +7,7 @@
 #include <nvml.h>
 #endif
 
-namespace EEngine
+namespace EE
 {
 	WindowsDeviceFunctions::WindowsDeviceFunctions() {
 #ifdef EE_PLATFORM_NVML

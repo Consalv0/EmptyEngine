@@ -4,7 +4,7 @@
 
 #include "Math/Plane.h"
 
-namespace EEngine
+namespace EE
 {
 	FORCEINLINE Plane::Plane() : x(), y(), z(), d() { }
 

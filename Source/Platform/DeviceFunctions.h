@@ -1,6 +1,6 @@
 #pragma once
 
-namespace EEngine
+namespace EE
 {
 	class DeviceFunctions {
 	public:

@@ -1,16 +1,12 @@
 #pragma once
 
-#include <cmath>
-#include <stdexcept>
-
 #include "Math/Vector2.h"
 #include "Math/Vector3.h"
 #include "Math/IntVector3.h"
 #include "Math/Vector4.h"
 
-namespace EEngine
+namespace EE
 {
-
 	FORCEINLINE Vector4::Vector4()
 		: x( 0 ), y( 0 ), z( 0 ), w( 0 )
 	{
@@ -19,7 +15,7 @@ namespace EEngine
 	FORCEINLINE Vector4::Vector4( const Vector4& vector )
 		: x( vector.x ), y( vector.y ), z( vector.z ), w( vector.w )
 	{
-	};
+	}
 
 	FORCEINLINE Vector4::Vector4( const float& x, const float& y, const float& z )
 		: x( x ), y( y ), z( z ), w( 0 )
@@ -34,17 +30,17 @@ namespace EEngine
 	FORCEINLINE Vector4::Vector4( const Vector2& vector )
 		: x( vector.x ), y( vector.y ), z( 0 ), w( 0 )
 	{
-	};
+	}
 
 	FORCEINLINE Vector4::Vector4( const Vector3& vector )
 		: x( vector.x ), y( vector.y ), z( vector.z ), w( 0 )
 	{
-	};
+	}
 
 	FORCEINLINE Vector4::Vector4( const Vector3& vector, const float& w )
 		: x( vector.x ), y( vector.y ), z( vector.z ), w( w )
 	{
-	};
+	}
 
 	FORCEINLINE Vector4::Vector4( const float& value )
 		: x( value ), y( value ), z( value ), w( value )
@@ -63,21 +59,23 @@ namespace EEngine
 
 	inline void Vector4::Normalize()
 	{
-		if ( MagnitudeSquared() == 0 )
+		float sqrMagnitude = MagnitudeSquared();
+		if ( sqrMagnitude == 0 )
 		{
 			x = 0; y = 0; z = 0; w = 0;
 		}
 		else
 		{
-			*this /= Magnitude();
+			*this /= sqrtf( sqrMagnitude );
 		}
 	}
 
 	inline Vector4 Vector4::Normalized() const
 	{
-		if ( MagnitudeSquared() == 0 ) return Vector4();
+		float sqrMagnitude = MagnitudeSquared();
+		if ( sqrMagnitude == 0 ) return Vector4();
 		Vector4 result = Vector4( *this );
-		return result /= Magnitude();
+		return result /= sqrtf( sqrMagnitude );
 	}
 
 	FORCEINLINE float Vector4::Dot( const Vector4& other ) const

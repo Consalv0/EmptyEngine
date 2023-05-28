@@ -1,7 +1,6 @@
 
 #include "CoreMinimal.h"
 
-#include "Core/Window.h"
 #include "Graphics/CPU/CPUGraphicsDevice.h"
 
 #include "SDL3/SDL.h"
@@ -14,7 +13,7 @@ extern "C" {
 	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 0x00000001;
 }
 
-namespace EEngine
+namespace EE
 {
 	struct CPUSwapChain
 	{
@@ -40,7 +39,7 @@ namespace EEngine
 		internalState->renderer = SDL_CreateRenderer( (SDL_Window*)window, NULL, 0 );
 		if ( internalState->renderer == NULL )
 		{
-			LOG_CORE_ERROR( L"Error creating SDL renderer" );
+			EE_LOG_CORE_ERROR( L"Error creating SDL renderer" );
 			return false;
 		}
 
@@ -61,7 +60,7 @@ namespace EEngine
 
 	void CPUGraphicsDevice::SetName( GraphicsDeviceResource* pResource, const NChar* name ) { }
 
-	EEngine::CommandList CPUGraphicsDevice::BeginCommandList( ECommandQueueType queue ) { return CommandList(); }
+	EE::CommandList CPUGraphicsDevice::BeginCommandList( ECommandQueueType queue ) { return CommandList(); }
 
 	void CPUGraphicsDevice::SubmitCommandLists() { }
 
