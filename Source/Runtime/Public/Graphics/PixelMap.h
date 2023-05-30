@@ -68,9 +68,9 @@ namespace EE
 
 		static void PerPixelOperator( PixelMap& Map, std::function<void( unsigned char*, const unsigned char& Channels )> const& Function );
 
-		static bool FormatIsFloat( EPixelFormat Format );
+		static bool FormatIsFloat( EPixelFormat format );
 
-		static bool FormatIsShort( EPixelFormat Format );
+		static bool FormatIsShort( EPixelFormat format );
 
 	private:
 		template<typename T>

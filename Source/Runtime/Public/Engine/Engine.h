@@ -14,9 +14,15 @@ namespace EE
 		
 		bool initialized_ = false;
 
-		Application* mainApplication_ = NULL;
+        uint64_t frameCount_ = 0;
 
-		Window* mainWindow_ = NULL;
+        SwapChain* swapChain_;
+
+        Application* application_ = NULL;
+
+        GraphicsDevice* graphicsDevice_ = NULL;
+
+		Window* window_ = NULL;
 
 		Input* inputManager_ = NULL;
 
@@ -33,9 +39,18 @@ namespace EE
 
         bool WantToTerminate() const;
 
-		FORCEINLINE Application* GetMainApplication() const { return mainApplication_; };
+        void Terminate();
 
-		FORCEINLINE Window* GetMainWindow() const { return mainWindow_; };
+        //* Get the total count of frames rendered
+        FORCEINLINE uint64_t GetFrameCount() const { return frameCount_; };
+
+		FORCEINLINE Application* GetApplication() const { return application_; };
+
+        FORCEINLINE GraphicsDevice* GetGraphicsDevice() const { return graphicsDevice_; };
+
+        FORCEINLINE Window* GetWindow() const { return window_; };
+
+        FORCEINLINE SwapChain* GetSwapChain() const { return swapChain_; };
 
 		FORCEINLINE Input* GetInputManager() const { return inputManager_; };
 
@@ -43,10 +58,15 @@ namespace EE
 
 	private:
         friend Application;
+        friend Window;
+
+        //* Begin of frame functions
+        void BeginFrame();
+
+        //* End of frame functions
+        void EndFrame();
 
         void PollEvents();
-
-		void Terminate();
 	};
 
     // Global engine pointer.

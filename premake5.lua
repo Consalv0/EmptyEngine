@@ -37,7 +37,6 @@ project "EmptyEngine"
     filter "system:windows"
         systemversion "latest"
         postbuildcommands {
-          "{COPY} %{LibrariesDir.SDL}/%{cfg.buildcfg}/*.dll %{wks.location}"
         }
         defines {
             "EE_PLATFORM_WINDOWS",

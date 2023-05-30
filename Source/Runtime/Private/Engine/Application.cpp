@@ -20,13 +20,17 @@ namespace EE
         initialized_ = false;
     }
 
+    Application::~Application()
+    {
+        Terminate();
+    }
+
     void Application::Run()
     {
         EE_LOG_CORE_INFO( L"Initalizing Application:\n" );
         Initalize();
         Awake();
         UpdateLoop();
-        Terminate();
     }
 
     RenderPipeline& Application::GetRenderPipeline()
@@ -63,16 +67,16 @@ namespace EE
             GEngine->GetInputManager()->Update();
             OnUpdate( Ticker::GetTimeStamp() );
 
-            if ( !Ticker::IsSkippingRender )
+            if ( !Ticker::IsSkippingRender() )
             {
-                GEngine->GetMainWindow()->BeginFrame();
+                GEngine->BeginFrame();
                 // GetRenderPipeline().BeginFrame();
 
                 OnRender();
                 OnPostRender();
 
                 // GetRenderPipeline().EndOfFrame();
-                GEngine->GetMainWindow()->EndFrame();
+                GEngine->EndFrame();
             }
 
         } while (
@@ -83,6 +87,5 @@ namespace EE
     void Application::Terminate()
     {
         OnTerminate();
-        GEngine->Terminate();
     }
 }

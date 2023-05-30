@@ -58,7 +58,7 @@ namespace EE
 		uint32_t Frecuency;
 		uint32_t SampleSize;
 		uint32_t BufferLength;
-		EAudioFormat Format;
+		EAudioFormat format;
 
 		unsigned char* Buffer;
 	};

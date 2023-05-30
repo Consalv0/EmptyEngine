@@ -1,6 +1,7 @@
 
 #include "CoreMinimal.h"
 
+#include "Engine/Engine.h"
 #include "Graphics/CPU/CPUGraphicsDevice.h"
 
 #include "SDL3/SDL.h"
@@ -15,33 +16,111 @@ extern "C" {
 
 namespace EE
 {
+    Uint32 ConvertPixelFormat( EPixelFormat format )
+    {
+        switch ( format )
+        {
+        case EE::PixelFormat_Unknown:
+            break;
+        case EE::PixelFormat_R8:
+            break;
+        case EE::PixelFormat_R32F:
+            break;
+        case EE::PixelFormat_RG8:
+            return SDL_PIXELFORMAT_RGB888;
+        case EE::PixelFormat_RG32F:
+            break;
+        case EE::PixelFormat_RG16F:
+            break;
+        case EE::PixelFormat_RGB8:
+            break;
+        case EE::PixelFormat_RGB32F:
+            break;
+        case EE::PixelFormat_RGB16F:
+            break;
+        case EE::PixelFormat_RGBA8:
+            break;
+        case EE::PixelFormat_RGBA16_UShort:
+            break;
+        case EE::PixelFormat_RGBA32F:
+            return SDL_PIXELFORMAT_ARGB8888;
+        case EE::PixelFormat_DepthComponent24:
+            break;
+        case EE::PixelFormat_DepthStencil:
+            break;
+        case EE::PixelFormat_ShadowDepth:
+            break;
+        case EE::Private_Num:
+            break;
+        default:
+            break;
+        }
+
+        return 0;
+    }
+
+    struct CPUTexture
+    {
+        SDL_Texture* resource;
+
+        ~CPUTexture()
+        {
+            SDL_DestroyTexture( resource );
+        }
+    };
+
 	struct CPUSwapChain
 	{
-		SDL_Renderer* renderer;
-		SDL_Texture* backBuffer;
+        TArray<Texture*> backBuffers;
+        SDL_Renderer* renderer;
 		
 		~CPUSwapChain()
 		{
-			SDL_DestroyRenderer( renderer );
-			SDL_DestroyTexture( backBuffer );
+            for ( int i = 0; i < backBuffers.size(); i++ )
+            {
+                delete backBuffers[ i ];
+            }
+
+            SDL_DestroyRenderer( renderer );
 		}
 	};
 
-	CPUSwapChain* ToInternal( const SwapChain& swapChain )
-	{
-		return static_cast<CPUSwapChain*>(swapChain.internalState.get());
-	}
+    CPUSwapChain* ToInternal( const SwapChain& swapChain )
+    {
+        return static_cast<CPUSwapChain*>(swapChain.internalState.get());
+    }
 
-	bool CPUGraphicsDevice::CreateSwapChain( const SwapChainDescription& description, void* window, SwapChain& outSwapChain ) const 
+    CPUTexture* ToInternal( const Texture& texture )
+    {
+        return static_cast<CPUTexture*>(texture.internalState.get());
+    }
+
+	bool CPUGraphicsDevice::CreateSwapChain( const SwapChainDescription& description, Window* window, SwapChain& outSwapChain ) const 
 	{
 		auto internalState = std::make_shared<CPUSwapChain>( CPUSwapChain() );
 
-		internalState->renderer = SDL_CreateRenderer( (SDL_Window*)window, NULL, 0 );
+		internalState->renderer = SDL_CreateRenderer( (SDL_Window*)window->GetHandle(), NULL, 0);
 		if ( internalState->renderer == NULL )
 		{
 			EE_LOG_CORE_ERROR( L"Error creating SDL renderer" );
 			return false;
 		}
+
+        internalState->backBuffers = { new Texture() };
+
+        TextureDescription textureDescription;
+        textureDescription.layout = ImageLayout_RenderTarget;
+        textureDescription.format = description.format;
+        textureDescription.width = description.width;
+        textureDescription.height = description.height;
+
+        SubresourceData subresource = { internalState->renderer, 0, 0 };
+        CreateTexture( textureDescription, &subresource, *internalState->backBuffers[ 0 ] );
+        if ( internalState->backBuffers[ 0 ] == NULL )
+        {
+            EE_LOG_CORE_ERROR( L"Error creating SDL backbuffer" );
+            return false;
+        }
 
 		outSwapChain.internalState = internalState;
 		outSwapChain.description = description;
@@ -52,7 +131,16 @@ namespace EE
 
 	bool CPUGraphicsDevice::CreateBuffer( const GPUBufferDescription& description, const SubresourceData* pInitialData, Buffer& outBuffer ) const { return false; }
 
-	bool CPUGraphicsDevice::CreateTexture( const TextureDescription& description, const SubresourceData* pInitialData, Texture& outTexture ) const { return false; }
+	bool CPUGraphicsDevice::CreateTexture( const TextureDescription& description, const SubresourceData* pInitialData, Texture& outTexture ) const 
+    {
+        SDL_Texture* texture = SDL_CreateTexture( (SDL_Renderer*)(pInitialData->memoryPointer), ConvertPixelFormat( description.format ), SDL_TEXTUREACCESS_STREAMING, description.width, description.height );
+
+        auto internalState = std::make_shared<CPUTexture>( CPUTexture() );
+        internalState->resource = texture;
+        outTexture.description = description;
+        outTexture.internalState = internalState;
+        return false;
+    }
 
 	bool CPUGraphicsDevice::CreateSampler( const SamplerDescription& description, Sampler& outSampler ) const { return false; }
 
@@ -66,7 +154,11 @@ namespace EE
 
 	void CPUGraphicsDevice::WaitForDevice() const { }
 
-	Texture CPUGraphicsDevice::GetBackBuffer( const SwapChain* swapchain ) const { return Texture(); }
+	Texture CPUGraphicsDevice::GetBackBuffer( const SwapChain& swapchain ) const 
+    {
+        auto swapchainInternal = ToInternal( swapchain );
+        return *swapchainInternal->backBuffers[ 0 ];
+    }
 
 	void CPUGraphicsDevice::RenderPassBegin( const SwapChain& swapchain, CommandList cmd ) 
 	{
@@ -77,6 +169,7 @@ namespace EE
 			(Uint8)clearColor.r, (Uint8)clearColor.g, (Uint8)clearColor.b, (Uint8)clearColor.a );
 
 		SDL_RenderClear( internalSwapChain->renderer );
+        SDL_RenderTexture( internalSwapChain->renderer, ToInternal( *internalSwapChain->backBuffers[ 0 ] )->resource, NULL, NULL);
 	}
 
 	void CPUGraphicsDevice::RenderPassEnd( const SwapChain& swapchain, CommandList cmd )
@@ -132,6 +225,16 @@ namespace EE
 	void CPUGraphicsDevice::CopyResource( const GraphicsDeviceResource* pDst, const GraphicsDeviceResource* pSrc, CommandList cmd ) { }
 
 	void CPUGraphicsDevice::UpdateBuffer( const Buffer* buffer, const void* data, CommandList cmd, int dataSize ) { }
+
+    void CPUGraphicsDevice::UpdateTexture( const Texture& texture, const void* data )
+    {
+        auto textureInternal = ToInternal( texture );
+
+        SDL_UpdateTexture(
+            textureInternal->resource,
+            NULL, data, (int)(texture.description.width * sizeof( uint32 ))
+        );
+    }
 
 	GraphicsDevice::DeviceAllocation CPUGraphicsDevice::AllocateToDevice( size_t dataSize, CommandList cmd ) { return DeviceAllocation(); }
 

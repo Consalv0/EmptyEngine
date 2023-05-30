@@ -23,6 +23,8 @@ namespace EE
 	class Input
 	{
 	public:
+        virtual bool Initialize();
+
         virtual bool IsKeyState( EScancode keyCode, EButtonState state );
 
 		virtual bool IsMouseState( EMouseButton button, EButtonState state );

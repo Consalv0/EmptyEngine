@@ -13,7 +13,6 @@ namespace EE
 	{
 	protected:
 		static const uint32_t bufferCount_ = 2;
-		uint64_t frameCount_ = 0;
 		bool debugDevice_ = false;
 		uint32_t capabilities_ = 0;
 		uint64_t timeStampFrecuency_ = 0;
@@ -21,7 +20,7 @@ namespace EE
 	public:
 		virtual ~GraphicsDevice() = default;
 
-		virtual bool CreateSwapChain( const SwapChainDescription& description, void* window, SwapChain& outSwapChain ) const = 0;
+		virtual bool CreateSwapChain( const SwapChainDescription& description, class Window* window, SwapChain& outSwapChain ) const = 0;
 		virtual bool CreateBuffer( const GPUBufferDescription& description, const SubresourceData* pInitialData, Buffer& outBuffer ) const = 0;
 		virtual bool CreateTexture( const TextureDescription& description, const SubresourceData* pInitialData, Texture& outTexture ) const = 0;
 		virtual bool CreateSampler( const SamplerDescription& description, Sampler& outSampler ) const = 0;
@@ -54,8 +53,6 @@ namespace EE
 		virtual void WaitForDevice() const = 0;
 		virtual void ClearPipelineStateCache() {};
 
-		constexpr uint64_t GetFrameCount() const { return frameCount_; }
-
 		FORCEINLINE bool CheckCapability( EGraphicDeviceCapability capability ) const { return capabilities_ & capability; }
 
 		static constexpr uint32_t GetBufferCount() { return bufferCount_; }
@@ -66,7 +63,7 @@ namespace EE
 
 		virtual EShaderFormat GetShaderFormat() const { return ShaderFormat_None; }
 
-		virtual Texture GetBackBuffer( const SwapChain* swapchain ) const = 0;
+		virtual Texture GetBackBuffer( const SwapChain& swapchain ) const = 0;
 
 		///////////////Thread-sensitive////////////////////////
 
@@ -103,11 +100,12 @@ namespace EE
 		virtual void DispatchMeshIndirect( const Buffer* args, uint32_t args_offset, CommandList cmd ) {}
 		virtual void CopyResource( const GraphicsDeviceResource* pDst, const GraphicsDeviceResource* pSrc, CommandList cmd ) = 0;
 		virtual void UpdateBuffer( const Buffer* buffer, const void* data, CommandList cmd, int dataSize = -1 ) = 0;
+        virtual void UpdateTexture( const Texture& texture, const void* data ) = 0;
 		// virtual void QueryBegin( const GPUQueryHeap* heap, uint32_t index, CommandList cmd ) = 0;
 		// virtual void QueryEnd( const GPUQueryHeap* heap, uint32_t index, CommandList cmd ) = 0;
 		// virtual void QueryResolve( const GPUQueryHeap* heap, uint32_t index, uint32_t count, CommandList cmd ) {}
 		// virtual void Barrier( const GPUBarrier* barriers, uint32_t numBarriers, CommandList cmd ) = 0;
-		virtual void PushConstants( const void* data, uint32_t size, CommandList cmd ) {}
+		virtual void PushConstants( const void* data, uint32_t size_, CommandList cmd ) {}
 
 		struct DeviceAllocation
 		{

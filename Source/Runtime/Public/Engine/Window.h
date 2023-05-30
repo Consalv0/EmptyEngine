@@ -41,59 +41,67 @@ namespace EE
     class Window
     {
     protected:
-        EWindowMode mode_;
+        struct
+        {
+            WString name_;
+            EWindowMode mode_;
+            void* windowHandle_;
+            int width_;
+            int height_;
+            bool vsync_;
+        };
 
-        void* windowHandle_;
-
-        std::unique_ptr<GraphicsDevice> device_;
-
-        SwapChain swapChain_;
+        void Initialize();
 
     public:
+        Window( const WindowProperties& parameters );
 
-        virtual ~Window() = default;
-
-        //* Begin of frame functions
-        virtual void BeginFrame() = 0;
-
-        //* End of frame functions
-        virtual void EndFrame() = 0;
+        ~Window();
 
         //* Set the window display mode
-        virtual void SetWindowMode(EWindowMode mode) = 0;
+        virtual void SetWindowMode(EWindowMode mode);
+
+        //* Resize the size of the window
+        void Resize( const uint32_t& width, const uint32_t& height );
+
+        //* Rename the window title
+        void SetName( const WString& newName );
 
         //* Get the window display mode
-        virtual EWindowMode GetWindowMode() const = 0;
+        virtual EWindowMode GetWindowMode() const;
 
         //* Get the window title name
-        virtual WString GetName() const = 0;
+        virtual WString GetName() const;
 
         //* Get the width in pixels of the window
-        virtual int GetWidth() const = 0;
+        virtual int GetWidth() const;
 
         //* Get the height in pixels of the window
-        virtual int GetHeight() const = 0;
+        virtual int GetHeight() const;
+
+        //* Get vsync options
+        virtual bool GetVSync() const;
 
         //* Get the size of the window in pixels
-        virtual IntVector2 GetSize() const = 0;
+        virtual IntVector2 GetSize() const;
 
         //* Get the size of the window in pixels
-        virtual IntBox2D GetViewport() const = 0;
-
-        //* Get the total frames renderized
-        virtual uint64_t GetFrameCount() const = 0;
+        virtual IntBox2D GetViewport() const;
 
         //* Get the aspect of width divided by height in pixels of the window
-        virtual float GetAspectRatio() const = 0;
+        virtual float GetAspectRatio() const;
 
         //* Get SDL_Window Pointer
-        virtual void* GetHandle() const = 0;
+        virtual void* GetHandle() const;
+
+        //* Sets the window icon
+        void SetIcon( class PixelMap* Icon );
+
+        //* Terminates this window
+        void Terminate();
 
         //* Creates a Window with a Name, Width and Height
         static Window* Create(const WindowProperties& parameters = WindowProperties());
-
-    public:
-        virtual FORCEINLINE GraphicsDevice& GetDevice() const { return *device_; };
     };
 
 }

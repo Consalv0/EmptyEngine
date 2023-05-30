@@ -250,7 +250,7 @@ namespace EE
 		uint32_t cpuAccessFlags = 0;
 		uint32_t miscFlags = 0;
 		uint32_t structureByteStride = 0; // needed for typed and structured buffer types!
-		EPixelFormat Format = PixelFormat_Unknown; // only needed for typed buffer!
+		EPixelFormat format = PixelFormat_Unknown; // only needed for typed buffer!
 	};
 	
 	struct Shader : public GraphicsDeviceObject
@@ -272,7 +272,7 @@ namespace EE
 		uint32_t depth = 0;
 		uint32_t arraySize = 1;
 		uint32_t mipLevels = 1;
-		EPixelFormat Format = PixelFormat_Unknown;
+		EPixelFormat format = PixelFormat_Unknown;
 		uint32_t SampleCount = 1;
 		EUsageMode Usage = UsageMode_Default;
 		uint32_t BindFlags = 0;
@@ -335,7 +335,7 @@ namespace EE
 	struct PixelFormatInfo
 	{
 		const WChar*    name;
-		int             size;
+		int             size_;
 		int             channels;
 		// Is supported on the current platform
 		bool            supported;

@@ -16,8 +16,8 @@ namespace EE
 
 		IntBox2D() = default;
 
-		IntBox2D( const int& minX, const int& minY, const int& maxX, const int& maxY )
-			: minX( minX ), minY( minY ), maxX( maxX ), maxY( maxY )
+		IntBox2D( const int& minX, const int& minY, const int& width, const int& height )
+			: minX( minX ), minY( minY ), maxX( minX + width ), maxY( minY + height )
 		{
 		}
 

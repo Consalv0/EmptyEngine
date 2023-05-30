@@ -17,9 +17,10 @@ int main(int argc, char **argv)
 	EE::GEngine = new EE::GameEngine();
     EE::GEngine->Initialize();
     EE::GEngine->Run();
+    EE::GEngine->Terminate();
 
 #ifdef EE_DEBUG
-	_getch();
+	// _getch();
 #endif // EE_DEBUG
 
 	delete EE::GEngine;

@@ -106,7 +106,7 @@ namespace EE
 		{
 			C NewLines = 0;
 			const char* Char = &String[ 0 ];
-			for ( int i = 0; i < MaxSize && i < String.size(); i++ )
+			for ( int i = 0; i < MaxSize && i < String.size_(); i++ )
 			{
 				if ( Char[ i ] == '\n' )
 				{
@@ -117,10 +117,10 @@ namespace EE
 		}
 
 		template<typename ... Arguments>
-		WString Formatted( const WString& Format, Arguments ... Args )
+		WString Formatted( const WString& format, Arguments ... Args )
 		{
-			const WChar* FormatBuffer = Format.c_str();
-			int Size = (int)sizeof( WChar ) * (int)Format.size();
+			const WChar* FormatBuffer = format.c_str();
+			int Size = (int)sizeof( WChar ) * (int)format.size();
 			std::unique_ptr<WChar[]> Buffer;
 
 			while ( true )
@@ -143,16 +143,16 @@ namespace EE
 		}
 
 		template<typename ... Arguments>
-		WString Formatted( const WChar* Format, Arguments ... Args )
+		WString Formatted( const WChar* format, Arguments ... Args )
 		{
-			int Size = (int)std::wcslen( Format );
+			int Size = (int)std::wcslen( format );
 			std::unique_ptr<WChar[]> Buffer;
 
 			while ( true )
 			{
 				Buffer = std::make_unique<WChar[]>( Size );
 				int OldSize = Size;
-				Size = std::swprintf( Buffer.get(), Size, Format, Args ... );
+				Size = std::swprintf( Buffer.get(), Size, format, Args ... );
 
 				if ( Size < 0 )
 				{

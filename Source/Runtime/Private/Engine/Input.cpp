@@ -20,6 +20,15 @@ namespace EE
 
     Point2 GMousePosition, GRelativeMousePosition;
 
+    int InputEventsHandler_Internal( void* userData, SDL_Event* sdlEvent );
+
+    bool Input::Initialize()
+    {
+        SDL_AddEventWatch( InputEventsHandler_Internal, (void*)this );
+        CheckForConnectedJoysticks();
+        return true;
+    }
+
     bool Input::IsKeyState( EScancode keyCode, EButtonState state )
     {
         if ( state & ButtonState_Down ) return GScancodeStates[ keyCode ].framePressed;
@@ -103,7 +112,7 @@ namespace EE
     {
         SDL_GetMouseState( &GMousePosition.x, &GMousePosition.y );
         int windowX, windowY;
-        SDL_GetWindowPosition( (SDL_Window*)GEngine->GetMainWindow()->GetHandle(), &windowX, &windowY );
+        SDL_GetWindowPosition( (SDL_Window*)GEngine->GetWindow()->GetHandle(), &windowX, &windowY );
         GRelativeMousePosition.x = GMousePosition.x - windowX;
         GRelativeMousePosition.y = GMousePosition.y - windowY;
     }
@@ -124,7 +133,7 @@ namespace EE
         {
             if ( GScancodeStates[ i ].state & ButtonState_Pressed )
             {
-                GScancodeStates[ i ].framePressed = GEngine->GetMainWindow()->GetFrameCount();
+                GScancodeStates[ i ].framePressed = GEngine->GetFrameCount();
             }
             GScancodeStates[ i ].state &= ~(ButtonState_Pressed | ButtonState_Released | ButtonState_Typed);
         }
@@ -132,7 +141,7 @@ namespace EE
         {
             if ( GMouseButtonStates[ i ].state & ButtonState_Pressed )
             {
-                GMouseButtonStates[ i ].framePressed = GEngine->GetMainWindow()->GetFrameCount();
+                GMouseButtonStates[ i ].framePressed = GEngine->GetFrameCount();
             }
             GMouseButtonStates[ i ].state &= ~(ButtonState_Pressed | ButtonState_Released);
         }
@@ -143,7 +152,7 @@ namespace EE
             {
                 if ( gamepad[ j ].state & ButtonState_Pressed )
                 {
-                    gamepad[ j ].framePressed = GEngine->GetMainWindow()->GetFrameCount();
+                    gamepad[ j ].framePressed = GEngine->GetFrameCount();
                 }
                 gamepad[ j ].state &= ~(ButtonState_Pressed | ButtonState_Released);
             }
@@ -154,7 +163,7 @@ namespace EE
     {
     }
 
-    void InputEventsHandler( void* userData, SDL_Event* sdlEvent )
+    int InputEventsHandler_Internal( void* userData, SDL_Event* sdlEvent )
     {
         Input& input = *(Input*)userData; 
         
@@ -467,6 +476,8 @@ namespace EE
             break;
         }
         }
+
+        return 0;
     }
 
     void Input::CheckForConnectedJoysticks()

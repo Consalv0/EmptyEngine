@@ -2,6 +2,8 @@
 #include "CoreMinimal.h"
 #include "Engine/Engine.h"
 
+#include "Graphics/CPU/CPUGraphicsDevice.h"
+
 #include <SDL3/SDL_events.h>
 
 namespace EE
@@ -10,10 +12,20 @@ namespace EE
 
     void GameEngine::Initialize()
     {
-        mainApplication_ = EE::CreateApplication();
-        mainWindow_ = Window::Create();
+        application_ = EE::CreateApplication();
+        window_ = Window::Create();
         inputManager_ = Input::Create();
         deviceFunctions_ = DeviceFunctions::Create();
+        graphicsDevice_ = new CPUGraphicsDevice();
+
+        swapChain_ = new SwapChain();
+        SwapChainDescription swapChainDesc{};
+        swapChainDesc.width = window_->GetWidth();
+        swapChainDesc.height = window_->GetHeight();
+        swapChainDesc.fullscreen = window_->GetWindowMode();
+        swapChainDesc.format = PixelFormat_RGBA32F;
+        swapChainDesc.vsync = window_->GetVSync();
+        graphicsDevice_->CreateSwapChain( swapChainDesc, window_, *swapChain_);
 
 #ifdef EE_PLATFORM_CUDA
         CUDA::FindCudaDevice();
@@ -28,15 +40,28 @@ namespace EE
 
     void GameEngine::Run()
     {
-        inputManager_->CheckForConnectedJoysticks();
-        mainApplication_->Run();
+        inputManager_->Initialize();
+        application_->Run();
+    }
+
+    void GameEngine::BeginFrame()
+    {
+        graphicsDevice_->RenderPassBegin( *swapChain_, 0 );
+    }
+
+    void GameEngine::EndFrame()
+    {
+        graphicsDevice_->RenderPassEnd( *swapChain_, 0 );
+        frameCount_++;
     }
 
     void GameEngine::Terminate()
     {
+        delete swapChain_;
         delete inputManager_;
-        delete mainWindow_;
-        delete mainApplication_;
+        delete window_;
+        delete application_;
+        delete graphicsDevice_;
     }
 
     void GameEngine::ShouldTerminate()

@@ -12,11 +12,11 @@ namespace EE
 		//* Entry point of the application
 		void Run();
 
-		virtual ~Application() = default;
+		virtual ~Application();
 
 	protected:
 
-		Application();
+        Application();
 
 		virtual void OnInitialize() {};
 
@@ -33,8 +33,6 @@ namespace EE
 	private:
 
 		bool initialized_;
-
-		bool running_;
 
 		//* Initialize the application, it creates a window, a context and loads GL functions.
 		void Initalize();

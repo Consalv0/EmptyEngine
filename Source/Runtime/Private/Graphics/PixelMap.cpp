@@ -61,7 +61,7 @@ namespace EE
 
 	size_t PixelMap::GetMemorySize() const
 	{
-		return Width * Height * Depth * PixelFormats[ PixelFormat ].size;
+		return Width * Height * Depth * PixelFormats[ PixelFormat ].size_;
 	}
 
 	PixelMap& PixelMap::operator=( const PixelMap& Other )
@@ -90,7 +90,7 @@ namespace EE
 	void PixelMapUtility::CreateData( int Width, int Height, int Depth, EPixelFormat PixelFormat, void*& Data )
 	{
 		if ( Data != NULL ) return;
-		const size_t Size = Width * Height * Depth * (size_t)PixelFormats[ PixelFormat ].size;
+		const size_t Size = Width * Height * Depth * (size_t)PixelFormats[ PixelFormat ].size_;
 		if ( Size == 0 )
 		{
 			Data = NULL;
@@ -108,7 +108,7 @@ namespace EE
 	{
 		CreateData( Width, Height, Depth, PixelFormat, Target );
 		if ( Target == NULL || Data == NULL ) return;
-		memcpy( Target, Data, Width * Height * Depth * (size_t)PixelFormats[ PixelFormat ].size );
+		memcpy( Target, Data, Width * Height * Depth * (size_t)PixelFormats[ PixelFormat ].size_ );
 	}
 
 	void PixelMapUtility::FlipVertically( PixelMap& Map )
@@ -186,9 +186,9 @@ namespace EE
 		}
 	}
 
-	bool PixelMapUtility::FormatIsFloat( EPixelFormat Format )
+	bool PixelMapUtility::FormatIsFloat( EPixelFormat format )
 	{
-		switch ( Format )
+		switch ( format )
 		{
 		case PixelFormat_R32F:
 		case PixelFormat_RG32F:
@@ -203,9 +203,9 @@ namespace EE
 		}
 	}
 
-	bool PixelMapUtility::FormatIsShort( EPixelFormat Format )
+	bool PixelMapUtility::FormatIsShort( EPixelFormat format )
 	{
-		switch ( Format )
+		switch ( format )
 		{
 		case PixelFormat_RGBA16_UShort:
 			return true;

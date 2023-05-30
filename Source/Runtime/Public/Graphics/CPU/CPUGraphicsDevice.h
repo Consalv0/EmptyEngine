@@ -5,7 +5,7 @@ namespace EE
 {
 	class CPUGraphicsDevice : public GraphicsDevice
 	{
-		bool CreateSwapChain( const SwapChainDescription& description, void* window, SwapChain& outSwapChain ) const;
+		bool CreateSwapChain( const SwapChainDescription& description, Window* window, SwapChain& outSwapChain ) const;
 		bool CreateBuffer( const GPUBufferDescription& description, const SubresourceData* pInitialData, Buffer& outBuffer ) const;
 		bool CreateTexture( const TextureDescription& description, const SubresourceData* pInitialData, Texture& outTexture ) const;
 		bool CreateSampler( const SamplerDescription& description, Sampler& outSampler ) const;
@@ -18,7 +18,7 @@ namespace EE
 
 		void WaitForDevice() const;
 
-		Texture GetBackBuffer( const SwapChain* swapchain ) const;
+		Texture GetBackBuffer( const SwapChain& swapchain ) const;
 
 		void WaitCommandList( CommandList cmd, CommandList wait_for ) {}
 		void RenderPassBegin( const SwapChain& swapchain, CommandList cmd );
@@ -48,8 +48,9 @@ namespace EE
 		void DispatchMesh( uint32_t threadGroupCountX, uint32_t threadGroupCountY, uint32_t threadGroupCountZ, CommandList cmd ) {}
 		void DispatchMeshIndirect( const Buffer* args, uint32_t args_offset, CommandList cmd ) {}
 		void CopyResource( const GraphicsDeviceResource* pDst, const GraphicsDeviceResource* pSrc, CommandList cmd );
-		void UpdateBuffer( const Buffer* buffer, const void* data, CommandList cmd, int dataSize = -1 );
-		void PushConstants( const void* data, uint32_t size, CommandList cmd ) {}
+        void UpdateBuffer( const Buffer* buffer, const void* data, CommandList cmd, int dataSize = -1 );
+        void UpdateTexture( const Texture& texture, const void* data );
+		void PushConstants( const void* data, uint32_t size_, CommandList cmd ) {}
 
 		DeviceAllocation AllocateToDevice( size_t dataSize, CommandList cmd );
 

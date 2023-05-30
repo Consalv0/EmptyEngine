@@ -371,16 +371,16 @@ namespace EE
         Scancode_KP_Decimal = 220,
         Scancode_KP_Hexadecimal = 221,
 
-        SDL_SCANCODE_LCTRL = 224,
-        SDL_SCANCODE_LSHIFT = 225,
-        SDL_SCANCODE_LALT = 226, /**< alt, option */
-        SDL_SCANCODE_LGUI = 227, /**< windows, command (apple), meta */
-        SDL_SCANCODE_RCTRL = 228,
-        SDL_SCANCODE_RSHIFT = 229,
-        SDL_SCANCODE_RALT = 230, /**< alt gr, option */
-        SDL_SCANCODE_RGUI = 231, /**< windows, command (apple), meta */
+        Scancode_LCtrl = 224,
+        Scancode_LShift = 225,
+        Scancode_LAlt = 226, /**< alt, option */
+        Scancode_LGui = 227, /**< windows, command (apple), meta */
+        Scancode_RCtrl = 228,
+        Scancode_RShift = 229,
+        Scancode_RAlt = 230, /**< alt gr, option */
+        Scancode_RGui = 231, /**< windows, command (apple), meta */
 
-        SDL_SCANCODE_Mode = 257,    /**< I'm not sure if this is really not covered
+        Scancode_Mode = 257,    /**< I'm not sure if this is really not covered
                                      *   by any of the above, but since there's a
                                      *   special SDL_KMOD_MODE for it I'm adding it here
                                      */
@@ -399,23 +399,23 @@ namespace EE
                                       */
                                       /* @{ */
 
-        SDL_SCANCODE_AudioNext = 258,
-        SDL_SCANCODE_AudioPrev = 259,
-        SDL_SCANCODE_AudioStop = 260,
-        SDL_SCANCODE_AudioPlay = 261,
-        SDL_SCANCODE_AudioMute = 262,
-        SDL_SCANCODE_MediaSelect = 263,
-        SDL_SCANCODE_WWW = 264,             /**< AL Internet Browser */
-        SDL_SCANCODE_Mail = 265,
-        SDL_SCANCODE_Calculator = 266,      /**< AL Calculator */
-        SDL_SCANCODE_Computer = 267,
-        SDL_SCANCODE_AC_Search = 268,       /**< AC Search */
-        SDL_SCANCODE_AC_Home = 269,         /**< AC Home */
-        SDL_SCANCODE_AC_Back = 270,         /**< AC Back */
-        SDL_SCANCODE_AC_Forward = 271,      /**< AC Forward */
-        SDL_SCANCODE_AC_Stop = 272,         /**< AC Stop */
-        SDL_SCANCODE_AC_Refresh = 273,      /**< AC Refresh */
-        SDL_SCANCODE_AC_Bookmarks = 274,    /**< AC Bookmarks */
+        Scancode_AudioNext = 258,
+        Scancode_AudioPrev = 259,
+        Scancode_AudioStop = 260,
+        Scancode_AudioPlay = 261,
+        Scancode_AudioMute = 262,
+        Scancode_MediaSelect = 263,
+        Scancode_WWW = 264,             /**< AL Internet Browser */
+        Scancode_Mail = 265,
+        Scancode_Calculator = 266,      /**< AL Calculator */
+        Scancode_Computer = 267,
+        Scancode_AC_Search = 268,       /**< AC Search */
+        Scancode_AC_Home = 269,         /**< AC Home */
+        Scancode_AC_Back = 270,         /**< AC Back */
+        Scancode_AC_Forward = 271,      /**< AC Forward */
+        Scancode_AC_Stop = 272,         /**< AC Stop */
+        Scancode_AC_Refresh = 273,      /**< AC Refresh */
+        Scancode_AC_Bookmarks = 274,    /**< AC Bookmarks */
 
         /* @} *//* Usage page 0x0C */
 
