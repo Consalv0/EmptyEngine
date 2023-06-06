@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "Engine/Engine.h"
 
+#include "Resources/MeshParser.h"
 #include "Graphics/CPU/CPUGraphicsDevice.h"
 
 #include <SDL3/SDL_events.h>
@@ -17,6 +18,8 @@ namespace EE
         inputManager_ = Input::Create();
         deviceFunctions_ = DeviceFunctions::Create();
         graphicsDevice_ = new CPUGraphicsDevice();
+
+        ModelParser::Initialize();
 
         swapChain_ = new SwapChain();
         SwapChainDescription swapChainDesc{};

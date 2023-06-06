@@ -9,7 +9,7 @@ namespace EE
 
 		PixelMap( int Width, int Height, int Depth, EPixelFormat PixelFormat );
 
-		PixelMap( int Width, int Height, int Depth, EPixelFormat PixelFormat, void*& Data );
+		PixelMap( int Width, int Height, int Depth, EPixelFormat PixelFormat, void*& data );
 
 		PixelMap( const PixelMap& Other );
 
@@ -26,7 +26,7 @@ namespace EE
 
 		inline IntVector3 GetSize() const { return { (int)Width, (int)Height, (int)Depth }; }
 
-		inline bool IsEmpty() const { return Data == NULL; };
+		inline bool IsEmpty() const { return data == NULL; };
 
 		size_t GetMemorySize() const;
 
@@ -41,7 +41,7 @@ namespace EE
 	private:
 		friend class PixelMapUtility;
 
-		void* Data;
+		void* data;
 		EPixelFormat PixelFormat;
 		uint32_t Width, Height, Depth;
 	};
@@ -49,9 +49,9 @@ namespace EE
 	class PixelMapUtility
 	{
 	public:
-		static void CreateData( int Width, int Height, int Depth, EPixelFormat PixelFormat, void*& Data );
+		static void CreateData( int Width, int Height, int Depth, EPixelFormat PixelFormat, void*& data );
 
-		static void CreateData( int Width, int Height, int Depth, EPixelFormat PixelFormat, void*& Target, void* Data );
+		static void CreateData( int Width, int Height, int Depth, EPixelFormat PixelFormat, void*& Target, void* data );
 
 		//* Flips the pixels vertically
 		static void FlipVertically( PixelMap& Map );
@@ -74,13 +74,13 @@ namespace EE
 
 	private:
 		template<typename T>
-		static void _FlipVertically( uint32_t Width, uint32_t Height, uint32_t Depth, void*& Data );
+		static void _FlipVertically( uint32_t Width, uint32_t Height, uint32_t Depth, void*& data );
 	};
 
 	template<typename T>
 	inline void PixelMapUtility::_FlipVertically( uint32_t Width, uint32_t Height, uint32_t Depth, void*& InData )
 	{
-		T* Data = (T*)InData;
+		T* data = (T*)InData;
 		T* TempRow = (T*)malloc( Width * sizeof( T ) );
 		for ( uint32_t DepthIndex = 0; DepthIndex < Depth; DepthIndex++ )
 		{
@@ -90,9 +90,9 @@ namespace EE
 
 			for ( uint32_t RowIndex = 0; RowIndex < Rows; RowIndex++ )
 			{
-				memcpy( TempRow, Data + DepthOffset + RowIndex * Width, Width * sizeof( T ) );
-				memcpy( Data + DepthOffset + RowIndex * Width, Data + DepthOffset + (Height - RowIndex - 1) * Width, Width * sizeof( T ) );
-				memcpy( Data + DepthOffset + (Height - RowIndex - 1) * Width, TempRow, Width * sizeof( T ) );
+				memcpy( TempRow, data + DepthOffset + RowIndex * Width, Width * sizeof( T ) );
+				memcpy( data + DepthOffset + RowIndex * Width, data + DepthOffset + (Height - RowIndex - 1) * Width, Width * sizeof( T ) );
+				memcpy( data + DepthOffset + (Height - RowIndex - 1) * Width, TempRow, Width * sizeof( T ) );
 			}
 		}
 		free( TempRow );

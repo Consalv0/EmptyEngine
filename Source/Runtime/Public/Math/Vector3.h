@@ -37,7 +37,7 @@ namespace EE
 		HOST_DEVICE FORCEINLINE float Dot( const Vector3& other ) const;
 		HOST_DEVICE FORCEINLINE static float Dot( const Vector3& a, const Vector3& b );
 		HOST_DEVICE FORCEINLINE static Vector3 Lerp( const Vector3& start, const Vector3& end, float t );
-		HOST_DEVICE FORCEINLINE static Vector3 Reflect( const Vector3& Incident, const Vector3& Normal );
+		HOST_DEVICE FORCEINLINE static Vector3 Reflect( const Vector3& Incident, const Vector3& normal );
 
 		HOST_DEVICE inline float& operator[]( unsigned char i );
 		HOST_DEVICE inline float const& operator[]( unsigned char i ) const;

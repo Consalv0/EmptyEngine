@@ -66,7 +66,7 @@ namespace EE
 
 	Vector3 Transform::Right() const
 	{
-		return rotation * Vector3( 1, 0 );
+		return rotation * Vector3( -1, 0 );
 	}
 
 	Transform Transform::operator*( const Transform& other ) const

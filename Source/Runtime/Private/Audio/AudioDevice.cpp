@@ -23,22 +23,22 @@ namespace EE
 
 			for ( auto KeyValue : Device )
 			{
-				SamplePlayInfo* Info = KeyValue.second;
-				if ( Info->Sample->GetBufferLength() <= 0 )
+				SamplePlayInfo* info = KeyValue.second;
+				if ( info->Sample->GetBufferLength() <= 0 )
 					return;
 
-				int FixLength = ((uint32_t)Length > Info->Sample->GetBufferLength() - Info->Pos) ? Info->Sample->GetBufferLength() - Info->Pos : (uint32_t)Length;
+				int FixLength = ((uint32_t)Length > info->Sample->GetBufferLength() - info->Pos) ? info->Sample->GetBufferLength() - info->Pos : (uint32_t)Length;
 
-				if ( !Info->bPause )
+				if ( !info->bPause )
 				{
-					SDL_MixAudioFormat( Stream, Info->Sample->GetBufferAt( Info->Pos ), SampleSpecs.format, FixLength, (int)(SDL_MIX_MAXVOLUME * Device.Volume * Info->Volume) );
-					Info->Pos += FixLength;
+					SDL_MixAudioFormat( Stream, info->Sample->GetBufferAt( info->Pos ), SampleSpecs.format, FixLength, (int)(SDL_MIX_MAXVOLUME * Device.Volume * info->Volume) );
+					info->Pos += FixLength;
 				}
 
-				if ( Info->Sample->GetBufferLength() - Info->Pos <= 0 )
+				if ( info->Sample->GetBufferLength() - info->Pos <= 0 )
 				{
-					Info->Pos = 0;
-					Info->bPause = !Info->bLoop;
+					info->Pos = 0;
+					info->bPause = !info->bLoop;
 				}
 			}
 

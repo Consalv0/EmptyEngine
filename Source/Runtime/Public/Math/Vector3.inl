@@ -116,9 +116,9 @@ namespace EE
 		return Vector3( (start.x * (1.0F - t)) + (end.x * t), (start.y * (1.0F - t)) + (end.y * t), (start.z * (1.0F - t)) + (end.z * t) );
 	}
 
-	inline HOST_DEVICE Vector3 Vector3::Reflect( const Vector3& Incident, const Vector3& Normal )
+	inline HOST_DEVICE Vector3 Vector3::Reflect( const Vector3& Incident, const Vector3& normal )
 	{
-		return Incident - (Normal * Normal.Dot( Incident )) * 2.F;
+		return Incident - (normal * normal.Dot( Incident )) * 2.F;
 	}
 
 	inline float& Vector3::operator[]( unsigned char i )

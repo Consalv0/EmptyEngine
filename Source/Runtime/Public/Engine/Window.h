@@ -29,8 +29,8 @@ namespace EE
 
         WindowProperties(
             const WString& title = L"Empty Engine",
-            uint32_t width = 1280,
-            uint32_t height = 720,
+            uint32_t width = 1920,
+            uint32_t height = 1080,
             EWindowMode mode = WindowMode_Windowed )
             : name(title), width(width), height(height), windowMode(mode) {
         }

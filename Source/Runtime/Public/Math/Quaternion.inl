@@ -80,12 +80,12 @@ namespace EE
 
 	inline Quaternion Quaternion::FromLookRotation( Vector3 const& Forward, Vector3 const& Up )
 	{
-		const Vector3 Normal = Forward.Normalized();
-		const Vector3 Tangent = Vector3::Cross( Up == Normal ? Up + 0.001F : Up, Normal ).Normalized();
-		const Vector3 Bitangent = Vector3::Cross( Normal, Tangent );
+		const Vector3 normal = Forward.Normalized();
+		const Vector3 tangent = Vector3::Cross( Up == normal ? Up + 0.001F : Up, normal ).Normalized();
+		const Vector3 Bitangent = Vector3::Cross( normal, tangent );
 
 		Matrix3x3 LookSpace(
-			Tangent, Bitangent, Normal
+			tangent, Bitangent, normal
 		);
 
 		return Quaternion::FromMatrix( LookSpace );

@@ -74,13 +74,13 @@ namespace EE
         SDL_AddEventWatch( WindowEventsHandler, (void*)this );
     }
 
-    Window::Window( const WindowProperties& Parameters )
+    Window::Window( const WindowProperties& parameters )
     {
         windowHandle_ = NULL;
-        width_ = Parameters.width;
-        height_ = Parameters.height;
-        name_ = Parameters.name;
-        mode_ = Parameters.windowMode;
+        width_ = parameters.width;
+        height_ = parameters.height;
+        name_ = parameters.name;
+        mode_ = parameters.windowMode;
         Initialize();
     }
 

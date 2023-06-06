@@ -104,73 +104,73 @@ namespace Math
 }
 
 template <typename T>
-T Math::Min( const T a, const T b )
+T Math::Min( const T& a, const T& b )
 {
 	return b < a ? b : a;
 }
 
 template <typename T>
-T Math::Max( const T a, const T b )
+T Math::Max( const T& a, const T& b )
 {
 	return a < b ? b : a;
 }
 
 template <typename T, typename S>
-T Math::Median( const T a, const T b, const S alpha )
+T Math::Median( const T& a, const T& b, const S& alpha )
 {
 	return Max( Min( a, b ), Min( Max( a, b ), alpha ) );
 }
 
 template <typename T, typename S>
-T Math::Mix( const T a, const T b, const S weight )
+T Math::Mix( const T& a, const T& b, const S& weight )
 {
 	return T( (S( 1 ) - weight) * a + weight * b );
 }
 
 template<typename T>
-T Math::Abs( const T value )
+T Math::Abs( const T& value )
 {
-	return fabs( value );
+    return (value >= (T)0) ? value : -value;
 }
 
 template<typename T>
-T Math::Sign( const T value )
+T Math::Sign( const T& value )
 {
 	return (T( 0 ) < value) - (value < T( 0 ));
 }
 
 template<typename T>
-T Math::NonZeroSign( const T value )
+T Math::NonZeroSign( const T& value )
 {
 	return T( 2 ) * (value > T( 0 )) - T( 1 );
 }
 
 template<typename T>
-T Math::Square( const T value )
+T Math::Square( const T& value )
 {
 	return value * value;
 }
 
 template<typename T>
-T Math::Map( const T value, const T minA, const T maxA, const T minB, const T maxB )
+T Math::Map( const T& value, const T& minA, const T& maxA, const T& minB, const T& maxB )
 {
 	return minB + (value - minA) * (maxA - minB) / (maxB - minA);
 }
 
 template <typename T>
-T Math::Clamp( const T value, const T a )
+T Math::Clamp( const T& value, const T& a )
 {
 	return value >= T( 0 ) && value <= a ? value : T( value > T( 0 ) ) * a;
 }
 
 template <typename T>
-T Math::Clamp( const T value, const T a, const T b )
+T Math::Clamp( const T& value, const T& a, const T& b )
 {
 	return value >= a && value <= b ? value : value < a ? a : b;
 }
 
 template <typename T>
-T Math::Clamp01( const T value )
+T Math::Clamp01( const T& value )
 {
 	return value >= T( 0 ) && value <= T( 1 ) ? value : value < T( 0 ) ? T( 0 ) : T( 1 );
 }
@@ -262,4 +262,9 @@ float Math::Atan2( float y, float x )
 	t3 = (y < 0.0F) ? -t3 : t3;
 
 	return t3;
+}
+
+float Math::Hypotenuse( float x, float y )
+{
+    return sqrtf( x * x + y * y );
 }

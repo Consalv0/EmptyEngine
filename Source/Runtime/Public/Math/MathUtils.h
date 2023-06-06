@@ -34,50 +34,50 @@ namespace Math
 {
 	//* Returns the smaller of the arguments.
 	template <typename T>
-	inline T Min( const T a, const T b );
+	inline T Min( const T& a, const T& b );
 
 	//* Returns the larger of the arguments.
 	template <typename T>
-	inline T Max( const T a, const T b );
+	inline T Max( const T& a, const T& b );
 
 	//* Returns the middle out of three values
 	template <typename T, typename S>
-	inline T Median( const T a, const T b, const S alpha );
+	inline T Median( const T& a, const T& b, const S& alpha );
 
 	//* Returns the weighted average of a and b.
 	template <typename T, typename S>
-	inline T Mix( const T a, const T b, const S weight );
+	inline T Mix( const T& a, const T& b, const S& weight );
 
 	//* Get the absolute value
 	template <typename T>
-	inline T Abs( const T value );
+	inline T Abs( const T& value );
 
 	//* Returns 1 for positive values, -1 for negative values, and 0 for zero.
 	template <typename T>
-	inline T Sign( const T value );
+	inline T Sign( const T& value );
 
 	/// Returns 1 for non-negative values and -1 for negative values.
 	template <typename T>
-	inline T NonZeroSign( const T value );
+	inline T NonZeroSign( const T& value );
 
 	template <typename T>
-	inline T Square( const T value );
+	inline T Square( const T& value );
 
 	//* Remap the value to another range of values
 	template <typename T>
-	inline T Map( const T value, const T minA, const T maxA, const T minB, const T maxB );
+	inline T Map( const T& value, const T& minA, const T& maxA, const T& minB, const T& maxB );
 
 	//* Clamps the number to the interval from 0 to b.
 	template <typename T>
-	inline T Clamp( const T value, const T a );
+	inline T Clamp( const T& value, const T& a );
 
 	//* Clamp the value in the defined range 
 	template <typename T>
-	inline T Clamp( const T value, const T a, const T b );
+	inline T Clamp( const T& value, const T& a, const T& b );
 
 	//* Clamp the value in range of [0, 1] 
 	template <typename T>
-	inline T Clamp01( const T value );
+	inline T Clamp01( const T& value );
 
 	//* Get the angle in degrees in range of [0, 360)
 	inline float ClampDegrees( float Degrees );
@@ -90,6 +90,8 @@ namespace Math
 
 	//* Error consideration
 	inline float Atan2( float y, float x );
+
+    inline float Hypotenuse( float x, float y );
 }
 
 #include "Math/MathUtils.inl"

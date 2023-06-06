@@ -38,6 +38,13 @@ namespace EE
 
 		//* Get the perimeter of the bounding box
 		inline float GetPerimeter() const { return GetWidth() * 2.F + GetHeight() * 2.F; }
+
+        //* Increase bounds by adding a point
+        inline void AddPoint( const Vector2& point ) 
+        {
+            minX = Math::Min( minX, point.x ); minY = Math::Min( minY, point.y );
+            maxX = Math::Max( maxX, point.x ); maxY = Math::Max( maxY, point.y );
+        }
 	};
 
 	typedef Box2D BoundingBox2D;

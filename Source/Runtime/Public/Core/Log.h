@@ -7,16 +7,16 @@
 
 namespace EE 
 {
-	// class Log {
-	// public:
-	// 	static void Initialize();
-	// 
-	// 	inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return CoreLogger; }
-	// 	inline static std::shared_ptr<spdlog::logger>& GetClientLogger() { return ClientLogger; }
-	// private:
-	// 	static std::shared_ptr<spdlog::logger> CoreLogger;
-	// 	static std::shared_ptr<spdlog::logger> ClientLogger;
-	// };
+	class Log {
+	public:
+		static void Initialize();
+	
+		inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return CoreLogger; }
+		inline static std::shared_ptr<spdlog::logger>& GetClientLogger() { return ClientLogger; }
+	private:
+		static std::shared_ptr<spdlog::logger> CoreLogger;
+		static std::shared_ptr<spdlog::logger> ClientLogger;
+	};
 }
 
 // Core log macros

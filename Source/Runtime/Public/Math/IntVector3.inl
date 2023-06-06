@@ -16,12 +16,12 @@ namespace EE
 	}
 
 	FORCEINLINE IntVector3::IntVector3( const Vector2& vector )
-		: x( (int)vector.x ), y( (int)vector.y ), z( 0 )
+		: x( (int32)vector.x ), y( (int32)vector.y ), z( 0 )
 	{
 	}
 
 	FORCEINLINE IntVector3::IntVector3( const Vector3& vector )
-		: x( (int)vector.x ), y( (int)vector.y ), z( (int)vector.z )
+		: x( (int32)vector.x ), y( (int32)vector.y ), z( (int32)vector.z )
 	{
 	}
 
@@ -35,27 +35,27 @@ namespace EE
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const IntVector2& vector, const int& z )
+	FORCEINLINE IntVector3::IntVector3( const IntVector2& vector, const int32& z )
 		: x( vector.x ), y( vector.y ), z( z )
 	{
 	}
 
 	FORCEINLINE IntVector3::IntVector3( const Vector4& vector )
-		: x( (int)vector.x ), y( (int)vector.y ), z( (int)vector.z )
+		: x( (int32)vector.x ), y( (int32)vector.y ), z( (int32)vector.z )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const int& x, const int& y, const int& z )
+	FORCEINLINE IntVector3::IntVector3( const int32& x, const int32& y, const int32& z )
 		: x( x ), y( y ), z( z )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const int& x, const int& y )
+	FORCEINLINE IntVector3::IntVector3( const int32& x, const int32& y )
 		: x( x ), y( y ), z( 0 )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const int& value )
+	FORCEINLINE IntVector3::IntVector3( const int32& value )
 		: x( value ), y( value ), z( value )
 	{
 	}
@@ -79,7 +79,7 @@ namespace EE
 		);
 	}
 
-	FORCEINLINE int IntVector3::Dot( const IntVector3& other ) const
+	FORCEINLINE int32 IntVector3::Dot( const IntVector3& other ) const
 	{
 		return (x * other.x) + (y * other.y) + (z * other.z);
 	}
@@ -89,21 +89,21 @@ namespace EE
 		return Vector3( float( x ), float( y ), float( z ) );
 	}
 
-	inline const int* IntVector3::PointerToValue() const
+	inline const int32* IntVector3::PointerToValue() const
 	{
 		return &x;
 	}
 
-	inline int& IntVector3::operator[]( unsigned char i )
+	inline int32& IntVector3::operator[]( unsigned char i )
 	{
 		EE_CORE_ASSERT( i <= 2, "IntVector3 index out of bounds" );
-		return ((int*)this)[ i ];
+		return ((int32*)this)[ i ];
 	}
 
-	inline int const& IntVector3::operator[]( unsigned char i ) const
+	inline int32 const& IntVector3::operator[]( unsigned char i ) const
 	{
 		EE_CORE_ASSERT( i <= 2, "IntVector3 index out of bounds" );
-		return ((int*)this)[ i ];
+		return ((int32*)this)[ i ];
 	}
 
 	FORCEINLINE IntVector3 IntVector3::operator * ( const IntVector3& other ) const
@@ -149,12 +149,12 @@ namespace EE
 		return IntVector3( -x, -y, -z );
 	}
 
-	FORCEINLINE IntVector3 IntVector3::operator*( const int& value ) const
+	FORCEINLINE IntVector3 IntVector3::operator*( const int32& value ) const
 	{
 		return IntVector3( x * value, y * value, z * value );
 	}
 
-	FORCEINLINE IntVector3 IntVector3::operator/( const int& value ) const
+	FORCEINLINE IntVector3 IntVector3::operator/( const int32& value ) const
 	{
 		if ( value == 0 ) return IntVector3();
 		return IntVector3( x / value, y / value, z / value );
@@ -192,7 +192,7 @@ namespace EE
 		return *this;
 	}
 
-	FORCEINLINE IntVector3& IntVector3::operator*=( const int& value )
+	FORCEINLINE IntVector3& IntVector3::operator*=( const int32& value )
 	{
 		x *= value;
 		y *= value;
@@ -200,7 +200,7 @@ namespace EE
 		return *this;
 	}
 
-	FORCEINLINE IntVector3& IntVector3::operator/=( const int& value )
+	FORCEINLINE IntVector3& IntVector3::operator/=( const int32& value )
 	{
 		if ( value == 0 ) x = y = z = 0;
 		x /= value;
@@ -209,12 +209,12 @@ namespace EE
 		return *this;
 	}
 
-	inline IntVector3 operator*( int value, const IntVector3& vector )
+	inline IntVector3 operator*( int32 value, const IntVector3& vector )
 	{
 		return IntVector3( value * vector.x, value * vector.y, value / vector.z );
 	}
 
-	inline IntVector3 operator/( int value, const IntVector3& vector )
+	inline IntVector3 operator/( int32 value, const IntVector3& vector )
 	{
 		return IntVector3( value / vector.x, value / vector.y, value / vector.z );
 	}

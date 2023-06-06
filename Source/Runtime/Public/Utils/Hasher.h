@@ -13,9 +13,9 @@ namespace EE
 		HashCombine(seed, rest...);
 	}
 
-	inline size_t WStringToHash(const WString & Name) {
+	inline size_t WStringToHash(const WString & name) {
 		static const std::hash<WString> Hasher;
-		return Hasher(Name);
+		return Hasher(name);
 	}
 
 	// Code taken from https://stackoverflow.com/a/28801005 by tux3
@@ -57,12 +57,12 @@ namespace EE
 
 }
 
-#define MAKE_HASHABLE(type, ...) \
+#define EE_MAKE_HASHABLE(type, ...) \
 namespace std {\
     template<> struct hash<type> {\
         std::size_t operator()(const type &t) const {\
             std::size_t ret = 0;\
-            ESource::HashCombine(ret, __VA_ARGS__);\
+            EE::HashCombine(ret, __VA_ARGS__);\
             return ret;\
         }\
     };\
