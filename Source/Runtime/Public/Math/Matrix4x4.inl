@@ -47,17 +47,41 @@ namespace EE
 		return Matrix4x4();
 	}
 
-	inline Matrix4x4 Matrix4x4::Perspective( const float& fov, const float& aspect, const float& near, const float& far )
-	{
-		float const tanHalfFOV = tan( fov / 2.F );
-		Matrix4x4 result(
-			1.F / (aspect * tanHalfFOV), 0.F, 0.F, 0.F,
-			0.F, 1.F / (tanHalfFOV), 0.F, 0.F,
-			0.F, 0.F, -(far + near) / (far - near), -1.F,
-			0.F, 0.F, -(2.F * far * near) / (far - near), 0.F
-		);
-		return result;
-	}
+    // inline Matrix4x4 Matrix4x4::Perspective( const float& fov, const float& aspect, const float& near, const float& far )
+    // {
+    //     float const tanHalfFOV = tan( fov / 2.F );
+    //     Matrix4x4 result(
+    //         1.F / (aspect * tanHalfFOV), 0.F, 0.F, 0.F,
+    //         0.F, 1.F / (tanHalfFOV), 0.F, 0.F,
+    //         0.F, 0.F, -(far + near) / (far - near), 1.F,
+    //         0.F, 0.F, -(2.F * far * near) / (far - near), 0.F
+    //     );
+    //     return result;
+    // }
+
+    inline Matrix4x4 Matrix4x4::Perspective( const float& fov, const float& aspect, const float& near, const float& far )
+    {
+        float const tanHalfFOV = tan( fov / 2.F );
+        Matrix4x4 result(
+            1.F / (tanHalfFOV * aspect), 0.F, 0.F, 0.F,
+            0.F, 1.F / (tanHalfFOV), 0.F, 0.F,
+            0.F, 0.F, ((near == far) ? 1.F : far / (far - near)), 1.F,
+            0.F, 0.F, -near * ((near == far) ? 1.F : far / (far - near)), 0.F
+        );
+        return result;
+    }
+
+    inline Matrix4x4 Matrix4x4::PerspectiveReversed( const float& fov, const float& aspect, const float& near, const float& far )
+    {
+        float const tanHalfFOV = tan( fov / 2.F );
+        Matrix4x4 result(
+            1.F / (tanHalfFOV * aspect), 0.F, 0.F, 0.F,
+            0.F, 1.F / (tanHalfFOV), 0.F, 0.F,
+            0.F, 0.F, ((near == far) ? 0.0F : near / (near - far)), 1.F,
+            0.F, 0.F, ((near == far) ? near : -far * near / (near - far)), 0.F
+        );
+        return result;
+    }
 
 	inline Matrix4x4 Matrix4x4::Orthographic( const float& left, const float& right, const float& bottom, const float& top )
 	{
@@ -90,8 +114,8 @@ namespace EE
 		return Matrix4x4(
 			side.x, side.y, side.z, 0.F,
 			upper.x, upper.y, upper.z, 0.F,
-			-forward.x, -forward.y, -forward.z, 0.F,
-			eye.x, eye.y, eye.z, 1.F
+			forward.x, forward.y, forward.z, 0.F,
+			-eye.x, -eye.y, -eye.z, 1.F
 		);
 	}
 

@@ -105,13 +105,13 @@ namespace EE
 
 	inline float& Vector4::operator[]( unsigned char i )
 	{
-		EE_CORE_ASSERT( i <= 3, "Vector4 index out of bounds" );
+		EE_CORE_ASSERT( i <= 3, L"Vector4 index out of bounds" );
 		return ((float*)this)[ i ];
 	}
 
 	inline float const& Vector4::operator[]( unsigned char i ) const
 	{
-		EE_CORE_ASSERT( i <= 3, "Vector4 index out of bounds" );
+		EE_CORE_ASSERT( i <= 3, L"Vector4 index out of bounds" );
 		return ((float*)this)[ i ];
 	}
 

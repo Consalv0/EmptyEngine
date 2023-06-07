@@ -1,5 +1,6 @@
 
 #include "CoreMinimal.h"
+#include "Utils/TextFormatting.h"
 #include "Audio/AudioDevice.h"
 
 #include <SDL3/SDL.h>
@@ -9,14 +10,14 @@ namespace EE
 {
 	AudioDevice::AudioDevice() : PlayInfoList()
 	{
-		Volume = 1.F;
-		static SDL_AudioSpec SampleSpecs;
+		volume = 1.F;
+		static SDL_AudioSpec sampleSpecs;
 
-		SampleSpecs.channels = 2;
-		SampleSpecs.format = SDL_AUDIO_F32LSB;
-		SampleSpecs.freq = 48000;
+		sampleSpecs.channels = 2;
+		sampleSpecs.format = SDL_AUDIO_F32LSB;
+		sampleSpecs.freq = 48000;
 
-		SampleSpecs.callback = []( void* UserData, Uint8* Stream, int Length ) -> void
+		sampleSpecs.callback = []( void* UserData, Uint8* Stream, int32 Length ) -> void
 		{
 			SDL_memset( Stream, 0, Length );
 			AudioDevice& Device = *(AudioDevice*)UserData;
@@ -27,12 +28,12 @@ namespace EE
 				if ( info->Sample->GetBufferLength() <= 0 )
 					return;
 
-				int FixLength = ((uint32_t)Length > info->Sample->GetBufferLength() - info->Pos) ? info->Sample->GetBufferLength() - info->Pos : (uint32_t)Length;
+				int32 fixLength = ((uint32)Length > info->Sample->GetBufferLength() - info->Pos) ? info->Sample->GetBufferLength() - info->Pos : (uint32)Length;
 
 				if ( !info->bPause )
 				{
-					SDL_MixAudioFormat( Stream, info->Sample->GetBufferAt( info->Pos ), SampleSpecs.format, FixLength, (int)(SDL_MIX_MAXVOLUME * Device.Volume * info->Volume) );
-					info->Pos += FixLength;
+					SDL_MixAudioFormat( Stream, info->Sample->GetBufferAt( info->Pos ), sampleSpecs.format, fixLength, (int32)(SDL_MIX_MAXVOLUME * Device.volume * info->volume) );
+					info->Pos += fixLength;
 				}
 
 				if ( info->Sample->GetBufferLength() - info->Pos <= 0 )
@@ -46,12 +47,12 @@ namespace EE
 			Device.LastAudioUpdate = Ticker::GetEpochTime<Ticker::Micro>();
 		};
 
-		SampleSpecs.userdata = this;
+		sampleSpecs.userdata = this;
 
 		/* Open the audio device */
-		if ( deviceID_ = SDL_OpenAudioDevice( SDL_GetAudioDeviceName( 0, 0 ), 0, &SampleSpecs, NULL, 0 ) < 0 )
+		if ( deviceID_ = SDL_OpenAudioDevice( SDL_GetAudioDeviceName( 0, 0 ), 0, &sampleSpecs, NULL, 0 ) < 0 )
 		{
-			EE_CORE_ASSERT( true, "Couldn't open audio device: {0}\n", SDL_GetError() );
+			EE_CORE_ASSERT( true, L"Couldn't open audio device: {0}\n", Text::NarrowToWide( SDL_GetError() ) );
 			bInitialized = false;
 		}
 		/* Start playing */
@@ -65,12 +66,12 @@ namespace EE
 			SDL_CloseAudioDevice( deviceID_ );
 	}
 
-	size_t AudioDevice::AddSample( AudioSamplePtr Sample, float Volume, bool Loop, bool PlayOnAdd )
+	size_t AudioDevice::AddSample( AudioSamplePtr Sample, float volume, bool Loop, bool PlayOnAdd )
 	{
 		if ( Sample == NULL ) return 0;
 
 		static size_t Increment = 0;
-		PlayInfoList.emplace( ++Increment, new SamplePlayInfo( Sample, Volume, Loop, !PlayOnAdd, Increment ) );
+		PlayInfoList.emplace( ++Increment, new SamplePlayInfo( Sample, volume, Loop, !PlayOnAdd, Increment ) );
 		return Increment;
 	}
 

@@ -15,8 +15,8 @@ namespace EE
             struct Subdivision
             {
                 NString name;
-                int vertexIndicesPos = 0;
-                int vertexIndicesCount = 0;
+                int32 vertexIndicesPos = 0;
+                int32 vertexIndicesCount = 0;
             };
 
             NString name;
@@ -24,8 +24,8 @@ namespace EE
             TArray<Subdivision> subdivisions;
             bool hasNormals;
             bool hasTextureCoords;
-            int vertexIndicesPos = 0;
-            int vertexIndicesCount = 0;
+            int32 vertexIndicesPos = 0;
+            int32 vertexIndicesCount = 0;
         };
 
         struct ExtractedData
@@ -50,8 +50,8 @@ namespace EE
 
         static bool GetSimilarVertexIndex(
             const StaticVertex& vertex,
-            TDictionary<StaticVertex, unsigned>& vertexToIndex,
-            unsigned& result
+            TDictionary<StaticVertex, uint32>& vertexToIndex,
+            uint32& result
         );
 
         static void ExtractVector3( const NChar* text, Vector3* vertex );

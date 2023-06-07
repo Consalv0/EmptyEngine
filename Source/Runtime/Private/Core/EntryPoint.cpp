@@ -14,6 +14,7 @@ extern EE::Application* EE::CreateApplication();
 int main(int argc, char **argv) 
 {
 	// EE::Log::Initialize();
+    EE::Log::Initialize();
 	EE::GEngine = new EE::GameEngine();
     EE::GEngine->Initialize();
     EE::GEngine->Run();

@@ -23,14 +23,14 @@ namespace EE
     {
         //* Name displayed in header window
         WString name;
-        uint32_t width;
-        uint32_t height;
+        uint32 width;
+        uint32 height;
         EWindowMode windowMode;
 
         WindowProperties(
             const WString& title = L"Empty Engine",
-            uint32_t width = 1920,
-            uint32_t height = 1080,
+            uint32 width = 1920,
+            uint32 height = 1080,
             EWindowMode mode = WindowMode_Windowed )
             : name(title), width(width), height(height), windowMode(mode) {
         }
@@ -46,8 +46,8 @@ namespace EE
             WString name_;
             EWindowMode mode_;
             void* windowHandle_;
-            int width_;
-            int height_;
+            int32 width_;
+            int32 height_;
             bool vsync_;
         };
 
@@ -62,7 +62,7 @@ namespace EE
         virtual void SetWindowMode(EWindowMode mode);
 
         //* Resize the size of the window
-        void Resize( const uint32_t& width, const uint32_t& height );
+        void Resize( const uint32& width, const uint32& height );
 
         //* Rename the window title
         void SetName( const WString& newName );
@@ -74,10 +74,10 @@ namespace EE
         virtual WString GetName() const;
 
         //* Get the width in pixels of the window
-        virtual int GetWidth() const;
+        virtual int32 GetWidth() const;
 
         //* Get the height in pixels of the window
-        virtual int GetHeight() const;
+        virtual int32 GetHeight() const;
 
         //* Get vsync options
         virtual bool GetVSync() const;

@@ -38,7 +38,7 @@ namespace EE
         return *this;
     }
 
-    bool FindNodeLevel( const NString& name, const ModelNode* Node, int& Level )
+    bool FindNodeLevel( const NString& name, const ModelNode* Node, int32& Level )
     {
         if ( Node->name == name )
             return true;
@@ -61,6 +61,7 @@ namespace EE
         {
             return OBJLoader::LoadModel( info, options );
         }
+        return false;
     }
 
     bool ModelParser::Initialize()

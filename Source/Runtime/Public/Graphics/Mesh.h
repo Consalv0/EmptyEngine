@@ -31,10 +31,10 @@ namespace EE
         Vector2 uv0, uv1;
         Vector4 color;
 
-        uint32_t influenceBones[ 4 ] = { 0, 0, 0, 0 };
+        uint32 influenceBones[ 4 ] = { 0, 0, 0, 0 };
         float weights[ 4 ]{ 0.0F, 0.0F, 0.0F, 0.0F };
 
-        void AddBoneData( uint32_t boneID, float weight )
+        void AddBoneData( uint32 boneID, float weight )
         {
             for ( size_t i = 0; i < 4; i++ )
             {
@@ -58,10 +58,10 @@ namespace EE
     struct Subdivision
     {
     public:
-        uint32_t materialIndex;
-        uint32_t baseVertex;
-        uint32_t baseIndex;
-        uint32_t indexCount;
+        uint32 materialIndex;
+        uint32 baseVertex;
+        uint32 baseIndex;
+        uint32 indexCount;
 
         bool operator==( const Subdivision& other ) const
         {
@@ -86,14 +86,14 @@ namespace EE
     typedef TArray<Vector2>           MeshUVs;
     typedef TArray<Vector4>           MeshColors;
     typedef TArray<StaticVertex>      MeshVertices;
-    typedef TDictionary<int, NString> MeshMaterials;
+    typedef TDictionary<int32, NString> MeshMaterials;
 
     struct MeshData
     {
         NString name;
         TArray<MeshFace> faces;
-        TDictionary<int, Subdivision> subdivisionsMap;
-        TDictionary<int, NString> materialsMap;
+        TDictionary<int32, Subdivision> subdivisionsMap;
+        TDictionary<int32, NString> materialsMap;
         TArray<StaticVertex> staticVertices;
         TArray<SkinVertex> skinVertices;
         BoundingBox3D bounding;
@@ -101,7 +101,7 @@ namespace EE
         bool hasNormals;
         bool hasTangents;
         bool hasVertexColor;
-        int  uvChannels;
+        int32  uvChannels;
         bool hasBoundingBox;
         bool hasBones;
 

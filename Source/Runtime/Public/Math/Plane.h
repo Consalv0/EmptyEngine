@@ -26,6 +26,7 @@ namespace EE
         };
 
         HOST_DEVICE FORCEINLINE Plane();
+        HOST_DEVICE FORCEINLINE Plane( const Plane& other );
         HOST_DEVICE FORCEINLINE Plane( const float& x, const float& y, const float& z, const float& d );
         HOST_DEVICE FORCEINLINE Plane( const Vector3& normalizedNormal, float distance );
 
@@ -41,7 +42,7 @@ namespace EE
         FORCEINLINE Point3 GetOrigin() const;
 
         // Rreturn >0: point is in front of the plane, <0: behind, =0: on the plane */
-        HOST_DEVICE FORCEINLINE float Dot( const Point3& p ) const;
+        HOST_DEVICE FORCEINLINE float DotPoint( const Point3& p ) const;
         HOST_DEVICE FORCEINLINE float Dot( const Vector4& v ) const;
         HOST_DEVICE FORCEINLINE float Dot( const Vector3& v ) const;
         HOST_DEVICE FORCEINLINE float DotCoord( const Vector3& v ) const;
@@ -58,11 +59,13 @@ namespace EE
         };
 
         HOST_DEVICE FORCEINLINE Frustrum();
+        HOST_DEVICE FORCEINLINE Frustrum( const Frustrum& other );
+        HOST_DEVICE FORCEINLINE Frustrum( const Plane& left, const Plane& right, const Plane& top, const Plane& bottom, const Plane& near, const Plane& far );
 
         FORCEINLINE bool Inside( const Point3& point ) const;
 
         // Construct frustum from modelview-projection transformation.
-        FORCEINLINE static Frustrum& FromMVP( const Matrix4x4& mvp );
+        FORCEINLINE static Frustrum FromMVP( const Matrix4x4& mvp );
     };
 }
 

@@ -17,8 +17,8 @@ namespace EE
 
 		Box3D()
 		{
-			minX = minY = minZ = Math::MaxNumber;
-			maxX = maxY = maxZ = -Math::MaxNumber;
+			minX = minY = minZ = Math::MaxFloat;
+			maxX = maxY = maxZ = Math::MinFloat;
 		}
 
 		Box3D( float minX, float minY, float minZ, float maxX, float maxY, float maxZ )

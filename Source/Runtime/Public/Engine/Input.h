@@ -33,7 +33,7 @@ namespace EE
 
 		virtual float GetJoystickAxis( int index, EGamepadAxis axis );
 
-		virtual bool GetJoystickState( int index, const JoystickState* state );
+		virtual bool GetJoystickState( int index, const JoystickState** state );
 
 		virtual void SendHapticImpulse( int index, int channel, float amplitude, int duration );
 

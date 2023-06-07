@@ -85,13 +85,13 @@ namespace EE
         // 
         // // Give our vertices to VAO
         // VertexBufferPtr VertexBufferPointer = NULL;
-        // VertexBufferPointer = VertexBuffer::Create( (float*)&data.staticVertices[ 0 ], (uint32_t)(data.staticVertices.size() * sizeof( StaticVertex )), UM_Static );
+        // VertexBufferPointer = VertexBuffer::Create( (float*)&data.staticVertices[ 0 ], (uint32)(data.staticVertices.size() * sizeof( StaticVertex )), UM_Static );
         // VertexBufferPointer->SetLayout( DafultLayout );
         // 
         // vertexArrayPointer = VertexArray::Create();
         // IndexBufferPtr IndexBufferPointer = IndexBuffer::Create(
-        //     (uint32_t*)&data.faces[ 0 ],
-        //     (uint32_t)data.faces.size() * 3, UM_Static
+        //     (uint32*)&data.faces[ 0 ],
+        //     (uint32)data.faces.size() * 3, UM_Static
         // );
         // vertexArrayPointer->AddVertexBuffer( VertexBufferPointer );
         // vertexArrayPointer->AddIndexBuffer( IndexBufferPointer );

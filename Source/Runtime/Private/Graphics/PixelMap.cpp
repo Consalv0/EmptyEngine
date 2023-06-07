@@ -29,13 +29,13 @@ namespace EE
 	{
 	}
 
-	PixelMap::PixelMap( int Width, int Height, int Depth, EPixelFormat PixelFormat )
+	PixelMap::PixelMap( int32 Width, int32 Height, int32 Depth, EPixelFormat PixelFormat )
 		: Width( Width ), Height( Height ), Depth( Depth ), PixelFormat( PixelFormat ), data( NULL )
 	{
 		PixelMapUtility::CreateData( Width, Height, Depth, PixelFormat, data );
 	}
 
-	PixelMap::PixelMap( int Width, int Height, int Depth, EPixelFormat PixelFormat, void*& InData )
+	PixelMap::PixelMap( int32 Width, int32 Height, int32 Depth, EPixelFormat PixelFormat, void*& InData )
 		: Width( Width ), Height( Height ), Depth( Depth ), PixelFormat( PixelFormat ), data( NULL )
 	{
 		PixelMapUtility::CreateData( Width, Height, Depth, PixelFormat, data, InData );
@@ -47,7 +47,7 @@ namespace EE
 		PixelMapUtility::CreateData( Width, Height, Depth, PixelFormat, data, Other.data );
 	}
 
-	void PixelMap::SetData( int InWidth, int InHeight, int InDepth, EPixelFormat InPixelFormat, void*& InData )
+	void PixelMap::SetData( int32 InWidth, int32 InHeight, int32 InDepth, EPixelFormat InPixelFormat, void*& InData )
 	{
 		if ( data )
 		{
@@ -87,7 +87,7 @@ namespace EE
 		delete[] data;
 	}
 
-	void PixelMapUtility::CreateData( int Width, int Height, int Depth, EPixelFormat PixelFormat, void*& data )
+	void PixelMapUtility::CreateData( int32 Width, int32 Height, int32 Depth, EPixelFormat PixelFormat, void*& data )
 	{
 		if ( data != NULL ) return;
 		const size_t Size = Width * Height * Depth * (size_t)PixelFormats[ PixelFormat ].size_;
@@ -104,7 +104,7 @@ namespace EE
 			data = new unsigned char[ Size ];
 	}
 
-	void PixelMapUtility::CreateData( int Width, int Height, int Depth, EPixelFormat PixelFormat, void*& Target, void* data )
+	void PixelMapUtility::CreateData( int32 Width, int32 Height, int32 Depth, EPixelFormat PixelFormat, void*& Target, void* data )
 	{
 		CreateData( Width, Height, Depth, PixelFormat, Target );
 		if ( Target == NULL || data == NULL ) return;
@@ -126,9 +126,9 @@ namespace EE
 		}
 	}
 
-	unsigned char* PixelMapUtility::GetCharPixelAt( PixelMap& Map, const uint32_t& X, const uint32_t& Y, const uint32_t& Z )
+	unsigned char* PixelMapUtility::GetCharPixelAt( PixelMap& Map, const uint32& X, const uint32& Y, const uint32& Z )
 	{
-		const int Channels = PixelFormats[ Map.PixelFormat ].channels;
+		const int32 Channels = PixelFormats[ Map.PixelFormat ].channels;
 		return &((unsigned char*)Map.data)[
 			Z * Map.Width * Map.Height * Channels +
 				Y * Map.Width * Channels +
@@ -136,9 +136,9 @@ namespace EE
 		];
 	}
 
-	float* PixelMapUtility::GetFloatPixelAt( PixelMap& Map, const uint32_t& X, const uint32_t& Y, const uint32_t& Z )
+	float* PixelMapUtility::GetFloatPixelAt( PixelMap& Map, const uint32& X, const uint32& Y, const uint32& Z )
 	{
-		const int Channels = PixelFormats[ Map.PixelFormat ].channels;
+		const int32 Channels = PixelFormats[ Map.PixelFormat ].channels;
 		return &((float*)Map.data)[
 			Z * Map.Width * Map.Height * Channels +
 				Y * Map.Width * Channels +
@@ -159,11 +159,11 @@ namespace EE
 	void PixelMapUtility::PerPixelOperator( PixelMap& Map, std::function<void( unsigned char*, const unsigned char& )> const& Function )
 	{
 		const unsigned char& Channels = (unsigned char)PixelFormats[ Map.PixelFormat ].channels;
-		for ( uint32_t Z = 0; Z < Map.Depth; ++Z )
+		for ( uint32 Z = 0; Z < Map.Depth; ++Z )
 		{
-			for ( uint32_t Y = 0; Y < Map.Height; ++Y )
+			for ( uint32 Y = 0; Y < Map.Height; ++Y )
 			{
-				for ( uint32_t X = 0; X < Map.Width; ++X )
+				for ( uint32 X = 0; X < Map.Width; ++X )
 				{
 					Function( GetCharPixelAt( Map, X, Y, Z ), Channels );
 				}
@@ -174,11 +174,11 @@ namespace EE
 	void PixelMapUtility::PerPixelOperator( PixelMap& Map, std::function<void( float*, const unsigned char& )> const& Function )
 	{
 		const unsigned char& Channels = (unsigned char)PixelFormats[ Map.PixelFormat ].channels;
-		for ( uint32_t Z = 0; Z < Map.Depth; ++Z )
+		for ( uint32 Z = 0; Z < Map.Depth; ++Z )
 		{
-			for ( uint32_t Y = 0; Y < Map.Height; ++Y )
+			for ( uint32 Y = 0; Y < Map.Height; ++Y )
 			{
-				for ( uint32_t X = 0; X < Map.Width; ++X )
+				for ( uint32 X = 0; X < Map.Width; ++X )
 				{
 					Function( GetFloatPixelAt( Map, X, Y, Z ), Channels );
 				}

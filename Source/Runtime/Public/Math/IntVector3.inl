@@ -65,7 +65,7 @@ namespace EE
 		return sqrtf( x * float( x ) + y * float( y ) + z * float( z ) );
 	}
 
-	inline int IntVector3::MagnitudeSquared() const
+	inline int32 IntVector3::MagnitudeSquared() const
 	{
 		return x * x + y * y + z * z;
 	}

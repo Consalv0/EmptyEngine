@@ -90,7 +90,7 @@ namespace EE
         SDL_Quit();
     }
 
-    void Window::Resize( const uint32_t& width, const uint32_t& height )
+    void Window::Resize( const uint32& width, const uint32& height )
     {
         if ( width_ != width || height_ != height )
         {
@@ -148,12 +148,12 @@ namespace EE
         return (float)width_ / (float)height_;
     }
 
-    int Window::GetWidth() const
+    int32 Window::GetWidth() const
     {
         return width_;
     }
 
-    int Window::GetHeight() const
+    int32 Window::GetHeight() const
     {
         return height_;
     }

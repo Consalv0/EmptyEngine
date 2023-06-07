@@ -8,11 +8,14 @@ namespace Math
 	static constexpr float Pi = 3.1415926535897932F;
 	static constexpr float TendencyZero = 1e-6F;
 	static constexpr float Epsilon = FLT_EPSILON;
-	static constexpr float MaxNumber = FLT_MAX;
-	static constexpr float Euler = 2.71828182845904523536F;
+    static constexpr float MaxFloat = FLT_MAX;
+    static constexpr float MinFloat = FLT_MIN;
+    static constexpr int32 MaxInt32 = INT32_MAX;
+    static constexpr int32 MinInt32 = INT32_MIN;
+	static constexpr float Euler = 2.7182817F;
 	static constexpr float InversePi = 0.31830988618F;
 	static constexpr float HalfPi = 1.57079632679F;
-	static constexpr float DeltaPresicion = 0.00001F;
+	static constexpr float DeltaPrecision = 0.00001F;
 	static constexpr float RadToDegree = 57.2957795130823208F;
 	static constexpr float DegToRad = 0.0174532925199432F;
 	static constexpr float SquareRoot2 = 1.41421356237F;
@@ -20,11 +23,11 @@ namespace Math
 
 namespace Math
 {
-	inline int SolveQuadratic( float x[ 2 ], float a, float b, float c );
+	inline int32 SolveQuadratic( float x[ 2 ], float a, float b, float c );
 
-	inline int SolveCubicNormed( float* x, float a, float b, float c );
+	inline int32 SolveCubicNormed( float* x, float a, float b, float c );
 
-	inline int SolveCubic( float x[ 3 ], float a, float b, float c, float d );
+	inline int32 SolveCubic( float x[ 3 ], float a, float b, float c, float d );
 
 	template <typename T>
 	inline float Shoelace2( const T& a, const T& b );
@@ -86,7 +89,7 @@ namespace Math
 	inline float NormalizeAngle( float Degrees );
 
 	//* Fast pow to ten
-	inline float Pow10( int number );
+	inline float Pow10( int32 number );
 
 	//* Error consideration
 	inline float Atan2( float y, float x );

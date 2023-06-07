@@ -178,53 +178,53 @@ namespace EE
 		SDL_RenderPresent( internalSwapChain->renderer );
 	}
 
-	void CPUGraphicsDevice::BindScissorRects( uint32_t numRects, const Box2D* rects, CommandList cmd ) { }
+	void CPUGraphicsDevice::BindScissorRects( uint32 numRects, const Box2D* rects, CommandList cmd ) { }
 
-	void CPUGraphicsDevice::BindResource( EShaderStage stage, const GraphicsDeviceResource* resource, uint32_t slot, CommandList cmd, int subresource ) { }
+	void CPUGraphicsDevice::BindResource( EShaderStage stage, const GraphicsDeviceResource* resource, uint32 slot, CommandList cmd, int subresource ) { }
 
-	void CPUGraphicsDevice::BindResources( EShaderStage stage, const GraphicsDeviceResource* const* resources, uint32_t slot, uint32_t count, CommandList cmd ) { }
+	void CPUGraphicsDevice::BindResources( EShaderStage stage, const GraphicsDeviceResource* const* resources, uint32 slot, uint32 count, CommandList cmd ) { }
 
-	void CPUGraphicsDevice::BindUAV( EShaderStage stage, const GraphicsDeviceResource* resource, uint32_t slot, CommandList cmd, int subresource ) { }
+	void CPUGraphicsDevice::BindUAV( EShaderStage stage, const GraphicsDeviceResource* resource, uint32 slot, CommandList cmd, int subresource ) { }
 
-	void CPUGraphicsDevice::BindUAVs( EShaderStage stage, const GraphicsDeviceResource* const* resources, uint32_t slot, uint32_t count, CommandList cmd ) { }
+	void CPUGraphicsDevice::BindUAVs( EShaderStage stage, const GraphicsDeviceResource* const* resources, uint32 slot, uint32 count, CommandList cmd ) { }
 
-	void CPUGraphicsDevice::UnbindResources( uint32_t slot, uint32_t num, CommandList cmd ) { }
+	void CPUGraphicsDevice::UnbindResources( uint32 slot, uint32 num, CommandList cmd ) { }
 
-	void CPUGraphicsDevice::UnbindUAVs( uint32_t slot, uint32_t num, CommandList cmd ) { }
+	void CPUGraphicsDevice::UnbindUAVs( uint32 slot, uint32 num, CommandList cmd ) { }
 
-	void CPUGraphicsDevice::BindSampler( EShaderStage stage, const Sampler* sampler, uint32_t slot, CommandList cmd ) { }
+	void CPUGraphicsDevice::BindSampler( EShaderStage stage, const Sampler* sampler, uint32 slot, CommandList cmd ) { }
 
-	void CPUGraphicsDevice::BindConstantBuffer( EShaderStage stage, const Buffer* buffer, uint32_t slot, CommandList cmd ) { }
+	void CPUGraphicsDevice::BindConstantBuffer( EShaderStage stage, const Buffer* buffer, uint32 slot, CommandList cmd ) { }
 
-	void CPUGraphicsDevice::BindVertexBuffers( const Buffer* const* vertexBuffers, uint32_t slot, uint32_t count, const uint32_t* strides, const uint32_t* offsets, CommandList cmd ) { }
+	void CPUGraphicsDevice::BindVertexBuffers( const Buffer* const* vertexBuffers, uint32 slot, uint32 count, const uint32* strides, const uint32* offsets, CommandList cmd ) { }
 
-	void CPUGraphicsDevice::BindIndexBuffer( const Buffer* indexBuffer, uint32_t offset, CommandList cmd ) { }
+	void CPUGraphicsDevice::BindIndexBuffer( const Buffer* indexBuffer, uint32 offset, CommandList cmd ) { }
 
-	void CPUGraphicsDevice::BindStencilRef( uint32_t value, CommandList cmd ) { }
+	void CPUGraphicsDevice::BindStencilRef( uint32 value, CommandList cmd ) { }
 
 	void CPUGraphicsDevice::BindBlendFactor( float r, float g, float b, float a, CommandList cmd ) { }
 
 	void CPUGraphicsDevice::BindComputeShader( const Shader* cs, CommandList cmd ) { }
 
-	void CPUGraphicsDevice::Draw( uint32_t vertexCount, uint32_t startVertexLocation, CommandList cmd ) { }
+	void CPUGraphicsDevice::Draw( uint32 vertexCount, uint32 startVertexLocation, CommandList cmd ) { }
 
-	void CPUGraphicsDevice::DrawIndexed( uint32_t indexCount, uint32_t startIndexLocation, uint32_t baseVertexLocation, CommandList cmd ) { }
+	void CPUGraphicsDevice::DrawIndexed( uint32 indexCount, uint32 startIndexLocation, uint32 baseVertexLocation, CommandList cmd ) { }
 
-	void CPUGraphicsDevice::DrawInstanced( uint32_t vertexCount, uint32_t instanceCount, uint32_t startVertexLocation, uint32_t startInstanceLocation, CommandList cmd ) { }
+	void CPUGraphicsDevice::DrawInstanced( uint32 vertexCount, uint32 instanceCount, uint32 startVertexLocation, uint32 startInstanceLocation, CommandList cmd ) { }
 
-	void CPUGraphicsDevice::DrawIndexedInstanced( uint32_t indexCount, uint32_t instanceCount, uint32_t startIndexLocation, uint32_t baseVertexLocation, uint32_t startInstanceLocation, CommandList cmd ) { }
+	void CPUGraphicsDevice::DrawIndexedInstanced( uint32 indexCount, uint32 instanceCount, uint32 startIndexLocation, uint32 baseVertexLocation, uint32 startInstanceLocation, CommandList cmd ) { }
 
-	void CPUGraphicsDevice::DrawInstancedIndirect( const Buffer* args, uint32_t args_offset, CommandList cmd ) { }
+	void CPUGraphicsDevice::DrawInstancedIndirect( const Buffer* args, uint32 args_offset, CommandList cmd ) { }
 
-	void CPUGraphicsDevice::DrawIndexedInstancedIndirect( const Buffer* args, uint32_t args_offset, CommandList cmd ) { }
+	void CPUGraphicsDevice::DrawIndexedInstancedIndirect( const Buffer* args, uint32 args_offset, CommandList cmd ) { }
 	
-	void CPUGraphicsDevice::Dispatch( uint32_t threadGroupCountX, uint32_t threadGroupCountY, uint32_t threadGroupCountZ, CommandList cmd ) { }
+	void CPUGraphicsDevice::Dispatch( uint32 threadGroupCountX, uint32 threadGroupCountY, uint32 threadGroupCountZ, CommandList cmd ) { }
 
-	void CPUGraphicsDevice::DispatchIndirect( const Buffer* args, uint32_t args_offset, CommandList cmd ) { }
+	void CPUGraphicsDevice::DispatchIndirect( const Buffer* args, uint32 args_offset, CommandList cmd ) { }
 
 	void CPUGraphicsDevice::CopyResource( const GraphicsDeviceResource* pDst, const GraphicsDeviceResource* pSrc, CommandList cmd ) { }
 
-	void CPUGraphicsDevice::UpdateBuffer( const Buffer* buffer, const void* data, CommandList cmd, int dataSize ) { }
+	void CPUGraphicsDevice::UpdateBuffer( const Buffer* buffer, const void* data, CommandList cmd, int32 dataSize ) { }
 
     void CPUGraphicsDevice::UpdateTexture( const Texture& texture, const void* data )
     {

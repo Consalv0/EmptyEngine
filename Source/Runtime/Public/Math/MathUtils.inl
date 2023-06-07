@@ -3,7 +3,7 @@
 
 namespace Math
 {
-	int SolveQuadratic( float x[ 2 ], float a, float b, float c )
+	int32 SolveQuadratic( float x[ 2 ], float a, float b, float c )
 	{
 		if ( fabs( a ) < 1e-14F )
 		{
@@ -33,7 +33,7 @@ namespace Math
 			return 0;
 	}
 
-	int SolveCubicNormed( float* x, float a, float b, float c )
+	int32 SolveCubicNormed( float* x, float a, float b, float c )
 	{
 		float a2 = a * a;
 		float q = (a2 - 3.F * b) / 9.F;
@@ -68,7 +68,7 @@ namespace Math
 		}
 	}
 
-	int SolveCubic( float x[ 3 ], float a, float b, float c, float d )
+	int32 SolveCubic( float x[ 3 ], float a, float b, float c, float d )
 	{
 		if ( fabs( a ) < 1e-14F )
 			return SolveQuadratic( x, b, c, d );
@@ -85,13 +85,13 @@ namespace Math
 namespace Math
 {
 	//* The number is power of 2
-	inline int IsPow2( const int a )
+	inline int32 IsPow2( const int32 a )
 	{
 		return ((a & (a - 1)) == 0);
 	}
 
 	//* Get the next power2 of the value
-	inline int NextPow2( int x )
+	inline int32 NextPow2( int32 x )
 	{
 		--x;
 		x |= x >> 1;
@@ -201,7 +201,7 @@ float Math::NormalizeAngle( float degrees )
 	return degrees;
 }
 
-float Math::Pow10( int number )
+float Math::Pow10( int32 number )
 {
 	float Ret = 1.0F;
 	float r = 10.0F;

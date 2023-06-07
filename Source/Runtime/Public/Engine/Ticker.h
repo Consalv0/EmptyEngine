@@ -7,7 +7,7 @@ namespace EE
 	struct Timestamp
 	{
 	public:
-		Timestamp() { }
+		Timestamp() : LastEpochTime(), NowEpochTime() {}
 
 		Timestamp( uint64 Last, uint64 Now)
 			: LastEpochTime(Last), NowEpochTime(Now) { };

@@ -8,6 +8,10 @@ namespace EE
 {
     FORCEINLINE Plane::Plane() : x(), y(), z(), d() {}
 
+    FORCEINLINE Plane::Plane( const Plane& other ) :
+        x( other.x ), y( other.y ), z( other.z ), d( other.d )
+    { }
+
     FORCEINLINE Plane::Plane( const float& x, const float& y, const float& z, const float& d ) : x( x ), y( y ), z( z ), d( d ) {}
 
     FORCEINLINE Plane::Plane( const Vector3& normalizedNormal, float distance )
@@ -60,7 +64,7 @@ namespace EE
         return normal * d;
     }
 
-    FORCEINLINE float Plane::Dot( const Point3& p ) const
+    FORCEINLINE float Plane::DotPoint( const Point3& p ) const
     {
         return x * p.x + y * p.y + z * p.z - d;
     }
@@ -89,33 +93,42 @@ namespace EE
     {
     }
 
+    FORCEINLINE Frustrum::Frustrum( const Frustrum& other )
+        : left( other.left ), right( other.right ), top( other.top ), bottom( other.bottom ), near( other.near ), far( other.far )
+    {
+    }
+
+    FORCEINLINE Frustrum::Frustrum( const Plane& left, const Plane& right, const Plane& top, const Plane& bottom, const Plane& near , const Plane& far )
+        : left( left ), right( right ), top( top ), bottom( bottom ), near( near ), far( far)
+    {
+    }
+
     FORCEINLINE bool Frustrum::Inside( const Point3& point ) const
     {
         return
-              left.Dot( point ) > 0 &&
-             right.Dot( point ) > 0 &&
-            bottom.Dot( point ) > 0 &&
-               top.Dot( point ) > 0 &&
-               far.Dot( point ) > 0 &&
-              near.Dot( point ) > 0;
+              left.DotPoint( point ) < 0 &&
+             right.DotPoint( point ) < 0 &&
+            bottom.DotPoint( point ) < 0 &&
+               top.DotPoint( point ) < 0 &&
+               far.DotPoint( point ) < 0 &&
+              near.DotPoint( point ) < 0;
     }
 
-    FORCEINLINE Frustrum& Frustrum::FromMVP( const Matrix4x4& mvp )
+    FORCEINLINE Frustrum Frustrum::FromMVP( const Matrix4x4& mvp )
     {
-        const float* m = mvp.PointerToValue();
         Frustrum fustrum;
 
-        fustrum.left   = { m[ 3 ] + m[ 0 ], m[ 7 ] + m[ 4 ], m[ 11 ] + m[  8 ], m[ 15 ] + m[ 12 ] };
+        fustrum.left   = { mvp.m03 + mvp.m00, mvp.m13 + mvp.m10, mvp.m23 + mvp.m20, mvp.m33 + mvp.m30 };
+        fustrum.right  = { mvp.m03 - mvp.m00, mvp.m13 - mvp.m10, mvp.m23 - mvp.m20, mvp.m33 - mvp.m30 };
+        fustrum.top    = { mvp.m03 - mvp.m01, mvp.m13 - mvp.m11, mvp.m23 - mvp.m21, mvp.m33 - mvp.m31 };
+        fustrum.bottom = { mvp.m03 + mvp.m01, mvp.m13 + mvp.m11, mvp.m23 + mvp.m21, mvp.m33 + mvp.m31 };
+        fustrum.near   = { mvp.m03 + mvp.m02, mvp.m13 + mvp.m12, mvp.m23 + mvp.m22, mvp.m33 + mvp.m32 };
+        fustrum.far    = { mvp.m03 - mvp.m02, mvp.m13 - mvp.m12, mvp.m23 - mvp.m22, mvp.m33 - mvp.m32 };
         fustrum.left.Normalize();
-        fustrum.right  = { m[ 3 ] - m[ 0 ], m[ 7 ] - m[ 4 ], m[ 11 ] - m[  8 ], m[ 15 ] - m[ 12 ] };
         fustrum.right.Normalize();
-        fustrum.top    = { m[ 3 ] - m[ 1 ], m[ 7 ] - m[ 5 ], m[ 11 ] - m[  9 ], m[ 15 ] - m[ 13 ] };
         fustrum.top.Normalize();
-        fustrum.bottom = { m[ 3 ] + m[ 1 ], m[ 7 ] + m[ 5 ], m[ 11 ] + m[  9 ], m[ 15 ] + m[ 13 ] };
         fustrum.bottom.Normalize();
-        fustrum.near   = { m[ 3 ] + m[ 2 ], m[ 7 ] + m[ 6 ], m[ 11 ] + m[ 10 ], m[ 15 ] + m[ 14 ] };
         fustrum.near.Normalize();
-        fustrum.far    = { m[ 3 ] - m[ 2 ], m[ 7 ] - m[ 6 ], m[ 11 ] - m[ 10 ], m[ 15 ] - m[ 14 ] };
         fustrum.far.Normalize();
 
         return fustrum;

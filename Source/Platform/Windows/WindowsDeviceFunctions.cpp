@@ -56,7 +56,7 @@ namespace EE
 	}
 
 	float WindowsDeviceFunctions::GetDeviceTemperature(const int & DeviceIndex) {
-		uint32_t DeviceTemperature = 0;
+		uint32 DeviceTemperature = 0;
 #ifdef EE_PLATFORM_NVML
 		nvmlDevice_t Device;
 		nvmlReturn_t DeviceResult;

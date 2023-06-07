@@ -14,7 +14,7 @@ namespace EE
 	class AudioSample
 	{
 	public:
-		AudioSample( unsigned char* Buffer, uint32_t SampleSize, uint32_t BufferLength, uint32_t Frecuency, uint32_t ChannelCount );
+		AudioSample( unsigned char* Buffer, uint32 SampleSize, uint32 BufferLength, uint32 Frecuency, uint32 ChannelCount );
 
 		~AudioSample();
 
@@ -22,42 +22,42 @@ namespace EE
 		inline typename T::ReturnType GetDuration() const { return (typename T::ReturnType)Duration / (typename T::ReturnType)T::GetSizeInMicro(); }
 
 		template<typename T>
-		inline typename T::ReturnType GetDurationAt( uint32_t Pos ) const
+		inline typename T::ReturnType GetDurationAt( uint32 Pos ) const
 		{
 			return (typename T::ReturnType)(BufferLength - Pos) / BufferLength * Duration / (typename T::ReturnType)T::GetSizeInMicro();
 		}
 
 		//* The number of channels in the audio.
-		inline uint32_t GetChannelCount() const { return ChannelCount; }
+		inline uint32 GetChannelCount() const { return ChannelCount; }
 
 		//* The sample frequency of the audio in Hertz
-		inline uint32_t GetFrecuency() const { return Frecuency; }
+		inline uint32 GetFrecuency() const { return Frecuency; }
 
 		//* The length of one audio sample in bytes.
-		inline uint32_t GetSampleSize() const { return SampleSize; }
+		inline uint32 GetSampleSize() const { return SampleSize; }
 
 		//* The length of the audio in bytes.
-		inline uint32_t GetBufferLength() const { return BufferLength; }
+		inline uint32 GetBufferLength() const { return BufferLength; }
 
 		//* The length of the audio in samples.
-		inline uint32_t GetSampleLength() const { return BufferLength / SampleSize; }
+		inline uint32 GetSampleLength() const { return BufferLength / SampleSize; }
 
 		inline EAudioFormat GetAudioFormat() const { return EAudioFormat::Float32; }
 
-		unsigned char* GetBufferAt( uint32_t Offset );
+		unsigned char* GetBufferAt( uint32 Offset );
 
-		unsigned char* GetBufferCopy( uint32_t Offset, uint32_t Length ) const;
+		unsigned char* GetBufferCopy( uint32 Offset, uint32 Length ) const;
 
-		bool SetData( unsigned char* InData, uint32_t Offset );
+		bool SetData( unsigned char* InData, uint32 Offset );
 
-		static AudioSamplePtr Create( unsigned char* Buffer, uint32_t SampleSize, uint32_t BufferLength, uint32_t Frecuency, uint32_t ChannelCount );
+		static AudioSamplePtr Create( unsigned char* Buffer, uint32 SampleSize, uint32 BufferLength, uint32 Frecuency, uint32 ChannelCount );
 
 	private:
 		unsigned long long Duration;
-		uint32_t ChannelCount;
-		uint32_t Frecuency;
-		uint32_t SampleSize;
-		uint32_t BufferLength;
+		uint32 ChannelCount;
+		uint32 Frecuency;
+		uint32 SampleSize;
+		uint32 BufferLength;
 		EAudioFormat format;
 
 		unsigned char* Buffer;

@@ -30,7 +30,9 @@ namespace EE
 		HOST_DEVICE inline static Matrix4x4 Identity();
 
 		//* Creates a perspective matrix, FOV is the aperture angle in radians
-		HOST_DEVICE inline static Matrix4x4 Perspective( const float& aperture, const float& aspect, const float& near, const float& far );
+        HOST_DEVICE inline static Matrix4x4 Perspective( const float& aperture, const float& aspect, const float& near, const float& far );
+        //* Creates a perspective matrix, FOV is the aperture angle in radians with z-value reversed
+        HOST_DEVICE inline static Matrix4x4 PerspectiveReversed( const float& aperture, const float& aspect, const float& near, const float& far );
 		//* Creates a orthographic matrix
 		HOST_DEVICE inline static Matrix4x4 Orthographic( const float& left, const float& right, const float& bottom, const float& top );
 		//* Creates a orthographic matrix with zClamping

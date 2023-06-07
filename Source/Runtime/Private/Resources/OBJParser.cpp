@@ -88,7 +88,7 @@ namespace EE
         float exponentPart = 1.0F;
         if ( (**character != '\0' && **character != ',' && **character != ' ') && hasExpo )
         {
-            int exponentSign = 1;
+            int32 exponentSign = 1;
             if ( **character == '-' )
             {
                 exponentSign = -1;
@@ -99,7 +99,7 @@ namespace EE
                 ++*character;
             }
 
-            int e = 0;
+            int32 e = 0;
             while ( (**character != '\0' && **character != ',' && **character != ' ') && **character >= '0' && **character <= '9' )
             {
                 e = e * 10 + **character - '0';
@@ -113,9 +113,9 @@ namespace EE
         return sign * (intPart + fractionPart) * exponentPart;
     }
 
-    bool OBJLoader::GetSimilarVertexIndex( const StaticVertex& vertex, TDictionary<StaticVertex, unsigned>& vertexToIndex, unsigned& result )
+    bool OBJLoader::GetSimilarVertexIndex( const StaticVertex& vertex, TDictionary<StaticVertex, uint32>& vertexToIndex, uint32& result )
     {
-        TDictionary<StaticVertex, unsigned>::iterator it = vertexToIndex.find( vertex );
+        TDictionary<StaticVertex, uint32>::iterator it = vertexToIndex.find( vertex );
         if ( it == vertexToIndex.end() )
         {
             return false;
@@ -145,9 +145,9 @@ namespace EE
     void OBJLoader::ExtractIntVector3( const NChar* text, IntVector3* vector )
     {
         NChar* lineState;
-        vector->x = (int)fast_strtof( text, &lineState );
-        vector->y = (int)fast_strtof( lineState, &lineState );
-        vector->z = (int)fast_strtof( lineState, NULL );
+        vector->x = (int32)fast_strtof( text, &lineState );
+        vector->y = (int32)fast_strtof( lineState, &lineState );
+        vector->z = (int32)fast_strtof( lineState, NULL );
     }
 
     void OBJLoader::ParseVertexPositions( ExtractedData& data )
@@ -186,7 +186,7 @@ namespace EE
         bool warned = false;
         auto currentObject = data.objects.begin();
         auto currentObjectMaterial = currentObject->subdivisions.begin();
-        int vertexCount = 0;
+        int32 vertexCount = 0;
         const NChar* lineChar;
         for ( TArray<const NChar*>::const_iterator Line = data.lineVertexIndices.begin(); Line != data.lineVertexIndices.end(); ++Line )
         {
@@ -275,10 +275,10 @@ namespace EE
     void OBJLoader::PrepareData( const NChar* inFile, ExtractedData& modelData )
     {
         const NChar* pointer = inFile;
-        int vertexCount = 0;
-        int normalCount = 0;
-        int uvCount = 0;
-        int faceCount = 0;
+        int32 vertexCount = 0;
+        int32 normalCount = 0;
+        int32 uvCount = 0;
+        int32 faceCount = 0;
         Keyword keyword;
 
         while ( *pointer != '\0' )
@@ -339,7 +339,7 @@ namespace EE
             if ( keyword == Group || keyword == Object )
             {
                 modelData.objects.push_back( ObjectData() );
-                modelData.objects.back().vertexIndicesPos = (int)modelData.lineVertexIndices.size();
+                modelData.objects.back().vertexIndicesPos = (int32)modelData.lineVertexIndices.size();
                 ++pointer;
                 while ( *(pointer + 1) != '\n' && *(pointer + 1) != '\0' )
                 {
@@ -352,7 +352,7 @@ namespace EE
                 if ( modelData.objects.size() == 0 )
                 {
                     modelData.objects.push_back( ObjectData() );
-                    modelData.objects.back().vertexIndicesPos = (int)modelData.lineVertexIndices.size();
+                    modelData.objects.back().vertexIndicesPos = (int32)modelData.lineVertexIndices.size();
                     modelData.objects.back().name = "default";
                 }
                 pointer += 6;
@@ -360,7 +360,7 @@ namespace EE
                 while ( *(pointer + 1) != '\n' && *(pointer + 1) != '\0' ) { name += *++pointer; }
                 modelData.objects.back().subdivisions.push_back( ObjectData::Subdivision() );
                 modelData.objects.back().subdivisions.back().name = name;
-                modelData.objects.back().subdivisions.back().vertexIndicesPos = (int)modelData.lineVertexIndices.size();
+                modelData.objects.back().subdivisions.back().vertexIndicesPos = (int32)modelData.lineVertexIndices.size();
                 continue;
             }
 
@@ -402,7 +402,7 @@ namespace EE
 
             timer.Stop();
             EE_LOG_CORE_INFO(
-                L"├> Parsed {0} vertices and {1} triangles in {2:.3f}ms",
+                L"\u250C> Parsed {0} vertices and {1} triangles in {2:.3f}ms",
                 Text::FormatUnit( modelData.vertexIndices.size(), 2 ),
                 Text::FormatUnit( modelData.vertexIndices.size() / 3, 2 ),
                 timer.GetDeltaTime<Ticker::Mili>()
@@ -418,7 +418,7 @@ namespace EE
         info.parentNode = ModelNode( "ParentNode" );
         Timestamp timer;
         timer.Begin();
-        for ( int objectCount = 0; objectCount < modelData.objects.size(); ++objectCount )
+        for ( int32 objectCount = 0; objectCount < modelData.objects.size(); ++objectCount )
         {
             ObjectData& data = modelData.objects[ objectCount ];
             if ( data.vertexIndicesCount == 0 ) continue;
@@ -434,14 +434,14 @@ namespace EE
             MeshData* outMesh = &info.meshes.back();
             outMesh->name = data.name;
 
-            uint32_t indexCount = 0;
-            for ( int materialCount = 0; materialCount < data.subdivisions.size(); ++materialCount )
+            uint32 indexCount = 0;
+            for ( int32 materialCount = 0; materialCount < data.subdivisions.size(); ++materialCount )
             {
                 ObjectData::Subdivision& materialIndex = data.subdivisions[ materialCount ];
-                outMesh->materialsMap.emplace( (int)outMesh->materialsMap.size(), materialIndex.name );
-                outMesh->subdivisionsMap.emplace( materialCount, Subdivision( { (uint32_t)materialCount, 0, indexCount, 0 } ) );
+                outMesh->materialsMap.emplace( (int32)outMesh->materialsMap.size(), materialIndex.name );
+                outMesh->subdivisionsMap.emplace( materialCount, Subdivision( { (uint32)materialCount, 0, indexCount, 0 } ) );
 
-                int initialCount = count;
+                size_t initialCount = count;
                 for ( ; count < initialCount + materialIndex.vertexIndicesCount; ++count )
                 {
                     IntVector3 vertexIndices = modelData.vertexIndices[ count ];
@@ -455,7 +455,7 @@ namespace EE
                     };
                     data.bounding.Add( newVertex.position );
 
-                    unsigned index = count;
+                    uint32 index = (uint32)count;
                     bool bFoundIndex = false;
                     if ( options.optimize )
                     {
@@ -471,13 +471,13 @@ namespace EE
                     {
                         // --- If not, it needs to be added in the output data.
                         outMesh->staticVertices.push_back( newVertex );
-                        unsigned NewIndex = (unsigned)outMesh->staticVertices.size() - 1;
-                        indices[ count ] = NewIndex;
-                        if ( options.optimize ) vertexToIndex[ newVertex ] = NewIndex;
+                        uint32 newIndex = (uint32)outMesh->staticVertices.size() - 1;
+                        indices[ count ] = newIndex;
+                        if ( options.optimize ) vertexToIndex[ newVertex ] = newIndex;
                         totalUniqueVertices++;
                     }
 
-                    if ( (count + 1) % 3 == 0 )
+                    if ( (count - initialCount + 1) % 3 == 0 )
                     {
                         outMesh->faces.push_back( { indices[ count - 2 ], indices[ count - 1 ], indices[ count ] } );
                         outMesh->subdivisionsMap[ materialCount ].indexCount += 3;
@@ -494,9 +494,9 @@ namespace EE
 
 #ifdef EE_DEBUG
             EE_LOG_CORE_DEBUG(
-                L"├> Parsed {0}	vertices in {1}	at [{2:d}]'{3}'",
+                L"\u251C> Parsed {0}	vertices in {1}	at [{2:d}]'{3}'",
                 Text::FormatUnit( data.vertexIndicesCount, 2 ),
-                Text::FormatData( sizeof( FaceIndex ) * outMesh->faces.size() + sizeof( StaticVertex ) * outMesh->staticVertices.size(), 2 ),
+                Text::FormatData( sizeof( MeshFaces ) * outMesh->faces.size() + sizeof( StaticVertex ) * outMesh->staticVertices.size(), 2 ),
                 info.meshes.size(),
                 Text::NarrowToWide( outMesh->name )
             );
@@ -513,7 +513,7 @@ namespace EE
         delete[] indices;
 
         timer.Stop();
-        EE_LOG_CORE_INFO( L"└> Allocated {0} in {1:.2f}ms", Text::FormatData( totalAllocatedSize, 2 ), timer.GetDeltaTime<Time::Mili>() );
+        EE_LOG_CORE_INFO( L"\u2514> Allocated {0} in {1:.2f}ms", Text::FormatData( totalAllocatedSize, 2 ), timer.GetDeltaTime<Ticker::Mili>() );
         
         info.isValid = true;
         return true;

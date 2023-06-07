@@ -20,11 +20,10 @@
 #include <string.h>
 
 #include "Core.h"
-#include "CoreTypes.h"
 #include "Core/Name.h"
+
 // Core basic log functions
 #include "Core/Log.h"
-
 
 // Engine classes
 #include "Engine/Ticker.h"

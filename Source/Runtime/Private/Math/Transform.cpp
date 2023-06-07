@@ -47,10 +47,10 @@ namespace EE
 		
 		return Matrix4x4
 		(
-		    side.x, upper.x, -forward.x, 0,
-		    side.y, upper.y, -forward.y, 0,
-		    side.z, upper.z, -forward.z, 0,
-		    -side.Dot( position ), -upper.Dot( position ), forward.Dot( position ), 1
+		    side.x, upper.x, forward.x, 0,
+		    side.y, upper.y, forward.y, 0,
+		    side.z, upper.z, forward.z, 0,
+		    -side.Dot( position ), -upper.Dot( position ), -forward.Dot( position ), 1
 		);
 	}
 

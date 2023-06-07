@@ -80,7 +80,7 @@ namespace EE
 	}
 
 	bool EName::operator<(const EName & Other) const {
-		uint32_t i = 0;
+		uint32 i = 0;
 		while ((i < entryName.length()) && (i < Other.entryName.length())) {
 			if (tolower(entryName[i]) < tolower(Other.entryName[i])) return true;
 			else if (tolower(entryName[i]) > tolower(Other.entryName[i])) return false;

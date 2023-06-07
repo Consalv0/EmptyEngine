@@ -13,12 +13,12 @@ namespace EE
 			AudioSamplePtr Sample;
 			bool bPause;
 			bool bLoop;
-			float Volume;
-			uint32_t Pos;
+			float volume;
+			uint32 Pos;
 			const size_t Identifier;
 			
-			SamplePlayInfo(AudioSamplePtr Sample, float Volume, bool Loop, bool Pause, const size_t & id) :
-				Sample(Sample), Volume(Volume), bLoop(Loop), bPause(Pause), Pos(0), Identifier(id) {
+			SamplePlayInfo(AudioSamplePtr Sample, float volume, bool Loop, bool Pause, const size_t & id) :
+				Sample(Sample), volume(volume), bLoop(Loop), bPause(Pause), Pos(0), Identifier(id) {
 			}
 		};
 
@@ -26,13 +26,13 @@ namespace EE
 
 		~AudioDevice();
 
-		size_t AddSample(AudioSamplePtr Sample, float Volume, bool Loop, bool PlayOnAdd);
+		size_t AddSample(AudioSamplePtr Sample, float volume, bool Loop, bool PlayOnAdd);
 
-		inline uint32_t GetFrecuency() const { return 48000; };
+		inline uint32 GetFrecuency() const { return 48000; };
 
-		inline int GetChannelCount() const { return 2; }
+		inline int32 GetChannelCount() const { return 2; }
 
-		inline uint32_t SampleSize() { return 4 * 8; }
+		inline uint32 SampleSize() { return 4 * 8; }
 
 		void RemoveSample(const size_t& Identifier);
 
@@ -40,7 +40,7 @@ namespace EE
 		inline TDictionary<size_t, SamplePlayInfo *>::iterator end() { return PlayInfoList.end(); }
 
 	public:
-		float Volume;
+		float volume;
 
 		unsigned char CurrentSample[32768];
 		unsigned long long LastAudioUpdate;
@@ -48,7 +48,7 @@ namespace EE
 	private:
 		bool bInitialized;
 
-		uint32_t deviceID_;
+		uint32 deviceID_;
 
 		TDictionary<size_t, SamplePlayInfo *> PlayInfoList;
 	};

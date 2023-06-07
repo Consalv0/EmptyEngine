@@ -37,13 +37,13 @@ namespace EE
 	constexpr unsigned CRCTable[] = { A(0) };
 
 	// Constexpr implementation and helpers
-	constexpr uint32_t CRC32Implementation(const uint8_t* p, size_t len, uint32_t crc) {
+	constexpr uint32 CRC32Implementation(const uint8_t* p, size_t len, uint32 crc) {
 		return len ?
 			CRC32Implementation(p + 1, len - 1, (crc >> 8) ^ CRCTable[(crc & 0xFF) ^ *p])
 			: crc;
 	}
 
-	constexpr uint32_t EncodeCRC32(const uint8_t* data, size_t length) {
+	constexpr uint32 EncodeCRC32(const uint8_t* data, size_t length) {
 		return ~CRC32Implementation(data, length, ~0);
 	}
 

@@ -226,9 +226,9 @@ namespace EE
 	
 	struct SwapChainDescription
 	{
-		uint32_t width = 0;
-		uint32_t height = 0;
-		uint32_t buffercount = 2;
+		uint32 width = 0;
+		uint32 height = 0;
+		uint32 buffercount = 2;
 		EPixelFormat format = PixelFormat_RGBA16_UShort;
 		bool fullscreen = false;
 		bool vsync = true;
@@ -244,12 +244,12 @@ namespace EE
 	
 	struct GPUBufferDescription
 	{
-		uint32_t byteWidth = 0;
+		uint32 byteWidth = 0;
 		EUsageMode usage = UsageMode_Default;
-		uint32_t bindFlags = 0;
-		uint32_t cpuAccessFlags = 0;
-		uint32_t miscFlags = 0;
-		uint32_t structureByteStride = 0; // needed for typed and structured buffer types!
+		uint32 bindFlags = 0;
+		uint32 cpuAccessFlags = 0;
+		uint32 miscFlags = 0;
+		uint32 structureByteStride = 0; // needed for typed and structured buffer types!
 		EPixelFormat format = PixelFormat_Unknown; // only needed for typed buffer!
 	};
 	
@@ -267,17 +267,17 @@ namespace EE
 	struct TextureDescription
 	{
 		ETextureType type = TextureType_Texture2D;
-		uint32_t width = 0;
-		uint32_t height = 0;
-		uint32_t depth = 0;
-		uint32_t arraySize = 1;
-		uint32_t mipLevels = 1;
+		uint32 width = 0;
+		uint32 height = 0;
+		uint32 depth = 0;
+		uint32 arraySize = 1;
+		uint32 mipLevels = 1;
 		EPixelFormat format = PixelFormat_Unknown;
-		uint32_t SampleCount = 1;
+		uint32 SampleCount = 1;
 		EUsageMode Usage = UsageMode_Default;
-		uint32_t BindFlags = 0;
-		uint32_t CPUAccessFlags = 0;
-		uint32_t MiscFlags = 0;
+		uint32 BindFlags = 0;
+		uint32 CPUAccessFlags = 0;
+		uint32 MiscFlags = 0;
 		Vector4 clear = {};
 		EImageLayout layout = ImageLayout_ShaderResource;
 	}; 
@@ -295,7 +295,7 @@ namespace EE
 		ESamplerAddressMode addressV = SamplerAdressMode_Clamp;
 		ESamplerAddressMode addressW = SamplerAdressMode_Clamp;
 		float mipLODBias = 0.0f;
-		uint32_t maxAnisotropy = 0;
+		uint32 maxAnisotropy = 0;
 		EComparisonFunction comparison = ComparisonFuntion_Always;
 		ESamplerBorder border = SamplerBorder_BlackTransparent;
 		float minLOD = 0.0f;
@@ -322,14 +322,14 @@ namespace EE
 		// const DepthStencilState* dss = nullptr;
 		// const InputLayout* il = nullptr;
 		// PRIMITIVETOPOLOGY		pt = TRIANGLELIST;
-		uint32_t				sampleMask = 0xFFFFFFFF;
+		uint32				sampleMask = 0xFFFFFFFF;
 	};
 	
 	struct SubresourceData
 	{
 		const void* memoryPointer = nullptr;
-		uint32_t memoryPitch = 0;
-		uint32_t memorySlicePitch = 0;
+		uint32 memoryPitch = 0;
+		uint32 memorySlicePitch = 0;
 	};
 
 	struct PixelFormatInfo

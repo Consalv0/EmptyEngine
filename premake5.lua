@@ -22,7 +22,8 @@ project "EmptyEngine"
         "%{prj.location}/Source",
         "%{prj.location}/Source/Runtime",
         "%{prj.location}/Source/Runtime/Public",
-        "%{IncludeDir.SDL}/include"
+        "%{IncludeDir.SDL}/include",
+        "%{IncludeDir.spdlog}/include"
     }      
 
     libdirs { 
@@ -31,7 +32,8 @@ project "EmptyEngine"
     }
 
     links {
-        "SDL3.lib"
+        "spdlog",
+        "SDL3.lib",
     }
 
     filter "system:windows"
@@ -55,42 +57,41 @@ project "EmptyEngine"
         runtime "Release"
         optimize "on"
 
---project "SDL"
---    location "%{IncludeDir.SDL}"
---    kind "StaticLib"
---    language "C"
---    staticruntime "on"
---
---    targetdir ("%{prj.location}/Build/" .. outputdir)
---    objdir ("%{prj.location}/BinObjs/" .. outputdir)
---    
---    files {
---        "%{prj.location}/src/**.h",
---        "%{prj.location}/src/**.c",
---    }
---
---    includedirs {
---        "%{prj.location}/include",
---    }
---        
---    libdirs { 
---        "%{prj.location}/Libraries"
---    }
---
---    links {
---    }
---
---    filter "system:windows"
---        systemversion "latest"
---
---    filter "configurations:Debug"
---        runtime "Debug"
---        symbols "on"
---
---    filter "configurations:Release"
---        runtime "Release"
---        optimize "on"
---
---    filter "configurations:Shipping"
---        runtime "Release"
---        optimize "on"
+project "spdlog"
+    location "%{IncludeDir.spdlog}"
+    kind "StaticLib"
+    language "C++"
+    cppdialect "C++20"
+    staticruntime "on"
+    pic "on"
+
+    targetdir ("%{prj.location}/Build/" .. outputdir)
+    objdir ("%{prj.location}/BinObjs/" .. outputdir)
+    
+    defines {
+        "SPDLOG_WCHAR_TO_UTF8_SUPPORT",
+        "SPDLOG_NO_DATETIME",
+        "SPDLOG_COMPILED_LIB"
+    }
+
+    files {
+        "%{prj.location}/include/**.h",
+        "%{prj.location}/src/**.h",
+        "%{prj.location}/src/**.cpp"
+    }
+
+    includedirs {
+        "%{prj.location}/src",
+        "%{prj.location}/include",
+    }
+
+    filter "system:windows"
+        systemversion "latest"
+
+    filter "configurations:Debug"
+        runtime "Debug"
+        symbols "on"
+
+    filter "configurations:Release"
+        runtime "Release"
+        optimize "on"

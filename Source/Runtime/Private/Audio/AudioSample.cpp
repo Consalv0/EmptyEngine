@@ -4,7 +4,7 @@
 
 namespace EE
 {
-	AudioSample::AudioSample( unsigned char* Buffer, uint32_t SampleSize, uint32_t BufferLength, uint32_t Frecuency, uint32_t ChannelCount )
+	AudioSample::AudioSample( unsigned char* Buffer, uint32 SampleSize, uint32 BufferLength, uint32 Frecuency, uint32 ChannelCount )
 		: SampleSize( SampleSize ), BufferLength( BufferLength ), Frecuency( Frecuency ), ChannelCount( ChannelCount ), format( EAudioFormat::Float32 )
 	{
 		this->Buffer = new unsigned char[ BufferLength ];
@@ -17,25 +17,25 @@ namespace EE
 		delete Buffer;
 	}
 
-	unsigned char* AudioSample::GetBufferAt( uint32_t Offset )
+	unsigned char* AudioSample::GetBufferAt( uint32 Offset )
 	{
-		EE_CORE_ASSERT( BufferLength - Offset >= 0, "Trying to copy outside range of audio sample" );
+		EE_CORE_ASSERT( BufferLength - Offset >= 0, L"Trying to copy outside range of audio sample" );
 		return &Buffer[ Offset ];
 	}
 
-	unsigned char* AudioSample::GetBufferCopy( uint32_t Offset, uint32_t Length ) const
+	unsigned char* AudioSample::GetBufferCopy( uint32 Offset, uint32 Length ) const
 	{
-		EE_CORE_ASSERT( BufferLength - Offset > 0 || Length > BufferLength - Offset, "Trying to copy outside range of audio sample" );
+		EE_CORE_ASSERT( BufferLength - Offset > 0 || Length > BufferLength - Offset, L"Trying to copy outside range of audio sample" );
 		unsigned char* ReturnVal = new unsigned char[ Length ];
 		return (unsigned char*)memcpy( ReturnVal, &Buffer[ Offset ], Length );
 	}
 
-	bool AudioSample::SetData( unsigned char* InData, uint32_t Offset )
+	bool AudioSample::SetData( unsigned char* InData, uint32 Offset )
 	{
 		return false;
 	}
 
-	AudioSamplePtr AudioSample::Create( unsigned char* Buffer, uint32_t SampleSize, uint32_t BufferLength, uint32_t Frecuency, uint32_t ChannelCount )
+	AudioSamplePtr AudioSample::Create( unsigned char* Buffer, uint32 SampleSize, uint32 BufferLength, uint32 Frecuency, uint32 ChannelCount )
 	{
 		return std::make_shared<AudioSample>( Buffer, SampleSize, BufferLength, Frecuency, ChannelCount );
 	}

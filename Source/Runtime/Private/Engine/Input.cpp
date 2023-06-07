@@ -66,8 +66,8 @@ namespace EE
             if ( indices.empty() ) index = 0;
             else index = indices[ 0 ];
         }
-        const JoystickState* joystick;
-        if ( GetJoystickState( index, joystick ) )
+        const JoystickState* joystick = NULL;
+        if ( GetJoystickState( index, &joystick ) )
         {
             SDL_Gamepad* gamepad = SDL_GetGamepadFromInstanceID( joystick->instanceID );
             return SDL_GetGamepadAxis( gamepad, (SDL_GamepadAxis)axis ) / 32768.F;
@@ -75,10 +75,10 @@ namespace EE
         return 0.F;
     }
 
-    bool Input::GetJoystickState( int index, const JoystickState* state )
+    bool Input::GetJoystickState( int index, const JoystickState** state )
     {
-        state = &GJoystickDeviceStates[ index ];
-        return state->instanceID;
+        *state = &GJoystickDeviceStates[ index ];
+        return (*state)->instanceID;
     }
 
     void Input::SendHapticImpulse( int index, int channel, float amplitude, int duration )
@@ -91,7 +91,7 @@ namespace EE
             else index = indices[ 0 ];
         }
         const JoystickState* joystick;
-        if ( GetJoystickState( index, joystick ) && joystick->hapticDevice != NULL )
+        if ( GetJoystickState( index, &joystick ) && joystick->hapticDevice != NULL )
             SDL_HapticRumblePlay( (SDL_Haptic*)joystick->hapticDevice, amplitude, duration );
     }
 
@@ -353,7 +353,7 @@ namespace EE
                 auto& JoyButtonState = GGamepadButtonStates[ index ][ (EGamepadButton)sdlEvent->gbutton.button ];
                 JoyButtonState.state = ButtonState_Pressed;
 
-                EE_LOG_CORE_INFO( "{} Button pressed {}", sdlEvent->cbutton.which, sdlEvent->cbutton.button );
+                EE_LOG_CORE_INFO( "{} Button pressed {}", sdlEvent->gbutton.which, sdlEvent->gbutton.button );
 
                 JoystickButtonPressedEvent inEvent
                 (
