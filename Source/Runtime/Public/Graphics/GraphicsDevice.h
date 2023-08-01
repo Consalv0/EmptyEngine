@@ -71,7 +71,7 @@ namespace EE
 		virtual void RenderPassBegin( const SwapChain& swapchain, CommandList cmd ) = 0;
 		// virtual void RenderPassBegin( const RenderPass* renderpass, CommandList cmd ) = 0;
 		virtual void RenderPassEnd( const SwapChain& swapchain, CommandList cmd ) = 0;
-		virtual void BindScissorRects( uint32 numRects, const Box2D* rects, CommandList cmd ) = 0;
+		virtual void BindScissorRects( uint32 numRects, const Box2* rects, CommandList cmd ) = 0;
 		// virtual void BindViewports( uint32 NumViewports, const Viewport* pViewports, CommandList cmd ) = 0;
 		virtual void BindResource( EShaderStage stage, const GraphicsDeviceResource* resource, uint32 slot, CommandList cmd, int subresource = -1 ) = 0;
 		virtual void BindResources( EShaderStage stage, const GraphicsDeviceResource* const* resources, uint32 slot, uint32 count, CommandList cmd ) = 0;

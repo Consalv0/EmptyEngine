@@ -7,106 +7,126 @@
 #include "Math/Vector4.h"
 #include "Math/Vector2.h"
 
-namespace EE
+namespace EE::Math
 {
-
-	FORCEINLINE Vector2::Vector2()
+    template <typename T>
+	FORCEINLINE TVector2<T>::TVector2()
 		: x( 0 ), y( 0 )
 	{
 	}
 
-	FORCEINLINE Vector2::Vector2( const Vector2& vector )
+    template <typename T>
+	FORCEINLINE TVector2<T>::TVector2( const TVector2<T>& vector )
 		: x( vector.x ), y( vector.y )
 	{
 	}
 
-	FORCEINLINE Vector2::Vector2( const Vector3& vector )
+    template <typename T>
+	FORCEINLINE TVector2<T>::TVector2( const TVector3<T>& vector )
 		: x( vector.x ), y( vector.y )
 	{
 	}
 
-	FORCEINLINE Vector2::Vector2( const Vector4& vector )
+    template <typename T>
+	FORCEINLINE TVector2<T>::TVector2( const TVector4<T>& vector )
 		: x( vector.x ), y( vector.y )
 	{
 	}
 
-	FORCEINLINE Vector2::Vector2( const IntVector2& vector )
-		: x( (float)vector.x ), y( (float)vector.y )
+    template <typename T>
+    template <typename I>
+	FORCEINLINE TVector2<T>::TVector2( const TIntVector2<I>& vector )
+		: x( (T)vector.x ), y( (T)vector.y )
 	{
 	}
 
-	FORCEINLINE Vector2::Vector2( const IntVector3& vector )
-		: x( (float)vector.x ), y( (float)vector.y )
+    template <typename T>
+    template <typename I>
+	FORCEINLINE TVector2<T>::TVector2( const TIntVector3<I>& vector )
+		: x( (T)vector.x ), y( (T)vector.y )
 	{
 	}
 
-	FORCEINLINE Vector2::Vector2( const float& x, const float& y )
+    template <typename T>
+	FORCEINLINE TVector2<T>::TVector2( const T& x, const T& y )
 		: x( x ), y( y )
 	{
 	}
 
-	FORCEINLINE Vector2::Vector2( const float& value )
+    template <typename T>
+	FORCEINLINE TVector2<T>::TVector2( const T& value )
 		: x( value ), y( value )
 	{
 	}
 
-	inline float Vector2::Magnitude() const
+    template <typename T>
+	inline T TVector2<T>::Magnitude() const
 	{
-		return sqrtf( x * x + y * y );
+		return std::sqrt( x * x + y * y );
 	}
 
-	inline float Vector2::MagnitudeSquared() const
+    template <typename T>
+	inline T TVector2<T>::MagnitudeSquared() const
 	{
 		return x * x + y * y;
 	}
 
-	inline void Vector2::Normalize()
+    template <typename T>
+	inline void TVector2<T>::Normalize()
 	{
 		*this /= Magnitude();
 	}
 
-	inline Vector2 Vector2::Normalized() const
+    template <typename T>
+	inline TVector2<T> TVector2<T>::Normalized() const
 	{
-		Vector2 result = Vector2( *this );
+		TVector2<T> result = TVector2<T>( *this );
 		return result /= Magnitude();;
 	}
 
-	FORCEINLINE float Vector2::Cross( const Vector2& other ) const
+    template <typename T>
+	FORCEINLINE T TVector2<T>::Cross( const TVector2<T>& other ) const
 	{
 		return x * other.y - y * other.x;
 	}
 
-	FORCEINLINE float Vector2::Cross( const Vector2& a, const Vector2& b )
+    template <typename T>
+	FORCEINLINE T TVector2<T>::Cross( const TVector2<T>& a, const TVector2<T>& b )
 	{
 		return a.x * b.y - a.y * b.x;
 	}
 
-	FORCEINLINE float Vector2::Dot( const Vector2& other ) const
+    template <typename T>
+	FORCEINLINE T TVector2<T>::Dot( const TVector2<T>& other ) const
 	{
 		return x * other.x + y * other.y;
 	}
 
-	FORCEINLINE float Vector2::Dot( const Vector2& a, const Vector2& b )
+    template <typename T>
+	FORCEINLINE T TVector2<T>::Dot( const TVector2<T>& a, const TVector2<T>& b )
 	{
 		return a.x * b.x + a.y * b.y;
 	}
 
-	inline Vector2 Vector2::Orthogonal( bool polarity ) const
+    template <typename T>
+	inline TVector2<T> TVector2<T>::Orthogonal( bool polarity ) const
 	{
-		return polarity ? Vector2( -y, x ) : Vector2( y, -x );
+		return polarity ? TVector2( -y, x ) : TVector2( y, -x );
 	}
 
-	inline Vector2 Vector2::Orthonormal( bool polarity ) const
+    template <typename T>
+	inline TVector2<T> TVector2<T>::Orthonormal( bool polarity ) const
 	{
-		float length = Magnitude();
+		T length = Magnitude();
 		if ( length == 0 )
-			return polarity ? Vector2( 0 ) : Vector2( 0 );
-		return polarity ? Vector2( -y / length, x / length ) : Vector2( y / length, -x / length );
+			return polarity ? TVector2( 0 ) : TVector2( 0 );
+		return polarity ? TVector2( -y / length, x / length ) : TVector2( y / length, -x / length );
 	}
 
-	inline Vector2 Vector2::Rotate( Vector2& a, const Vector2& center, float radians ) const
+    template <typename T>
+	inline TVector2<T> TVector2<T>::Rotate( TVector2<T>& a, const TVector2<T>& center, T radians ) const
 	{
-		Vector2 rot;
+		TVector2 rot;
 		a.x -= center.x;
 		a.y -= center.y;
 		rot.x = round( a.x * cos( radians ) - a.y * sin( radians ) );
@@ -116,118 +136,140 @@ namespace EE
 		return rot;
 	}
 
-	inline const float* Vector2::PointerToValue() const
+    template <typename T>
+	inline const T* TVector2<T>::PointerToValue() const
 	{
 		return &x;
 	}
 
-	FORCEINLINE Vector2 Vector2::Lerp( const Vector2& start, const Vector2& end, float t )
+    template <typename T>
+	FORCEINLINE TVector2<T> TVector2<T>::Lerp( const TVector2<T>& start, const TVector2<T>& end, T t )
 	{
-		return Vector2( (start.x * (1.0F - t)) + (end.x * t), (start.y * (1.0F - t)) + (end.y * t) );
+		return TVector2( (start.x * (1 - t)) + (end.x * t), (start.y * (1 - t)) + (end.y * t) );
 	}
 
-	inline float& Vector2::operator[]( unsigned char i )
+    template <typename T>
+	inline T& TVector2<T>::operator[]( unsigned char i )
 	{
-		EE_CORE_ASSERT( i <= 1, "Vector2 index out of bounds" );
-		return ((float*)this)[ i ];
+		EE_CORE_ASSERT( i <= 1, "TVector2 index out of bounds" );
+		return ((T*)this)[ i ];
 	}
 
-	inline float const& Vector2::operator[]( unsigned char i ) const
+    template <typename T>
+	inline T const& TVector2<T>::operator[]( unsigned char i ) const
 	{
-		EE_CORE_ASSERT( i <= 1, "Vector2 index out of bounds" );
-		return ((float*)this)[ i ];
+		EE_CORE_ASSERT( i <= 1, "TVector2 index out of bounds" );
+		return ((T*)this)[ i ];
 	}
 
-	FORCEINLINE bool Vector2::operator==( const Vector2& other ) const
+    template <typename T>
+	FORCEINLINE bool TVector2<T>::operator==( const TVector2<T>& other ) const
 	{
 		return (x == other.x && y == other.y);
 	}
 
-	inline HOST_DEVICE bool Vector2::operator!() const
+    template <typename T>
+	inline HOST_DEVICE bool TVector2<T>::operator!() const
 	{
 		return !x || !y;
 	}
 
-	FORCEINLINE bool Vector2::operator!=( const Vector2& other ) const
+    template <typename T>
+	FORCEINLINE bool TVector2<T>::operator!=( const TVector2<T>& other ) const
 	{
 		return (x != other.x || y != other.y);
 	}
 
-	FORCEINLINE Vector2 Vector2::operator+( const Vector2& other ) const
+    template <typename T>
+	FORCEINLINE TVector2<T> TVector2<T>::operator+( const TVector2<T>& other ) const
 	{
-		return Vector2( x + other.x, y + other.y );
+		return TVector2( x + other.x, y + other.y );
+	}
+    template <typename T>
+
+	FORCEINLINE TVector2<T> TVector2<T>::operator-( const TVector2<T>& other ) const
+	{
+		return TVector2( x - other.x, y - other.y );
 	}
 
-	FORCEINLINE Vector2 Vector2::operator-( const Vector2& other ) const
+    template <typename T>
+	FORCEINLINE TVector2<T> TVector2<T>::operator-( void ) const
 	{
-		return Vector2( x - other.x, y - other.y );
+		return TVector2( -x, -y );
 	}
 
-	FORCEINLINE Vector2 Vector2::operator-( void ) const
+    template <typename T>
+	FORCEINLINE TVector2<T> TVector2<T>::operator*( const TVector2<T>& other ) const
 	{
-		return Vector2( -x, -y );
+		return TVector2( x * other.x, y * other.y );
 	}
 
-	FORCEINLINE Vector2 Vector2::operator*( const Vector2& other ) const
+    template <typename T>
+	FORCEINLINE TVector2<T> TVector2<T>::operator/( const TVector2<T>& other ) const
 	{
-		return Vector2( x * other.x, y * other.y );
+		return TVector2( x / other.x, y / other.y );
 	}
 
-	FORCEINLINE Vector2 Vector2::operator/( const Vector2& other ) const
+    template <typename T>
+	FORCEINLINE TVector2<T> TVector2<T>::operator*( const T& value ) const
 	{
-		return Vector2( x / other.x, y / other.y );
+		return TVector2( x * value, y * value );
 	}
 
-	FORCEINLINE Vector2 Vector2::operator*( const float& value ) const
+    template <typename T>
+	FORCEINLINE TVector2<T> TVector2<T>::operator/( const T& value ) const
 	{
-		return Vector2( x * value, y * value );
+		if ( value == 0 ) return TVector2();
+		return TVector2( x / value, y / value );
 	}
 
-	FORCEINLINE Vector2 Vector2::operator/( const float& value ) const
-	{
-		if ( value == 0 ) return Vector2();
-		return Vector2( x / value, y / value );
-	}
-
-	FORCEINLINE Vector2& Vector2::operator+=( const Vector2& other )
+    template <typename T>
+	FORCEINLINE TVector2<T>& TVector2<T>::operator+=( const TVector2<T>& other )
 	{
 		x += other.x; y += other.y; return *this;
 	}
 
-	FORCEINLINE Vector2& Vector2::operator-=( const Vector2& other )
+    template <typename T>
+	FORCEINLINE TVector2<T>& TVector2<T>::operator-=( const TVector2<T>& other )
 	{
 		x -= other.x; y -= other.y; return *this;
 	}
 
-	FORCEINLINE Vector2& Vector2::operator*=( const Vector2& other )
+    template <typename T>
+	FORCEINLINE TVector2<T>& TVector2<T>::operator*=( const TVector2<T>& other )
 	{
 		x *= other.x; y *= other.y; return *this;
 	}
 
-	FORCEINLINE Vector2& Vector2::operator/=( const Vector2& other )
+    template <typename T>
+	FORCEINLINE TVector2<T>& TVector2<T>::operator/=( const TVector2<T>& other )
 	{
 		x /= other.x; y /= other.y; return *this;
 	}
 
-	FORCEINLINE Vector2& Vector2::operator*=( const float& value )
+    template <typename T>
+	FORCEINLINE TVector2<T>& TVector2<T>::operator*=( const T& value )
 	{
 		x *= value;	y *= value; return *this;
 	}
 
-	FORCEINLINE Vector2& Vector2::operator/=( const float& value )
+    template <typename T>
+	FORCEINLINE TVector2<T>& TVector2<T>::operator/=( const T& value )
 	{
 		if ( value == 0 ) x = y = 0;
 		x /= value; y /= value; return *this;
 	}
 
-	inline Vector2 operator*( float value, const Vector2& vector )
+    template <typename T>
+	inline TVector2<T> operator*( T value, const TVector2<T>& vector )
 	{
-		return Vector2( value * vector.x, value * vector.y );
+		return TVector2( value * vector.x, value * vector.y );
 	}
 
-	inline Vector2 operator/( float value, const Vector2& vector )
+    template <typename T>
+	inline TVector2<T> operator/( T value, const TVector2<T>& vector )
 	{
-		return Vector2( value / vector.x, value / vector.y );
+		return TVector2( value / vector.x, value / vector.y );
 	}
 
 }

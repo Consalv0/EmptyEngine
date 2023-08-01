@@ -13,8 +13,8 @@ namespace EE
 	uint64 Ticker::TickBuffer[ MaxTickSamples ];
 	uint64 Ticker::TickAverage = 30;
 
-	uint64 Ticker::MaxUpdateDeltaMicro = Ticker::Second::GetSizeInMicro() / 60;
-	uint64 Ticker::MaxRenderDeltaMicro = Ticker::Second::GetSizeInMicro() / 70;
+	uint64 Ticker::MaxUpdateDeltaMicro = 0;
+	uint64 Ticker::MaxRenderDeltaMicro = 0;
 
 	bool Ticker::SkipRender = false;
 	uint64 Ticker::RenderDeltaTimeSum = 0;

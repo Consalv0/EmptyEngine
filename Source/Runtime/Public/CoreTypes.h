@@ -40,8 +40,10 @@ typedef size_t          intPNT;
 #define HOST_DEVICE
 #endif
 
-#ifdef EE_PLATFORM_APPLE
-#define FORCEINLINE inline
+#if defined(_MSC_VER)
+#	define FORCENOINLINE	__declspec(noinline)
+#	define FORCEINLINE		__forceinline
 #else
-#define FORCEINLINE __forceinline
+#	define FORCENOINLINE	inline __attribute__((noinline))
+#	define FORCEINLINE		inline __attribute__((always_inline))
 #endif

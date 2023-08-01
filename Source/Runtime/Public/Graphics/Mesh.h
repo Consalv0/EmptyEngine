@@ -96,7 +96,7 @@ namespace EE
         TDictionary<int32, NString> materialsMap;
         TArray<StaticVertex> staticVertices;
         TArray<SkinVertex> skinVertices;
-        BoundingBox3D bounding;
+        BoundingBox3 bounding;
 
         bool hasNormals;
         bool hasTangents;

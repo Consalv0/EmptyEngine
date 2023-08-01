@@ -8,59 +8,71 @@
 #include "Math/IntVector3.h"
 #include "Math/Vector4.h"
 
-namespace EE
+namespace EE::Math
 {
-	FORCEINLINE Vector3::Vector3()
+    template <typename T>
+	FORCEINLINE TVector3<T>::TVector3()
 		: x( 0 ), y( 0 ), z( 0 )
 	{
 	}
 
-	FORCEINLINE Vector3::Vector3( const Vector2& vector )
+    template <typename T>
+	FORCEINLINE TVector3<T>::TVector3( const TVector2<T>& vector )
 		: x( vector.x ), y( vector.y ), z( 0 )
 	{
 	}
 
-	FORCEINLINE Vector3::Vector3( const IntVector3& vector )
-		: x( float( vector.x ) ), y( float( vector.y ) ), z( float( vector.z ) )
+    template <typename T>
+    template <typename I>
+	FORCEINLINE TVector3<T>::TVector3( const TIntVector3<I>& vector )
+		: x( T( vector.x ) ), y( T( vector.y ) ), z( T( vector.z ) )
 	{
 	}
 
-	FORCEINLINE Vector3::Vector3( const Vector3& vector )
+    template <typename T>
+	FORCEINLINE TVector3<T>::TVector3( const TVector3<T>& vector )
 		: x( vector.x ), y( vector.y ), z( vector.z )
 	{
 	}
 
-	FORCEINLINE Vector3::Vector3( const Vector4& vector )
+    template <typename T>
+	FORCEINLINE TVector3<T>::TVector3( const TVector4<T>& vector )
 		: x( vector.x ), y( vector.y ), z( vector.z )
 	{
 	}
 
-	FORCEINLINE Vector3::Vector3( const float& x, const float& y, const float& z )
+    template <typename T>
+	FORCEINLINE TVector3<T>::TVector3( const T& x, const T& y, const T& z )
 		: x( x ), y( y ), z( z )
 	{
 	}
 
-	FORCEINLINE Vector3::Vector3( const float& x, const float& y )
+    template <typename T>
+	FORCEINLINE TVector3<T>::TVector3( const T& x, const T& y )
 		: x( x ), y( y ), z( 0 )
 	{
 	}
 
-	FORCEINLINE Vector3::Vector3( const float& value )
+    template <typename T>
+	FORCEINLINE TVector3<T>::TVector3( const T& value )
 		: x( value ), y( value ), z( value )
 	{
 	}
 
-	inline float Vector3::Magnitude() const
+    template <typename T>
+	inline T TVector3<T>::Magnitude() const
 	{
-		return sqrtf( x * x + y * y + z * z );
+		return std::sqrt( x * x + y * y + z * z );
 	}
 
-	inline float Vector3::MagnitudeSquared() const
+    template <typename T>
+	inline T TVector3<T>::MagnitudeSquared() const
 	{
 		return x * x + y * y + z * z;
 	}
 
-	inline void Vector3::Normalize()
+    template <typename T>
+	inline void TVector3<T>::Normalize()
 	{
 		if ( MagnitudeSquared() == 0 )
 		{
@@ -72,176 +84,204 @@ namespace EE
 		}
 	}
 
-	inline Vector3 Vector3::Normalized() const
+    template <typename T>
+	inline TVector3<T> TVector3<T>::Normalized() const
 	{
-		if ( MagnitudeSquared() == 0 ) return Vector3();
+		if ( MagnitudeSquared() == 0 ) return TVector3<T>();
 		return *this / Magnitude();
 	}
 
-	FORCEINLINE Vector3 Vector3::Cross( const Vector3& other ) const
+    template <typename T>
+	FORCEINLINE TVector3<T> TVector3<T>::Cross( const TVector3<T>& other ) const
 	{
-		return Vector3(
+		return TVector3(
 			y * other.z - z * other.y,
 			z * other.x - x * other.z,
 			x * other.y - y * other.x
 		);
 	}
 
-	inline Vector3 Vector3::Cross( const Vector3& a, const Vector3& b )
+    template <typename T>
+	inline TVector3<T> TVector3<T>::Cross( const TVector3<T>& a, const TVector3<T>& b )
 	{
-		return Vector3(
+		return TVector3(
 			a.y * b.z - a.z * b.y,
 			a.z * b.x - a.x * b.z,
 			a.x * b.y - a.y * b.x
 		);
 	}
 
-	FORCEINLINE float Vector3::Dot( const Vector3& other ) const
+    template <typename T>
+	FORCEINLINE T TVector3<T>::Dot( const TVector3<T>& other ) const
 	{
 		return (x * other.x) + (y * other.y) + (z * other.z);
 	}
 
-	inline float Vector3::Dot( const Vector3& a, const Vector3& b )
+    template <typename T>
+	inline T TVector3<T>::Dot( const TVector3<T>& a, const TVector3<T>& b )
 	{
 		return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
 	}
 
-	inline const float* Vector3::PointerToValue() const
+    template <typename T>
+	inline const T* TVector3<T>::PointerToValue() const
 	{
 		return &x;
 	}
 
-	FORCEINLINE Vector3 Vector3::Lerp( const Vector3& start, const Vector3& end, float t )
+    template <typename T>
+	FORCEINLINE TVector3<T> TVector3<T>::Lerp( const TVector3<T>& start, const TVector3<T>& end, T t )
 	{
-		return Vector3( (start.x * (1.0F - t)) + (end.x * t), (start.y * (1.0F - t)) + (end.y * t), (start.z * (1.0F - t)) + (end.z * t) );
+		return TVector3( (start.x * (1 - t)) + (end.x * t), (start.y * (1 - t)) + (end.y * t), (start.z * (1 - t)) + (end.z * t) );
 	}
 
-	inline HOST_DEVICE Vector3 Vector3::Reflect( const Vector3& Incident, const Vector3& normal )
+    template <typename T>
+	inline HOST_DEVICE TVector3<T> TVector3<T>::Reflect( const TVector3<T>& Incident, const TVector3<T>& normal )
 	{
-		return Incident - (normal * normal.Dot( Incident )) * 2.F;
+		return Incident - (normal * normal.Dot( Incident )) * 2;
 	}
 
-	inline float& Vector3::operator[]( unsigned char i )
+    template <typename T>
+	inline T& TVector3<T>::operator[]( unsigned char i )
 	{
-		EE_CORE_ASSERT( i <= 2, "Vector3 index out of bounds" );
-		return ((float*)this)[ i ];
+		EE_CORE_ASSERT( i <= 2, "TVector3 index out of bounds" );
+		return ((T*)this)[ i ];
 	}
 
-	inline float const& Vector3::operator[]( unsigned char i ) const
+    template <typename T>
+	inline T const& TVector3<T>::operator[]( unsigned char i ) const
 	{
-		EE_CORE_ASSERT( i <= 2, "Vector3 index out of bounds" );
-		return ((float*)this)[ i ];
+		EE_CORE_ASSERT( i <= 2, "TVector3 index out of bounds" );
+		return ((T*)this)[ i ];
 	}
 
-	FORCEINLINE Vector3 Vector3::operator * ( const Vector3& other ) const
+    template <typename T>
+	FORCEINLINE TVector3<T> TVector3<T>::operator * ( const TVector3<T>& other ) const
 	{
-		return Vector3( x * other.x, y * other.y, z * other.z );
+		return TVector3( x * other.x, y * other.y, z * other.z );
 	}
 
-	FORCEINLINE Vector3 Vector3::operator/( const Vector3& other ) const
+    template <typename T>
+	FORCEINLINE TVector3<T> TVector3<T>::operator/( const TVector3<T>& other ) const
 	{
-		return Vector3( x / other.x, y / other.y, z / other.z );
+		return TVector3( x / other.x, y / other.y, z / other.z );
 	}
 
-	FORCEINLINE bool Vector3::operator==( const Vector3& other ) const
+    template <typename T>
+	FORCEINLINE bool TVector3<T>::operator==( const TVector3<T>& other ) const
 	{
 		return (x == other.x && y == other.y && z == other.z);
 	}
 
-	FORCEINLINE bool Vector3::operator!=( const Vector3& other ) const
+    template <typename T>
+	FORCEINLINE bool TVector3<T>::operator!=( const TVector3<T>& other ) const
 	{
 		return (x != other.x || y != other.y || z != other.z);
 	}
 
-	FORCEINLINE Vector3 Vector3::operator+( const Vector3& other ) const
+    template <typename T>
+	FORCEINLINE TVector3<T> TVector3<T>::operator+( const TVector3<T>& other ) const
 	{
-		return Vector3( x + other.x, y + other.y, z + other.z );
+		return TVector3( x + other.x, y + other.y, z + other.z );
 	}
 
-	FORCEINLINE Vector3 Vector3::operator-( const Vector3& other ) const
+    template <typename T>
+	FORCEINLINE TVector3<T> TVector3<T>::operator-( const TVector3<T>& other ) const
 	{
-		return Vector3( x - other.x, y - other.y, z - other.z );
+		return TVector3( x - other.x, y - other.y, z - other.z );
 	}
 
-	FORCEINLINE Vector3 Vector3::operator-( void ) const
+    template <typename T>
+	FORCEINLINE TVector3<T> TVector3<T>::operator-( void ) const
 	{
-		return Vector3( -x, -y, -z );
+		return TVector3( -x, -y, -z );
 	}
 
-	FORCEINLINE Vector3 Vector3::operator*( const float& value ) const
+    template <typename T>
+	FORCEINLINE TVector3<T> TVector3<T>::operator*( const T& value ) const
 	{
-		return Vector3( x * value, y * value, z * value );
+		return TVector3( x * value, y * value, z * value );
 	}
 
-	FORCEINLINE Vector3 Vector3::operator/( const float& value ) const
+    template <typename T>
+	FORCEINLINE TVector3<T> TVector3<T>::operator/( const T& value ) const
 	{
-		if ( value == 0 ) return Vector3();
-		return Vector3( x / value, y / value, z / value );
+		if ( value == 0 ) return TVector3<T>();
+		return TVector3( x / value, y / value, z / value );
 	}
 
-	FORCEINLINE Vector3& Vector3::operator+=( const Vector3& other )
+    template <typename T>
+	FORCEINLINE TVector3<T>& TVector3<T>::operator+=( const TVector3<T>& other )
 	{
 		x += other.x; y += other.y;	z += other.z;
 		return *this;
 	}
 
-	FORCEINLINE Vector3& Vector3::operator-=( const Vector3& other )
+    template <typename T>
+	FORCEINLINE TVector3<T>& TVector3<T>::operator-=( const TVector3<T>& other )
 	{
 		x -= other.x; y -= other.y; z -= other.z;
 		return *this;
 	}
 
-	FORCEINLINE Vector3& Vector3::operator*=( const Vector3& other )
+    template <typename T>
+	FORCEINLINE TVector3<T>& TVector3<T>::operator*=( const TVector3<T>& other )
 	{
 		x *= other.x; y *= other.y; z *= other.z;
 		return *this;
 	}
 
-	FORCEINLINE Vector3& Vector3::operator/=( const Vector3& other )
+    template <typename T>
+	FORCEINLINE TVector3<T>& TVector3<T>::operator/=( const TVector3<T>& other )
 	{
 		x /= other.x; y /= other.y; z /= other.z;
 		return *this;
 	}
 
-	FORCEINLINE Vector3& Vector3::operator*=( const float& value )
+    template <typename T>
+	FORCEINLINE TVector3<T>& TVector3<T>::operator*=( const T& value )
 	{
 		x *= value; y *= value; z *= value;
 		return *this;
 	}
 
-	FORCEINLINE Vector3& Vector3::operator/=( const float& value )
+    template <typename T>
+	FORCEINLINE TVector3<T>& TVector3<T>::operator/=( const T& value )
 	{
 		if ( value == 0 ) x = y = z = 0;
 		x /= value; y /= value; z /= value;
 		return *this;
 	}
 
-	inline Vector3 operator*( float value, const Vector3& vector )
+    template <typename T>
+    FORCEINLINE TVector3<T> operator*( T value, const TVector3<T>& vector )
 	{
-		return Vector3( value * vector.x, value * vector.y, value * vector.z );
+		return TVector3<T>( value * vector.x, value * vector.y, value * vector.z );
 	}
 
-	inline Vector3 operator/( float value, const Vector3& vector )
+    template <typename T>
+    FORCEINLINE TVector3<T> operator/( T value, const TVector3<T>& vector )
 	{
-		return Vector3( value / vector.x, value / vector.y, value / vector.z );
+		return TVector3<T>( value / vector.x, value / vector.y, value / vector.z );
 	}
 
-}
+    template <typename T>
+    inline TVector3<T> NormalizeAngleComponents( TVector3<T> eulerAngle )
+    {
+        eulerAngle.x = NormalizeDegrees( eulerAngle.x );
+        eulerAngle.y = NormalizeDegrees( eulerAngle.y );
+        eulerAngle.z = NormalizeDegrees( eulerAngle.z );
 
-inline EE::Vector3 Math::NormalizeAngleComponents( EE::Vector3 eulerAngle )
-{
-	eulerAngle.x = NormalizeAngle( eulerAngle.x );
-	eulerAngle.y = NormalizeAngle( eulerAngle.y );
-	eulerAngle.z = NormalizeAngle( eulerAngle.z );
+        return eulerAngle;
+    }
 
-	return eulerAngle;
-}
+    template <typename T>
+    inline TVector3<T> ClampAngleComponents( TVector3<T> eulerAngle )
+    {
+        eulerAngle.x = ClampDegrees( eulerAngle.x );
+        eulerAngle.y = ClampDegrees( eulerAngle.y );
+        eulerAngle.z = ClampDegrees( eulerAngle.z );
 
-inline EE::Vector3 Math::ClampAngleComponents( EE::Vector3 eulerAngle )
-{
-	eulerAngle.x = ClampDegrees( eulerAngle.x );
-	eulerAngle.y = ClampDegrees( eulerAngle.y );
-	eulerAngle.z = ClampDegrees( eulerAngle.z );
-
-	return eulerAngle;
+        return eulerAngle;
+    }
 }

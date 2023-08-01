@@ -133,7 +133,7 @@ namespace EE
     {
         if ( !hasBoundingBox )
         {
-            bounding = BoundingBox3D();
+            bounding = BoundingBox3();
             for ( MeshVertices::const_iterator Vertex = staticVertices.begin(); Vertex != staticVertices.end(); ++Vertex )
             {
                 bounding.Add( Vertex->position );
@@ -166,7 +166,7 @@ namespace EE
             const Vector2 deltaUV1 = uvB - uvA;
             const Vector2 deltaUV2 = uvC - uvA;
 
-            float r = 1.F / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+            double r = 1 / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
             r = std::isfinite( r ) ? r : 0;
 
             Vector3 tangent;
@@ -212,7 +212,7 @@ namespace EE
         name.clear();
         faces.clear();
         staticVertices.clear();
-        bounding = BoundingBox3D();
+        bounding = BoundingBox3();
         hasNormals = false;
         hasTangents = false;
         hasVertexColor = false;

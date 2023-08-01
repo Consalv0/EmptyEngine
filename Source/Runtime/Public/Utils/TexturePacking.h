@@ -33,7 +33,7 @@ namespace ESource {
 	public:
 		~TexturePacking();
 
-		void CreateTexture(const IntVector2& Dimensions);
+		void CreateTexture(const TIntVector2& Dimensions);
 		TexturePacking<T>::ReturnElement Insert(const T & Element);
 	};
 

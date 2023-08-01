@@ -163,7 +163,7 @@ namespace EE
 	void CPUGraphicsDevice::RenderPassBegin( const SwapChain& swapchain, CommandList cmd ) 
 	{
 		auto internalSwapChain = ToInternal( swapchain );
-		Vector4 clearColor = swapchain.description.clearcolor * 255.F;
+		Vector4 clearColor = swapchain.description.clearcolor * 255;
 		
 		SDL_SetRenderDrawColor( internalSwapChain->renderer,
 			(Uint8)clearColor.r, (Uint8)clearColor.g, (Uint8)clearColor.b, (Uint8)clearColor.a );
@@ -178,7 +178,7 @@ namespace EE
 		SDL_RenderPresent( internalSwapChain->renderer );
 	}
 
-	void CPUGraphicsDevice::BindScissorRects( uint32 numRects, const Box2D* rects, CommandList cmd ) { }
+	void CPUGraphicsDevice::BindScissorRects( uint32 numRects, const Rect* rects, CommandList cmd ) { }
 
 	void CPUGraphicsDevice::BindResource( EShaderStage stage, const GraphicsDeviceResource* resource, uint32 slot, CommandList cmd, int subresource ) { }
 

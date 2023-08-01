@@ -4,17 +4,21 @@
 
 #include "Math/Plane.h"
 
-namespace EE
+namespace EE::Math
 {
-    FORCEINLINE Plane::Plane() : x(), y(), z(), d() {}
+    template <typename T>
+    FORCEINLINE TPlane<T>::TPlane() : x(), y(), z(), d() {}
 
-    FORCEINLINE Plane::Plane( const Plane& other ) :
+    template <typename T>
+    FORCEINLINE TPlane<T>::TPlane( const TPlane<T>& other ) :
         x( other.x ), y( other.y ), z( other.z ), d( other.d )
     { }
 
-    FORCEINLINE Plane::Plane( const float& x, const float& y, const float& z, const float& d ) : x( x ), y( y ), z( z ), d( d ) {}
+    template <typename T>
+    FORCEINLINE TPlane<T>::TPlane( const T& x, const T& y, const T& z, const T& d ) : x( x ), y( y ), z( z ), d( d ) {}
 
-    FORCEINLINE Plane::Plane( const Vector3& normalizedNormal, float distance )
+    template <typename T>
+    FORCEINLINE TPlane<T>::TPlane( const TVector3<T>& normalizedNormal, T distance )
     {
         x = normalizedNormal.x;
         y = normalizedNormal.y;
@@ -22,88 +26,103 @@ namespace EE
         d = distance;
     }
 
-    FORCEINLINE Plane Plane::FromPointNormal( const Point3& point, const Vector3& normal )
+    template <typename T>
+    FORCEINLINE TPlane<T> TPlane<T>::FromPointNormal( const TPoint3<T>& point, const TVector3<T>& normal )
     {
-        Vector3 normalizedNormal = normal.Normalized();
-        return Plane(
+        TVector3<T> normalizedNormal = normal.Normalized();
+        return TPlane(
             normalizedNormal.x,
             normalizedNormal.y,
             normalizedNormal.z,
-            -Vector3::Dot( point, normalizedNormal )
+            -TVector3<T>::Dot( point, normalizedNormal )
         );
     }
 
-    FORCEINLINE Plane Plane::From3Points( const Point3& v0, const Point3& v1, const Point3& v2 )
+    template <typename T>
+    FORCEINLINE TPlane<T> TPlane<T>::From3Points( const TPoint3<T>& v0, const TPoint3<T>& v1, const TPoint3<T>& v2 )
     {
-        Vector3 normal = Vector3::Cross( v1 - v0, v2 - v0 );
+        TVector3<T> normal = TVector3<T>::Cross( v1 - v0, v2 - v0 );
         normal.Normalize();
         FromPointNormal( v0, normal );
     }
 
-    FORCEINLINE void Plane::Normalize()
+    template <typename T>
+    FORCEINLINE void TPlane<T>::Normalize()
     {
-        float distance = sqrtf( x * x + y * y + z * z );
+        T distance = std::sqrt( x * x + y * y + z * z );
         x /= distance;
         y /= distance;
         z /= distance;
         d /= distance;
     }
 
-    FORCEINLINE float Plane::SignedDistance( const Vector3& p ) const
+    template <typename T>
+    FORCEINLINE T TPlane<T>::SignedDistance( const TVector3<T>& p ) const
     {
         return (x * p.x + y * p.y + z * p.z + d);
     }
 
-    inline Point3 Plane::SegmentIntersection( const Point3& point1, const Point3& point2 ) const
+    template <typename T>
+    inline TPoint3<T> TPlane<T>::SegmentIntersection( const TPoint3<T>& point1, const TPoint3<T>& point2 ) const
     {
         return point1 + (point2 - point1) * ((d - Dot( point1 )) / (Dot( point2 - point1 )));
     }
 
-    FORCEINLINE Point3 Plane::GetOrigin() const
+    template <typename T>
+    FORCEINLINE TPoint3<T> TPlane<T>::GetOrigin() const
     {
         return normal * d;
     }
 
-    FORCEINLINE float Plane::DotPoint( const Point3& p ) const
+    template <typename T>
+    FORCEINLINE T TPlane<T>::DotPoint( const TPoint3<T>& p ) const
     {
         return x * p.x + y * p.y + z * p.z - d;
     }
 
-    FORCEINLINE float Plane::Dot( const Vector4& v ) const
+    template <typename T>
+    FORCEINLINE T TPlane<T>::Dot( const TVector4<T>& v ) const
     {
         return x * v.x + y * v.y + z * v.z + d * v.w;
     }
 
-    FORCEINLINE float Plane::Dot( const Vector3& v ) const
+    template <typename T>
+    FORCEINLINE T TPlane<T>::Dot( const TVector3<T>& v ) const
     {
         return x * v.x + y * v.y + z * v.z + d;
     }
 
-    FORCEINLINE float Plane::DotCoord( const Vector3& v ) const
+    template <typename T>
+    FORCEINLINE T TPlane<T>::DotCoord( const TVector3<T>& v ) const
     {
         return x * v.x + y * v.y + z * v.z + d;
     }
 
-    FORCEINLINE float Plane::DotNormal( const Vector3& v ) const
+    template <typename T>
+    FORCEINLINE T TPlane<T>::DotNormal( const TVector3<T>& v ) const
     {
         return x * v.x + y * v.y + z * v.z;
     }
 
-    FORCEINLINE Frustrum::Frustrum( ) : left(), right(), top(), bottom(), near(), far()
+    template <typename T>
+    FORCEINLINE TFrustrum<T>::TFrustrum( ) : left(), right(), top(), bottom(), near(), far()
     {
     }
 
-    FORCEINLINE Frustrum::Frustrum( const Frustrum& other )
+    template <typename T>
+    FORCEINLINE TFrustrum<T>::TFrustrum( const TFrustrum<T>& other )
         : left( other.left ), right( other.right ), top( other.top ), bottom( other.bottom ), near( other.near ), far( other.far )
     {
     }
 
-    FORCEINLINE Frustrum::Frustrum( const Plane& left, const Plane& right, const Plane& top, const Plane& bottom, const Plane& near , const Plane& far )
+    template <typename T>
+    FORCEINLINE TFrustrum<T>::TFrustrum( const TPlane<T>& left, const TPlane<T>& right, const TPlane<T>& top, const TPlane<T>& bottom, const TPlane<T>& near , const TPlane<T>& far )
         : left( left ), right( right ), top( top ), bottom( bottom ), near( near ), far( far)
     {
     }
 
-    FORCEINLINE bool Frustrum::Inside( const Point3& point ) const
+    template <typename T>
+    FORCEINLINE bool TFrustrum<T>::Inside( const TPoint3<T>& point ) const
     {
         return
               left.DotPoint( point ) < 0 &&
@@ -114,7 +133,8 @@ namespace EE
               near.DotPoint( point ) < 0;
     }
 
-    FORCEINLINE Frustrum Frustrum::FromMVP( const Matrix4x4& mvp )
+    template <typename T>
+    FORCEINLINE TFrustrum<T> TFrustrum<T>::FromMVP( const TMatrix4x4<T>& mvp )
     {
         Frustrum fustrum;
 

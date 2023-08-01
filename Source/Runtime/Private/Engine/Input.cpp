@@ -18,7 +18,7 @@ namespace EE
 
     MouseButtonState GMouseButtonStates[ EMouseButton::Mouse_Button_NUM ];
 
-    Point2 GMousePosition, GRelativeMousePosition;
+    Point2f GMousePosition, GRelativeMousePosition;
 
     int InputEventsHandler_Internal( void* userData, SDL_Event* sdlEvent );
 
@@ -117,7 +117,7 @@ namespace EE
         GRelativeMousePosition.y = GMousePosition.y - windowY;
     }
 
-    const Point2& Input::GetMousePosition( bool realtive ) const
+    const Point2f& Input::GetMousePosition( bool realtive ) const
     {
         if ( realtive )
             return GMousePosition;

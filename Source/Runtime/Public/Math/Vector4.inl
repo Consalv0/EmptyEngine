@@ -5,61 +5,72 @@
 #include "Math/IntVector3.h"
 #include "Math/Vector4.h"
 
-namespace EE
+namespace EE::Math
 {
-	FORCEINLINE Vector4::Vector4()
+    template <typename T>
+	FORCEINLINE TVector4<T>::TVector4()
 		: x( 0 ), y( 0 ), z( 0 ), w( 0 )
 	{
 	}
+    template <typename T>
 
-	FORCEINLINE Vector4::Vector4( const Vector4& vector )
+	FORCEINLINE TVector4<T>::TVector4( const TVector4<T>& vector )
 		: x( vector.x ), y( vector.y ), z( vector.z ), w( vector.w )
 	{
 	}
 
-	FORCEINLINE Vector4::Vector4( const float& x, const float& y, const float& z )
+    template <typename T>
+	FORCEINLINE TVector4<T>::TVector4( const T& x, const T& y, const T& z )
 		: x( x ), y( y ), z( z ), w( 0 )
 	{
 	}
 
-	FORCEINLINE Vector4::Vector4( const float& x, const float& y, const float& z, const float& w )
+    template <typename T>
+	FORCEINLINE TVector4<T>::TVector4( const T& x, const T& y, const T& z, const T& w )
 		: x( x ), y( y ), z( z ), w( w )
 	{
 	}
 
-	FORCEINLINE Vector4::Vector4( const Vector2& vector )
+    template <typename T>
+	FORCEINLINE TVector4<T>::TVector4( const TVector2<T>& vector )
 		: x( vector.x ), y( vector.y ), z( 0 ), w( 0 )
 	{
 	}
 
-	FORCEINLINE Vector4::Vector4( const Vector3& vector )
+    template <typename T>
+	FORCEINLINE TVector4<T>::TVector4( const TVector3<T>& vector )
 		: x( vector.x ), y( vector.y ), z( vector.z ), w( 0 )
 	{
 	}
 
-	FORCEINLINE Vector4::Vector4( const Vector3& vector, const float& w )
+    template <typename T>
+	FORCEINLINE TVector4<T>::TVector4( const TVector3<T>& vector, const T& w )
 		: x( vector.x ), y( vector.y ), z( vector.z ), w( w )
 	{
 	}
 
-	FORCEINLINE Vector4::Vector4( const float& value )
+    template <typename T>
+	FORCEINLINE TVector4<T>::TVector4( const T& value )
 		: x( value ), y( value ), z( value ), w( value )
 	{
 	}
 
-	inline float Vector4::Magnitude() const
+    template <typename T>
+	inline T TVector4<T>::Magnitude() const
 	{
 		return sqrtf( x * x + y * y + z * z + w * w );
 	}
 
-	inline float Vector4::MagnitudeSquared() const
+    template <typename T>
+	inline T TVector4<T>::MagnitudeSquared() const
 	{
 		return x * x + y * y + z * z + w * w;
 	}
 
-	inline void Vector4::Normalize()
+    template <typename T>
+	inline void TVector4<T>::Normalize()
 	{
-		float sqrMagnitude = MagnitudeSquared();
+		T sqrMagnitude = MagnitudeSquared();
 		if ( sqrMagnitude == 0 )
 		{
 			x = 0; y = 0; z = 0; w = 0;
@@ -70,98 +81,115 @@ namespace EE
 		}
 	}
 
-	inline Vector4 Vector4::Normalized() const
+    template <typename T>
+	inline TVector4<T> TVector4<T>::Normalized() const
 	{
-		float sqrMagnitude = MagnitudeSquared();
-		if ( sqrMagnitude == 0 ) return Vector4();
-		Vector4 result = Vector4( *this );
+		T sqrMagnitude = MagnitudeSquared();
+		if ( sqrMagnitude == 0 ) return TVector4();
+		TVector4 result = TVector4( *this );
 		return result /= sqrtf( sqrMagnitude );
 	}
 
-	FORCEINLINE float Vector4::Dot( const Vector4& other ) const
+    template <typename T>
+	FORCEINLINE T TVector4<T>::Dot( const TVector4<T>& other ) const
 	{
 		return x * other.x + y * other.y + z * other.z + w * other.w;
 	}
 
-	FORCEINLINE float Vector4::Dot( const Vector4& a, const Vector4& b )
+    template <typename T>
+	FORCEINLINE T TVector4<T>::Dot( const TVector4<T>& a, const TVector4<T>& b )
 	{
 		return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 	}
 
-	inline const float* Vector4::PointerToValue() const
+    template <typename T>
+	inline const T* TVector4<T>::PointerToValue() const
 	{
 		return &x;
 	}
 
-	FORCEINLINE Vector4 Vector4::Lerp( const Vector4& start, const Vector4& end, float t )
+    template <typename T>
+	FORCEINLINE TVector4<T> TVector4<T>::Lerp( const TVector4<T>& start, const TVector4<T>& end, T t )
 	{
-		return Vector4(
-			(start.x * (1.0F - t)) + (end.x * t),
-			(start.y * (1.0F - t)) + (end.y * t),
-			(start.z * (1.0F - t)) + (end.z * t),
-			(start.w * (1.0F - t)) + (end.w * t)
+		return TVector4(
+			(start.x * (1 - t)) + (end.x * t),
+			(start.y * (1 - t)) + (end.y * t),
+			(start.z * (1 - t)) + (end.z * t),
+			(start.w * (1 - t)) + (end.w * t)
 		);
 	}
 
-	inline float& Vector4::operator[]( unsigned char i )
+    template <typename T>
+	inline T& TVector4<T>::operator[]( unsigned char i )
 	{
-		EE_CORE_ASSERT( i <= 3, L"Vector4 index out of bounds" );
+		EE_CORE_ASSERT( i <= 3, L"TVector4 index out of bounds" );
 		return ((float*)this)[ i ];
 	}
 
-	inline float const& Vector4::operator[]( unsigned char i ) const
+    template <typename T>
+	inline T const& TVector4<T>::operator[]( unsigned char i ) const
 	{
-		EE_CORE_ASSERT( i <= 3, L"Vector4 index out of bounds" );
+		EE_CORE_ASSERT( i <= 3, L"TVector4 index out of bounds" );
 		return ((float*)this)[ i ];
 	}
 
-	FORCEINLINE bool Vector4::operator==( const Vector4& other ) const
+    template <typename T>
+	FORCEINLINE bool TVector4<T>::operator==( const TVector4<T>& other ) const
 	{
 		return (x == other.x && y == other.y && z == other.z && w == other.w);
 	}
 
-	FORCEINLINE bool Vector4::operator!=( const Vector4& other ) const
+    template <typename T>
+	FORCEINLINE bool TVector4<T>::operator!=( const TVector4<T>& other ) const
 	{
 		return (x != other.x || y != other.y || z != other.z || w != other.w);
 	}
 
-	FORCEINLINE Vector4 Vector4::operator+( const Vector4& other ) const
+    template <typename T>
+	FORCEINLINE TVector4<T> TVector4<T>::operator+( const TVector4<T>& other ) const
 	{
-		return Vector4( x + other.x, y + other.y, z + other.z, w + other.w );
+		return TVector4( x + other.x, y + other.y, z + other.z, w + other.w );
 	}
 
-	FORCEINLINE Vector4 Vector4::operator-( const Vector4& other ) const
+    template <typename T>
+	FORCEINLINE TVector4<T> TVector4<T>::operator-( const TVector4<T>& other ) const
 	{
-		return Vector4( x - other.x, y - other.y, z - other.z, w - other.w );
+		return TVector4( x - other.x, y - other.y, z - other.z, w - other.w );
 	}
 
-	FORCEINLINE Vector4 Vector4::operator-( void ) const
+    template <typename T>
+	FORCEINLINE TVector4<T> TVector4<T>::operator-( void ) const
 	{
-		return Vector4( -x, -y, -z, -w );
+		return TVector4( -x, -y, -z, -w );
 	}
 
-	FORCEINLINE Vector4 Vector4::operator*( const float& value ) const
+    template <typename T>
+	FORCEINLINE TVector4<T> TVector4<T>::operator*( const T& value ) const
 	{
-		return Vector4( x * value, y * value, z * value, w * value );
+		return TVector4( x * value, y * value, z * value, w * value );
 	}
 
-	FORCEINLINE Vector4 Vector4::operator/( const float& value ) const
+    template <typename T>
+	FORCEINLINE TVector4<T> TVector4<T>::operator/( const T& value ) const
 	{
-		if ( value == 0 ) return Vector4();
-		return Vector4( x / value, y / value, z / value, w / value );
+		if ( value == 0 ) return TVector4();
+		return TVector4( x / value, y / value, z / value, w / value );
 	}
 
-	FORCEINLINE Vector4 Vector4::operator*( const Vector4& other ) const
+    template <typename T>
+	FORCEINLINE TVector4<T> TVector4<T>::operator*( const TVector4<T>& other ) const
 	{
-		return Vector4( x * other.x, y * other.y, z * other.z, w * other.w );
+		return TVector4( x * other.x, y * other.y, z * other.z, w * other.w );
 	}
 
-	FORCEINLINE Vector4 Vector4::operator/( const Vector4& other ) const
+    template <typename T>
+	FORCEINLINE TVector4<T> TVector4<T>::operator/( const TVector4<T>& other ) const
 	{
-		return Vector4( x / other.x, y / other.y, z / other.z, w / other.w );
+		return TVector4( x / other.x, y / other.y, z / other.z, w / other.w );
 	}
 
-	FORCEINLINE Vector4& Vector4::operator+=( const Vector4& other )
+    template <typename T>
+	FORCEINLINE TVector4<T>& TVector4<T>::operator+=( const TVector4<T>& other )
 	{
 		x += other.x;
 		y += other.y;
@@ -170,7 +198,8 @@ namespace EE
 		return *this;
 	}
 
-	FORCEINLINE Vector4& Vector4::operator-=( const Vector4& other )
+    template <typename T>
+	FORCEINLINE TVector4<T>& TVector4<T>::operator-=( const TVector4<T>& other )
 	{
 		x -= other.x;
 		y -= other.y;
@@ -179,7 +208,8 @@ namespace EE
 		return *this;
 	}
 
-	FORCEINLINE Vector4& Vector4::operator*=( const Vector4& other )
+    template <typename T>
+	FORCEINLINE TVector4<T>& TVector4<T>::operator*=( const TVector4<T>& other )
 	{
 		x *= other.x;
 		y *= other.y;
@@ -188,7 +218,8 @@ namespace EE
 		return *this;
 	}
 
-	FORCEINLINE Vector4& Vector4::operator/=( const Vector4& other )
+    template <typename T>
+	FORCEINLINE TVector4<T>& TVector4<T>::operator/=( const TVector4<T>& other )
 	{
 		x /= other.x;
 		y /= other.y;
@@ -197,7 +228,8 @@ namespace EE
 		return *this;
 	}
 
-	FORCEINLINE Vector4& Vector4::operator*=( const float& value )
+    template <typename T>
+	FORCEINLINE TVector4<T>& TVector4<T>::operator*=( const T& value )
 	{
 		x *= value;
 		y *= value;
@@ -206,7 +238,8 @@ namespace EE
 		return *this;
 	}
 
-	FORCEINLINE Vector4& Vector4::operator/=( const float& value )
+    template <typename T>
+	FORCEINLINE TVector4<T>& TVector4<T>::operator/=( const T& value )
 	{
 		if ( value == 0 ) x = y = z = w = 0;
 		x /= value;
@@ -216,14 +249,15 @@ namespace EE
 		return *this;
 	}
 
-	inline Vector4 operator*( float value, const Vector4& vector )
+    template <typename T>
+	inline TVector4<T> operator*( T value, const TVector4<T>& vector )
 	{
-		return Vector4( value * vector.x, value * vector.y, value * vector.z, value * vector.w );
+		return TVector4( value * vector.x, value * vector.y, value * vector.z, value * vector.w );
 	}
 
-	inline Vector4 operator/( float value, const Vector4& vector )
+    template <typename T>
+	inline TVector4<T> operator/( T value, const TVector4<T>& vector )
 	{
-		return Vector4( value / vector.x, value / vector.y, value / vector.z, value / vector.w );
+		return TVector4( value / vector.x, value / vector.y, value / vector.z, value / vector.w );
 	}
-
 }

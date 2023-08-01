@@ -4,78 +4,71 @@
 
 namespace EE
 {
+    namespace Math
+    {
+        template <typename T>
+        struct TVector3
+        {
+        public:
+            union
+            {
+                struct { T x, y, z; };
+                struct { T r, g, b; };
+            };
 
-	struct IntVector3;
-	struct Vector2;
-	struct Vector4;
+            HOST_DEVICE FORCEINLINE TVector3();
+            HOST_DEVICE FORCEINLINE TVector3( const TVector2<T>& vector );
+            template <typename I>
+            HOST_DEVICE FORCEINLINE TVector3( const TIntVector3<I>& vector );
+            HOST_DEVICE FORCEINLINE TVector3( const TVector3<T>& vector );
+            HOST_DEVICE FORCEINLINE TVector3( const TVector4<T>& vector );
+            HOST_DEVICE FORCEINLINE TVector3( const T& value );
+            HOST_DEVICE FORCEINLINE TVector3( const T& x, const T& y, const T& z );
+            HOST_DEVICE FORCEINLINE TVector3( const T& x, const T& y );
 
-	struct Vector3
-	{
-	public:
-		union
-		{
-			struct { float x, y, z; };
-			struct { float r, g, b; };
-		};
+            HOST_DEVICE inline T Magnitude() const;
+            HOST_DEVICE inline T MagnitudeSquared() const;
+            HOST_DEVICE inline void Normalize();
+            HOST_DEVICE inline TVector3<T> Normalized() const;
 
-		HOST_DEVICE FORCEINLINE Vector3();
-		HOST_DEVICE FORCEINLINE Vector3( const Vector2& vector );
-		HOST_DEVICE FORCEINLINE Vector3( const IntVector3& vector );
-		HOST_DEVICE FORCEINLINE Vector3( const Vector3& vector );
-		HOST_DEVICE FORCEINLINE Vector3( const Vector4& vector );
-		HOST_DEVICE FORCEINLINE Vector3( const float& value );
-		HOST_DEVICE FORCEINLINE Vector3( const float& x, const float& y, const float& z );
-		HOST_DEVICE FORCEINLINE Vector3( const float& x, const float& y );
+            HOST_DEVICE FORCEINLINE TVector3 Cross( const TVector3<T>& other ) const;
+            HOST_DEVICE FORCEINLINE static TVector3 Cross( const TVector3<T>& a, const TVector3<T>& b );
+            HOST_DEVICE FORCEINLINE T Dot( const TVector3<T>& other ) const;
+            HOST_DEVICE FORCEINLINE static T Dot( const TVector3<T>& a, const TVector3<T>& b );
+            HOST_DEVICE FORCEINLINE static TVector3<T> Lerp( const TVector3<T>& start, const TVector3<T>& end, T t );
+            HOST_DEVICE FORCEINLINE static TVector3<T> Reflect( const TVector3<T>& Incident, const TVector3<T>& normal );
 
-		HOST_DEVICE inline float Magnitude() const;
-		HOST_DEVICE inline float MagnitudeSquared() const;
-		HOST_DEVICE inline void Normalize();
-		HOST_DEVICE inline Vector3 Normalized() const;
+            HOST_DEVICE inline T& operator[]( unsigned char i );
+            HOST_DEVICE inline T const& operator[]( unsigned char i ) const;
+            HOST_DEVICE inline const T* PointerToValue() const;
 
-		HOST_DEVICE FORCEINLINE Vector3 Cross( const Vector3& other ) const;
-		HOST_DEVICE FORCEINLINE static Vector3 Cross( const Vector3& a, const Vector3& b );
-		HOST_DEVICE FORCEINLINE float Dot( const Vector3& other ) const;
-		HOST_DEVICE FORCEINLINE static float Dot( const Vector3& a, const Vector3& b );
-		HOST_DEVICE FORCEINLINE static Vector3 Lerp( const Vector3& start, const Vector3& end, float t );
-		HOST_DEVICE FORCEINLINE static Vector3 Reflect( const Vector3& Incident, const Vector3& normal );
+            HOST_DEVICE FORCEINLINE bool operator==( const TVector3& other ) const;
+            HOST_DEVICE FORCEINLINE bool operator!=( const TVector3& other ) const;
 
-		HOST_DEVICE inline float& operator[]( unsigned char i );
-		HOST_DEVICE inline float const& operator[]( unsigned char i ) const;
-		HOST_DEVICE inline const float* PointerToValue() const;
+            HOST_DEVICE FORCEINLINE TVector3 operator+( const TVector3& other ) const;
+            HOST_DEVICE FORCEINLINE TVector3 operator-( const TVector3& other ) const;
+            HOST_DEVICE FORCEINLINE TVector3 operator-( void ) const;
+            HOST_DEVICE FORCEINLINE TVector3 operator*( const TVector3& other ) const;
+            HOST_DEVICE FORCEINLINE TVector3 operator/( const TVector3& other ) const;
+            HOST_DEVICE FORCEINLINE TVector3 operator*( const T& value ) const;
+            HOST_DEVICE FORCEINLINE TVector3 operator/( const T& value ) const;
 
-		HOST_DEVICE FORCEINLINE bool operator==( const Vector3& other ) const;
-		HOST_DEVICE FORCEINLINE bool operator!=( const Vector3& other ) const;
+            HOST_DEVICE FORCEINLINE TVector3& operator+=( const TVector3& other );
+            HOST_DEVICE FORCEINLINE TVector3& operator-=( const TVector3& other );
+            HOST_DEVICE FORCEINLINE TVector3& operator*=( const TVector3& other );
+            HOST_DEVICE FORCEINLINE TVector3& operator/=( const TVector3& other );
+            HOST_DEVICE FORCEINLINE TVector3& operator*=( const T& value );
+            HOST_DEVICE FORCEINLINE TVector3& operator/=( const T& value );
+        };
 
-		HOST_DEVICE FORCEINLINE Vector3 operator+( const Vector3& other ) const;
-		HOST_DEVICE FORCEINLINE Vector3 operator-( const Vector3& other ) const;
-		HOST_DEVICE FORCEINLINE Vector3 operator-( void ) const;
-		HOST_DEVICE FORCEINLINE Vector3 operator*( const Vector3& other ) const;
-		HOST_DEVICE FORCEINLINE Vector3 operator/( const Vector3& other ) const;
-		HOST_DEVICE FORCEINLINE Vector3 operator*( const float& value ) const;
-		HOST_DEVICE FORCEINLINE Vector3 operator/( const float& value ) const;
+        //* Get the angles in degrees in the range of (-180, 180) 
+        template <typename T>
+        inline TVector3<T> NormalizeAngleComponents( TVector3<T> eulerAngle );
 
-		HOST_DEVICE FORCEINLINE Vector3& operator+=( const Vector3& other );
-		HOST_DEVICE FORCEINLINE Vector3& operator-=( const Vector3& other );
-		HOST_DEVICE FORCEINLINE Vector3& operator*=( const Vector3& other );
-		HOST_DEVICE FORCEINLINE Vector3& operator/=( const Vector3& other );
-		HOST_DEVICE FORCEINLINE Vector3& operator*=( const float& value );
-		HOST_DEVICE FORCEINLINE Vector3& operator/=( const float& value );
-
-		HOST_DEVICE inline friend Vector3 operator*( float value, const Vector3& vector );
-		HOST_DEVICE inline friend Vector3 operator/( float value, const Vector3& vector );
-	};
-
-	typedef Vector3 Point3;
-
-}
-
-namespace Math
-{
-	//* Get the angles in degrees in the range of (-180, 180) 
-	inline EE::Vector3 NormalizeAngleComponents( EE::Vector3 eulerAngle );
-
-	//* Get the angles in degrees in the range of [0, 360)
-	inline EE::Vector3 ClampAngleComponents( EE::Vector3 eulerAngle );
+        //* Get the angles in degrees in the range of [0, 360)
+        template <typename T>
+        inline TVector3<T> ClampAngleComponents( TVector3<T> eulerAngle );
+    }
 }
 
 #include "Math/Vector3.inl"

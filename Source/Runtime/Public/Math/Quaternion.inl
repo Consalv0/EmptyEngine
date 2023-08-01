@@ -9,43 +9,48 @@
 #include "Math/Matrix3x3.h"
 #include "Math/Quaternion.h"
 
-namespace EE
+namespace EE::Math
 {
-	FORCEINLINE Quaternion::Quaternion()
+    template <typename T>
+	FORCEINLINE TQuaternion<T>::TQuaternion()
 		:w( 1 ), x( 0 ), y( 0 ), z( 0 )
 	{
 	}
 
-	FORCEINLINE Quaternion::Quaternion( Quaternion const& other )
+    template <typename T>
+	FORCEINLINE TQuaternion<T>::TQuaternion( TQuaternion<T> const& other )
 		: w( other.w ), x( other.x ), y( other.y ), z( other.z )
 	{
 	}
 
-	FORCEINLINE Quaternion::Quaternion( float const& Scale, Vector3 const& vector )
+    template <typename T>
+	FORCEINLINE TQuaternion<T>::TQuaternion( T const& Scale, TVector3<T> const& vector )
 		: w( Scale ), x( vector.x ), y( vector.y ), z( vector.z )
 	{
 	}
 
-	FORCEINLINE Quaternion::Quaternion( float const& w, float const& x, float const& y, float const& z )
+    template <typename T>
+	FORCEINLINE TQuaternion<T>::TQuaternion( T const& w, T const& x, T const& y, T const& z )
 		: w( w ), x( x ), y( y ), z( z )
 	{
 	}
 
-	inline Quaternion Quaternion::FromEulerAngles( Vector3 const& EulerAngles )
+    template <typename T>
+	inline TQuaternion<T> TQuaternion<T>::FromEulerAngles( TVector3<T> const& EulerAngles )
 	{
-		const float Scale = Math::DegToRad * 0.5F;
-		float HalfRoll = EulerAngles[ Roll ] * Scale;
-		float HalfPitch = EulerAngles[ Pitch ] * Scale;
-		float HalfYaw = EulerAngles[ Yaw ] * Scale;
+		const T Scale = MathConstants<T>::DegToRad * T(0.5);
+		T HalfRoll = EulerAngles[ Roll ] * Scale;
+		T HalfPitch = EulerAngles[ Pitch ] * Scale;
+		T HalfYaw = EulerAngles[ Yaw ] * Scale;
 
-		float SR = std::sin( HalfRoll );
-		float CR = std::cos( HalfRoll );
-		float SP = std::sin( HalfPitch );
-		float CP = std::cos( HalfPitch );
-		float SY = std::sin( HalfYaw );
-		float CY = std::cos( HalfYaw );
+		T SR = std::sin( HalfRoll );
+		T CR = std::cos( HalfRoll );
+		T SP = std::sin( HalfPitch );
+		T CP = std::cos( HalfPitch );
+		T SY = std::sin( HalfYaw );
+		T CY = std::cos( HalfYaw );
 
-		Quaternion EulerToQuat;
+		TQuaternion EulerToQuat;
 		EulerToQuat.x = (CY * SP * CR) + (SY * CP * SR);
 		EulerToQuat.y = (SY * CP * CR) - (CY * SP * SR);
 		EulerToQuat.z = (CY * CP * SR) - (SY * SP * CR);
@@ -53,141 +58,149 @@ namespace EE
 		return EulerToQuat;
 	}
 
-	FORCEINLINE Quaternion Quaternion::FromToRotation( Vector3 const& From, Vector3 const& To )
+    template <typename T>
+	FORCEINLINE TQuaternion<T> TQuaternion<T>::FromToRotation( TVector3<T> const& from, TVector3<T> const& to )
 	{
-		Vector3 Half = From + To;
+		TVector3 Half = from + to;
 		Half.Normalize();
 
-		return Quaternion(
-			From.Dot( Half ),
-			From.y * Half.z - From.z * Half.y,
-			From.z * Half.x - From.x * Half.z,
-			From.x * Half.y - From.y * Half.x
+		return TQuaternion(
+			from.Dot( Half ),
+			from.y * Half.z - from.z * Half.y,
+			from.z * Half.x - from.x * Half.z,
+			from.x * Half.y - from.y * Half.x
 		).Normalized();
 	}
 
-	inline Quaternion Quaternion::FromAxisAngle( Vector3 const& Axis, float const& Radians )
+    template <typename T>
+	inline TQuaternion<T> TQuaternion<T>::FromAxisAngle( TVector3<T> const& Axis, T const& Radians )
 	{
-		float Sine = sinf( Radians * .5F );
+		T Sine = std::sin( Radians * T(.5) );
 
-		return Quaternion(
-			cosf( Radians * .5F ),
+		return TQuaternion(
+			std::cos( Radians * T(.5) ),
 			Axis.x * Sine,
 			Axis.y * Sine,
 			Axis.z * Sine
 		);
 	}
 
-	inline Quaternion Quaternion::FromLookRotation( Vector3 const& Forward, Vector3 const& Up )
+    template <typename T>
+	inline TQuaternion<T> TQuaternion<T>::FromLookRotation( TVector3<T> const& forward, TVector3<T> const& up )
 	{
-		const Vector3 normal = Forward.Normalized();
-		const Vector3 tangent = Vector3::Cross( Up == normal ? Up + 0.001F : Up, normal ).Normalized();
-		const Vector3 Bitangent = Vector3::Cross( normal, tangent );
+		const TVector3<T> normal = forward.Normalized();
+		const TVector3<T> tangent = TVector3::Cross( up == normal ? up + 0.001F : up, normal ).Normalized();
+		const TVector3<T> Bitangent = TVector3::Cross( normal, tangent );
 
-		Matrix3x3 LookSpace(
+		TMatrix3x3 LookSpace(
 			tangent, Bitangent, normal
 		);
 
-		return Quaternion::FromMatrix( LookSpace );
+		return TQuaternion::FromMatrix( LookSpace );
 	}
 
-	inline Quaternion Quaternion::FromMatrix( Matrix3x3 const& matrix )
+    template <typename T>
+	inline TQuaternion<T> TQuaternion<T>::FromMatrix( TMatrix3x3<T> const& matrix )
 	{
-		const float tr = matrix.m0[ 0 ] + matrix.m1[ 1 ] + matrix.m2[ 2 ];
+		const T tr = matrix.m00 + matrix.m11 + matrix.m22;
 
-		if ( tr > 0.F )
+		if ( tr > T(0) )
 		{
-			float num0 = sqrtf( tr + 1.F );
-			float num1 = 0.5f / num0;
-			return Quaternion(
-				num0 * 0.5f,
-				(matrix.m1[ 2 ] - matrix.m2[ 1 ]) * num1,
-				(matrix.m2[ 0 ] - matrix.m0[ 2 ]) * num1,
-				(matrix.m0[ 1 ] - matrix.m1[ 0 ]) * num1
+			T num0 = sqrtf( tr + T(1) );
+			T num1 = T(.5) / num0;
+			return TQuaternion(
+				num0 * T(.5),
+				(matrix.m12 - matrix.m21) * num1,
+				(matrix.m20 - matrix.m02) * num1,
+				(matrix.m01 - matrix.m10) * num1
 			);
 		}
-		if ( (matrix.m0[ 0 ] >= matrix.m1[ 1 ]) && (matrix.m0[ 0 ] >= matrix.m2[ 2 ]) )
+		if ( (matrix.m00 >= matrix.m11) && (matrix.m00 >= matrix.m22) )
 		{
-			float num7 = sqrtf( ((1.F + matrix.m0[ 0 ]) - matrix.m1[ 1 ]) - matrix.m2[ 2 ] );
-			float num4 = 0.5f / num7;
-			return Quaternion(
-				(matrix.m1[ 2 ] - matrix.m2[ 1 ]) * num4,
-				0.5f * num7,
-				(matrix.m0[ 1 ] + matrix.m1[ 0 ]) * num4,
-				(matrix.m0[ 2 ] + matrix.m2[ 0 ]) * num4
+			T num7 = std::sqrtf( ((1 + matrix.m00) - matrix.m11) - matrix.m22 );
+			T num4 = T(.5) / num7;
+			return TQuaternion(
+				(matrix.m12 - matrix.m21) * num4,
+				T(.5) * num7,
+				(matrix.m01 + matrix.m10) * num4,
+				(matrix.m02 + matrix.m20) * num4
 			);
 		}
-		if ( matrix.m1[ 1 ] > matrix.m2[ 2 ] )
+		if ( matrix.m11 > matrix.m22 )
 		{
-			float num6 = sqrtf( ((1.F + matrix.m1[ 1 ]) - matrix.m0[ 0 ]) - matrix.m2[ 2 ] );
-			float num3 = 0.5f / num6;
-			return Quaternion(
-				(matrix.m2[ 0 ] - matrix.m0[ 2 ]) * num3,
-				(matrix.m1[ 0 ] + matrix.m0[ 1 ]) * num3,
-				0.5f * num6,
-				(matrix.m2[ 1 ] + matrix.m1[ 2 ]) * num3
+			T num6 = std::sqrtf( ((1 + matrix.m11) - matrix.m00) - matrix.m22 );
+			T num3 = T(.5) / num6;
+			return TQuaternion(
+				(matrix.m20 - matrix.m02) * num3,
+				(matrix.m10 + matrix.m01) * num3,
+				T(.5) * num6,
+				(matrix.m21 + matrix.m12) * num3
 			);
 		}
 
-		float num5 = sqrtf( ((1.F + matrix.m2[ 2 ]) - matrix.m0[ 0 ]) - matrix.m1[ 1 ] );
-		float num2 = 0.5F / num5;
-		return Quaternion(
-			(matrix.m0[ 1 ] - matrix.m1[ 0 ]) * num2,
-			(matrix.m2[ 0 ] + matrix.m0[ 2 ]) * num2,
-			(matrix.m2[ 1 ] + matrix.m1[ 2 ]) * num2,
-			0.5F * num5
+		T num5 = sqrtf( ((T(1) + matrix.m22) - matrix.m00) - matrix.m11 );
+		T num2 = T(.5) / num5;
+		return TQuaternion(
+			(matrix.m01 - matrix.m10) * num2,
+			(matrix.m20 + matrix.m02) * num2,
+			(matrix.m21 + matrix.m12) * num2,
+			T(.5) * num5
 		);
 	}
 
-	inline void Quaternion::Interpolate( Quaternion& Out, const Quaternion& start, const Quaternion& end, float Factor )
+    template <typename T>
+	inline void TQuaternion<T>::Interpolate( TQuaternion<T>& out, const TQuaternion<T>& start, const TQuaternion<T>& end, T factor )
 	{
-		float CosTheta = start.x * end.x + start.y * end.y + start.z * end.z + start.w * end.w;
+		T cosTheta = start.x * end.x + start.y * end.y + start.z * end.z + start.w * end.w;
 
 		// Adjust signs (if necessary)
-		Quaternion AdjEnd = end;
-		if ( CosTheta < 0.F )
+		TQuaternion adjEnd = end;
+		if ( cosTheta < 0 )
 		{
-			CosTheta = -CosTheta;
-			AdjEnd.x = -AdjEnd.x;   // Reverse all signs
-			AdjEnd.y = -AdjEnd.y;
-			AdjEnd.z = -AdjEnd.z;
-			AdjEnd.w = -AdjEnd.w;
+			cosTheta = -cosTheta;
+			adjEnd.x = -adjEnd.x;   // Reverse all signs
+			adjEnd.y = -adjEnd.y;
+			adjEnd.z = -adjEnd.z;
+			adjEnd.w = -adjEnd.w;
 		}
 
 		// Calculate coefficients
-		float sclp, sclq;
-		if ( (1.F - CosTheta) > 0.0001F )
+		T sclp, sclq;
+		if ( (T(1) - cosTheta) > 0.0001F )
 		{
 			// Standard case (slerp)
-			float omega = std::acos( CosTheta ); // extract theta from dot product's cos theta
-			float sinom = std::sin( omega );
-			sclp = std::sin( (1.F - Factor) * omega ) / sinom;
-			sclq = std::sin( Factor * omega ) / sinom;
+			T omega = std::acos( cosTheta ); // extract theta from dot product's cos theta
+			T sinom = std::sin( omega );
+			sclp = std::sin( (1 - factor) * omega ) / sinom;
+			sclq = std::sin( factor * omega ) / sinom;
 		}
 		else
 		{
 			// Very close, do linear interp (because it's faster)
-			sclp = 1.F - Factor;
-			sclq = Factor;
+			sclp = 1 - factor;
+			sclq = factor;
 		}
 
-		Out.x = sclp * start.x + sclq * AdjEnd.x;
-		Out.y = sclp * start.y + sclq * AdjEnd.y;
-		Out.z = sclp * start.z + sclq * AdjEnd.z;
-		Out.w = sclp * start.w + sclq * AdjEnd.w;
+		out.x = sclp * start.x + sclq * adjEnd.x;
+		out.y = sclp * start.y + sclq * adjEnd.y;
+		out.z = sclp * start.z + sclq * adjEnd.z;
+		out.w = sclp * start.w + sclq * adjEnd.w;
 	}
 
-	inline float Quaternion::Magnitude() const
+    template <typename T>
+	inline T TQuaternion<T>::Magnitude() const
 	{
-		return sqrtf( x * x + y * y + z * z + w * w );
+		return std::sqrtf( x * x + y * y + z * z + w * w );
 	}
 
-	inline float Quaternion::MagnitudeSquared() const
+    template <typename T>
+	inline T TQuaternion<T>::MagnitudeSquared() const
 	{
 		return x * x + y * y + z * z + w * w;
 	}
 
-	inline void Quaternion::Normalize()
+    template <typename T>
+	inline void TQuaternion<T>::Normalize()
 	{
 		if ( MagnitudeSquared() == 0 )
 		{
@@ -199,158 +212,170 @@ namespace EE
 		}
 	}
 
-	inline Quaternion Quaternion::Normalized() const
+    template <typename T>
+	inline TQuaternion<T> TQuaternion<T>::Normalized() const
 	{
-		if ( MagnitudeSquared() == 0 ) return Quaternion();
-		Quaternion Result = Quaternion( *this );
+		if ( MagnitudeSquared() == 0 ) return TQuaternion();
+		TQuaternion Result = TQuaternion( *this );
 		return Result /= Magnitude();
 	}
 
-	inline Quaternion Quaternion::Conjugated() const
+    template <typename T>
+	inline TQuaternion<T> TQuaternion<T>::Conjugated() const
 	{
-		return Quaternion( GetScalar(), GetVector() * -1.F );
+		return TQuaternion( GetScalar(), GetVector() * -1 );
 	}
 
-	inline Quaternion Quaternion::Inversed() const
+    template <typename T>
+	inline TQuaternion<T> TQuaternion<T>::Inversed() const
 	{
-		float AbsoluteValue = Magnitude();
+		T AbsoluteValue = Magnitude();
 		AbsoluteValue *= AbsoluteValue;
 		AbsoluteValue = 1 / AbsoluteValue;
 
-		Quaternion ConjugateVal = Conjugated();
+		TQuaternion ConjugateVal = Conjugated();
 
-		float Scalar = ConjugateVal.GetScalar() * AbsoluteValue;
-		Vector3 Imaginary = ConjugateVal.GetVector() * AbsoluteValue;
+		T Scalar = ConjugateVal.GetScalar() * AbsoluteValue;
+		TVector3<T> Imaginary = ConjugateVal.GetVector() * AbsoluteValue;
 
-		return Quaternion( Scalar, Imaginary );
+		return TQuaternion( Scalar, Imaginary );
 	}
 
-	inline Matrix4x4 Quaternion::ToMatrix4x4() const
+    template <typename T>
+	inline TMatrix4x4<T> TQuaternion<T>::ToMatrix4x4() const
 	{
-		Matrix4x4 Result;
-		float xx( x * x );
-		float yy( y * y );
-		float zz( z * z );
-		float xz( x * z );
-		float xy( x * y );
-		float yz( y * z );
-		float wx( w * x );
-		float wy( w * y );
-		float wz( w * z );
+		TMatrix4x4 result;
+		T xx( x * x );
+		T yy( y * y );
+		T zz( z * z );
+		T xz( x * z );
+		T xy( x * y );
+		T yz( y * z );
+		T wx( w * x );
+		T wy( w * y );
+		T wz( w * z );
 
-		Result[ 0 ][ 0 ] = 1.F - 2.F * (yy + zz);
-		Result[ 0 ][ 1 ] = 2.F * (xy + wz);
-		Result[ 0 ][ 2 ] = 2.F * (xz - wy);
+		result.m00 = 1 - 2 * (yy + zz);
+		result.m01 = 2 * (xy + wz);
+		result.m02 = 2 * (xz - wy);
 
-		Result[ 1 ][ 0 ] = 2.F * (xy - wz);
-		Result[ 1 ][ 1 ] = 1.F - 2.f * (xx + zz);
-		Result[ 1 ][ 2 ] = 2.F * (yz + wx);
+		result.m10 = 2 * (xy - wz);
+		result.m11 = 1 - 2 * (xx + zz);
+		result.m12 = 2 * (yz + wx);
 
-		Result[ 2 ][ 0 ] = 2.F * (xz + wy);
-		Result[ 2 ][ 1 ] = 2.F * (yz - wx);
-		Result[ 2 ][ 2 ] = 1.F - 2.F * (xx + yy);
-		return Result;
+		result.m20 = 2 * (xz + wy);
+		result.m21 = 2 * (yz - wx);
+		result.m22 = 1 - 2 * (xx + yy);
+		return result;
 	}
 
-	inline float Quaternion::GetPitch() const
+    template <typename T>
+	inline T TQuaternion<T>::GetPitch() const
 	{
-		float Pitch;
-		const float SingularityTest = x * y + z * w;
-		if ( Math::Abs( SingularityTest ) > 0.499995F )
+		T pitch;
+		const T singularityTest = x * y + z * w;
+		if ( Math::Abs( singularityTest ) > 0.499995 )
 		{
-			return 0.F;
+			return 0;
 		}
 		else
 		{
-			Pitch = Math::Atan2( (2.F * x * w) - (2.F * y * z), 1.F - (2.F * Math::Square( x )) - (2.F * Math::Square( z )) );
+			pitch = Math::Atan2( (2 * x * w) - (2 * y * z), 1 - (2 * Math::Square( x )) - (2 * Math::Square( z )) );
 		}
-		return Pitch * Math::RadToDegree;
+		return pitch * MathConstants<T>::RadToDegree;
 	}
 
-	inline float Quaternion::GetYaw() const
+    template <typename T>
+	inline T TQuaternion<T>::GetYaw() const
 	{
-		float Yaw;
-		const float SingularityTest = x * y + z * w;
-		if ( SingularityTest > 0.499995F )
+		T yaw;
+		const T SingularityTest = x * y + z * w;
+		if ( SingularityTest > 0.499995 )
 		{
-			Yaw = 2.F * Math::Atan2( x, w );
+			yaw = 2 * Math::Atan2( x, w );
 		}
-		else if ( SingularityTest < -0.49999F )
+		else if ( SingularityTest < -0.49999 )
 		{
-			Yaw = -2.F * Math::Atan2( x, w );
+			yaw = -2 * Math::Atan2( x, w );
 		}
 		else
 		{
-			const float sqy = y * y;
-			const float sqz = z * z;
-			Yaw = Math::Atan2( (2.F * y * w) - (2.F * x * z), 1.F - (2.F * sqy) - (2.F * sqz) );
+			const T sqy = y * y;
+			const T sqz = z * z;
+			yaw = Math::Atan2( (2 * y * w) - (2 * x * z), 1 - (2 * sqy) - (2 * sqz) );
 		}
-		return Yaw * Math::RadToDegree;
+		return yaw * MathConstants<T>::RadToDegree;
 	}
 
-	inline float Quaternion::GetRoll() const
+    template <typename T>
+	inline T TQuaternion<T>::GetRoll() const
 	{
-		float Roll;
-		const float SingularityTest = x * y + z * w;
-		if ( SingularityTest > 0.499995F )
+		T roll;
+		const T singularityTest = x * y + z * w;
+		if ( singularityTest > 0.499995 )
 		{
-			Roll = Math::HalfPi;
+			roll = MathConstants<T>::HalfPi;
 		}
-		else if ( SingularityTest < -0.499995F )
+		else if ( singularityTest < -0.499995 )
 		{
-			Roll = -Math::HalfPi;
+			roll = -MathConstants<T>::HalfPi;
 		}
 		else
 		{
-			Roll = asin( 2.F * SingularityTest );
+			roll = asin( 2 * singularityTest );
 		}
-		return Roll * Math::RadToDegree;
+		return roll * MathConstants<T>::RadToDegree;
 	}
 
-	inline float Quaternion::GetScalar() const
+    template <typename T>
+	inline T TQuaternion<T>::GetScalar() const
 	{
-		return w;
+		return scalar;
 	}
 
-	inline Vector3 Quaternion::GetVector() const
+    template <typename T>
+	inline TVector3<T> TQuaternion<T>::GetVector() const
 	{
-		return Vector3( x, y, z );
+		return vector;
 	}
 
-	inline Vector3 Quaternion::ToEulerAngles() const
+    template <typename T>
+	inline TVector3<T> TQuaternion<T>::ToEulerAngles() const
 	{
-		Vector3 EulerFromQuat;
+		TVector3<T> eulerFromQuat;
 
-		float PitchY = std::asin( 2.F * (x * w - y * z) );
-		float Test = std::cos( PitchY );
-		if ( Test > Math::TendencyZero )
+		T PitchY = std::asin( 2 * (x * w - y * z) );
+		T Test = std::cos( PitchY );
+		if ( Test > MathConstants<T>::TendencyZero )
 		{
-			EulerFromQuat[ Roll ] = Math::Atan2( 2.F * (x * y + z * w), 1.F - (2.F * (Math::Square( z ) + Math::Square( x ))) ) * Math::RadToDegree;
-			EulerFromQuat[ Pitch ] = PitchY * Math::RadToDegree;
-			EulerFromQuat[ Yaw ] = Math::Atan2( 2.F * (z * x + y * w), 1.F - (2.F * (Math::Square( y ) + Math::Square( x ))) ) * Math::RadToDegree;
+			eulerFromQuat[ Roll ] = Math::Atan2( 2 * (x * y + z * w), 1 - (2 * (Math::Square( z ) + Math::Square( x ))) ) * MathConstants<T>::RadToDegree;
+			eulerFromQuat[ Pitch ] = PitchY * MathConstants<T>::RadToDegree;
+			eulerFromQuat[ Yaw ] = Math::Atan2( 2 * (z * x + y * w), 1 - (2 * (Math::Square( y ) + Math::Square( x ))) ) * MathConstants<T>::RadToDegree;
 		}
 		else
 		{
-			EulerFromQuat[ Roll ] = Math::Atan2( -2.F * (x * y - z * w), 1.F - (2.F * (Math::Square( y ) + Math::Square( z ))) ) * Math::RadToDegree;
-			EulerFromQuat[ Pitch ] = PitchY * Math::RadToDegree;
-			EulerFromQuat[ Yaw ] = 0.F;
+			eulerFromQuat[ Roll ] = Math::Atan2( -2.F * (x * y - z * w), 1 - (2 * (Math::Square( y ) + Math::Square( z ))) ) * MathConstants<T>::RadToDegree;
+			eulerFromQuat[ Pitch ] = PitchY * MathConstants<T>::RadToDegree;
+			eulerFromQuat[ Yaw ] = 0;
 		}
 
-		if ( std::isinf( EulerFromQuat[ Roll ] ) || std::isnan( EulerFromQuat[ Roll ] ) )   EulerFromQuat[ Roll ] = 0.F;
-		if ( std::isinf( EulerFromQuat[ Pitch ] ) || std::isnan( EulerFromQuat[ Pitch ] ) ) EulerFromQuat[ Pitch ] = 0.F;
-		if ( std::isinf( EulerFromQuat[ Yaw ] ) || std::isnan( EulerFromQuat[ Yaw ] ) )     EulerFromQuat[ Yaw ] = 0.F;
+		if ( std::isinf( eulerFromQuat[ Roll ] ) || std::isnan( eulerFromQuat[ Roll ] ) )   eulerFromQuat[ Roll ] = 0;
+		if ( std::isinf( eulerFromQuat[ Pitch ] ) || std::isnan( eulerFromQuat[ Pitch ] ) ) eulerFromQuat[ Pitch ] = 0;
+		if ( std::isinf( eulerFromQuat[ Yaw ] ) || std::isnan( eulerFromQuat[ Yaw ] ) )     eulerFromQuat[ Yaw ] = 0;
 
-		return EulerFromQuat;
+		return eulerFromQuat;
 	}
 
-	FORCEINLINE float Quaternion::Dot( const Quaternion& other ) const
+    template <typename T>
+	FORCEINLINE T TQuaternion<T>::Dot( const TQuaternion<T>& other ) const
 	{
 		return x * other.x + y * other.y + z * other.z + w * other.w;
 	}
 
-	inline Quaternion Quaternion::Cross( const Quaternion& other ) const
+    template <typename T>
+	inline TQuaternion<T> TQuaternion<T>::Cross( const TQuaternion& other ) const
 	{
-		return Quaternion(
+		return TQuaternion(
 			w * other.w - x * other.x - y * other.y - z * other.z,
 			w * other.x + x * other.w + y * other.z - z * other.y,
 			w * other.y + y * other.w + z * other.x - x * other.z,
@@ -358,75 +383,87 @@ namespace EE
 		);
 	}
 
-	inline const float* Quaternion::PointerToValue() const
+    template <typename T>
+	inline const T* TQuaternion<T>::PointerToValue() const
 	{
 		return &w;
 	}
 
-	inline float& Quaternion::operator[]( unsigned char i )
+    template <typename T>
+	inline T& TQuaternion<T>::operator[]( unsigned char i )
 	{
 		return (&w)[ i ];
 	}
 
-	inline float const& Quaternion::operator[]( unsigned char i ) const
+    template <typename T>
+	inline T const& TQuaternion<T>::operator[]( unsigned char i ) const
 	{
 		return (&w)[ i ];
 	}
 
-	FORCEINLINE bool Quaternion::operator==( const Quaternion& other ) const
+    template <typename T>
+	FORCEINLINE bool TQuaternion<T>::operator==( const TQuaternion<T>& other ) const
 	{
 		return (x == other.x && y == other.y && z == other.z && w == other.w);
 	}
 
-	FORCEINLINE bool Quaternion::operator!=( const Quaternion& other ) const
+    template <typename T>
+	FORCEINLINE bool TQuaternion<T>::operator!=( const TQuaternion<T>& other ) const
 	{
 		return (x != other.x || y != other.y || z != other.z || w != other.w);
 	}
 
-	FORCEINLINE Quaternion Quaternion::operator-( void ) const
+    template <typename T>
+	FORCEINLINE TQuaternion<T> TQuaternion<T>::operator-( void ) const
 	{
-		return Quaternion( -w, -x, -y, -z );
+		return TQuaternion( -w, -x, -y, -z );
 	}
 
-	FORCEINLINE Quaternion Quaternion::operator*( const float& value ) const
+    template <typename T>
+	FORCEINLINE TQuaternion<T> TQuaternion<T>::operator*( const T& value ) const
 	{
-		return Quaternion( w * value, x * value, y * value, z * value );
+		return TQuaternion( w * value, x * value, y * value, z * value );
 	}
 
-	FORCEINLINE Quaternion Quaternion::operator/( const float& value ) const
+    template <typename T>
+	FORCEINLINE TQuaternion<T> TQuaternion<T>::operator/( const T& value ) const
 	{
-		if ( value == 0.F ) Quaternion();
-		return Quaternion( w / value, x / value, y / value, z / value );
+		if ( value == 0 ) TQuaternion();
+		return TQuaternion( w / value, x / value, y / value, z / value );
 	}
 
-	FORCEINLINE Quaternion Quaternion::operator*( const Quaternion& other ) const
+    template <typename T>
+	FORCEINLINE TQuaternion<T> TQuaternion<T>::operator*( const TQuaternion& other ) const
 	{
-		Quaternion Result;
+		TQuaternion result;
 
-		Result.x = w * other.x + x * other.w + y * other.z - z * other.y;
-		Result.y = w * other.y + y * other.w + z * other.x - x * other.z;
-		Result.z = w * other.z + z * other.w + x * other.y - y * other.x;
-		Result.w = w * other.w - x * other.x - y * other.y - z * other.z;
+		result.x = w * other.x + x * other.w + y * other.z - z * other.y;
+		result.y = w * other.y + y * other.w + z * other.x - x * other.z;
+		result.z = w * other.z + z * other.w + x * other.y - y * other.x;
+		result.w = w * other.w - x * other.x - y * other.y - z * other.z;
 
-		return Result;
+		return result;
 	}
 
-	inline Vector3 Quaternion::operator*( const Vector3& vector ) const
+    template <typename T>
+	inline TVector3<T> TQuaternion<T>::operator*( const TVector3<T>& vector ) const
 	{
-		Vector3 const QuatVector( GetVector() );
-		Vector3 const QV( Vector3::Cross( QuatVector, vector ) );
-		Vector3 const QQV( Vector3::Cross( QuatVector, QV ) );
+		TVector3<T> const QuatVector( GetVector() );
+		TVector3<T> const QV( TVector3<T>::Cross( QuatVector, vector ) );
+		TVector3<T> const QQV( TVector3<T>::Cross( QuatVector, QV ) );
 
-		return vector + ((QV * w) + QQV) * 2.F;
+		return vector + ((QV * w) + QQV) * 2;
 	}
 
-	FORCEINLINE Quaternion& Quaternion::operator*=( const Quaternion& other )
+    template <typename T>
+	FORCEINLINE TQuaternion<T>& TQuaternion<T>::operator*=( const TQuaternion& other )
 	{
 		*this = *this * other;
 		return *this;
 	}
 
-	FORCEINLINE Quaternion& Quaternion::operator*=( const float& value )
+    template <typename T>
+	FORCEINLINE TQuaternion<T>& TQuaternion<T>::operator*=( const T& value )
 	{
 		w *= value;
 		x *= value;
@@ -435,9 +472,10 @@ namespace EE
 		return *this;
 	}
 
-	FORCEINLINE Quaternion& Quaternion::operator/=( const float& value )
+    template <typename T>
+	FORCEINLINE TQuaternion<T>& TQuaternion<T>::operator/=( const T& value )
 	{
-		if ( value == 0.F ) w = x = y = z = 0;
+		if ( value == 0 ) w = x = y = z = 0;
 		w /= value;
 		x /= value;
 		y /= value;

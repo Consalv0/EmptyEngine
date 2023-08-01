@@ -8,159 +8,192 @@
 #include "Vector3.h"
 #include "Vector4.h"
 
-namespace EE
+namespace EE::Math
 {
-	FORCEINLINE IntVector3::IntVector3()
+    template <typename T>
+	FORCEINLINE TIntVector3<T>::TIntVector3()
 		: x( 0 ), y( 0 ), z( 0 )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const Vector2& vector )
+    template <typename T>
+    template <typename R>
+	FORCEINLINE TIntVector3<T>::TIntVector3( const TVector2<R>& vector )
 		: x( (int32)vector.x ), y( (int32)vector.y ), z( 0 )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const Vector3& vector )
+    template <typename T>
+    template <typename R>
+	FORCEINLINE TIntVector3<T>::TIntVector3( const TVector3<R>& vector )
 		: x( (int32)vector.x ), y( (int32)vector.y ), z( (int32)vector.z )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const IntVector3& vector )
+    template <typename T>
+	FORCEINLINE TIntVector3<T>::TIntVector3( const TIntVector3& vector )
 		: x( vector.x ), y( vector.y ), z( vector.z )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const IntVector2& vector )
+    template <typename T>
+	FORCEINLINE TIntVector3<T>::TIntVector3( const TIntVector2<T>& vector )
 		: x( vector.x ), y( vector.y ), z( 0 )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const IntVector2& vector, const int32& z )
+    template <typename T>
+	FORCEINLINE TIntVector3<T>::TIntVector3( const TIntVector2<T>& vector, const T& z )
 		: x( vector.x ), y( vector.y ), z( z )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const Vector4& vector )
+    template <typename T>
+    template <typename R>
+	FORCEINLINE TIntVector3<T>::TIntVector3( const TVector4<R>& vector )
 		: x( (int32)vector.x ), y( (int32)vector.y ), z( (int32)vector.z )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const int32& x, const int32& y, const int32& z )
+    template <typename T>
+	FORCEINLINE TIntVector3<T>::TIntVector3( const T& x, const T& y, const T& z )
 		: x( x ), y( y ), z( z )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const int32& x, const int32& y )
+    template <typename T>
+	FORCEINLINE TIntVector3<T>::TIntVector3( const T& x, const T& y )
 		: x( x ), y( y ), z( 0 )
 	{
 	}
 
-	FORCEINLINE IntVector3::IntVector3( const int32& value )
+    template <typename T>
+	FORCEINLINE TIntVector3<T>::TIntVector3( const T& value )
 		: x( value ), y( value ), z( value )
 	{
 	}
 
-	inline float IntVector3::Magnitude() const
+    template <typename T>
+    template <typename R>
+	inline R TIntVector3<T>::Magnitude() const
 	{
-		return sqrtf( x * float( x ) + y * float( y ) + z * float( z ) );
+		return sqrtf( x * R( x ) + y * R( y ) + z * R( z ) );
 	}
 
-	inline int32 IntVector3::MagnitudeSquared() const
+    template <typename T>
+	inline T TIntVector3<T>::MagnitudeSquared() const
 	{
 		return x * x + y * y + z * z;
 	}
 
-	FORCEINLINE IntVector3 IntVector3::Cross( const IntVector3& other ) const
+    template <typename T>
+	FORCEINLINE TIntVector3<T> TIntVector3<T>::Cross( const TIntVector3& other ) const
 	{
-		return IntVector3(
+		return TIntVector3(
 			y * other.z - z * other.y,
 			z * other.x - x * other.z,
 			x * other.y - y * other.x
 		);
 	}
 
-	FORCEINLINE int32 IntVector3::Dot( const IntVector3& other ) const
+    template <typename T>
+	FORCEINLINE T TIntVector3<T>::Dot( const TIntVector3& other ) const
 	{
 		return (x * other.x) + (y * other.y) + (z * other.z);
 	}
 
-	inline Vector3 IntVector3::FloatVector3() const
+    template <typename T>
+    template <typename V>
+	inline V TIntVector3<T>::ToFloat() const
 	{
-		return Vector3( float( x ), float( y ), float( z ) );
+		return V( x, y, z );
 	}
 
-	inline const int32* IntVector3::PointerToValue() const
+    template <typename T>
+	inline const T* TIntVector3<T>::PointerToValue() const
 	{
 		return &x;
 	}
 
-	inline int32& IntVector3::operator[]( unsigned char i )
+    template <typename T>
+	inline T& TIntVector3<T>::operator[]( unsigned char i )
 	{
-		EE_CORE_ASSERT( i <= 2, "IntVector3 index out of bounds" );
-		return ((int32*)this)[ i ];
+		EE_CORE_ASSERT( i <= 2, "TIntVector3 index out of bounds" );
+		return ((T*)this)[ i ];
 	}
 
-	inline int32 const& IntVector3::operator[]( unsigned char i ) const
+    template <typename T>
+	inline T const& TIntVector3<T>::operator[]( unsigned char i ) const
 	{
-		EE_CORE_ASSERT( i <= 2, "IntVector3 index out of bounds" );
-		return ((int32*)this)[ i ];
+		EE_CORE_ASSERT( i <= 2, "TIntVector3 index out of bounds" );
+		return ((T*)this)[ i ];
 	}
 
-	FORCEINLINE IntVector3 IntVector3::operator * ( const IntVector3& other ) const
+    template <typename T>
+	FORCEINLINE TIntVector3<T> TIntVector3<T>::operator * ( const TIntVector3& other ) const
 	{
-		return IntVector3(
+		return TIntVector3(
 			x * other.x,
 			y * other.y,
 			z * other.z
 		);
 	}
 
-	FORCEINLINE IntVector3 IntVector3::operator/( const IntVector3& other ) const
+    template <typename T>
+	FORCEINLINE TIntVector3<T> TIntVector3<T>::operator/( const TIntVector3& other ) const
 	{
-		return IntVector3(
+		return TIntVector3(
 			x / other.x,
 			y / other.y,
 			z / other.z
 		);
 	}
 
-	FORCEINLINE bool IntVector3::operator==( const IntVector3& other )
+    template <typename T>
+	FORCEINLINE bool TIntVector3<T>::operator==( const TIntVector3& other )
 	{
 		return (x == other.x && y == other.y && z == other.z);
 	}
 
-	FORCEINLINE bool IntVector3::operator!=( const IntVector3& other )
+    template <typename T>
+	FORCEINLINE bool TIntVector3<T>::operator!=( const TIntVector3& other )
 	{
 		return (x != other.x || y != other.y || z != other.z);
 	}
 
-	FORCEINLINE IntVector3 IntVector3::operator+( const IntVector3& other ) const
+    template <typename T>
+	FORCEINLINE TIntVector3<T> TIntVector3<T>::operator+( const TIntVector3& other ) const
 	{
-		return IntVector3( x + other.x, y + other.y, z + other.z );
+		return TIntVector3( x + other.x, y + other.y, z + other.z );
 	}
 
-	FORCEINLINE IntVector3 IntVector3::operator-( const IntVector3& other ) const
+    template <typename T>
+	FORCEINLINE TIntVector3<T> TIntVector3<T>::operator-( const TIntVector3& other ) const
 	{
-		return IntVector3( x - other.x, y - other.y, z - other.z );
+		return TIntVector3( x - other.x, y - other.y, z - other.z );
 	}
 
-	FORCEINLINE IntVector3 IntVector3::operator-( void ) const
+    template <typename T>
+	FORCEINLINE TIntVector3<T> TIntVector3<T>::operator-( void ) const
 	{
-		return IntVector3( -x, -y, -z );
+		return TIntVector3( -x, -y, -z );
 	}
 
-	FORCEINLINE IntVector3 IntVector3::operator*( const int32& value ) const
+    template <typename T>
+	FORCEINLINE TIntVector3<T> TIntVector3<T>::operator*( const T& value ) const
 	{
-		return IntVector3( x * value, y * value, z * value );
+		return TIntVector3( x * value, y * value, z * value );
 	}
 
-	FORCEINLINE IntVector3 IntVector3::operator/( const int32& value ) const
+    template <typename T>
+	FORCEINLINE TIntVector3<T> TIntVector3<T>::operator/( const T& value ) const
 	{
-		if ( value == 0 ) return IntVector3();
-		return IntVector3( x / value, y / value, z / value );
+		if ( value == 0 ) return TIntVector3();
+		return TIntVector3( x / value, y / value, z / value );
 	}
 
-	FORCEINLINE IntVector3& IntVector3::operator+=( const IntVector3& other )
+    template <typename T>
+	FORCEINLINE TIntVector3<T>& TIntVector3<T>::operator+=( const TIntVector3& other )
 	{
 		x += other.x;
 		y += other.y;
@@ -168,7 +201,8 @@ namespace EE
 		return *this;
 	}
 
-	FORCEINLINE IntVector3& IntVector3::operator-=( const IntVector3& other )
+    template <typename T>
+	FORCEINLINE TIntVector3<T>& TIntVector3<T>::operator-=( const TIntVector3& other )
 	{
 		x -= other.x;
 		y -= other.y;
@@ -176,7 +210,8 @@ namespace EE
 		return *this;
 	}
 
-	FORCEINLINE IntVector3& IntVector3::operator*=( const IntVector3& other )
+    template <typename T>
+	FORCEINLINE TIntVector3<T>& TIntVector3<T>::operator*=( const TIntVector3& other )
 	{
 		x *= other.x;
 		y *= other.y;
@@ -184,7 +219,8 @@ namespace EE
 		return *this;
 	}
 
-	FORCEINLINE IntVector3& IntVector3::operator/=( const IntVector3& other )
+    template <typename T>
+	FORCEINLINE TIntVector3<T>& TIntVector3<T>::operator/=( const TIntVector3& other )
 	{
 		x /= other.x;
 		y /= other.y;
@@ -192,7 +228,8 @@ namespace EE
 		return *this;
 	}
 
-	FORCEINLINE IntVector3& IntVector3::operator*=( const int32& value )
+    template <typename T>
+	FORCEINLINE TIntVector3<T>& TIntVector3<T>::operator*=( const T& value )
 	{
 		x *= value;
 		y *= value;
@@ -200,7 +237,8 @@ namespace EE
 		return *this;
 	}
 
-	FORCEINLINE IntVector3& IntVector3::operator/=( const int32& value )
+    template <typename T>
+	FORCEINLINE TIntVector3<T>& TIntVector3<T>::operator/=( const T& value )
 	{
 		if ( value == 0 ) x = y = z = 0;
 		x /= value;
@@ -209,13 +247,15 @@ namespace EE
 		return *this;
 	}
 
-	inline IntVector3 operator*( int32 value, const IntVector3& vector )
+    template <typename T>
+	inline TIntVector3<T> operator*( T value, const TIntVector3<T>& vector )
 	{
-		return IntVector3( value * vector.x, value * vector.y, value / vector.z );
+		return TIntVector3( value * vector.x, value * vector.y, value / vector.z );
 	}
 
-	inline IntVector3 operator/( int32 value, const IntVector3& vector )
+    template <typename T>
+	inline TIntVector3<T> operator/( T value, const TIntVector3<T>& vector )
 	{
-		return IntVector3( value / vector.x, value / vector.y, value / vector.z );
+		return TIntVector3( value / vector.x, value / vector.y, value / vector.z );
 	}
 }

@@ -4,73 +4,72 @@
 
 namespace EE
 {
-	struct Vector3;
-	struct Vector4;
-	struct IntVector2;
-	struct IntVector3;
+    namespace Math
+    {
+        template <typename T>
+        struct TVector2
+        {
+        public:
+            union
+            {
+                struct { T x, y; };
+                struct { T u, v; };
+            };
 
-	struct Vector2
-	{
-	public:
-		union
-		{
-			struct { float x, y; };
-			struct { float u, v; };
-		};
+            HOST_DEVICE FORCEINLINE TVector2();
+            HOST_DEVICE FORCEINLINE TVector2( const TVector2<T>& vector );
+            HOST_DEVICE FORCEINLINE TVector2( const TVector3<T>& vector );
+            HOST_DEVICE FORCEINLINE TVector2( const TVector4<T>& vector );
+            template <typename I>
+            HOST_DEVICE FORCEINLINE TVector2( const TIntVector2<I>& vector );
+            template <typename I>
+            HOST_DEVICE FORCEINLINE TVector2( const TIntVector3<I>& vector );
+            HOST_DEVICE FORCEINLINE TVector2( const T& value );
+            HOST_DEVICE FORCEINLINE TVector2( const T& x, const T& y );
 
-		HOST_DEVICE FORCEINLINE Vector2();
-		HOST_DEVICE FORCEINLINE Vector2( const Vector2& vector );
-		HOST_DEVICE FORCEINLINE Vector2( const Vector3& vector );
-		HOST_DEVICE FORCEINLINE Vector2( const Vector4& vector );
-		HOST_DEVICE FORCEINLINE Vector2( const IntVector2& vector );
-		HOST_DEVICE FORCEINLINE Vector2( const IntVector3& vector );
-		HOST_DEVICE FORCEINLINE Vector2( const float& value );
-		HOST_DEVICE FORCEINLINE Vector2( const float& x, const float& y );
+            HOST_DEVICE inline T Magnitude() const;
+            HOST_DEVICE inline T MagnitudeSquared() const;
+            HOST_DEVICE inline void Normalize();
+            HOST_DEVICE inline TVector2<T> Normalized() const;
 
-		HOST_DEVICE inline float Magnitude() const;
-		HOST_DEVICE inline float MagnitudeSquared() const;
-		HOST_DEVICE inline void Normalize();
-		HOST_DEVICE inline Vector2 Normalized() const;
+            //* a special version of the cross product for 2D vectors (returns scalar value).
+            HOST_DEVICE FORCEINLINE T Cross( const TVector2<T>& other ) const;
+            HOST_DEVICE FORCEINLINE static T Cross( const TVector2<T>& a, const TVector2<T>& b );
+            HOST_DEVICE FORCEINLINE T Dot( const TVector2<T>& other ) const;
+            HOST_DEVICE FORCEINLINE static T Dot( const TVector2<T>& a, const TVector2<T>& b );
+            HOST_DEVICE FORCEINLINE TVector2<T> Orthogonal( bool polarity ) const;
+            HOST_DEVICE FORCEINLINE TVector2<T> Orthonormal( bool polarity ) const;
+            HOST_DEVICE FORCEINLINE static TVector2<T> Lerp( const TVector2<T>& start, const TVector2<T>& end, T t );
 
-		//* a special version of the cross product for 2D vectors (returns scalar value).
-		HOST_DEVICE FORCEINLINE float Cross( const Vector2& other ) const;
-		HOST_DEVICE FORCEINLINE static float Cross( const Vector2& a, const Vector2& b );
-		HOST_DEVICE FORCEINLINE float Dot( const Vector2& other ) const;
-		HOST_DEVICE FORCEINLINE static float Dot( const Vector2& a, const Vector2& b );
-		HOST_DEVICE FORCEINLINE Vector2 Orthogonal( bool polarity ) const;
-		HOST_DEVICE FORCEINLINE Vector2 Orthonormal( bool polarity ) const;
-		HOST_DEVICE FORCEINLINE static Vector2 Lerp( const Vector2& start, const Vector2& end, float t );
+            HOST_DEVICE FORCEINLINE TVector2<T> Rotate( TVector2<T>& a, const TVector2<T>& center, T radians ) const;
 
-		HOST_DEVICE FORCEINLINE Vector2 Rotate( Vector2& a, const Vector2& center, float radians ) const;
+            HOST_DEVICE inline T& operator[]( unsigned char i );
+            HOST_DEVICE inline T const& operator[]( unsigned char i ) const;
+            HOST_DEVICE inline const T* PointerToValue() const;
 
-		HOST_DEVICE inline float& operator[]( unsigned char i );
-		HOST_DEVICE inline float const& operator[]( unsigned char i ) const;
-		HOST_DEVICE inline const float* PointerToValue() const;
+            HOST_DEVICE FORCEINLINE bool operator==( const TVector2<T>& other ) const;
+            HOST_DEVICE FORCEINLINE bool operator!() const;
+            HOST_DEVICE FORCEINLINE bool operator!=( const TVector2<T>& other ) const;
 
-		HOST_DEVICE FORCEINLINE bool operator==( const Vector2& other ) const;
-		HOST_DEVICE FORCEINLINE bool operator!() const;
-		HOST_DEVICE FORCEINLINE bool operator!=( const Vector2& other ) const;
+            HOST_DEVICE FORCEINLINE TVector2 operator+( const TVector2<T>& other ) const;
+            HOST_DEVICE FORCEINLINE TVector2 operator-( const TVector2<T>& other ) const;
+            HOST_DEVICE FORCEINLINE TVector2 operator-( void ) const;
+            HOST_DEVICE FORCEINLINE TVector2 operator*( const TVector2<T>& other ) const;
+            HOST_DEVICE FORCEINLINE TVector2 operator/( const TVector2<T>& other ) const;
+            HOST_DEVICE FORCEINLINE TVector2 operator*( const T& value ) const;
+            HOST_DEVICE FORCEINLINE TVector2 operator/( const T& value ) const;
 
-		HOST_DEVICE FORCEINLINE Vector2 operator+( const Vector2& other ) const;
-		HOST_DEVICE FORCEINLINE Vector2 operator-( const Vector2& other ) const;
-		HOST_DEVICE FORCEINLINE Vector2 operator-( void ) const;
-		HOST_DEVICE FORCEINLINE Vector2 operator*( const Vector2& other ) const;
-		HOST_DEVICE FORCEINLINE Vector2 operator/( const Vector2& other ) const;
-		HOST_DEVICE FORCEINLINE Vector2 operator*( const float& value ) const;
-		HOST_DEVICE FORCEINLINE Vector2 operator/( const float& value ) const;
+            HOST_DEVICE FORCEINLINE TVector2& operator+=( const TVector2& other );
+            HOST_DEVICE FORCEINLINE TVector2& operator-=( const TVector2& other );
+            HOST_DEVICE FORCEINLINE TVector2& operator*=( const TVector2& other );
+            HOST_DEVICE FORCEINLINE TVector2& operator/=( const TVector2& other );
+            HOST_DEVICE FORCEINLINE TVector2& operator*=( const T& value );
+            HOST_DEVICE FORCEINLINE TVector2& operator/=( const T& value );
 
-		HOST_DEVICE FORCEINLINE Vector2& operator+=( const Vector2& other );
-		HOST_DEVICE FORCEINLINE Vector2& operator-=( const Vector2& other );
-		HOST_DEVICE FORCEINLINE Vector2& operator*=( const Vector2& other );
-		HOST_DEVICE FORCEINLINE Vector2& operator/=( const Vector2& other );
-		HOST_DEVICE FORCEINLINE Vector2& operator*=( const float& value );
-		HOST_DEVICE FORCEINLINE Vector2& operator/=( const float& value );
-
-		HOST_DEVICE inline friend Vector2 operator*( float value, const Vector2& vector );
-		HOST_DEVICE inline friend Vector2 operator/( float value, const Vector2& vector );
-	};
-
-	typedef Vector2 Point2;
+            HOST_DEVICE inline friend TVector2 operator*( T value, const TVector2& vector );
+            HOST_DEVICE inline friend TVector2 operator/( T value, const TVector2& vector );
+        };
+    }
 }
 
 #include "Math/Vector2.inl"

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #define SPDLOG_WCHAR_TO_UTF8_SUPPORT
 #define SPDLOG_NO_DATETIME
@@ -28,18 +28,18 @@ namespace EE
 #define EE_LOG_CORE_CRITICAL(...) ::EE::Log::CoreLogger->critical(__VA_ARGS__)
 
 #ifdef EE_ENABLE_ASSERTS
-#define EE_ASSERT(X, ...) { if(!(X)) { EE_LOG_CRITICAL(L"Assertion Failed: " __VA_ARGS__); __debugbreak(); } }
 #define EE_CORE_ASSERT(X, ...) { if(!(X)) { EE_LOG_CORE_CRITICAL(L"Assertion Failed: " __VA_ARGS__); __debugbreak(); } }
+#define EE_ASSERT(X, ...) { if(!(X)) { EE_LOG_CRITICAL(L"Assertion Failed: " __VA_ARGS__); __debugbreak(); } }
 
 #else
-#define EE_ASSERT(X, ...)
 #define EE_CORE_ASSERT(X, ...)
+#define EE_ASSERT(X, ...)
 #endif
 
 #else
 
-#define EE_ASSERT(X, ...)
 #define EE_CORE_ASSERT(X, ...)
+#define EE_ASSERT(X, ...)
 
 // Core log macros
 #define EE_LOG_CORE_DEBUG(...)    

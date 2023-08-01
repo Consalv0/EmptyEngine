@@ -70,6 +70,7 @@ namespace EE
             return;
         }
 
+        SDL_SetWindowKeyboardGrab( (SDL_Window*)windowHandle_, SDL_bool( false ) );
         SDL_SetWindowData( (SDL_Window*)windowHandle_, "WindowData", this );
         SDL_AddEventWatch( WindowEventsHandler, (void*)this );
     }
@@ -168,9 +169,9 @@ namespace EE
         return IntVector2( width_, height_ );
     }
 
-    IntBox2D Window::GetViewport() const
+    IntBox2 Window::GetViewport() const
     {
-        return IntBox2D( 0, 0, width_, height_ );
+        return IntBox2( 0, 0, width_, height_ );
     }
 
     void* Window::GetHandle() const

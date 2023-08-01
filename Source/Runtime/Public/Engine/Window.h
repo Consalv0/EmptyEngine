@@ -86,7 +86,7 @@ namespace EE
         virtual IntVector2 GetSize() const;
 
         //* Get the size of the window in pixels
-        virtual IntBox2D GetViewport() const;
+        virtual IntBox2 GetViewport() const;
 
         //* Get the aspect of width divided by height in pixels of the window
         virtual float GetAspectRatio() const;

@@ -23,7 +23,7 @@ namespace EE
 		void WaitCommandList( CommandList cmd, CommandList wait_for ) {}
 		void RenderPassBegin( const SwapChain& swapchain, CommandList cmd );
 		void RenderPassEnd( const SwapChain& swapchain, CommandList cmd );
-		void BindScissorRects( uint32 numRects, const Box2D* rects, CommandList cmd );
+		void BindScissorRects( uint32 numRects, const Rect* rects, CommandList cmd );
 		void BindResource( EShaderStage stage, const GraphicsDeviceResource* resource, uint32 slot, CommandList cmd, int subresource = -1 );
 		void BindResources( EShaderStage stage, const GraphicsDeviceResource* const* resources, uint32 slot, uint32 count, CommandList cmd );
 		void BindUAV( EShaderStage stage, const GraphicsDeviceResource* resource, uint32 slot, CommandList cmd, int subresource = -1 );

@@ -11,8 +11,19 @@ extern EE::Application* EE::CreateApplication();
 
 #include "Platform/Platform.h"
 
+#ifdef EE_PLATFORM_WINDOWS
+#include <iostream>
+#include <fcntl.h>
+#include <io.h>
+#include <stdio.h>
+#endif
+
 int main(int argc, char **argv) 
 {
+#ifdef EE_PLATFORM_WINDOWS
+    SetConsoleOutputCP( CP_UTF8 );
+#endif
+
 	// EE::Log::Initialize();
     EE::Log::Initialize();
 	EE::GEngine = new EE::GameEngine();

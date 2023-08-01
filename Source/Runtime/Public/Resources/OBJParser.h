@@ -20,7 +20,7 @@ namespace EE
             };
 
             NString name;
-            Box3D bounding;
+            BoundingBox3 bounding;
             TArray<Subdivision> subdivisions;
             bool hasNormals;
             bool hasTextureCoords;

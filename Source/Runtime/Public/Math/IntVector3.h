@@ -4,66 +4,67 @@
 
 namespace EE
 {
-	struct IntVector2;
-	struct Vector2;
-	struct Vector3;
-	struct Vector4;
+    namespace Math
+    {
+        template <typename T>
+        struct TIntVector3
+        {
+        public:
+            union
+            {
+                struct { T x, y, z; };
+                struct { T r, g, b; };
+            };
 
-	struct IntVector3
-	{
-	public:
-		union
-		{
-			struct { int32 x, y, z; };
-			struct { int32 r, g, b; };
-		};
+            HOST_DEVICE FORCEINLINE TIntVector3();
+            HOST_DEVICE FORCEINLINE TIntVector3( const TIntVector3& vector );
+            HOST_DEVICE FORCEINLINE TIntVector3( const TIntVector2<T>& vector );
+            HOST_DEVICE FORCEINLINE TIntVector3( const TIntVector2<T>& vector, const T& z );
+            template <typename R>
+            HOST_DEVICE FORCEINLINE TIntVector3( const TVector2<R>& vector );
+            template <typename R>
+            HOST_DEVICE FORCEINLINE TIntVector3( const TVector3<R>& vector );
+            template <typename R>
+            HOST_DEVICE FORCEINLINE TIntVector3( const TVector4<R>& vector );
+            HOST_DEVICE FORCEINLINE TIntVector3( const T& value );
+            HOST_DEVICE FORCEINLINE TIntVector3( const T& x, const T& y, const T& z );
+            HOST_DEVICE FORCEINLINE TIntVector3( const T& x, const T& y );
 
-		HOST_DEVICE FORCEINLINE IntVector3();
-		HOST_DEVICE FORCEINLINE IntVector3( const IntVector3& vector );
-		HOST_DEVICE FORCEINLINE IntVector3( const IntVector2& vector );
-		HOST_DEVICE FORCEINLINE IntVector3( const IntVector2& vector, const int32& z );
-		HOST_DEVICE FORCEINLINE IntVector3( const Vector2& vector );
-		HOST_DEVICE FORCEINLINE IntVector3( const Vector3& vector );
-		HOST_DEVICE FORCEINLINE IntVector3( const Vector4& vector );
-		HOST_DEVICE FORCEINLINE IntVector3( const int32& value );
-		HOST_DEVICE FORCEINLINE IntVector3( const int32& x, const int32& y, const int32& z );
-		HOST_DEVICE FORCEINLINE IntVector3( const int32& x, const int32& y );
+            template <typename R>
+            HOST_DEVICE inline R Magnitude() const;
+            HOST_DEVICE inline T MagnitudeSquared() const;
 
-		HOST_DEVICE inline float Magnitude() const;
-		HOST_DEVICE inline int32 MagnitudeSquared() const;
+            HOST_DEVICE FORCEINLINE TIntVector3 Cross( const TIntVector3& other ) const;
+            HOST_DEVICE FORCEINLINE T Dot( const TIntVector3& other ) const;
 
-		HOST_DEVICE FORCEINLINE IntVector3 Cross( const IntVector3& other ) const;
-		HOST_DEVICE FORCEINLINE int32 Dot( const IntVector3& other ) const;
+            template <typename V>
+            HOST_DEVICE inline V ToFloat() const;
+            HOST_DEVICE inline T& operator[]( unsigned char i );
+            HOST_DEVICE inline T const& operator[]( unsigned char i ) const;
+            HOST_DEVICE inline const T* PointerToValue() const;
 
-		HOST_DEVICE inline Vector3 FloatVector3() const;
-		HOST_DEVICE inline int32& operator[]( unsigned char i );
-		HOST_DEVICE inline int32 const& operator[]( unsigned char i ) const;
-		HOST_DEVICE inline const int32* PointerToValue() const;
+            HOST_DEVICE FORCEINLINE bool operator==( const TIntVector3& other );
+            HOST_DEVICE FORCEINLINE bool operator!=( const TIntVector3& other );
 
-		HOST_DEVICE FORCEINLINE bool operator==( const IntVector3& other );
-		HOST_DEVICE FORCEINLINE bool operator!=( const IntVector3& other );
+            HOST_DEVICE FORCEINLINE TIntVector3 operator+( const TIntVector3& other ) const;
+            HOST_DEVICE FORCEINLINE TIntVector3 operator-( const TIntVector3& other ) const;
+            HOST_DEVICE FORCEINLINE TIntVector3 operator-( void ) const;
+            HOST_DEVICE FORCEINLINE TIntVector3 operator*( const TIntVector3& other ) const;
+            HOST_DEVICE FORCEINLINE TIntVector3 operator/( const TIntVector3& other ) const;
+            HOST_DEVICE FORCEINLINE TIntVector3 operator*( const T& value ) const;
+            HOST_DEVICE FORCEINLINE TIntVector3 operator/( const T& value ) const;
 
-		HOST_DEVICE FORCEINLINE IntVector3 operator+( const IntVector3& other ) const;
-		HOST_DEVICE FORCEINLINE IntVector3 operator-( const IntVector3& other ) const;
-		HOST_DEVICE FORCEINLINE IntVector3 operator-( void ) const;
-		HOST_DEVICE FORCEINLINE IntVector3 operator*( const IntVector3& other ) const;
-		HOST_DEVICE FORCEINLINE IntVector3 operator/( const IntVector3& other ) const;
-		HOST_DEVICE FORCEINLINE IntVector3 operator*( const int32& value ) const;
-		HOST_DEVICE FORCEINLINE IntVector3 operator/( const int32& value ) const;
+            HOST_DEVICE FORCEINLINE TIntVector3& operator+=( const TIntVector3& other );
+            HOST_DEVICE FORCEINLINE TIntVector3& operator-=( const TIntVector3& other );
+            HOST_DEVICE FORCEINLINE TIntVector3& operator*=( const TIntVector3& other );
+            HOST_DEVICE FORCEINLINE TIntVector3& operator/=( const TIntVector3& other );
+            HOST_DEVICE FORCEINLINE TIntVector3& operator*=( const T& value );
+            HOST_DEVICE FORCEINLINE TIntVector3& operator/=( const T& value );
 
-		HOST_DEVICE FORCEINLINE IntVector3& operator+=( const IntVector3& other );
-		HOST_DEVICE FORCEINLINE IntVector3& operator-=( const IntVector3& other );
-		HOST_DEVICE FORCEINLINE IntVector3& operator*=( const IntVector3& other );
-		HOST_DEVICE FORCEINLINE IntVector3& operator/=( const IntVector3& other );
-		HOST_DEVICE FORCEINLINE IntVector3& operator*=( const int32& value );
-		HOST_DEVICE FORCEINLINE IntVector3& operator/=( const int32& value );
-
-		HOST_DEVICE inline friend IntVector3 operator*( int32 value, const IntVector3& vector );
-		HOST_DEVICE inline friend IntVector3 operator/( int32 value, const IntVector3& vector );
-	};
-
-	typedef IntVector3 IntPoint3;
-
+            HOST_DEVICE inline friend TIntVector3 operator*( T value, const TIntVector3& vector );
+            HOST_DEVICE inline friend TIntVector3 operator/( T value, const TIntVector3& vector );
+        };
+    }
 }
 
 #include "Math/IntVector3.inl"

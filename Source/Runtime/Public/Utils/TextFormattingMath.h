@@ -7,37 +7,37 @@ namespace EE
 {
 	namespace Text
 	{
-		inline WString FormatMath( const IntVector2& value )
+		inline WString FormatMath( const TIntVector2& value )
 		{
 			return Formatted( L"{%d, %d}", value.x, value.y );
 		}
 
-		inline WString FormatMath( const IntVector3& value )
+		inline WString FormatMath( const TIntVector3& value )
 		{
 			return Formatted( L"{%d, %d, %d}", value.x, value.y, value.z );
 		}
 
-		inline WString FormatMath( const Quaternion& value )
+		inline WString FormatMath( const TQuaternion& value )
 		{
 			return Formatted( L"{%.3f, %.3f, %.3f, %.3f}", value.w, value.x, value.y, value.z );
 		}
 
-		inline WString FormatMath( const Vector2& value )
+		inline WString FormatMath( const TVector2& value )
 		{
 			return Formatted( L"{%.3f, %.3f}", value.x, value.y );
 		}
 
-		inline WString FormatMath( const Vector3& value )
+		inline WString FormatMath( const TVector3& value )
 		{
 			return Formatted( L"{%.3f, %.3f, %.3f}", value.x, value.y, value.z );
 		}
 
-		inline WString FormatMath( const Vector4& value )
+		inline WString FormatMath( const TVector4& value )
 		{
 			return Formatted( L"{%.3f, %.3f, %.3f, %.3f}", value.x, value.y, value.z, value.w );
 		}
 
-		inline WString FormatMath( const Matrix4x4& value, bool ColumnMajor = false )
+		inline WString FormatMath( const TMatrix4x4& value, bool ColumnMajor = false )
 		{
 			if ( ColumnMajor )
 			{

@@ -85,7 +85,7 @@ namespace EE
             }
         }
 
-        float exponentPart = 1.0F;
+        float exponentPart = 1.0;
         if ( (**character != '\0' && **character != ',' && **character != ' ') && hasExpo )
         {
             int32 exponentSign = 1;
@@ -106,7 +106,7 @@ namespace EE
                 ++*character;
             }
 
-            exponentPart = Math::Pow10( exponentSign * e );
+            exponentPart = Math::Pow10<float, int32>( exponentSign * e );
         }
         ++ * character;
 
@@ -447,11 +447,11 @@ namespace EE
                     IntVector3 vertexIndices = modelData.vertexIndices[ count ];
                     StaticVertex newVertex = {
                         vertexIndices[ 0 ] >= 0 ? modelData.positions[ vertexIndices[ 0 ] - 1 ] : 0,
-                        vertexIndices[ 2 ] >= 0 ? modelData.normals[ vertexIndices[ 2 ] - 1 ] : Vector3( 0.F, 1.F, 0.F ),
+                        vertexIndices[ 2 ] >= 0 ? modelData.normals[ vertexIndices[ 2 ] - 1 ] : Vector3( 0., 1., 0. ),
                         0,
                         vertexIndices[ 1 ] >= 0 ? modelData.uvs[ vertexIndices[ 1 ] - 1 ] : 0,
                         vertexIndices[ 1 ] >= 0 ? modelData.uvs[ vertexIndices[ 1 ] - 1 ] : 0,
-                        Vector4( 1.F )
+                        Vector4( 1 )
                     };
                     data.bounding.Add( newVertex.position );
 

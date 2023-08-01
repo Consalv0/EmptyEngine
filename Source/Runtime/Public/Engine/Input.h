@@ -46,7 +46,7 @@ namespace EE
         virtual void UpdateMouseState();
 
 		//* Get mouse position in screen coordinates relative to the upper left position of the window
-		virtual const Point2& GetMousePosition( bool realtive ) const;
+		virtual const Point2f& GetMousePosition( bool realtive ) const;
 
         virtual void InputEventsHandler( const InputEvent& inputEvent );
 

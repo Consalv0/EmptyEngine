@@ -7,9 +7,10 @@
 #include "Math/Quaternion.h"
 #include "Math/Matrix4x4.h"
 
-namespace EE
+namespace EE::Math
 {
-	FORCEINLINE Matrix4x4::Matrix4x4() :
+    template <typename T>
+	FORCEINLINE TMatrix4x4<T>::TMatrix4x4() :
 		m00(1), m01(0), m02(0), m03(0),
 		m10(0), m11(1), m12(0), m13(0),
 		m20(0), m21(0), m22(1), m23(0),
@@ -17,12 +18,14 @@ namespace EE
 	{
 	}
 
-	FORCEINLINE Matrix4x4::Matrix4x4( const Matrix4x4& other )
+    template <typename T>
+	FORCEINLINE TMatrix4x4<T>::TMatrix4x4( const TMatrix4x4& other )
 		: m0( other.m0 ), m1( other.m1 ), m2( other.m2 ), m3( other.m3 )
 	{
 	}
 
-	FORCEINLINE Matrix4x4::Matrix4x4( const Vector4& row0, const Vector4& row1, const Vector4& row2, const Vector4 row3 )
+    template <typename T>
+	FORCEINLINE TMatrix4x4<T>::TMatrix4x4( const TVector4<T>& row0, const TVector4<T>& row1, const TVector4<T>& row2, const TVector4<T> row3 )
 	{
 		m00 = row0.x; m01 = row0.y; m02 = row0.z; m03 = row0.w;
 		m10 = row1.x; m11 = row1.y; m12 = row1.z; m13 = row1.w;
@@ -30,11 +33,12 @@ namespace EE
 		m30 = row3.x; m31 = row3.y; m32 = row3.z; m33 = row3.w;
 	}
 
-	inline Matrix4x4::Matrix4x4(
-		float m00, float m01, float m02, float m03,
-		float m10, float m11, float m12, float m13,
-		float m20, float m21, float m22, float m23,
-		float m30, float m31, float m32, float m33 ) :
+    template <typename T>
+	inline TMatrix4x4<T>::TMatrix4x4(
+		T m00, T m01, T m02, T m03,
+		T m10, T m11, T m12, T m13,
+		T m20, T m21, T m22, T m23,
+		T m30, T m31, T m32, T m33 ) :
 		m00(m00), m01(m01), m02(m02), m03(m03),
 		m10(m10), m11(m11), m12(m12), m13(m13),
 		m20(m20), m21(m21), m22(m22), m23(m23),
@@ -42,14 +46,15 @@ namespace EE
 	{
 	}
 
-	inline Matrix4x4 Matrix4x4::Identity()
+    template <typename T>
+	inline TMatrix4x4<T> TMatrix4x4<T>::Identity()
 	{
-		return Matrix4x4();
+		return TMatrix4x4();
 	}
 
-    // inline Matrix4x4 Matrix4x4::Perspective( const float& fov, const float& aspect, const float& near, const float& far )
+    // inline Matrix4x4 Matrix4x4::Perspective( const T& fov, const T& aspect, const T& near, const T& far )
     // {
-    //     float const tanHalfFOV = tan( fov / 2.F );
+    //     T const tanHalfFOV = tan( fov / 2.F );
     //     Matrix4x4 result(
     //         1.F / (aspect * tanHalfFOV), 0.F, 0.F, 0.F,
     //         0.F, 1.F / (tanHalfFOV), 0.F, 0.F,
@@ -59,95 +64,103 @@ namespace EE
     //     return result;
     // }
 
-    inline Matrix4x4 Matrix4x4::Perspective( const float& fov, const float& aspect, const float& near, const float& far )
+    template <typename T>
+    inline TMatrix4x4<T> TMatrix4x4<T>::Perspective( const T& fov, const T& aspect, const T& near, const T& far )
     {
-        float const tanHalfFOV = tan( fov / 2.F );
-        Matrix4x4 result(
-            1.F / (tanHalfFOV * aspect), 0.F, 0.F, 0.F,
-            0.F, 1.F / (tanHalfFOV), 0.F, 0.F,
-            0.F, 0.F, ((near == far) ? 1.F : far / (far - near)), 1.F,
-            0.F, 0.F, -near * ((near == far) ? 1.F : far / (far - near)), 0.F
+        T const tanHalfFOV = tan( fov * T(0.5) );
+        TMatrix4x4 result(
+            T(1) / (tanHalfFOV * aspect), T(0), T(0), T(0),
+            T(0), T(1) / (tanHalfFOV), 0, 0,
+            T(0), T(0), ((near == far) ? 1 : far / (far - near)), 1,
+            T(0), T(0), -near * ((near == far) ? 1 : far / (far - near)), 0
         );
         return result;
     }
 
-    inline Matrix4x4 Matrix4x4::PerspectiveReversed( const float& fov, const float& aspect, const float& near, const float& far )
+    template <typename T>
+    inline TMatrix4x4<T> TMatrix4x4<T>::PerspectiveReversed( const T& fov, const T& aspect, const T& near, const T& far )
     {
-        float const tanHalfFOV = tan( fov / 2.F );
-        Matrix4x4 result(
-            1.F / (tanHalfFOV * aspect), 0.F, 0.F, 0.F,
-            0.F, 1.F / (tanHalfFOV), 0.F, 0.F,
-            0.F, 0.F, ((near == far) ? 0.0F : near / (near - far)), 1.F,
-            0.F, 0.F, ((near == far) ? near : -far * near / (near - far)), 0.F
+        T const tanHalfFOV = tan( fov * T(0.5) );
+        TMatrix4x4 result(
+            T(1) / (tanHalfFOV * aspect), 0, 0, 0,
+            T(0), T(1) / (tanHalfFOV), 0, 0,
+            T(0), T(0), ((near == far) ? 0 : near / (near - far)), 1,
+            T(0), T(0), ((near == far) ? near : -far * near / (near - far)), 0
         );
         return result;
     }
 
-	inline Matrix4x4 Matrix4x4::Orthographic( const float& left, const float& right, const float& bottom, const float& top )
+    template <typename T>
+	inline TMatrix4x4<T> TMatrix4x4<T>::Orthographic( const T& left, const T& right, const T& bottom, const T& top )
 	{
-		Matrix4x4 result(
-			2.F / (right - left), 0.F, 0.F, 0.F,
-			0.F, 2.F / (top - bottom), 0.F, 0.F,
-			0.F, 0.F, 1.F, 0.F,
-			-(right + left) / (right - left), -(top + bottom) / (top - bottom), 0.F, 1.F
+		TMatrix4x4 result(
+			T(2) / (right - left), 0, 0, 0,
+			0, T(2) / (top - bottom), 0, 0,
+			0, 0, 1, 0,
+			-(right + left) / (right - left), -(top + bottom) / (top - bottom), 0, 1
 		);
 		return result;
 	}
 
-	inline Matrix4x4 Matrix4x4::Orthographic( const float& left, const float& right, const float& bottom, const float& top, const float& near, const float& far )
+    template <typename T>
+	inline TMatrix4x4<T> TMatrix4x4<T>::Orthographic( const T& left, const T& right, const T& bottom, const T& top, const T& near, const T& far )
 	{
-		Matrix4x4 result(
-			2.F / (right - left), 0.F, 0.F, 0.F,
-			0.F, 2.F / (top - bottom), 0.F, 0.F,
-			0.F, 0.F, 1.F / (near - far), 0.F,
-			-(right + left) / (right - left), -(top + bottom) / (top - bottom), near / (near - far), 1.F
+		TMatrix4x4 result(
+			T(2) / (right - left), 0, 0, 0,
+			0, T(2) / (top - bottom), 0, 0,
+			0, 0, 1 / (near - far), 0,
+			-(right + left) / (right - left), -(top + bottom) / (top - bottom), near / (near - far), 1
 		);
 		return result;
 	}
 
-	inline Matrix4x4 Matrix4x4::LookAt( const Vector3& eye, const Vector3& target, const Vector3& up )
+    template <typename T>
+	inline TMatrix4x4<T> TMatrix4x4<T>::LookAt( const TVector3<T>& eye, const TVector3<T>& target, const TVector3<T>& up )
 	{
-		Vector3 const forward( (eye - target).Normalized() );
-		Vector3 const side( forward.Cross( up ).Normalized() );
-		Vector3 const upper( side.Cross( forward ) );
+		TVector3<T> const forward( (eye - target).Normalized() );
+		TVector3<T> const side( forward.Cross( up ).Normalized() );
+		TVector3<T> const upper( side.Cross( forward ) );
 
-		return Matrix4x4(
-			side.x, side.y, side.z, 0.F,
-			upper.x, upper.y, upper.z, 0.F,
-			forward.x, forward.y, forward.z, 0.F,
-			-eye.x, -eye.y, -eye.z, 1.F
+		return TMatrix4x4(
+			side.x, side.y, side.z, 0,
+			upper.x, upper.y, upper.z, 0,
+			forward.x, forward.y, forward.z, 0,
+			-eye.x, -eye.y, -eye.z, 1
 		);
 	}
 
-	inline Matrix4x4 Matrix4x4::Translation( const Vector3& vector )
+    template <typename T>
+	inline TMatrix4x4<T> TMatrix4x4<T>::Translation( const TVector3<T>& vector )
 	{
-		return Matrix4x4(
-			1.F, 0.F, 0.F, 0.F,
-			0.F, 1.F, 0.F, 0.F,
-			0.F, 0.F, 1.F, 0.F,
-			vector.x, vector.y, vector.z, 1.F
+		return TMatrix4x4(
+			T(1), T(0), T(0), T(0),
+			T(0), T(1), T(0), T(0),
+			T(0), T(0), T(1), T(0),
+			vector.x, vector.y, vector.z, T(1)
 		);
 	}
 
-	inline Matrix4x4 Matrix4x4::Scaling( const Vector3& vector )
+    template <typename T>
+	inline TMatrix4x4<T> TMatrix4x4<T>::Scaling( const TVector3<T>& vector )
 	{
-		return Matrix4x4(
-			vector.x, 0.F, 0.F, 0.F,
-			0.F, vector.y, 0.F, 0.F,
-			0.F, 0.F, vector.z, 0.F,
-			0.F, 0.F, 0.F, 1.F
+		return TMatrix4x4(
+			vector.x, T(0), T(0), T(0),
+			T(0), vector.y, T(0), T(0),
+			T(0), T(0), vector.z, T(0),
+			T(0), T(0), T(0), T(1)
 		);
 	}
 
-	inline Matrix4x4 Matrix4x4::Rotation( const Vector3& axis, const float& radians )
+    template <typename T>
+	inline TMatrix4x4<T> TMatrix4x4<T>::Rotation( const TVector3<T>& axis, const T& radians )
 	{
-		float const cosA = cos( radians );
-		float const sinA = sin( radians );
+		T const cosA = cos( radians );
+		T const sinA = sin( radians );
 
-		Vector3 axisN( axis.Normalized() );
-		Vector3 temp( axisN * (1.F - cosA) );
+		TVector3<T> axisN( axis.Normalized() );
+		TVector3<T> temp( axisN * (T(1) - cosA) );
 
-		Matrix4x4 rotation;
+		TMatrix4x4 rotation;
 		rotation.m00 = cosA + temp.x * axisN.x;
 		rotation.m01 = temp.x * axisN.y + sinA * axisN.z;
 		rotation.m02 = temp.x * axisN.z - sinA * axisN.y;
@@ -163,17 +176,18 @@ namespace EE
 		return rotation;
 	}
 
-	inline Matrix4x4 Matrix4x4::Rotation( const Vector3& euler )
+    template <typename T>
+	inline TMatrix4x4<T> TMatrix4x4<T>::Rotation( const TVector3<T>& euler )
 	{
-		Matrix4x4 result;
-		float sinR, sinP, sinY, cosR, cosP, cosY;
+		TMatrix4x4 result;
+		T sinR, sinP, sinY, cosR, cosP, cosY;
 
-		sinY = std::sin( euler[ Yaw ] * Math::DegToRad );
-		cosY = std::cos( euler[ Yaw ] * Math::DegToRad );
-		sinP = std::sin( euler[ Pitch ] * Math::DegToRad );
-		cosP = std::cos( euler[ Pitch ] * Math::DegToRad );
-		sinR = std::sin( euler[ Roll ] * Math::DegToRad );
-		cosR = std::cos( euler[ Roll ] * Math::DegToRad );
+		sinY = std::sin( euler[ Yaw ] * MathConstants<T>::DegToRad );
+		cosY = std::cos( euler[ Yaw ] * MathConstants<T>::DegToRad );
+		sinP = std::sin( euler[ Pitch ] * MathConstants<T>::DegToRad );
+		cosP = std::cos( euler[ Pitch ] * MathConstants<T>::DegToRad );
+		sinR = std::sin( euler[ Roll ] * MathConstants<T>::DegToRad );
+		cosR = std::cos( euler[ Roll ] * MathConstants<T>::DegToRad );
 
 		result.m00 = cosP * cosY;
 		result.m01 = cosP * sinY;
@@ -187,95 +201,101 @@ namespace EE
 		result.m21 = (cosR * sinP * sinY + -sinR * cosY);
 		result.m22 = cosR * cosP;
 
-		result.m30 = 0.F;
-		result.m31 = 0.F;
-		result.m32 = 0.F;
-		result.m33 = 1.F;
+		result.m30 = T(0);
+		result.m31 = T(0);
+		result.m32 = T(0);
+		result.m33 = T(1);
 
 		return result;
 	}
 
-	inline Matrix4x4 Matrix4x4::Rotation( const Quaternion& quat )
+    template <typename T>
+	inline TMatrix4x4<T> TMatrix4x4<T>::Rotation( const TQuaternion<T>& quat )
 	{
 		return quat.ToMatrix4x4();
 	}
 
-	inline void Matrix4x4::Transpose()
+    template <typename T>
+	inline void TMatrix4x4<T>::Transpose()
 	{
-		Matrix4x4 result = Matrix4x4( GetColumn( 0 ), GetColumn( 1 ), GetColumn( 2 ), GetColumn( 3 ) );
+		TMatrix4x4 result = TMatrix4x4( GetColumn( 0 ), GetColumn( 1 ), GetColumn( 2 ), GetColumn( 3 ) );
 		*this = result;
 	}
 
-	inline Matrix4x4 Matrix4x4::Transposed() const
+    template <typename T>
+	inline TMatrix4x4<T> TMatrix4x4<T>::Transposed() const
 	{
-		return Matrix4x4( GetColumn( 0 ), GetColumn( 1 ), GetColumn( 2 ), GetColumn( 3 ) );
+		return TMatrix4x4( GetColumn( 0 ), GetColumn( 1 ), GetColumn( 2 ), GetColumn( 3 ) );
 	}
 
-	inline Matrix4x4 Matrix4x4::Inversed() const
+    template <typename T>
+	inline TMatrix4x4<T> TMatrix4x4<T>::Inversed() const
 	{
-		float coef00 = m22 * m33 - m32 * m23;
-		float coef02 = m12 * m33 - m32 * m13;
-		float coef03 = m12 * m23 - m22 * m13;
+		T coef00 = m22 * m33 - m32 * m23;
+		T coef02 = m12 * m33 - m32 * m13;
+		T coef03 = m12 * m23 - m22 * m13;
 
-		float coef04 = m21 * m33 - m31 * m23;
-		float coef06 = m11 * m33 - m31 * m13;
-		float coef07 = m11 * m23 - m21 * m13;
+		T coef04 = m21 * m33 - m31 * m23;
+		T coef06 = m11 * m33 - m31 * m13;
+		T coef07 = m11 * m23 - m21 * m13;
 
-		float coef08 = m21 * m32 - m31 * m22;
-		float coef10 = m11 * m32 - m31 * m12;
-		float coef11 = m11 * m22 - m21 * m12;
+		T coef08 = m21 * m32 - m31 * m22;
+		T coef10 = m11 * m32 - m31 * m12;
+		T coef11 = m11 * m22 - m21 * m12;
 
-		float coef12 = m20 * m33 - m30 * m23;
-		float coef14 = m10 * m33 - m30 * m13;
-		float coef15 = m10 * m23 - m20 * m13;
+		T coef12 = m20 * m33 - m30 * m23;
+		T coef14 = m10 * m33 - m30 * m13;
+		T coef15 = m10 * m23 - m20 * m13;
 
-		float coef16 = m20 * m32 - m30 * m22;
-		float coef18 = m10 * m32 - m30 * m12;
-		float coef19 = m10 * m22 - m20 * m12;
+		T coef16 = m20 * m32 - m30 * m22;
+		T coef18 = m10 * m32 - m30 * m12;
+		T coef19 = m10 * m22 - m20 * m12;
 
-		float coef20 = m20 * m31 - m30 * m21;
-		float coef22 = m10 * m31 - m30 * m11;
-		float coef23 = m10 * m21 - m20 * m11;
+		T coef20 = m20 * m31 - m30 * m21;
+		T coef22 = m10 * m31 - m30 * m11;
+		T coef23 = m10 * m21 - m20 * m11;
 
-		Vector4 fac0( coef00, coef00, coef02, coef03 );
-		Vector4 fac1( coef04, coef04, coef06, coef07 );
-		Vector4 fac2( coef08, coef08, coef10, coef11 );
-		Vector4 fac3( coef12, coef12, coef14, coef15 );
-		Vector4 fac4( coef16, coef16, coef18, coef19 );
-		Vector4 fac5( coef20, coef20, coef22, coef23 );
+		TVector4<T> fac0( coef00, coef00, coef02, coef03 );
+		TVector4<T> fac1( coef04, coef04, coef06, coef07 );
+		TVector4<T> fac2( coef08, coef08, coef10, coef11 );
+		TVector4<T> fac3( coef12, coef12, coef14, coef15 );
+		TVector4<T> fac4( coef16, coef16, coef18, coef19 );
+		TVector4<T> fac5( coef20, coef20, coef22, coef23 );
 
-		Vector4 vec0( m10, m00, m00, m00 );
-		Vector4 vec1( m11, m01, m01, m01 );
-		Vector4 vec2( m12, m02, m02, m02 );
-		Vector4 vec3( m13, m03, m03, m03 );
+		TVector4<T> vec0( m10, m00, m00, m00 );
+		TVector4<T> vec1( m11, m01, m01, m01 );
+		TVector4<T> vec2( m12, m02, m02, m02 );
+		TVector4<T> vec3( m13, m03, m03, m03 );
 
-		Vector4 inv0( vec1 * fac0 - vec2 * fac1 + vec3 * fac2 );
-		Vector4 inv1( vec0 * fac0 - vec2 * fac3 + vec3 * fac4 );
-		Vector4 inv2( vec0 * fac1 - vec1 * fac3 + vec3 * fac5 );
-		Vector4 inv3( vec0 * fac2 - vec1 * fac4 + vec2 * fac5 );
+		TVector4<T> inv0( vec1 * fac0 - vec2 * fac1 + vec3 * fac2 );
+		TVector4<T> inv1( vec0 * fac0 - vec2 * fac3 + vec3 * fac4 );
+		TVector4<T> inv2( vec0 * fac1 - vec1 * fac3 + vec3 * fac5 );
+		TVector4<T> inv3( vec0 * fac2 - vec1 * fac4 + vec2 * fac5 );
 
-		Vector4 signA( +1.F, -1.F, +1.F, -1.F );
-		Vector4 signB( -1.F, +1.F, -1.F, +1.F );
+		TVector4<T> signA( +1, -1, +1, -1 );
+		TVector4<T> signB( -1, +1, -1, +1 );
 
-		Matrix4x4 result( inv0 * signA, inv1 * signB, inv2 * signA, inv3 * signB );
+		TMatrix4x4 result( inv0 * signA, inv1 * signB, inv2 * signA, inv3 * signB );
 
-		// Vector4 row0(Inverse[0][0], Inverse[1][0], Inverse[2][0], Inverse[3][0]);
+		// TVector4<T> row0(Inverse[0][0], Inverse[1][0], Inverse[2][0], Inverse[3][0]);
 
-		Vector4 dot0( GetRow( 0 ) * result.GetColumn( 0 ) );
-		float dot1 = (dot0.x + dot0.y) + (dot0.z + dot0.w);
+		TVector4<T> dot0( GetRow( 0 ) * result.GetColumn( 0 ) );
+		T dot1 = (dot0.x + dot0.y) + (dot0.z + dot0.w);
 
-		float oneOverDeterminant = 1.F / dot1;
+		T oneOverDeterminant = T(1) / dot1;
 
 		return result * oneOverDeterminant;
 	}
 
-	inline Vector4 Matrix4x4::GetRow( const unsigned char& i ) const
+    template <typename T>
+	inline TVector4<T> TMatrix4x4<T>::GetRow( const unsigned char& i ) const
 	{
-		if ( i > 3 ) return Vector4();
-		return ((Vector4*)this)[ i ];
+		if ( i > 3 ) return TVector4<T>();
+		return ((TVector4<T>*)this)[ i ];
 	}
 
-	inline Vector4 Matrix4x4::GetColumn( const unsigned char& i ) const
+    template <typename T>
+	inline TVector4<T> TMatrix4x4<T>::GetColumn( const unsigned char& i ) const
 	{
 		switch ( i )
 		{
@@ -285,22 +305,25 @@ namespace EE
 		case 3: return { m03, m13, m23, m33 };
 		}
 
-		return Vector4();
+		return TVector4<T>();
 	}
 
-	inline HOST_DEVICE Vector3 Matrix4x4::ExtractTranslation() const
+    template <typename T>
+	inline HOST_DEVICE TVector3<T> TMatrix4x4<T>::ExtractTranslation() const
 	{
 		return GetRow( 3 );
 	}
 
-	inline HOST_DEVICE Quaternion Matrix4x4::ExtractRotation() const
+    template <typename T>
+	inline HOST_DEVICE TQuaternion<T> TMatrix4x4<T>::ExtractRotation() const
 	{
-		return Quaternion::FromLookRotation( GetRow( 2 ), GetRow( 1 ) );
+		return TQuaternion<T>::FromLookRotation( GetRow( 2 ), GetRow( 1 ) );
 	}
 
-	inline HOST_DEVICE Vector3 Matrix4x4::ExtractScale() const
+    template <typename T>
+	inline HOST_DEVICE TVector3<T> TMatrix4x4<T>::ExtractScale() const
 	{
-		Vector3 scale(
+		TVector3<T> scale(
 			GetRow( 0 ).Magnitude(),
 			GetRow( 1 ).Magnitude(),
 			GetRow( 2 ).Magnitude()
@@ -308,33 +331,38 @@ namespace EE
 		return scale;
 	}
 
-	inline Vector4& Matrix4x4::operator[]( unsigned char i )
+    template <typename T>
+	inline TVector4<T>& TMatrix4x4<T>::operator[]( unsigned char i )
 	{
-		EE_CORE_ASSERT( i <= 3, "Matrix4x4 index out of bounds" );
-		return ((Vector4*)this)[ i ];
+		EE_CORE_ASSERT( i <= 3, "TMatrix4x4 index out of bounds" );
+		return ((TVector4<T>*)this)[ i ];
 	}
 
-	inline Vector4 const& Matrix4x4::operator[]( unsigned char i ) const
+    template <typename T>
+	inline TVector4<T> const& TMatrix4x4<T>::operator[]( unsigned char i ) const
 	{
-		EE_CORE_ASSERT( i <= 3, "Matrix4x4 index out of bounds" );
-		return ((Vector4*)this)[ i ];
+		EE_CORE_ASSERT( i <= 3, "TMatrix4x4 index out of bounds" );
+		return ((TVector4<T>*)this)[ i ];
 	}
 
-	inline HOST_DEVICE Vector4 Matrix4x4::MultiplyPoint( const Vector3& vector ) const
+    template <typename T>
+	inline HOST_DEVICE TVector4<T> TMatrix4x4<T>::MultiplyPoint( const TVector3<T>& vector ) const
 	{
-		return *this * Vector4( vector, 1.F );
+		return *this * TVector4<T>( vector, T(1) );
 	}
 
-	inline Vector3 Matrix4x4::MultiplyVector( const Vector3& vector ) const
+    template <typename T>
+	inline TVector3<T> TMatrix4x4<T>::MultiplyVector( const TVector3<T>& vector ) const
 	{
 		return *this * vector;
 	}
 
-	FORCEINLINE Matrix4x4 Matrix4x4::operator*( const Matrix4x4& other ) const
+    template <typename T>
+	FORCEINLINE TMatrix4x4<T> TMatrix4x4<T>::operator*( const TMatrix4x4& other ) const
 	{
-		Matrix4x4 result = Matrix4x4();
+		TMatrix4x4 result = TMatrix4x4();
 
-		const Vector4 col0 = GetColumn( 0 ), col1 = GetColumn( 1 ), col2 = GetColumn( 2 ), col3 = GetColumn( 3 );
+		const TVector4<T> col0 = GetColumn( 0 ), col1 = GetColumn( 1 ), col2 = GetColumn( 2 ), col3 = GetColumn( 3 );
 
 		result.m00 = other.m0.Dot( col0 );
 		result.m10 = other.m1.Dot( col0 );
@@ -359,9 +387,10 @@ namespace EE
 		return result;
 	}
 
-	FORCEINLINE Vector4 Matrix4x4::operator*( const Vector4& vector ) const
+    template <typename T>
+	FORCEINLINE TVector4<T> TMatrix4x4<T>::operator*( const TVector4<T>& vector ) const
 	{
-		Vector4 result(
+		TVector4<T> result(
 			GetColumn( 0 ).Dot( vector ),
 			GetColumn( 1 ).Dot( vector ),
 			GetColumn( 2 ).Dot( vector ),
@@ -371,10 +400,11 @@ namespace EE
 		return result;
 	}
 
-	FORCEINLINE Vector3 Matrix4x4::operator*( const Vector3& vector ) const
+    template <typename T>
+	FORCEINLINE TVector3<T> TMatrix4x4<T>::operator*( const TVector3<T>& vector ) const
 	{
-		Vector4 const vect = Vector4( vector, 0.F );
-		Vector3 result(
+		TVector4<T> const vect = TVector4<T>( vector, T(0) );
+		TVector3<T> result(
 			GetColumn( 0 ).Dot( vect ),
 			GetColumn( 1 ).Dot( vect ),
 			GetColumn( 2 ).Dot( vect )
@@ -382,9 +412,10 @@ namespace EE
 		return result;
 	}
 
-	FORCEINLINE Matrix4x4 Matrix4x4::operator*( const float& value ) const
+    template <typename T>
+	FORCEINLINE TMatrix4x4<T> TMatrix4x4<T>::operator*( const T& value ) const
 	{
-		Matrix4x4 result( *this );
+		TMatrix4x4 result( *this );
 
 		result.m0 *= value;
 		result.m1 *= value;
@@ -394,9 +425,10 @@ namespace EE
 		return result;
 	}
 
-	FORCEINLINE Matrix4x4 Matrix4x4::operator/( const float& value ) const
+    template <typename T>
+	FORCEINLINE TMatrix4x4<T> TMatrix4x4<T>::operator/( const T& value ) const
 	{
-		Matrix4x4 result( *this );
+		TMatrix4x4 result( *this );
 
 		result.m0 /= value;
 		result.m1 /= value;
@@ -406,7 +438,8 @@ namespace EE
 		return result;
 	}
 
-	inline const float* Matrix4x4::PointerToValue( void ) const
+    template <typename T>
+	inline const T* TMatrix4x4<T>::PointerToValue( void ) const
 	{
 		return &m00;
 	}
