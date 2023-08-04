@@ -259,17 +259,4 @@ namespace EE::Math
 		if ( value == 0 ) x = y = 0;
 		x /= value; y /= value; return *this;
 	}
-
-    template <typename T>
-	inline TVector2<T> operator*( T value, const TVector2<T>& vector )
-	{
-		return TVector2( value * vector.x, value * vector.y );
-	}
-
-    template <typename T>
-	inline TVector2<T> operator/( T value, const TVector2<T>& vector )
-	{
-		return TVector2( value / vector.x, value / vector.y );
-	}
-
 }

@@ -127,7 +127,7 @@ namespace EE
         }
     }
 
-    void OBJLoader::ExtractVector3( const NChar* text, Vector3* vector )
+    void OBJLoader::ExtractVector3( const NChar* text, Vector3f* vector )
     {
         NChar* lineState;
         vector->x = fast_strtof( text, &lineState );
@@ -135,7 +135,7 @@ namespace EE
         vector->z = fast_strtof( lineState, &lineState );
     }
 
-    void OBJLoader::ExtractVector2( const NChar* text, Vector2* vector )
+    void OBJLoader::ExtractVector2( const NChar* text, Vector2f* vector )
     {
         NChar* lineState;
         vector->x = fast_strtof( text, &lineState );
@@ -447,11 +447,11 @@ namespace EE
                     IntVector3 vertexIndices = modelData.vertexIndices[ count ];
                     StaticVertex newVertex = {
                         vertexIndices[ 0 ] >= 0 ? modelData.positions[ vertexIndices[ 0 ] - 1 ] : 0,
-                        vertexIndices[ 2 ] >= 0 ? modelData.normals[ vertexIndices[ 2 ] - 1 ] : Vector3( 0., 1., 0. ),
+                        vertexIndices[ 2 ] >= 0 ? modelData.normals[ vertexIndices[ 2 ] - 1 ] : Vector3f( 0.F, 1.F, 0.F ),
                         0,
                         vertexIndices[ 1 ] >= 0 ? modelData.uvs[ vertexIndices[ 1 ] - 1 ] : 0,
                         vertexIndices[ 1 ] >= 0 ? modelData.uvs[ vertexIndices[ 1 ] - 1 ] : 0,
-                        Vector4( 1 )
+                        Vector4f( 1 )
                     };
                     data.bounding.Add( newVertex.position );
 

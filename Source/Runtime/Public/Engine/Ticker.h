@@ -41,8 +41,8 @@ namespace EE
 
 		using Micro  = Duration<1, uint64>;
 		using Mili   = Duration<1000, double>;
-		using Second = Duration<1000000, float>;
-		using Minute = Duration<166666667, float>;
+		using Second = Duration<1000000, double>;
+		using Minute = Duration<166666667, double>;
 
 		static uint64 MaxUpdateDeltaMicro;
 		static uint64 MaxRenderDeltaMicro;

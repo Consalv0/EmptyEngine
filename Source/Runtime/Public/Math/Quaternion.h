@@ -16,6 +16,8 @@ namespace EE
         template <typename T>
         struct TQuaternion
         {
+            static_assert(std::is_floating_point_v<T>, "T must be floating point.");
+
         public:
             union
             {

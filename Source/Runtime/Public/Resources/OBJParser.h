@@ -20,7 +20,7 @@ namespace EE
             };
 
             NString name;
-            BoundingBox3 bounding;
+            BoundingBox3f bounding;
             TArray<Subdivision> subdivisions;
             bool hasNormals;
             bool hasTextureCoords;
@@ -54,8 +54,8 @@ namespace EE
             uint32& result
         );
 
-        static void ExtractVector3( const NChar* text, Vector3* vertex );
-        static void ExtractVector2( const NChar* text, Vector2* vertex );
+        static void ExtractVector3( const NChar* text, Vector3f* vertex );
+        static void ExtractVector2( const NChar* text, Vector2f* vertex );
         static void ExtractIntVector3( const NChar* text, IntVector3* tertex );
 
         static void PrepareData( const NChar* inFile, ExtractedData& data );
@@ -73,7 +73,7 @@ namespace EE
     };
 }
 
-EE_MAKE_HASHABLE(EE::Vector2, t.x, t.y)
-EE_MAKE_HASHABLE(EE::Vector3, t.x, t.y, t.z)
-EE_MAKE_HASHABLE(EE::Vector4, t.x, t.y, t.z, t.w)
+EE_MAKE_HASHABLE(EE::Vector2f, t.x, t.y)
+EE_MAKE_HASHABLE(EE::Vector3f, t.x, t.y, t.z)
+EE_MAKE_HASHABLE(EE::Vector4f, t.x, t.y, t.z, t.w)
 EE_MAKE_HASHABLE(EE::StaticVertex, t.position, t.normal, t.tangent, t.uv0, t.uv1, t.color)

@@ -28,29 +28,29 @@ namespace EE
         meshKey = other.meshKey;
         parent = NULL;
         children.clear();
-        for ( auto& OtherChild : other.children )
+        for ( auto& otherChild : other.children )
         {
-            ModelNode* Child = new ModelNode( name );
-            *Child = *OtherChild;
-            Child->parent = this;
-            children.push_back( Child );
+            ModelNode* child = new ModelNode( name );
+            *child = *otherChild;
+            child->parent = this;
+            children.push_back( child );
         }
         return *this;
     }
 
-    bool FindNodeLevel( const NString& name, const ModelNode* Node, int32& Level )
+    bool FindNodeLevel( const NString& name, const ModelNode* node, int32& level )
     {
-        if ( Node->name == name )
+        if ( node->name == name )
             return true;
-        for ( auto& Child : Node->children )
+        for ( auto& child : node->children )
         {
-            bool Find = FindNodeLevel( name, Child, ++Level );
-            if ( Find )
+            bool find = FindNodeLevel( name, child, ++level );
+            if ( find )
             {
                 return true;
             }
         }
-        Level--;
+        level--;
         return false;
     }
 

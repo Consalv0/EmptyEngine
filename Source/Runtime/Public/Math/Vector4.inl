@@ -249,14 +249,14 @@ namespace EE::Math
 		return *this;
 	}
 
-    template <typename T>
-	inline TVector4<T> operator*( T value, const TVector4<T>& vector )
+    template <typename T, typename R>
+	inline TVector4<T> operator*( R value, const TVector4<T>& vector )
 	{
 		return TVector4( value * vector.x, value * vector.y, value * vector.z, value * vector.w );
 	}
 
-    template <typename T>
-	inline TVector4<T> operator/( T value, const TVector4<T>& vector )
+    template <typename T, typename R>
+	inline TVector4<T> operator/( R value, const TVector4<T>& vector )
 	{
 		return TVector4( value / vector.x, value / vector.y, value / vector.z, value / vector.w );
 	}

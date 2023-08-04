@@ -4,14 +4,13 @@
 
 namespace EE
 {
-
-    StaticVertex::StaticVertex( const Vector3& pos, const Vector3& normal, const Vector2& uv ) :
+    StaticVertex::StaticVertex( const Vector3f& pos, const Vector3f& normal, const Vector2f& uv ) :
         position( pos ), normal( normal ), tangent(), uv0( uv ), uv1( uv ), color( 1.0F )
     {
     }
 
-    StaticVertex::StaticVertex( const Vector3& point, const Vector3& normal, const Vector3& tangent,
-        const Vector2& uv0, const Vector2& uv1, const Vector4& color ) :
+    StaticVertex::StaticVertex( const Vector3f& point, const Vector3f& normal, const Vector3f& tangent,
+        const Vector2f& uv0, const Vector2f& uv1, const Vector4f& color ) :
         position( point ), normal( normal ), tangent( tangent ),
         uv0( uv0 ), uv1( uv1 ), color( color )
     {
@@ -133,7 +132,7 @@ namespace EE
     {
         if ( !hasBoundingBox )
         {
-            bounding = BoundingBox3();
+            bounding = BoundingBox3f();
             for ( MeshVertices::const_iterator Vertex = staticVertices.begin(); Vertex != staticVertices.end(); ++Vertex )
             {
                 bounding.Add( Vertex->position );
@@ -150,26 +149,26 @@ namespace EE
         // --- For each triangle, compute the edge (DeltaPos) and the DeltaUV
         for ( MeshFaces::const_iterator triangle = faces.begin(); triangle != faces.end(); ++triangle )
         {
-            const Vector3& vertexA = staticVertices[ (*triangle).indx0 ].position;
-            const Vector3& vertexB = staticVertices[ (*triangle).indx1 ].position;
-            const Vector3& vertexC = staticVertices[ (*triangle).indx2 ].position;
+            const Vector3f& vertexA = staticVertices[ (*triangle).indx0 ].position;
+            const Vector3f& vertexB = staticVertices[ (*triangle).indx1 ].position;
+            const Vector3f& vertexC = staticVertices[ (*triangle).indx2 ].position;
 
-            const Vector2& uvA = staticVertices[ (*triangle).indx0 ].uv0;
-            const Vector2& uvB = staticVertices[ (*triangle).indx1 ].uv0;
-            const Vector2& uvC = staticVertices[ (*triangle).indx2 ].uv0;
+            const Vector2f& uvA = staticVertices[ (*triangle).indx0 ].uv0;
+            const Vector2f& uvB = staticVertices[ (*triangle).indx1 ].uv0;
+            const Vector2f& uvC = staticVertices[ (*triangle).indx2 ].uv0;
 
             // --- Edges of the triangle : position delta
-            const Vector3 edge1 = vertexB - vertexA;
-            const Vector3 edge2 = vertexC - vertexA;
+            const Vector3f edge1 = vertexB - vertexA;
+            const Vector3f edge2 = vertexC - vertexA;
 
             // --- UV delta
-            const Vector2 deltaUV1 = uvB - uvA;
-            const Vector2 deltaUV2 = uvC - uvA;
+            const Vector2f deltaUV1 = uvB - uvA;
+            const Vector2f deltaUV2 = uvC - uvA;
 
-            double r = 1 / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+            float r = 1.F / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
             r = std::isfinite( r ) ? r : 0;
 
-            Vector3 tangent;
+            Vector3f tangent;
             tangent.x = r * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
             tangent.y = r * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
             tangent.z = r * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
@@ -190,14 +189,14 @@ namespace EE
 
         for ( MeshFaces::const_iterator Triangle = faces.begin(); Triangle != faces.end(); ++Triangle )
         {
-            const Vector3& VertexA = staticVertices[ (*Triangle).indx0 ].position;
-            const Vector3& VertexB = staticVertices[ (*Triangle).indx1 ].position;
-            const Vector3& VertexC = staticVertices[ (*Triangle).indx2 ].position;
+            const Vector3f& vertexA = staticVertices[ (*Triangle).indx0 ].position;
+            const Vector3f& vertexB = staticVertices[ (*Triangle).indx1 ].position;
+            const Vector3f& vertexC = staticVertices[ (*Triangle).indx2 ].position;
 
-            const Vector3 Edge1 = VertexB - VertexA;
-            const Vector3 Edge2 = VertexC - VertexA;
+            const Vector3f edge1 = vertexB - vertexA;
+            const Vector3f edge2 = vertexC - vertexA;
 
-            const Vector3 normal = Vector3::Cross( Edge1, Edge2 ).Normalized();
+            const Vector3f normal = Vector3f::Cross( edge1, edge2 ).Normalized();
 
             staticVertices[ (*Triangle).indx0 ].normal = normal;
             staticVertices[ (*Triangle).indx1 ].normal = normal;
@@ -212,7 +211,7 @@ namespace EE
         name.clear();
         faces.clear();
         staticVertices.clear();
-        bounding = BoundingBox3();
+        bounding = BoundingBox3f();
         hasNormals = false;
         hasTangents = false;
         hasVertexColor = false;

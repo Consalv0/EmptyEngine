@@ -252,19 +252,7 @@ namespace EE::Math
 		x /= value; y /= value; z /= value;
 		return *this;
 	}
-
-    template <typename T>
-    FORCEINLINE TVector3<T> operator*( T value, const TVector3<T>& vector )
-	{
-		return TVector3<T>( value * vector.x, value * vector.y, value * vector.z );
-	}
-
-    template <typename T>
-    FORCEINLINE TVector3<T> operator/( T value, const TVector3<T>& vector )
-	{
-		return TVector3<T>( value / vector.x, value / vector.y, value / vector.z );
-	}
-
+    
     template <typename T>
     inline TVector3<T> NormalizeAngleComponents( TVector3<T> eulerAngle )
     {

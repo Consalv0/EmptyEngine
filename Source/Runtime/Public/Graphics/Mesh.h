@@ -7,17 +7,17 @@ namespace EE
 {
     struct StaticVertex
     {
-        Vector3 position;
-        Vector3 normal;
-        Vector3 tangent;
-        Vector2 uv0, uv1;
-        Vector4 color;
+        Vector3f position;
+        Vector3f normal;
+        Vector3f tangent;
+        Vector2f uv0, uv1;
+        Vector4f color;
 
         StaticVertex() = default;
         StaticVertex( const StaticVertex& other ) = default;
         StaticVertex( StaticVertex&& other ) = default;
-        StaticVertex( const Vector3& pos, const Vector3& normal, const Vector2& uv );
-        StaticVertex( const Vector3& pos, const Vector3& normal, const Vector3& tangent, const Vector2& uv0, const Vector2& uv1, const Vector4& color );
+        StaticVertex( const Vector3f& pos, const Vector3f& normal, const Vector2f& uv );
+        StaticVertex( const Vector3f& pos, const Vector3f& normal, const Vector3f& tangent, const Vector2f& uv0, const Vector2f& uv1, const Vector4f& color );
         StaticVertex& operator=( const StaticVertex& other ) = default;
         bool operator<( const StaticVertex other ) const;
         bool operator==( const StaticVertex& other ) const;
@@ -25,11 +25,11 @@ namespace EE
 
     struct SkinVertex
     {
-        Vector3 position;
-        Vector3 normal;
-        Vector3 tangent;
-        Vector2 uv0, uv1;
-        Vector4 color;
+        Vector3f position;
+        Vector3f normal;
+        Vector3f tangent;
+        Vector2f uv0, uv1;
+        Vector4f color;
 
         uint32 influenceBones[ 4 ] = { 0, 0, 0, 0 };
         float weights[ 4 ]{ 0.0F, 0.0F, 0.0F, 0.0F };
@@ -82,9 +82,9 @@ namespace EE
     };
 
     typedef TArray<MeshFace>          MeshFaces;
-    typedef TArray<Vector3>           MeshVector3D;
-    typedef TArray<Vector2>           MeshUVs;
-    typedef TArray<Vector4>           MeshColors;
+    typedef TArray<Vector3f>           MeshVector3D;
+    typedef TArray<Vector2f>           MeshUVs;
+    typedef TArray<Vector4f>           MeshColors;
     typedef TArray<StaticVertex>      MeshVertices;
     typedef TDictionary<int32, NString> MeshMaterials;
 
@@ -96,7 +96,7 @@ namespace EE
         TDictionary<int32, NString> materialsMap;
         TArray<StaticVertex> staticVertices;
         TArray<SkinVertex> skinVertices;
-        BoundingBox3 bounding;
+        BoundingBox3f bounding;
 
         bool hasNormals;
         bool hasTangents;

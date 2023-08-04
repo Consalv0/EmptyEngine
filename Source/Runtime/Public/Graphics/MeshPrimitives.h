@@ -23,7 +23,7 @@ namespace EE
             data.materialsMap.emplace( 0, "default" );
             data.subdivisionsMap.emplace( 0, Subdivision( { 0, 0, 0, 12 * 3 } ) );
 
-            Matrix4x4 transform = Matrix4x4::Translation( position ) * Matrix4x4::Scaling( Size );
+            Matrix4x4f transform = (Matrix4x4f)( Matrix4x4::Translation( position ) * Matrix4x4::Scaling( Size ) );
             data.staticVertices = {
                 { transform.MultiplyPoint( { 0.5, -0.5,  0.5} ), { 0, -1,  0}, { 0,  0, 1}, {1, 0}, {1, 0}, {1} },
                 { transform.MultiplyPoint( {-0.5, -0.5, -0.5} ), { 0, -1,  0}, { 0,  0, 1}, {0, 1}, {0, 1}, {1} },
@@ -73,10 +73,10 @@ namespace EE
 
             Matrix4x4 transform = Matrix4x4::Translation( position ) * Matrix4x4::Scaling( Size );
             data.staticVertices = {
-                { transform.MultiplyPoint( { 1, -1, -0} ), {0, 0, 1}, {1, -0, -0}, {1, 0}, {1, 0}, {1} },
-                { transform.MultiplyPoint( {-1,  1,  0} ), {0, 0, 1}, {1, -0, -0}, {0, 1}, {0, 1}, {1} },
-                { transform.MultiplyPoint( { 1,  1,  0} ), {0, 0, 1}, {1, -0, -0}, {1, 1}, {1, 1}, {1} },
-                { transform.MultiplyPoint( {-1, -1, -0} ), {0, 0, 1}, {1, -0, -0}, {0, 0}, {0, 0}, {1} }
+                { Vector4f( transform.MultiplyPoint( { 1, -1, -0} ) ), {0, 0, 1}, {1, -0, -0}, {1, 0}, {1, 0}, {1} },
+                { Vector4f( transform.MultiplyPoint( {-1,  1,  0} ) ), {0, 0, 1}, {1, -0, -0}, {0, 1}, {0, 1}, {1} },
+                { Vector4f( transform.MultiplyPoint( { 1,  1,  0} ) ), {0, 0, 1}, {1, -0, -0}, {1, 1}, {1, 1}, {1} },
+                { Vector4f( transform.MultiplyPoint( {-1, -1, -0} ) ), {0, 0, 1}, {1, -0, -0}, {0, 0}, {0, 0}, {1} }
             };
 
             data.hasBoundingBox = false;

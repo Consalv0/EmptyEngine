@@ -9,6 +9,8 @@ namespace EE
         template <typename T>
         struct TVector4
         {
+            static_assert(std::is_floating_point_v<T>, "T must be floating point.");
+
         public:
             union
             {
@@ -56,8 +58,15 @@ namespace EE
             HOST_DEVICE FORCEINLINE TVector4& operator*=( const T& value );
             HOST_DEVICE FORCEINLINE TVector4& operator/=( const T& value );
 
-            HOST_DEVICE inline friend TVector4 operator*( T value, const TVector4& vector );
-            HOST_DEVICE inline friend TVector4 operator/( T value, const TVector4& vector );
+            template <typename R>
+            HOST_DEVICE FORCEINLINE friend TVector4 operator*( R value, const TVector4& vector )
+            { return vector.operator*( value ); }
+            template <typename R>
+            HOST_DEVICE FORCEINLINE friend TVector4 operator/( R value, const TVector4& vector )
+            { return TVector2( value / vector.x, value / vector.y, value / vector.z, value / vector.w ); }
+
+            template<typename R>
+            explicit TVector4<T>( const TVector4<R>& other ) : TVector4<T>( (T)other.x, (T)other.y, (T)other.z, (T)other.w ) {}
         };
     }
 }

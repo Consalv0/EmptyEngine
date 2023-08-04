@@ -13,6 +13,8 @@ namespace EE
         template <typename T>
         class TTransform
         {
+            static_assert(std::is_floating_point_v<T>, "T must be floating point.");
+
         public:
             TPoint3<T> position;
             TQuaternion<T> rotation;

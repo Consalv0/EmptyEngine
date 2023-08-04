@@ -7,6 +7,8 @@ namespace EE
         template <typename T>
         struct TMatrix3x3
         {
+            static_assert(std::is_floating_point_v<T>, "T must be floating point.");
+
         public:
             struct
             {

@@ -9,6 +9,8 @@ namespace EE
         template <typename T>
         struct TVector3
         {
+            static_assert(std::is_floating_point_v<T>, "T must be floating point.");
+
         public:
             union
             {
@@ -36,7 +38,7 @@ namespace EE
             HOST_DEVICE FORCEINLINE T Dot( const TVector3<T>& other ) const;
             HOST_DEVICE FORCEINLINE static T Dot( const TVector3<T>& a, const TVector3<T>& b );
             HOST_DEVICE FORCEINLINE static TVector3<T> Lerp( const TVector3<T>& start, const TVector3<T>& end, T t );
-            HOST_DEVICE FORCEINLINE static TVector3<T> Reflect( const TVector3<T>& Incident, const TVector3<T>& normal );
+            HOST_DEVICE FORCEINLINE static TVector3<T> Reflect( const TVector3<T>& incident, const TVector3<T>& normal );
 
             HOST_DEVICE inline T& operator[]( unsigned char i );
             HOST_DEVICE inline T const& operator[]( unsigned char i ) const;
@@ -59,6 +61,16 @@ namespace EE
             HOST_DEVICE FORCEINLINE TVector3& operator/=( const TVector3& other );
             HOST_DEVICE FORCEINLINE TVector3& operator*=( const T& value );
             HOST_DEVICE FORCEINLINE TVector3& operator/=( const T& value );
+
+            template <typename R>
+            HOST_DEVICE FORCEINLINE friend TVector3 operator*( R value, const TVector3& vector ) 
+            { return vector.operator*( value ); }
+            template <typename R>
+            HOST_DEVICE FORCEINLINE friend TVector3 operator/( R value, const TVector3& vector )
+            { return TVector2( value / vector.x, value / vector.y, value / vector.z ); }
+
+            template<typename R>
+            explicit TVector3<T>( const TVector3<R>& other ) : TVector3<T>( (T)other.x, (T)other.y, (T)other.z ) {}
         };
 
         //* Get the angles in degrees in the range of (-180, 180) 
@@ -68,6 +80,7 @@ namespace EE
         //* Get the angles in degrees in the range of [0, 360)
         template <typename T>
         inline TVector3<T> ClampAngleComponents( TVector3<T> eulerAngle );
+
     }
 }
 

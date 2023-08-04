@@ -7,6 +7,7 @@ namespace EE
         template <typename T>
         struct TMatrix4x4
         {
+            static_assert(std::is_floating_point_v<T>, "T must be floating point.");
 
         public:
             union
@@ -65,6 +66,9 @@ namespace EE
             HOST_DEVICE FORCEINLINE TVector3<T> operator*( const TVector3<T>& vector ) const;
             HOST_DEVICE FORCEINLINE TMatrix4x4 operator*( const T& value ) const;
             HOST_DEVICE FORCEINLINE TMatrix4x4 operator/( const T& value ) const;
+
+            template<typename R>
+            explicit TMatrix4x4<T>( const TMatrix4x4<R>& other ) : TMatrix4x4<T>( m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33 ) {}
         };
     }
 }
