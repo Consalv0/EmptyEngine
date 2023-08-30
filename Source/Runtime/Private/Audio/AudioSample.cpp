@@ -9,7 +9,7 @@ namespace EE
 	{
 		this->Buffer = new unsigned char[ BufferLength ];
 		memcpy( this->Buffer, Buffer, BufferLength );
-		Duration = (Ticker::Micro::ReturnType)(((BufferLength * 8u / (SampleSize * ChannelCount)) / (float)Frecuency) * Ticker::Second::GetSizeInMicro());
+		Duration = (int64)(((BufferLength * 8u / (SampleSize * ChannelCount)) / (float)Frecuency) * Ticker::Mili::GetSizeInNano());
 	}
 
 	AudioSample::~AudioSample()

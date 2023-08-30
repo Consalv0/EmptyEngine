@@ -12,6 +12,11 @@ project "EmptyEngine"
     pchsource "%{prj.location}/Source/Runtime/Private/CoreMinimal.cpp"
     pchheader "CoreMinimal.h"
 
+    defines {
+        --"FIXMATH_NO_ROUNDING",
+        --"FIXMATH_NO_OVERFLOW",
+    }
+
     files {
         "%{prj.location}/Source/**.h",
         "%{prj.location}/Source/**.inl",
@@ -42,7 +47,6 @@ project "EmptyEngine"
         }
         defines {
             "EE_PLATFORM_WINDOWS",
-            "EE_DLLEXPORT",
         }
 
     filter "configurations:Debug"
@@ -50,6 +54,7 @@ project "EmptyEngine"
             "EE_DEBUG", "EE_ENABLE_ASSERTS"
         }
         runtime "Debug"
+        optimize "Debug"
         symbols "on"
 
     filter "configurations:Release"

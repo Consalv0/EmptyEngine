@@ -44,7 +44,7 @@ namespace EE
 			}
 
 			memcpy( Device.CurrentSample, Stream, Length );
-			Device.LastAudioUpdate = Ticker::GetEpochTime<Ticker::Micro>();
+			Device.LastAudioUpdate = Ticker::GetEpochTimeNow<Ticker::Nano>();
 		};
 
 		sampleSpecs.userdata = this;

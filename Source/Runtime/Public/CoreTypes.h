@@ -47,3 +47,11 @@ typedef size_t          intPNT;
 #	define FORCENOINLINE	inline __attribute__((noinline))
 #	define FORCEINLINE		inline __attribute__((always_inline))
 #endif
+
+#if defined(_MSC_VER)
+#define EE_DLLEXPORT __declspec(dllexport)
+#define EE_DLLIMPORT __declspec(dllimport)
+#else
+#define EE_DLLEXPORT __attribute__((visibility("default")))
+#define EE_DLLIMPORT __attribute__((visibility("default")))
+#endif

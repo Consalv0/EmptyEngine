@@ -16,7 +16,7 @@ namespace EE
 		template<typename T>
 		FORCEINLINE typename T::ReturnType GetDeltaTime() const
 		{ 
-			return (NowEpochTime - LastEpochTime) / (typename T::ReturnType)T::GetSizeInMicro();
+			return (NowEpochTime - LastEpochTime) / (typename T::ReturnType)T::GetSizeInNano();
 		};
 
 		void Begin();
@@ -37,15 +37,16 @@ namespace EE
 	{
 	public:
 		template<uint64 Size, typename Type>
-		struct Duration { static constexpr uint64 GetSizeInMicro() { return Size; }; using ReturnType = Type; };
+		struct Duration { static constexpr uint64 GetSizeInNano() { return Size; }; using ReturnType = Type; };
 
-		using Micro  = Duration<1, uint64>;
-		using Mili   = Duration<1000, double>;
-		using Second = Duration<1000000, double>;
-		using Minute = Duration<166666667, double>;
+        using Nano   = Duration<1, uint64>;
+		using Micro  = Duration<1000, uint64>;
+		using Mili   = Duration<1000000, double>;
+		using Second = Duration<1000000000, double>;
+		using Minute = Duration<166666666667, double>;
 
 		static uint64 MaxUpdateDeltaMicro;
-		static uint64 MaxRenderDeltaMicro;
+		static uint64 MaxRenderDeltaNano;
 
 		FORCEINLINE static bool IsSkippingRender() { return SkipRender; };
 
@@ -60,8 +61,8 @@ namespace EE
 		// static void FixedTick();
 
 		// Time since the last tick callback
-		static uint64 LastUpdateMicro;
-		static uint64 LastDeltaMicro;
+		static uint64 LastUpdateNano;
+		static uint64 LastDeltaNano;
 
 		static bool HasStarted;
 
@@ -73,7 +74,7 @@ namespace EE
 		static uint64 RenderDeltaTimeSum;
 		static bool SkipRender;
 
-		static uint64 GetEpochTimeMicro();
+        static uint64 GetEpochTimeNanoNow();
 
 	public:
 
@@ -83,28 +84,28 @@ namespace EE
 		template<typename T>
 		static inline typename T::ReturnType GetDeltaTime()
 		{
-			return (LastDeltaMicro) / (typename T::ReturnType)T::GetSizeInMicro();
+			return (LastDeltaNano) / (typename T::ReturnType)T::GetSizeInNano();
 		}
 
 		// Get the application tick average
 		template<typename T>
 		static inline typename T::ReturnType GetAverageDelta()
 		{
-			return (typename T::ReturnType)TickAverage / (typename T::ReturnType)T::GetSizeInMicro();
+			return (typename T::ReturnType)TickAverage / (typename T::ReturnType)T::GetSizeInNano();
 		}
 
 		// Get the application frame rate
 		template<typename T>
 		static inline typename T::ReturnType GetFrameRate()
 		{
-			return (typename T::ReturnType)(1) / ((typename T::ReturnType)TickAverage / (typename T::ReturnType)T::GetSizeInMicro());
+			return (typename T::ReturnType)(1) / ((typename T::ReturnType)TickAverage / (typename T::ReturnType)T::GetSizeInNano());
 		}
 
 		// Machine Time
 		template<typename T>
-		static inline typename T::ReturnType GetEpochTime()
+		static inline typename T::ReturnType GetEpochTimeNow()
 		{
-			return GetEpochTimeMicro() / (typename T::ReturnType)T::GetSizeInMicro();
+			return GetEpochTimeNanoNow() / (typename T::ReturnType)T::GetSizeInNano();
 		}
 	};
 

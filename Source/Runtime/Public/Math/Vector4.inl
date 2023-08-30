@@ -58,7 +58,7 @@ namespace EE::Math
     template <typename T>
 	inline T TVector4<T>::Magnitude() const
 	{
-		return sqrtf( x * x + y * y + z * z + w * w );
+		return Math::Sqrt( x * x + y * y + z * z + w * w );
 	}
 
     template <typename T>
@@ -77,7 +77,7 @@ namespace EE::Math
 		}
 		else
 		{
-			*this /= sqrtf( sqrMagnitude );
+			*this /= Math::Sqrt( sqrMagnitude );
 		}
 	}
 
@@ -87,7 +87,7 @@ namespace EE::Math
 		T sqrMagnitude = MagnitudeSquared();
 		if ( sqrMagnitude == 0 ) return TVector4();
 		TVector4 result = TVector4( *this );
-		return result /= sqrtf( sqrMagnitude );
+		return result /= Math::Sqrt( sqrMagnitude );
 	}
 
     template <typename T>

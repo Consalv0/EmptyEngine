@@ -77,11 +77,6 @@ namespace EE
 		return *this;
 	}
 
-	const void* PixelMap::PointerToValue() const
-	{
-		return data;
-	}
-
 	PixelMap::~PixelMap()
 	{
 		delete[] data;

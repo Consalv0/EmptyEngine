@@ -62,7 +62,7 @@ namespace EE::Math
     template <typename T>
 	inline T TVector3<T>::Magnitude() const
 	{
-		return std::sqrt( x * x + y * y + z * z );
+		return Math::Sqrt( x * x + y * y + z * z );
 	}
 
     template <typename T>
@@ -256,9 +256,9 @@ namespace EE::Math
     template <typename T>
     inline TVector3<T> NormalizeAngleComponents( TVector3<T> eulerAngle )
     {
-        eulerAngle.x = NormalizeDegrees( eulerAngle.x );
-        eulerAngle.y = NormalizeDegrees( eulerAngle.y );
-        eulerAngle.z = NormalizeDegrees( eulerAngle.z );
+        eulerAngle.x = Math::NormalizeDegrees( eulerAngle.x );
+        eulerAngle.y = Math::NormalizeDegrees( eulerAngle.y );
+        eulerAngle.z = Math::NormalizeDegrees( eulerAngle.z );
 
         return eulerAngle;
     }
@@ -266,9 +266,9 @@ namespace EE::Math
     template <typename T>
     inline TVector3<T> ClampAngleComponents( TVector3<T> eulerAngle )
     {
-        eulerAngle.x = ClampDegrees( eulerAngle.x );
-        eulerAngle.y = ClampDegrees( eulerAngle.y );
-        eulerAngle.z = ClampDegrees( eulerAngle.z );
+        eulerAngle.x = Math::ClampDegrees( eulerAngle.x );
+        eulerAngle.y = Math::ClampDegrees( eulerAngle.y );
+        eulerAngle.z = Math::ClampDegrees( eulerAngle.z );
 
         return eulerAngle;
     }

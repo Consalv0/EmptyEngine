@@ -6,41 +6,41 @@
 
 namespace EE
 {
-	uint64 Ticker::LastUpdateMicro = GetEpochTimeMicro();
-	uint64 Ticker::LastDeltaMicro = 0;
+	uint64 Ticker::LastUpdateNano = GetEpochTimeNanoNow();
+	uint64 Ticker::LastDeltaNano = 0;
 
 	uint32 Ticker::TickCount = 0;
 	uint64 Ticker::TickBuffer[ MaxTickSamples ];
 	uint64 Ticker::TickAverage = 30;
 
 	uint64 Ticker::MaxUpdateDeltaMicro = 0;
-	uint64 Ticker::MaxRenderDeltaMicro = 0;
+	uint64 Ticker::MaxRenderDeltaNano = 0;
 
 	bool Ticker::SkipRender = false;
 	uint64 Ticker::RenderDeltaTimeSum = 0;
 
 	void Ticker::Tick()
 	{
-		uint64 TickTime = GetEpochTimeMicro();
-		LastDeltaMicro = TickTime - LastUpdateMicro;
+		uint64 TickTime = GetEpochTimeNanoNow();
+		LastDeltaNano = TickTime - LastUpdateNano;
 
-		if ( LastDeltaMicro < MaxUpdateDeltaMicro )
+		if ( LastDeltaNano < MaxUpdateDeltaMicro )
 		{
-			uint64 Delta = MaxUpdateDeltaMicro - LastDeltaMicro;
-			std::this_thread::sleep_for( std::chrono::microseconds( Delta - 1000 ) );
+			uint64 Delta = MaxUpdateDeltaMicro - LastDeltaNano;
+			std::this_thread::sleep_for( std::chrono::nanoseconds( Delta - 1000000 ) );
 		}
 
-		LastUpdateMicro = GetEpochTimeMicro();
-		LastDeltaMicro += LastUpdateMicro - TickTime;
+		LastUpdateNano = GetEpochTimeNanoNow();
+		LastDeltaNano += LastUpdateNano - TickTime;
 
-		RenderDeltaTimeSum += LastDeltaMicro;
-		SkipRender = RenderDeltaTimeSum < MaxRenderDeltaMicro;
+		RenderDeltaTimeSum += LastDeltaNano;
+		SkipRender = RenderDeltaTimeSum < MaxRenderDeltaNano;
 		if ( !SkipRender )
 		{
 			RenderDeltaTimeSum = 0;
 		}
 
-		TickBuffer[ TickCount ] = LastDeltaMicro;
+		TickBuffer[ TickCount ] = LastDeltaNano;
 
 		TickAverage = 0;
 		for ( int Count = 0; Count < MaxTickSamples; Count++ )
@@ -54,24 +54,24 @@ namespace EE
 
 	Timestamp Ticker::GetTimeStamp()
 	{
-		return Timestamp( LastUpdateMicro, LastUpdateMicro + LastDeltaMicro );
+		return Timestamp( LastUpdateNano, LastUpdateNano + LastDeltaNano );
 	}
 
-	uint64 Ticker::GetEpochTimeMicro()
+	uint64 Ticker::GetEpochTimeNanoNow()
 	{
 		using namespace std::chrono;
-		return time_point_cast<microseconds>(steady_clock::now()).time_since_epoch().count();
+		return time_point_cast<nanoseconds>(steady_clock::now()).time_since_epoch().count();
 		return 0;
 	}
 
 	void Timestamp::Begin()
 	{
-		LastEpochTime = Ticker::GetEpochTime<Ticker::Micro>();
+		LastEpochTime = Ticker::GetEpochTimeNow<Ticker::Nano>();
 	}
 
 	void Timestamp::Stop()
 	{
-		NowEpochTime = Ticker::GetEpochTime<Ticker::Micro>();
+		NowEpochTime = Ticker::GetEpochTimeNow<Ticker::Nano>();
 	}
 
 	Timestamp Timestamp::operator+( const Timestamp& Other )

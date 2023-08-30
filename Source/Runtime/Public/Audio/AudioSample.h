@@ -19,12 +19,12 @@ namespace EE
 		~AudioSample();
 
 		template<typename T>
-		inline typename T::ReturnType GetDuration() const { return (typename T::ReturnType)Duration / (typename T::ReturnType)T::GetSizeInMicro(); }
+		inline typename T::ReturnType GetDuration() const { return (typename T::ReturnType)Duration / (typename T::ReturnType)T::GetSizeInNano(); }
 
 		template<typename T>
 		inline typename T::ReturnType GetDurationAt( uint32 Pos ) const
 		{
-			return (typename T::ReturnType)(BufferLength - Pos) / BufferLength * Duration / (typename T::ReturnType)T::GetSizeInMicro();
+			return (typename T::ReturnType)(BufferLength - Pos) / BufferLength * Duration / (typename T::ReturnType)T::GetSizeInNano();
 		}
 
 		//* The number of channels in the audio.

@@ -43,12 +43,12 @@ namespace EE::Math
 		T HalfPitch = EulerAngles[ Pitch ] * Scale;
 		T HalfYaw = EulerAngles[ Yaw ] * Scale;
 
-		T SR = std::sin( HalfRoll );
-		T CR = std::cos( HalfRoll );
-		T SP = std::sin( HalfPitch );
-		T CP = std::cos( HalfPitch );
-		T SY = std::sin( HalfYaw );
-		T CY = std::cos( HalfYaw );
+		T SR = Math::Sin( HalfRoll );
+		T CR = Math::Cos( HalfRoll );
+		T SP = Math::Sin( HalfPitch );
+		T CP = Math::Cos( HalfPitch );
+		T SY = Math::Sin( HalfYaw );
+		T CY = Math::Cos( HalfYaw );
 
 		TQuaternion EulerToQuat;
 		EulerToQuat.x = (CY * SP * CR) + (SY * CP * SR);
@@ -75,10 +75,10 @@ namespace EE::Math
     template <typename T>
 	inline TQuaternion<T> TQuaternion<T>::FromAxisAngle( TVector3<T> const& Axis, T const& Radians )
 	{
-		T Sine = std::sin( Radians * T(.5) );
+		T Sine = Math::Sin( Radians * T(.5) );
 
 		return TQuaternion(
-			std::cos( Radians * T(.5) ),
+			Math::Cos( Radians * T(.5) ),
 			Axis.x * Sine,
 			Axis.y * Sine,
 			Axis.z * Sine
@@ -106,7 +106,7 @@ namespace EE::Math
 
 		if ( tr > T(0) )
 		{
-			T num0 = sqrtf( tr + T(1) );
+			T num0 = Math::Sqrt( tr + T(1) );
 			T num1 = T(.5) / num0;
 			return TQuaternion(
 				num0 * T(.5),
@@ -117,7 +117,7 @@ namespace EE::Math
 		}
 		if ( (matrix.m00 >= matrix.m11) && (matrix.m00 >= matrix.m22) )
 		{
-			T num7 = std::sqrtf( ((1 + matrix.m00) - matrix.m11) - matrix.m22 );
+			T num7 = Math::Sqrt( ((1 + matrix.m00) - matrix.m11) - matrix.m22 );
 			T num4 = T(.5) / num7;
 			return TQuaternion(
 				(matrix.m12 - matrix.m21) * num4,
@@ -128,7 +128,7 @@ namespace EE::Math
 		}
 		if ( matrix.m11 > matrix.m22 )
 		{
-			T num6 = std::sqrtf( ((1 + matrix.m11) - matrix.m00) - matrix.m22 );
+			T num6 = Math::Sqrt( ((1 + matrix.m11) - matrix.m00) - matrix.m22 );
 			T num3 = T(.5) / num6;
 			return TQuaternion(
 				(matrix.m20 - matrix.m02) * num3,
@@ -138,7 +138,7 @@ namespace EE::Math
 			);
 		}
 
-		T num5 = sqrtf( ((T(1) + matrix.m22) - matrix.m00) - matrix.m11 );
+		T num5 = Math::Sqrt( ((T(1) + matrix.m22) - matrix.m00) - matrix.m11 );
 		T num2 = T(.5) / num5;
 		return TQuaternion(
 			(matrix.m01 - matrix.m10) * num2,
@@ -169,10 +169,10 @@ namespace EE::Math
 		if ( (T(1) - cosTheta) > 0.0001F )
 		{
 			// Standard case (slerp)
-			T omega = std::acos( cosTheta ); // extract theta from dot product's cos theta
-			T sinom = std::sin( omega );
-			sclp = std::sin( (1 - factor) * omega ) / sinom;
-			sclq = std::sin( factor * omega ) / sinom;
+			T omega = Math::Acos( cosTheta ); // extract theta from dot product's cos theta
+			T sinom = Math::Sin( omega );
+			sclp = Math::Sin( (1 - factor) * omega ) / sinom;
+			sclq = Math::Sin( factor * omega ) / sinom;
 		}
 		else
 		{
@@ -190,7 +190,7 @@ namespace EE::Math
     template <typename T>
 	inline T TQuaternion<T>::Magnitude() const
 	{
-		return std::sqrtf( x * x + y * y + z * z + w * w );
+		return Math::Sqrt( x * x + y * y + z * z + w * w );
 	}
 
     template <typename T>
@@ -359,9 +359,9 @@ namespace EE::Math
 			eulerFromQuat[ Yaw ] = 0;
 		}
 
-		if ( std::isinf( eulerFromQuat[ Roll ] ) || std::isnan( eulerFromQuat[ Roll ] ) )   eulerFromQuat[ Roll ] = 0;
-		if ( std::isinf( eulerFromQuat[ Pitch ] ) || std::isnan( eulerFromQuat[ Pitch ] ) ) eulerFromQuat[ Pitch ] = 0;
-		if ( std::isinf( eulerFromQuat[ Yaw ] ) || std::isnan( eulerFromQuat[ Yaw ] ) )     eulerFromQuat[ Yaw ] = 0;
+		if ( Math::IsInfiniteOrNan( eulerFromQuat[ Roll ] ) )   eulerFromQuat[ Roll ] = 0;
+		if ( Math::IsInfiniteOrNan( eulerFromQuat[ Pitch ] ) ) eulerFromQuat[ Pitch ] = 0;
+		if ( Math::IsInfiniteOrNan( eulerFromQuat[ Yaw ] ) )     eulerFromQuat[ Yaw ] = 0;
 
 		return eulerFromQuat;
 	}

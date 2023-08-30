@@ -34,7 +34,7 @@ namespace EE
 
 		PixelMap& operator=( const PixelMap& Other );
 
-		const void* PointerToValue() const;
+        constexpr const void* PointerToValue() const { return data; }
 
 		~PixelMap();
 
