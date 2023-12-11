@@ -145,7 +145,7 @@ namespace EE::Math
     template <typename T>
 	FORCEINLINE TVector2<T> TVector2<T>::Lerp( const TVector2<T>& start, const TVector2<T>& end, T t )
 	{
-		return TVector2( (start.x * (1 - t)) + (end.x * t), (start.y * (1 - t)) + (end.y * t) );
+		return TVector2( (start.x * (T(1) - t)) + (end.x * t), (start.y * (T(1) - t)) + (end.y * t) );
 	}
 
     template <typename T>

@@ -71,9 +71,9 @@ namespace EE::Math
 	inline void TVector4<T>::Normalize()
 	{
 		T sqrMagnitude = MagnitudeSquared();
-		if ( sqrMagnitude == 0 )
+		if ( sqrMagnitude == T(0) )
 		{
-			x = 0; y = 0; z = 0; w = 0;
+			x = T(0); y = T(0); z = T(0); w = T(0);
 		}
 		else
 		{
@@ -112,10 +112,10 @@ namespace EE::Math
 	FORCEINLINE TVector4<T> TVector4<T>::Lerp( const TVector4<T>& start, const TVector4<T>& end, T t )
 	{
 		return TVector4(
-			(start.x * (1 - t)) + (end.x * t),
-			(start.y * (1 - t)) + (end.y * t),
-			(start.z * (1 - t)) + (end.z * t),
-			(start.w * (1 - t)) + (end.w * t)
+			(start.x * (T(1) - t)) + (end.x * t),
+			(start.y * (T(1) - t)) + (end.y * t),
+			(start.z * (T(1) - t)) + (end.z * t),
+			(start.w * (T(1) - t)) + (end.w * t)
 		);
 	}
 
@@ -172,7 +172,7 @@ namespace EE::Math
     template <typename T>
 	FORCEINLINE TVector4<T> TVector4<T>::operator/( const T& value ) const
 	{
-		if ( value == 0 ) return TVector4();
+		if ( value == T(0) ) return TVector4();
 		return TVector4( x / value, y / value, z / value, w / value );
 	}
 
@@ -241,7 +241,7 @@ namespace EE::Math
     template <typename T>
 	FORCEINLINE TVector4<T>& TVector4<T>::operator/=( const T& value )
 	{
-		if ( value == 0 ) x = y = z = w = 0;
+		if ( value == T(0) ) x = y = z = w = T(0);
 		x /= value;
 		y /= value;
 		z /= value;

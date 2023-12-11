@@ -49,7 +49,7 @@ namespace EE::Math
     template <typename T>
     FORCEINLINE void TPlane<T>::Normalize()
     {
-        T distance = std::sqrt( x * x + y * y + z * z );
+        T distance = Math::Sqrt( x * x + y * y + z * z );
         x /= distance;
         y /= distance;
         z /= distance;
@@ -125,18 +125,18 @@ namespace EE::Math
     FORCEINLINE bool TFrustrum<T>::Inside( const TPoint3<T>& point ) const
     {
         return
-              left.DotPoint( point ) < 0 &&
-             right.DotPoint( point ) < 0 &&
-            bottom.DotPoint( point ) < 0 &&
-               top.DotPoint( point ) < 0 &&
-               far.DotPoint( point ) < 0 &&
-              near.DotPoint( point ) < 0;
+              left.DotPoint( point ) < T(0) &&
+             right.DotPoint( point ) < T(0) &&
+            bottom.DotPoint( point ) < T(0) &&
+               top.DotPoint( point ) < T(0) &&
+               far.DotPoint( point ) < T(0) &&
+              near.DotPoint( point ) < T(0);
     }
 
     template <typename T>
     FORCEINLINE TFrustrum<T> TFrustrum<T>::FromMVP( const TMatrix4x4<T>& mvp )
     {
-        Frustrum fustrum;
+        TFrustrum fustrum;
 
         fustrum.left   = { mvp.m03 + mvp.m00, mvp.m13 + mvp.m10, mvp.m23 + mvp.m20, mvp.m33 + mvp.m30 };
         fustrum.right  = { mvp.m03 - mvp.m00, mvp.m13 - mvp.m10, mvp.m23 - mvp.m20, mvp.m33 - mvp.m30 };

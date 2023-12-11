@@ -74,9 +74,9 @@ namespace EE::Math
     template <typename T>
 	inline void TVector3<T>::Normalize()
 	{
-		if ( MagnitudeSquared() == 0 )
+		if ( MagnitudeSquared() == T(0) )
 		{
-			x = 0; y = 0; z = 0;
+			x = T(0); y = T(0); z = T(0);
 		}
 		else
 		{
@@ -87,7 +87,7 @@ namespace EE::Math
     template <typename T>
 	inline TVector3<T> TVector3<T>::Normalized() const
 	{
-		if ( MagnitudeSquared() == 0 ) return TVector3<T>();
+		if ( MagnitudeSquared() == T(0) ) return TVector3<T>();
 		return *this / Magnitude();
 	}
 
@@ -132,7 +132,7 @@ namespace EE::Math
     template <typename T>
 	FORCEINLINE TVector3<T> TVector3<T>::Lerp( const TVector3<T>& start, const TVector3<T>& end, T t )
 	{
-		return TVector3( (start.x * (1 - t)) + (end.x * t), (start.y * (1 - t)) + (end.y * t), (start.z * (1 - t)) + (end.z * t) );
+		return TVector3( (start.x * (T(1) - t)) + (end.x * t), (start.y * (T(1) - t)) + (end.y * t), (start.z * (T(1) - t)) + (end.z * t) );
 	}
 
     template <typename T>
@@ -206,7 +206,7 @@ namespace EE::Math
     template <typename T>
 	FORCEINLINE TVector3<T> TVector3<T>::operator/( const T& value ) const
 	{
-		if ( value == 0 ) return TVector3<T>();
+		if ( value == T(0) ) return TVector3<T>();
 		return TVector3( x / value, y / value, z / value );
 	}
 

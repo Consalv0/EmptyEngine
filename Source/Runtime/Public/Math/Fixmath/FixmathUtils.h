@@ -8,6 +8,10 @@ namespace EE
         static constexpr fixed<Frac> Pi = fixed<Frac>::FromRaw( FIXED_PI( Frac ) );
         static constexpr fixed<Frac> QuarterPi = fixed<Frac>::FromRaw( FIXED_QUARTER_PI( Frac ) );
         static constexpr fixed<Frac> Epsilon = fixed<Frac>::FromRaw( FIXED_EPSILON( Frac ) );
+        static constexpr fixed<Frac> RadToDegree = fixed<Frac>( 180.0 / MathConstants<double>::Pi );
+        static constexpr fixed<Frac> DegToRad = fixed<Frac>( MathConstants<double>::Pi / 180.0 );
+        static constexpr fixed<Frac> DeltaPrecision = fixed<Frac>::FromRaw( 1 );
+        static constexpr fixed<Frac> Ra = fixed<Frac>::FromRaw( FIXED_EPSILON( Frac ) );
         static constexpr fixed<Frac> MaxValue = fixed<Frac>::FromRaw( FIXED_MAX );
         static constexpr fixed<Frac> MinValue = fixed<Frac>::FromRaw( FIXED_MIN );
     };
@@ -23,14 +27,6 @@ namespace EE
 
 namespace EE::Math
 {
-    //* Returns the smaller of the arguments.
-    template<unsigned Frac>
-    inline fixed<Frac> Min( const fixed<Frac>& a, const fixed<Frac>& b );
-
-    //* Returns the larger of the arguments.
-    template<unsigned Frac>
-    inline fixed<Frac> Max( const fixed<Frac>& a, const fixed<Frac>& b );
-     
     // //* Returns the middle out of three values
     // template <typename T, typename S>
     // inline T Median( const T& a, const T& b, const S& alpha );
@@ -89,11 +85,7 @@ namespace EE::Math
     // //* Fast pow to ten
     // template <typename R, typename T>
     // inline R Pow10( T number );
-    // 
-    // //* Error consideration
-    // template <typename T>
-    // inline T Atan2( T y, T x );
-    // 
+
     template<unsigned Frac>
     inline fixed<Frac> Sin( const fixed<Frac>& radians );
 
@@ -108,6 +100,10 @@ namespace EE::Math
 
     template<unsigned Frac>
     inline fixed<Frac> ATan2( const fixed<Frac>& x, const fixed<Frac>& y );
+
+    template<unsigned Frac>
+    inline fixed<Frac> Ceil( const fixed<Frac>& value );
+
     // template <typename T>
     // inline T Hypotenuse( T x, T y );
 }

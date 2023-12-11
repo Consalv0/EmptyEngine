@@ -67,12 +67,12 @@ namespace EE::Math
     template <typename T>
     inline TMatrix4x4<T> TMatrix4x4<T>::Perspective( const T& fov, const T& aspect, const T& near, const T& far )
     {
-        T const tanHalfFOV = tan( fov * T(0.5) );
+        T const tanHalfFOV = Math::Tan( fov * T(0.5) );
         TMatrix4x4 result(
             T(1) / (tanHalfFOV * aspect), T(0), T(0), T(0),
-            T(0), T(1) / (tanHalfFOV), 0, 0,
-            T(0), T(0), ((near == far) ? 1 : far / (far - near)), 1,
-            T(0), T(0), -near * ((near == far) ? 1 : far / (far - near)), 0
+            T(0), T(1) / (tanHalfFOV), T(0), T(0),
+            T(0), T(0), ((near == far) ? T(1) : far / (far - near)), T(1),
+            T(0), T(0), -near * ((near == far) ? T(1) : far / (far - near)), T(0)
         );
         return result;
     }
@@ -80,12 +80,12 @@ namespace EE::Math
     template <typename T>
     inline TMatrix4x4<T> TMatrix4x4<T>::PerspectiveReversed( const T& fov, const T& aspect, const T& near, const T& far )
     {
-        T const tanHalfFOV = tan( fov * T(0.5) );
+        T const tanHalfFOV = Math::Tan( fov * T(0.5) );
         TMatrix4x4 result(
-            T(1) / (tanHalfFOV * aspect), 0, 0, 0,
-            T(0), T(1) / (tanHalfFOV), 0, 0,
-            T(0), T(0), ((near == far) ? 0 : near / (near - far)), 1,
-            T(0), T(0), ((near == far) ? near : -far * near / (near - far)), 0
+            T(1) / (tanHalfFOV * aspect),T(0), T(0), T(0),
+            T(0), T(1) / (tanHalfFOV), T(0), T(0),
+            T(0), T(0), ((near == far) ? T(0) : near / (near - far)), T(1),
+            T(0), T(0), ((near == far) ? near : -far * near / (near - far)), T(0)
         );
         return result;
     }
@@ -94,10 +94,10 @@ namespace EE::Math
 	inline TMatrix4x4<T> TMatrix4x4<T>::Orthographic( const T& left, const T& right, const T& bottom, const T& top )
 	{
 		TMatrix4x4 result(
-			T(2) / (right - left), 0, 0, 0,
-			0, T(2) / (top - bottom), 0, 0,
-			0, 0, 1, 0,
-			-(right + left) / (right - left), -(top + bottom) / (top - bottom), 0, 1
+			T(2) / (right - left), T(0), T(0), T(0),
+			T(0), T(2) / (top - bottom), T(0), T(0),
+			T(0), T(0), T(1), T(0),
+			-(right + left) / (right - left), -(top + bottom) / (top - bottom), T(0), T(1)
 		);
 		return result;
 	}
@@ -106,10 +106,10 @@ namespace EE::Math
 	inline TMatrix4x4<T> TMatrix4x4<T>::Orthographic( const T& left, const T& right, const T& bottom, const T& top, const T& near, const T& far )
 	{
 		TMatrix4x4 result(
-			T(2) / (right - left), 0, 0, 0,
-			0, T(2) / (top - bottom), 0, 0,
-			0, 0, 1 / (near - far), 0,
-			-(right + left) / (right - left), -(top + bottom) / (top - bottom), near / (near - far), 1
+			T(2) / (right - left), T(0), T(0), T(0),
+			T(0), T(2) / (top - bottom), T(0), T(0),
+			T(0), T(0), T(1) / (near - far), T(0),
+			-(right + left) / (right - left), -(top + bottom) / (top - bottom), near / (near - far), T(1)
 		);
 		return result;
 	}
@@ -122,10 +122,10 @@ namespace EE::Math
 		TVector3<T> const upper( side.Cross( forward ) );
 
 		return TMatrix4x4(
-			side.x, side.y, side.z, 0,
-			upper.x, upper.y, upper.z, 0,
-			forward.x, forward.y, forward.z, 0,
-			-eye.x, -eye.y, -eye.z, 1
+			side.x, side.y, side.z, T(0),
+			upper.x, upper.y, upper.z, T(0),
+			forward.x, forward.y, forward.z, T(0),
+			-eye.x, -eye.y, -eye.z, T(1)
 		);
 	}
 

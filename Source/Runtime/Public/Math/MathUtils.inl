@@ -27,13 +27,13 @@ namespace EE::Math
 namespace EE
 {
     template <typename T>
-    T Math::Min( const T& a, const T& b )
+    constexpr T Math::Min( const T& a, const T& b )
     {
         return b < a ? b : a;
     }
 
     template <typename T>
-    T Math::Max( const T& a, const T& b )
+    constexpr T Math::Max( const T& a, const T& b )
     {
         return a < b ? b : a;
     }
@@ -208,10 +208,16 @@ namespace EE
     {
         return std::hypot( x, y );
     }
-    
+
     template<typename T>
     bool EE::Math::IsInfiniteOrNan( const T& value )
     {
         return std::isinf( value ) || std::isnan( value );
+    }
+
+    template<typename T>
+    T EE::Math::Ceil( const T& value )
+    {
+        return std::ceil( value );
     }
 }

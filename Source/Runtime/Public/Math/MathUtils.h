@@ -61,11 +61,11 @@ namespace EE::Math
 {
 	//* Returns the smaller of the arguments.
 	template <typename T>
-	inline T Min( const T& a, const T& b );
+    FORCEINLINE constexpr T Min( const T& a, const T& b );
 
 	//* Returns the larger of the arguments.
 	template <typename T>
-	inline T Max( const T& a, const T& b );
+    FORCEINLINE constexpr T Max( const T& a, const T& b );
 
 	//* Returns the middle out of three values
 	template <typename T, typename S>
@@ -146,7 +146,7 @@ namespace EE::Math
     template <typename T>
     inline T ATan( const T& value );
 
-    // Arc Tangent function
+    // Arc Tangent x,y function
     template <typename T>
     inline T ATan2( const T& x, const T& y );
 
@@ -159,6 +159,9 @@ namespace EE::Math
 
     template <typename T>
     inline bool IsInfiniteOrNan( const T& value );
+
+    template <typename T>
+    inline T Ceil( const T& value );
 }
 
 #include "Math/MathUtils.inl"

@@ -7,7 +7,7 @@ namespace EE
         template <typename T>
         struct TMatrix4x4
         {
-            static_assert(std::is_floating_point_v<T>, "T must be floating point.");
+            static_assert(IsFixedOrFloatingPoint<T>, "T must be floating point.");
 
         public:
             union

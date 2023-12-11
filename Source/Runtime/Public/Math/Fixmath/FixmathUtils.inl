@@ -48,4 +48,10 @@ namespace EE
     {
         return fixed<Frac>::ATan2( x, y );
     }
+
+    template<unsigned Frac>
+    fixed<Frac> Math::Ceil( const fixed<Frac>& value )
+    {
+        return fixed<Frac>::Ceil( value );
+    }
 }

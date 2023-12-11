@@ -19,14 +19,14 @@ namespace EE::Math
     template <typename T>
     template <typename R>
 	FORCEINLINE TIntVector3<T>::TIntVector3( const TVector2<R>& vector )
-		: x( (int32)vector.x ), y( (int32)vector.y ), z( 0 )
+		: x( (T)vector.x ), y( (T)vector.y ), z( (T)0 )
 	{
 	}
 
     template <typename T>
     template <typename R>
 	FORCEINLINE TIntVector3<T>::TIntVector3( const TVector3<R>& vector )
-		: x( (int32)vector.x ), y( (int32)vector.y ), z( (int32)vector.z )
+		: x( (T)vector.x ), y( (T)vector.y ), z( (T)vector.z )
 	{
 	}
 

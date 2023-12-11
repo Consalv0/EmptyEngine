@@ -89,7 +89,7 @@ namespace EE::Math
 	inline TQuaternion<T> TQuaternion<T>::FromLookRotation( TVector3<T> const& forward, TVector3<T> const& up )
 	{
 		const TVector3<T> normal = forward.Normalized();
-		const TVector3<T> tangent = TVector3::Cross( up == normal ? up + 0.001F : up, normal ).Normalized();
+		const TVector3<T> tangent = TVector3::Cross( up == normal ? up + T(0.001F) : up, normal ).Normalized();
 		const TVector3<T> Bitangent = TVector3::Cross( normal, tangent );
 
 		TMatrix3x3 LookSpace(
@@ -117,7 +117,7 @@ namespace EE::Math
 		}
 		if ( (matrix.m00 >= matrix.m11) && (matrix.m00 >= matrix.m22) )
 		{
-			T num7 = Math::Sqrt( ((1 + matrix.m00) - matrix.m11) - matrix.m22 );
+            T num7 = Math::Sqrt( ((T(1) + matrix.m00) - matrix.m11) - matrix.m22 );
 			T num4 = T(.5) / num7;
 			return TQuaternion(
 				(matrix.m12 - matrix.m21) * num4,
@@ -128,7 +128,7 @@ namespace EE::Math
 		}
 		if ( matrix.m11 > matrix.m22 )
 		{
-			T num6 = Math::Sqrt( ((1 + matrix.m11) - matrix.m00) - matrix.m22 );
+			T num6 = Math::Sqrt( ((T(1) + matrix.m11) - matrix.m00) - matrix.m22 );
 			T num3 = T(.5) / num6;
 			return TQuaternion(
 				(matrix.m20 - matrix.m02) * num3,
@@ -155,7 +155,7 @@ namespace EE::Math
 
 		// Adjust signs (if necessary)
 		TQuaternion adjEnd = end;
-		if ( cosTheta < 0 )
+		if ( cosTheta < T(0) )
 		{
 			cosTheta = -cosTheta;
 			adjEnd.x = -adjEnd.x;   // Reverse all signs
@@ -166,7 +166,7 @@ namespace EE::Math
 
 		// Calculate coefficients
 		T sclp, sclq;
-		if ( (T(1) - cosTheta) > 0.0001F )
+		if ( (T(1) - cosTheta) > T(0.0001) )
 		{
 			// Standard case (slerp)
 			T omega = Math::Acos( cosTheta ); // extract theta from dot product's cos theta
@@ -177,7 +177,7 @@ namespace EE::Math
 		else
 		{
 			// Very close, do linear interp (because it's faster)
-			sclp = 1 - factor;
+			sclp = T(1) - factor;
 			sclq = factor;
 		}
 
@@ -202,9 +202,9 @@ namespace EE::Math
     template <typename T>
 	inline void TQuaternion<T>::Normalize()
 	{
-		if ( MagnitudeSquared() == 0 )
+		if ( MagnitudeSquared() == T(0) )
 		{
-			w = 1; x = 0; y = 0; z = 0;
+			w = T(1); x = T(0); y = T(0); z = T(0);
 		}
 		else
 		{
@@ -215,7 +215,7 @@ namespace EE::Math
     template <typename T>
 	inline TQuaternion<T> TQuaternion<T>::Normalized() const
 	{
-		if ( MagnitudeSquared() == 0 ) return TQuaternion();
+		if ( MagnitudeSquared() == T(0) ) return TQuaternion();
 		TQuaternion Result = TQuaternion( *this );
 		return Result /= Magnitude();
 	}
@@ -223,20 +223,20 @@ namespace EE::Math
     template <typename T>
 	inline TQuaternion<T> TQuaternion<T>::Conjugated() const
 	{
-		return TQuaternion( GetScalar(), GetVector() * -1 );
+		return TQuaternion( GetScalar(), GetVector() * T(-1) );
 	}
 
     template <typename T>
 	inline TQuaternion<T> TQuaternion<T>::Inversed() const
 	{
-		T AbsoluteValue = Magnitude();
-		AbsoluteValue *= AbsoluteValue;
-		AbsoluteValue = 1 / AbsoluteValue;
+		T absoluteValue = Magnitude();
+		absoluteValue *= absoluteValue;
+		absoluteValue = T(1) / absoluteValue;
 
 		TQuaternion ConjugateVal = Conjugated();
 
-		T Scalar = ConjugateVal.GetScalar() * AbsoluteValue;
-		TVector3<T> Imaginary = ConjugateVal.GetVector() * AbsoluteValue;
+		T Scalar = ConjugateVal.GetScalar() * absoluteValue;
+		TVector3<T> Imaginary = ConjugateVal.GetVector() * absoluteValue;
 
 		return TQuaternion( Scalar, Imaginary );
 	}
@@ -244,7 +244,7 @@ namespace EE::Math
     template <typename T>
 	inline TMatrix4x4<T> TQuaternion<T>::ToMatrix4x4() const
 	{
-		TMatrix4x4 result;
+		TMatrix4x4<T> result;
 		T xx( x * x );
 		T yy( y * y );
 		T zz( z * z );
@@ -255,17 +255,17 @@ namespace EE::Math
 		T wy( w * y );
 		T wz( w * z );
 
-		result.m00 = 1 - 2 * (yy + zz);
-		result.m01 = 2 * (xy + wz);
-		result.m02 = 2 * (xz - wy);
+		result.m00 = T(1) - T(2) * (yy + zz);
+		result.m01 = T(2) * (xy + wz);
+		result.m02 = T(2) * (xz - wy);
 
-		result.m10 = 2 * (xy - wz);
-		result.m11 = 1 - 2 * (xx + zz);
-		result.m12 = 2 * (yz + wx);
+		result.m10 = T(2) * (xy - wz);
+		result.m11 = T(1) - T(2) * (xx + zz);
+		result.m12 = T(2) * (yz + wx);
 
-		result.m20 = 2 * (xz + wy);
-		result.m21 = 2 * (yz - wx);
-		result.m22 = 1 - 2 * (xx + yy);
+		result.m20 = T(2) * (xz + wy);
+		result.m21 = T(2) * (yz - wx);
+		result.m22 = T(1) - T(2) * (xx + yy);
 		return result;
 	}
 
@@ -274,13 +274,13 @@ namespace EE::Math
 	{
 		T pitch;
 		const T singularityTest = x * y + z * w;
-		if ( Math::Abs( singularityTest ) > 0.499995 )
+		if ( Math::Abs( singularityTest ) > T(0.499995) )
 		{
 			return 0;
 		}
 		else
 		{
-			pitch = Math::Atan2( (2 * x * w) - (2 * y * z), 1 - (2 * Math::Square( x )) - (2 * Math::Square( z )) );
+            pitch = Math::Atan2( (T(2) * x * w) - (T(2) * y * z), T(1) - (T(2) * Math::Square( x )) - (T(2) * Math::Square( z )) );
 		}
 		return pitch * MathConstants<T>::RadToDegree;
 	}
@@ -290,19 +290,19 @@ namespace EE::Math
 	{
 		T yaw;
 		const T SingularityTest = x * y + z * w;
-		if ( SingularityTest > 0.499995 )
+        if ( SingularityTest > T(0.499995) )
 		{
-			yaw = 2 * Math::Atan2( x, w );
+            yaw = T(2) * Math::Atan2( x, w );
 		}
-		else if ( SingularityTest < -0.49999 )
+		else if ( SingularityTest < T(-0.49999) )
 		{
-			yaw = -2 * Math::Atan2( x, w );
+			yaw = T(-2) * Math::Atan2(x, w);
 		}
 		else
 		{
 			const T sqy = y * y;
 			const T sqz = z * z;
-			yaw = Math::Atan2( (2 * y * w) - (2 * x * z), 1 - (2 * sqy) - (2 * sqz) );
+            yaw = Math::Atan2( (T(2) * y * w) - (T(2) * x * z), T(1) - (T(2) * sqy) - (T(2) * sqz) );
 		}
 		return yaw * MathConstants<T>::RadToDegree;
 	}
@@ -312,17 +312,17 @@ namespace EE::Math
 	{
 		T roll;
 		const T singularityTest = x * y + z * w;
-		if ( singularityTest > 0.499995 )
+        if ( singularityTest > T(0.499995) )
 		{
 			roll = MathConstants<T>::HalfPi;
 		}
-		else if ( singularityTest < -0.499995 )
+		else if ( singularityTest < T(-0.499995) )
 		{
 			roll = -MathConstants<T>::HalfPi;
 		}
 		else
 		{
-			roll = asin( 2 * singularityTest );
+            roll = asin( T(2) * singularityTest );
 		}
 		return roll * MathConstants<T>::RadToDegree;
 	}
@@ -344,24 +344,24 @@ namespace EE::Math
 	{
 		TVector3<T> eulerFromQuat;
 
-		T PitchY = std::asin( 2 * (x * w - y * z) );
+		T PitchY = std::asin( T(2) * (x * w - y * z) );
 		T Test = std::cos( PitchY );
 		if ( Test > MathConstants<T>::TendencyZero )
 		{
-			eulerFromQuat[ Roll ] = Math::Atan2( 2 * (x * y + z * w), 1 - (2 * (Math::Square( z ) + Math::Square( x ))) ) * MathConstants<T>::RadToDegree;
+			eulerFromQuat[ Roll ] = Math::Atan2( T(2) * (x * y + z * w), T(1) - (T(2) * (Math::Square( z ) + Math::Square( x ))) ) * MathConstants<T>::RadToDegree;
 			eulerFromQuat[ Pitch ] = PitchY * MathConstants<T>::RadToDegree;
-			eulerFromQuat[ Yaw ] = Math::Atan2( 2 * (z * x + y * w), 1 - (2 * (Math::Square( y ) + Math::Square( x ))) ) * MathConstants<T>::RadToDegree;
+			eulerFromQuat[ Yaw ] = Math::Atan2( T(2) * (z * x + y * w), T(1) - (T(2) * (Math::Square( y ) + Math::Square( x ))) ) * MathConstants<T>::RadToDegree;
 		}
 		else
 		{
-			eulerFromQuat[ Roll ] = Math::Atan2( -2.F * (x * y - z * w), 1 - (2 * (Math::Square( y ) + Math::Square( z ))) ) * MathConstants<T>::RadToDegree;
+			eulerFromQuat[ Roll ] = Math::Atan2( T(-2.F) * (x * y - z * w), T(1) - (T(2) * (Math::Square( y ) + Math::Square( z ))) ) * MathConstants<T>::RadToDegree;
 			eulerFromQuat[ Pitch ] = PitchY * MathConstants<T>::RadToDegree;
-			eulerFromQuat[ Yaw ] = 0;
+			eulerFromQuat[ Yaw ] = T(0);
 		}
 
-		if ( Math::IsInfiniteOrNan( eulerFromQuat[ Roll ] ) )   eulerFromQuat[ Roll ] = 0;
-		if ( Math::IsInfiniteOrNan( eulerFromQuat[ Pitch ] ) ) eulerFromQuat[ Pitch ] = 0;
-		if ( Math::IsInfiniteOrNan( eulerFromQuat[ Yaw ] ) )     eulerFromQuat[ Yaw ] = 0;
+		if ( Math::IsInfiniteOrNan( eulerFromQuat[ Roll ] ) )   eulerFromQuat[ Roll ] = T(0);
+		if ( Math::IsInfiniteOrNan( eulerFromQuat[ Pitch ] ) ) eulerFromQuat[ Pitch ] = T(0);
+		if ( Math::IsInfiniteOrNan( eulerFromQuat[ Yaw ] ) )     eulerFromQuat[ Yaw ] = T(0);
 
 		return eulerFromQuat;
 	}
@@ -448,11 +448,11 @@ namespace EE::Math
     template <typename T>
 	inline TVector3<T> TQuaternion<T>::operator*( const TVector3<T>& vector ) const
 	{
-		TVector3<T> const QuatVector( GetVector() );
-		TVector3<T> const QV( TVector3<T>::Cross( QuatVector, vector ) );
-		TVector3<T> const QQV( TVector3<T>::Cross( QuatVector, QV ) );
+		TVector3<T> const quatVector( GetVector() );
+		TVector3<T> const QV( TVector3<T>::Cross( quatVector, vector ) );
+		TVector3<T> const QQV( TVector3<T>::Cross( quatVector, QV ) );
 
-		return vector + ((QV * w) + QQV) * 2;
+		return vector + ((QV * w) + QQV) * T(2);
 	}
 
     template <typename T>
@@ -475,7 +475,7 @@ namespace EE::Math
     template <typename T>
 	FORCEINLINE TQuaternion<T>& TQuaternion<T>::operator/=( const T& value )
 	{
-		if ( value == 0 ) w = x = y = z = 0;
+		if ( value == T(0) ) w = x = y = z = T(0);
 		w /= value;
 		x /= value;
 		y /= value;

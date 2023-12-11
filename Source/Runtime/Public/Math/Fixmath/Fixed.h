@@ -81,6 +81,12 @@ namespace EE
             return (this->xValue >> (Frac));
         }
 
+        // Fixed-point to unsigned integer conversion.
+        explicit FORCEINLINE constexpr operator uint32() const
+        {
+            return (this->xValue >> (Frac));
+        }
+
         // Conversion of different Frac sizes
         template<unsigned OtherFrac>
         explicit FORCEINLINE constexpr operator fixed<OtherFrac>() const
@@ -283,9 +289,9 @@ namespace EE
          */
 #ifdef __GNUC__
      // Count leading zeros, using processor-specific instruction if available.
-#define clz(x) __builtin_clz(x)
+#define FIXED_CLZ(x) __builtin_clz(x)
 #elif defined _MSC_VER
-#define clz(x) __lzcnt(x)
+#define FIXED_CLZ(x) __lzcnt(x)
 #else
         static constexpr uint8 clz( uint32 x )
         {
@@ -513,76 +519,15 @@ namespace EE
         // Returns the square root of the given fixed
         static FORCEINLINE constexpr fixed Sqrt( const fixed& value ) noexcept
         {
-            uint8 neg = (value.xValue < 0);
-            uint32 num = (neg ? -value.xValue : value.xValue);
-            uint32 result = 0;
-            uint32 bit;
-            uint8 n;
+            fixed result = fixed( 1 );
 
-            // Many numbers will be less than 15, so
-            // this gives a good balance between time spent
-            // in if vs. time spent in the while loop
-            // when searching for the starting value.
-            if ( num & 0xFFF00000 )
-                bit = (uint32_t)1 << 30;
-            else
-                bit = (uint32_t)1 << 18;
-
-            while ( bit > num ) bit >>= 2;
-
-            // The main part is executed twice, in order to avoid
-            // using 64 bit values in computations.
-            for ( n = 0; n < 2; n++ )
+            int iteration = 0;
+            while ( (iteration++ < 10) && (Abs( (result * result) - value ).xValue >= 1) )
             {
-                // First we get the top 24 bits of the answer.
-                while ( bit )
-                {
-                    if ( num >= result + bit )
-                    {
-                        num -= result + bit;
-                        result = (result >> 1) + bit;
-                    }
-                    else
-                    {
-                        result = (result >> 1);
-                    }
-                    bit >>= 2;
-                }
-
-                if ( n == 0 )
-                {
-                    // Then process it again to get the lowest 8 bits.
-                    if ( num > FIXED_FRACTIONAL_BIT_MASK( Frac ) )
-                    {
-                        // The remainder 'num' is too large to be shifted left
-                        // by 16, so we have to add 1 to result manually and
-                        // adjust 'num' accordingly.
-                        // num = a - (result + 0.5)^2
-                        //   = num + result^2 - (result + 0.5)^2
-                        //   = num - result - 0.5
-                        num -= result;
-                        num = (num << Frac) - (0x8 << Frac);
-                        result = (result << Frac) + (0x8 << Frac);
-                    }
-                    else
-                    {
-                        num <<= Frac;
-                        result <<= Frac;
-                    }
-
-                    bit = 1 << (Frac - 2);
-                }
+                result = fixed( 0.5 ) * (result + (value / result));
             }
 
-#ifndef FIXMATH_NO_ROUNDING
-            // Finally, if next bit would have been 1, round the result upwards.
-            if ( num > result )
-            {
-                result++;
-            }
-#endif
-
-            return FromRaw(neg ? -(int32)result : (int32)result);
+            return result;
         }
         // 
         //         // Returns the exponent (e^) of the given fixed
@@ -621,6 +566,11 @@ namespace EE
             return *this;
         }
 
+        FORCEINLINE constexpr fixed operator-() const
+        {
+            return FromRaw( -xValue );
+        }
+
         FORCEINLINE constexpr fixed operator-( const fixed& other ) const
         {
             return Subtract( *this, other );
@@ -635,6 +585,31 @@ namespace EE
         FORCEINLINE fixed operator%( const fixed& other ) const
         {
             return Modulus( *this, other );
+        }
+
+        FORCEINLINE constexpr bool operator>( const fixed& other ) const
+        {
+            return this->xValue > other.xValue;
+        }
+
+        FORCEINLINE constexpr bool operator>=( const fixed& other ) const
+        {
+            return this->xValue >= other.xValue;
+        }
+
+        FORCEINLINE constexpr bool operator<( const fixed& other ) const
+        {
+            return this->xValue < other.xValue;
+        }
+
+        FORCEINLINE constexpr bool operator<=( const fixed& other ) const
+        {
+            return this->xValue < other.xValue;
+        }
+
+        FORCEINLINE constexpr bool operator==( const fixed& other ) const
+        {
+            return this->xValue == other.xValue;
         }
     };
 }
