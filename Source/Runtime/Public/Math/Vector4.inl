@@ -172,7 +172,6 @@ namespace EE::Math
     template <typename T>
 	FORCEINLINE TVector4<T> TVector4<T>::operator/( const T& value ) const
 	{
-		if ( value == T(0) ) return TVector4();
 		return TVector4( x / value, y / value, z / value, w / value );
 	}
 
@@ -241,7 +240,6 @@ namespace EE::Math
     template <typename T>
 	FORCEINLINE TVector4<T>& TVector4<T>::operator/=( const T& value )
 	{
-		if ( value == T(0) ) x = y = z = w = T(0);
 		x /= value;
 		y /= value;
 		z /= value;

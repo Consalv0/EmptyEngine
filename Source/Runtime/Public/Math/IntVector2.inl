@@ -16,21 +16,21 @@ namespace EE
         template <typename T>
         template <typename R>
         FORCEINLINE TIntVector2<T>::TIntVector2( const TVector2<R>& vector )
-            : x( (int32)vector.x ), y( (int32)vector.y )
+            : x( (T)vector.x ), y( (T)vector.y )
         {
         }
 
         template <typename T>
         template <typename R>
         FORCEINLINE TIntVector2<T>::TIntVector2( const TVector3<R>& vector )
-            : x( (int32)vector.x ), y( (int32)vector.y )
+            : x( (T)vector.x ), y( (T)vector.y )
         {
         }
 
         template <typename T>
         template <typename R>
         FORCEINLINE TIntVector2<T>::TIntVector2( const TVector4<R>& vector )
-            : x( (int32)vector.x ), y( (int32)vector.y )
+            : x( (T)vector.x ), y( (T)vector.y )
         {
         }
 
@@ -179,7 +179,6 @@ namespace EE
         template <typename T>
         FORCEINLINE TIntVector2<T> TIntVector2<T>::operator/( const T& value ) const
         {
-            if ( value == 0 ) TIntVector2();
             return TIntVector2<T>( x / value, y / value );
         }
 
@@ -226,20 +225,19 @@ namespace EE
         template <typename T>
         FORCEINLINE TIntVector2<T>& TIntVector2<T>::operator/=( const T& value )
         {
-            if ( value == 0 ) x = y = 0;
             x /= value;
             y /= value;
             return *this;
         }
 
         template <typename T>
-        inline TIntVector2<T> operator*( int32 value, const TIntVector2<T>& vector )
+        inline TIntVector2<T> operator*( T value, const TIntVector2<T>& vector )
         {
             return TIntVector2<T>( value * vector.x, value * vector.y );
         }
 
         template <typename T>
-        inline TIntVector2<T> operator/( int32 value, const TIntVector2<T>& vector )
+        inline TIntVector2<T> operator/( T value, const TIntVector2<T>& vector )
         {
             return TIntVector2<T>( value / vector.x, value / vector.y );
         }

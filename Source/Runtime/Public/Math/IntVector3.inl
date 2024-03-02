@@ -51,7 +51,7 @@ namespace EE::Math
     template <typename T>
     template <typename R>
 	FORCEINLINE TIntVector3<T>::TIntVector3( const TVector4<R>& vector )
-		: x( (int32)vector.x ), y( (int32)vector.y ), z( (int32)vector.z )
+		: x( (T)vector.x ), y( (T)vector.y ), z( (T)vector.z )
 	{
 	}
 
@@ -188,7 +188,6 @@ namespace EE::Math
     template <typename T>
 	FORCEINLINE TIntVector3<T> TIntVector3<T>::operator/( const T& value ) const
 	{
-		if ( value == 0 ) return TIntVector3();
 		return TIntVector3( x / value, y / value, z / value );
 	}
 
@@ -240,7 +239,6 @@ namespace EE::Math
     template <typename T>
 	FORCEINLINE TIntVector3<T>& TIntVector3<T>::operator/=( const T& value )
 	{
-		if ( value == 0 ) x = y = z = 0;
 		x /= value;
 		y /= value;
 		z /= value;

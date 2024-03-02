@@ -77,4 +77,5 @@ namespace EE
     using IntBox3 = Math::TIntBox3<int32>;
     using IntVector2 = Math::TIntVector2<int32>;
     using IntVector3 = Math::TIntVector3<int32>;
+    using IntVector4 = Math::TIntVector4<int32>;
 }

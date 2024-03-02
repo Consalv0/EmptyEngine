@@ -43,7 +43,7 @@ namespace EE::Math
     template <typename T>
 	TMatrix4x4<T> TTransform<T>::GetLocalToWorldMatrix() const
 	{
-		return TMatrix4x4::Translation( position ) * rotation.ToMatrix4x4() * TMatrix4x4::Scaling( scale );
+		return TMatrix4x4<T>::Translation( position ) * rotation.ToMatrix4x4() * TMatrix4x4<T>::Scaling( scale );
 	}
 
     template <typename T>

@@ -67,8 +67,8 @@ namespace EE::Math
     template <typename T>
     inline TMatrix4x4<T> TMatrix4x4<T>::Perspective( const T& fov, const T& aspect, const T& near, const T& far )
     {
-        T const tanHalfFOV = Math::Tan( fov * T(0.5) );
-        TMatrix4x4 result(
+        float const tanHalfFOV = Math::Tan( fov * T( 0.5 ) );
+        Matrix4x4 result(
             T(1) / (tanHalfFOV * aspect), T(0), T(0), T(0),
             T(0), T(1) / (tanHalfFOV), T(0), T(0),
             T(0), T(0), ((near == far) ? T(1) : far / (far - near)), T(1),
@@ -108,8 +108,8 @@ namespace EE::Math
 		TMatrix4x4 result(
 			T(2) / (right - left), T(0), T(0), T(0),
 			T(0), T(2) / (top - bottom), T(0), T(0),
-			T(0), T(0), T(1) / (near - far), T(0),
-			-(right + left) / (right - left), -(top + bottom) / (top - bottom), near / (near - far), T(1)
+			T(0), T(0), T(1) / (far - near), T(0),
+			-(right + left) / (right - left), -(top + bottom) / (top - bottom), near / (far - near), T(1)
 		);
 		return result;
 	}

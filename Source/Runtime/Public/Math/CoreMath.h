@@ -11,6 +11,7 @@
 #include "Math/Quaternion.h"
 #include "Math/IntVector2.h"
 #include "Math/IntVector3.h"
+#include "Math/IntVector4.h"
 
 #include "Math/Matrix3x3.h"
 #include "Math/Matrix4x4.h"
