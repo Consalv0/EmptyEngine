@@ -166,7 +166,7 @@ namespace EE
     int InputEventsHandler_Internal( void* userData, SDL_Event* sdlEvent )
     {
         Input& input = *(Input*)userData; 
-        
+
         auto& keyState = GScancodeStates[ (EScancode)sdlEvent->key.keysym.scancode ];
         auto& mouseState = GMouseButtonStates[ (EMouseButton)sdlEvent->button.button ];
         static int32_t mouseButtonPressedCount[ 255 ] = {

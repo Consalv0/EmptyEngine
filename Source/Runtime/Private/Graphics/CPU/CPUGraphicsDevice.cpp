@@ -33,13 +33,13 @@ namespace EE
         case EE::PixelFormat_RG16F:
             break;
         case EE::PixelFormat_RGB8:
-            break;
+            return SDL_PIXELFORMAT_RGB888;
         case EE::PixelFormat_RGB32F:
             break;
         case EE::PixelFormat_RGB16F:
             break;
         case EE::PixelFormat_RGBA8:
-            break;
+            return SDL_PIXELFORMAT_RGBA8888;
         case EE::PixelFormat_RGBA16_UShort:
             break;
         case EE::PixelFormat_RGBA32F:
@@ -99,7 +99,7 @@ namespace EE
 	{
 		auto internalState = std::make_shared<CPUSwapChain>( CPUSwapChain() );
 
-		internalState->renderer = SDL_CreateRenderer( (SDL_Window*)window->GetHandle(), NULL, 0);
+		internalState->renderer = SDL_CreateRenderer( (SDL_Window*)window->GetHandle(), NULL, SDL_RENDERER_SOFTWARE );
 		if ( internalState->renderer == NULL )
 		{
 			EE_LOG_CORE_ERROR( L"Error creating SDL renderer" );
@@ -164,12 +164,33 @@ namespace EE
 	{
 		auto internalSwapChain = ToInternal( swapchain );
 		Vector4 clearColor = swapchain.description.clearcolor * 255;
-		
-		SDL_SetRenderDrawColor( internalSwapChain->renderer,
-			(Uint8)clearColor.r, (Uint8)clearColor.g, (Uint8)clearColor.b, (Uint8)clearColor.a );
 
-		SDL_RenderClear( internalSwapChain->renderer );
-        SDL_RenderTexture( internalSwapChain->renderer, ToInternal( *internalSwapChain->backBuffers[ 0 ] )->resource, NULL, NULL);
+        SDL_Texture* buffer = ToInternal( *internalSwapChain->backBuffers[ 0 ] )->resource;
+
+        SDL_SetRenderTarget( internalSwapChain->renderer, buffer );
+
+        const auto bm = SDL_ComposeCustomBlendMode(
+            SDL_BLENDFACTOR_ONE,
+            SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+            SDL_BLENDOPERATION_ADD,
+
+            SDL_BLENDFACTOR_ONE,
+            SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+            SDL_BLENDOPERATION_ADD );
+        SDL_SetTextureBlendMode( buffer, bm );
+
+        SDL_SetRenderDrawBlendMode( internalSwapChain->renderer, SDL_BLENDMODE_NONE );
+        SDL_SetRenderDrawColor( internalSwapChain->renderer,
+        	(Uint8)clearColor.r, (Uint8)clearColor.g, (Uint8)clearColor.b, (Uint8)clearColor.a );
+        SDL_RenderFillRect( internalSwapChain->renderer, NULL );
+
+        SDL_RenderTexture( internalSwapChain->renderer, buffer, NULL, NULL );
+
+		// SDL_RenderClear( internalSwapChain->renderer );
+        // 
+        // SDL_SetRenderDrawBlendMode( internalSwapChain->renderer, SDL_BLENDMODE_ADD );
+        // SDL_SetTextureBlendMode( texture, SDL_BLENDMODE_MOD );
+        // SDL_RenderTexture( internalSwapChain->renderer, texture, NULL, NULL);
 	}
 
 	void CPUGraphicsDevice::RenderPassEnd( const SwapChain& swapchain, CommandList cmd )

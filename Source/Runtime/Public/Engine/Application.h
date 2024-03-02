@@ -47,5 +47,5 @@ namespace EE
 		void Terminate();
 	};
 
-	Application* CreateApplication();
+    Application* CreateApplication();
 }

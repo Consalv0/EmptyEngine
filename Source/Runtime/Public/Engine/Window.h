@@ -16,6 +16,15 @@ namespace EE
         WindowMode_FullScreen = 1
     };
 
+    enum EWindowOption
+    {
+        WindowOption_None = 0,
+        WindowOption_Borderless = 1 << 0,
+        WindowOption_Resizable = 1 << 1,
+        WindowOption_AlwaysOnTop = 1 << 2,
+        WindowOption_SkipTaskbar = 1 << 3,
+    };
+
     template <typename T>
     class Bitmap;
 
@@ -26,13 +35,15 @@ namespace EE
         uint32 width;
         uint32 height;
         EWindowMode windowMode;
+        uint32 options;
 
         WindowProperties(
             const WString& title = L"Empty Engine",
-            uint32 width = 1920,
-            uint32 height = 1080,
-            EWindowMode mode = WindowMode_Windowed )
-            : name(title), width(width), height(height), windowMode(mode) {
+            uint32 width = -1,
+            uint32 height = -1,
+            EWindowMode mode = WindowMode_Windowed,
+            uint32 options = WindowOption_None )
+            : name(title), width(width), height(height), windowMode(mode), options(options) {
         }
 
     };
@@ -46,6 +57,7 @@ namespace EE
             WString name_;
             EWindowMode mode_;
             void* windowHandle_;
+            uint32 options_;
             int32 width_;
             int32 height_;
             bool vsync_;
@@ -94,6 +106,9 @@ namespace EE
         //* Get SDL_Window Pointer
         virtual void* GetHandle() const;
 
+        //* Makes a window transparent by setting a transparency color.
+        virtual bool MakeTransparent( const uint8& r, const uint8& g, const uint8& b, const uint8& a );
+
         //* Sets the window icon
         void SetIcon( class PixelMap* Icon );
 
@@ -101,7 +116,8 @@ namespace EE
         void Terminate();
 
         //* Creates a Window with a Name, Width and Height
-        static Window* Create(const WindowProperties& parameters = WindowProperties());
+        static Window* Create( const WindowProperties& parameters );
     };
 
+    Window* CreateWindow();
 }

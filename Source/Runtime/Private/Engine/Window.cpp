@@ -58,12 +58,30 @@ namespace EE
             return;
         }
 
+        Uint32 windowFlags = SDL_WINDOW_KEYBOARD_GRABBED;
+        if ( options_ & WindowOption_Resizable )
+        {
+            windowFlags |= SDL_WINDOW_RESIZABLE;
+        }
+        if ( options_ & WindowOption_Borderless )
+        {
+            windowFlags |= SDL_WINDOW_BORDERLESS;
+        }
+        if ( options_ & WindowOption_AlwaysOnTop )
+        {
+            windowFlags |= SDL_WINDOW_ALWAYS_ON_TOP;
+        }
+        if ( options_ & WindowOption_SkipTaskbar )
+        {
+            windowFlags |= SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_TRANSPARENT;
+        }
+
         if ( (windowHandle_ = SDL_CreateWindowWithPosition(
             Text::WideToNarrow( name_ ).c_str(),
             SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED,
             width_, height_,
-            SDL_WINDOW_RESIZABLE | SDL_WINDOW_KEYBOARD_GRABBED | mode_ // | GraphicsDevice::GetWindowMode()
+            windowFlags | mode_ // | GraphicsDevice::GetWindowMode()
         )) == NULL )
         {
             EE_LOG_CORE_CRITICAL( L"Window: \"{0}\" could not be initialized: {1}", name_, Text::NarrowToWide( SDL_GetError() ) );
@@ -82,7 +100,7 @@ namespace EE
         height_ = parameters.height;
         name_ = parameters.name;
         mode_ = parameters.windowMode;
-        Initialize();
+        options_ = parameters.options;
     }
 
     Window::~Window()
@@ -177,5 +195,10 @@ namespace EE
     void* Window::GetHandle() const
     {
         return windowHandle_;
+    }
+
+    bool Window::MakeTransparent( const uint8& r, const uint8& g, const uint8& b, const uint8& a )
+    {
+        return false;
     }
 }

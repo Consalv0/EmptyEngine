@@ -7,13 +7,13 @@ namespace EE
 	public:
 		PixelMap();
 
-		PixelMap( int32 Width, int32 Height, int32 Depth, EPixelFormat PixelFormat );
+		PixelMap( int32 Width, int32 Height, int32 Depth, EPixelFormat pixelFormat );
 
-		PixelMap( int32 Width, int32 Height, int32 Depth, EPixelFormat PixelFormat, void*& data );
+		PixelMap( int32 Width, int32 Height, int32 Depth, EPixelFormat pixelFormat, void*& data );
 
 		PixelMap( const PixelMap& Other );
 
-		void SetData( int32 Width, int32 Height, int32 Depth, EPixelFormat PixelFormat, void*& InData );
+		void SetData( int32 Width, int32 Height, int32 Depth, EPixelFormat pixelFormat, void*& InData );
 
 		//* Width in pixels. 
 		inline uint32 GetWidth() const { return Width; };
@@ -30,7 +30,7 @@ namespace EE
 
 		size_t GetMemorySize() const;
 
-		inline EPixelFormat GetColorFormat() const { return PixelFormat; };
+		inline EPixelFormat GetColorFormat() const { return pixelFormat; };
 
 		PixelMap& operator=( const PixelMap& Other );
 
@@ -42,16 +42,16 @@ namespace EE
 		friend class PixelMapUtility;
 
 		void* data;
-		EPixelFormat PixelFormat;
+		EPixelFormat pixelFormat;
 		uint32 Width, Height, Depth;
 	};
 
 	class PixelMapUtility
 	{
 	public:
-		static void CreateData( int32 Width, int32 Height, int32 Depth, EPixelFormat PixelFormat, void*& data );
+		static void CreateData( int32 Width, int32 Height, int32 Depth, EPixelFormat pixelFormat, void*& data );
 
-		static void CreateData( int32 Width, int32 Height, int32 Depth, EPixelFormat PixelFormat, void*& Target, void* data );
+		static void CreateData( int32 Width, int32 Height, int32 Depth, EPixelFormat pixelFormat, void*& Target, void* data );
 
 		//* Flips the pixels vertically
 		static void FlipVertically( PixelMap& Map );

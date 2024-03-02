@@ -14,7 +14,7 @@ namespace EE
     void GameEngine::Initialize()
     {
         application_ = EE::CreateApplication();
-        window_ = Window::Create();
+        window_ = EE::CreateWindow();
         inputManager_ = Input::Create();
         deviceFunctions_ = DeviceFunctions::Create();
         graphicsDevice_ = new CPUGraphicsDevice();
