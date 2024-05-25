@@ -29,8 +29,10 @@ int main(int argc, char **argv)
 	// EE::Log::Initialize();
     EE::Log::Initialize();
 	EE::GEngine = new EE::GameEngine();
-    EE::GEngine->Initialize();
-    EE::GEngine->Run();
+    if ( EE::GEngine->Initialize() )
+    {
+        EE::GEngine->Run();
+    }
     EE::GEngine->Terminate();
 
 #ifdef EE_DEBUG

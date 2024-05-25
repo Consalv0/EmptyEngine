@@ -28,16 +28,19 @@ project "EmptyEngine"
         "%{prj.location}/Source/Runtime",
         "%{prj.location}/Source/Runtime/Public",
         "%{IncludeDir.SDL}/include",
+        "%{IncludeDir.VulkanSDK}/include",
         "%{IncludeDir.spdlog}/include"
     }      
 
     libdirs { 
         "%{prj.location}/Libraries",
+        "%{LibrariesDir.VulkanSDK}",
         "%{LibrariesDir.SDL}/%{cfg.buildcfg}"
     }
 
     links {
         "spdlog",
+        "vulkan-1.lib",
         "SDL3.lib",
     }
 

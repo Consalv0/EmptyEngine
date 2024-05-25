@@ -4,19 +4,11 @@
 #include "Engine/Engine.h"
 #include "Graphics/CPU/CPUGraphicsDevice.h"
 
-#include "SDL3/SDL.h"
-
-// --- Make discrete GPU by default.
-extern "C" {
-	// --- developer.download.nvidia.com/devzone/devcenter/gamegraphics/files/OptimusRenderingPolicies.pdf
-	__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
-	// --- developer.amd.com/community/blog/2015/10/02/amd-enduro-system-for-developers/
-	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 0x00000001;
-}
+#include <SDL3/SDL.h>
 
 namespace EE
 {
-    Uint32 ConvertPixelFormat( EPixelFormat format )
+    uint32 ConvertPixelFormat( EPixelFormat format )
     {
         switch ( format )
         {
@@ -26,19 +18,19 @@ namespace EE
             break;
         case EE::PixelFormat_R32F:
             break;
-        case EE::PixelFormat_RG8:
+        case EE::PixelFormat_R8G8:
             return SDL_PIXELFORMAT_RGB888;
         case EE::PixelFormat_RG32F:
             break;
         case EE::PixelFormat_RG16F:
             break;
-        case EE::PixelFormat_RGB8:
+        case EE::PixelFormat_R8G8B8:
             return SDL_PIXELFORMAT_RGB888;
         case EE::PixelFormat_RGB32F:
             break;
         case EE::PixelFormat_RGB16F:
             break;
-        case EE::PixelFormat_RGBA8:
+        case EE::PixelFormat_R8G8B8A8:
             return SDL_PIXELFORMAT_RGBA8888;
         case EE::PixelFormat_RGBA16_UShort:
             break;
@@ -59,6 +51,10 @@ namespace EE
         return 0;
     }
 
+    struct CPUWindowContext
+    {
+    };
+
     struct CPUTexture
     {
         SDL_Texture* resource;
@@ -67,6 +63,12 @@ namespace EE
         {
             SDL_DestroyTexture( resource );
         }
+    };
+
+    struct CPUSurface
+    {
+        ~CPUSurface()
+        { }
     };
 
 	struct CPUSwapChain
@@ -95,9 +97,54 @@ namespace EE
         return static_cast<CPUTexture*>(texture.internalState.get());
     }
 
-	bool CPUGraphicsDevice::CreateSwapChain( const SwapChainDescription& description, Window* window, SwapChain& outSwapChain ) const 
+    EWindowGraphicsAPI CPUGraphicsDevice::GetWindowGraphicsAPI() const
+    {
+        return EWindowGraphicsAPI::WindowGraphicsAPI_Other;
+    }
+
+    bool CPUGraphicsDevice::Initialize()
+    {
+        return true;
+    }
+
+    bool CPUGraphicsDevice::CreateWindowContext( Window* window, WindowContext& windowContext ) const
+    {
+        windowContext.internalState = std::make_shared<CPUWindowContext>();
+
+        WindowSurfaceDescription surfaceDescription;
+        surfaceDescription.window = window;
+        if ( CreateWindowSurface( surfaceDescription, windowContext.windowSurface ) == false )
+        {
+            return false;
+        }
+
+        SwapChainDescription swapChainDesc{};
+        swapChainDesc.width = window->GetWidth();
+        swapChainDesc.height = window->GetHeight();
+        swapChainDesc.fullscreen = window->GetWindowMode();
+        swapChainDesc.format = PixelFormat_RGBA32F;
+        swapChainDesc.vsync = window->GetVSync();
+        if ( CreateSwapChain( swapChainDesc, window, windowContext.swapChain ) == false )
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool CPUGraphicsDevice::CreateWindowSurface( const WindowSurfaceDescription& description, WindowSurface& outWindowSurface ) const
+    {
+        auto internalState = std::make_shared<CPUSurface>();
+
+        outWindowSurface.type = GraphicsResourceType_Surface;
+        outWindowSurface.internalState = internalState;
+        outWindowSurface.description = description;
+        return true;
+    }
+
+    bool CPUGraphicsDevice::CreateSwapChain( const SwapChainDescription& description, Window* window, SwapChain& outSwapChain ) const
 	{
-		auto internalState = std::make_shared<CPUSwapChain>( CPUSwapChain() );
+		auto internalState = std::make_shared<CPUSwapChain>();
 
 		internalState->renderer = SDL_CreateRenderer( (SDL_Window*)window->GetHandle(), NULL, SDL_RENDERER_SOFTWARE );
 		if ( internalState->renderer == NULL )
@@ -122,9 +169,9 @@ namespace EE
             return false;
         }
 
+        outSwapChain.type = GraphicsResourceType_Swapchain;
 		outSwapChain.internalState = internalState;
 		outSwapChain.description = description;
-		outSwapChain.type = ResourceType_Texture;
 
 		return true;
 	}
@@ -133,13 +180,19 @@ namespace EE
 
 	bool CPUGraphicsDevice::CreateTexture( const TextureDescription& description, const SubresourceData* pInitialData, Texture& outTexture ) const 
     {
-        SDL_Texture* texture = SDL_CreateTexture( (SDL_Renderer*)(pInitialData->memoryPointer), ConvertPixelFormat( description.format ), SDL_TEXTUREACCESS_STREAMING, description.width, description.height );
-
-        auto internalState = std::make_shared<CPUTexture>( CPUTexture() );
+        auto internalState = std::make_shared<CPUTexture>();
+        SDL_Texture* texture = SDL_CreateTexture( 
+            (SDL_Renderer*)(pInitialData->memoryPointer),
+            ConvertPixelFormat( description.format ),
+            SDL_TEXTUREACCESS_STREAMING,
+            description.width,
+            description.height 
+        );
         internalState->resource = texture;
+        outTexture.type = GraphicsResourceType_Texture;
         outTexture.description = description;
         outTexture.internalState = internalState;
-        return false;
+        return true;
     }
 
 	bool CPUGraphicsDevice::CreateSampler( const SamplerDescription& description, Sampler& outSampler ) const { return false; }
@@ -154,10 +207,10 @@ namespace EE
 
 	void CPUGraphicsDevice::WaitForDevice() const { }
 
-	Texture CPUGraphicsDevice::GetBackBuffer( const SwapChain& swapchain ) const 
+	Texture* CPUGraphicsDevice::GetBackBuffer( const SwapChain& swapchain ) const 
     {
         auto swapchainInternal = ToInternal( swapchain );
-        return *swapchainInternal->backBuffers[ 0 ];
+        return swapchainInternal->backBuffers[ 0 ];
     }
 
 	void CPUGraphicsDevice::RenderPassBegin( const SwapChain& swapchain, CommandList cmd ) 

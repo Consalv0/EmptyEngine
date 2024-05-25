@@ -3,36 +3,45 @@
 #include "Engine/Engine.h"
 
 #include "Resources/MeshParser.h"
-#include "Graphics/CPU/CPUGraphicsDevice.h"
 
+#include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
 
 namespace EE
 {
     bool GWantToTerminate = false;
 
-    void GameEngine::Initialize()
+    bool GameEngine::Initialize()
     {
         application_ = EE::CreateApplication();
+        graphicsDevice_ = EE::CreateGraphicsDevice();
         window_ = EE::CreateWindow();
+
+        if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_HAPTIC ) != 0 )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to initialize SDL3: {0}\n", Text::NarrowToWide( SDL_GetError() ) );
+            return false;
+        }
+
+        if ( graphicsDevice_->Initialize() == false )
+        {
+            return false;
+        }
+        if ( window_->Initialize() == false )
+        {
+            return false;
+        }
+
+
         inputManager_ = Input::Create();
         deviceFunctions_ = DeviceFunctions::Create();
-        graphicsDevice_ = new CPUGraphicsDevice();
 
         ModelParser::Initialize();
-
-        swapChain_ = new SwapChain();
-        SwapChainDescription swapChainDesc{};
-        swapChainDesc.width = window_->GetWidth();
-        swapChainDesc.height = window_->GetHeight();
-        swapChainDesc.fullscreen = window_->GetWindowMode();
-        swapChainDesc.format = PixelFormat_RGBA32F;
-        swapChainDesc.vsync = window_->GetVSync();
-        graphicsDevice_->CreateSwapChain( swapChainDesc, window_, *swapChain_);
 
 #ifdef EE_PLATFORM_CUDA
         CUDA::FindCudaDevice();
 #endif
+        return true;
     }
 
     void GameEngine::PollEvents()
@@ -49,22 +58,23 @@ namespace EE
 
     void GameEngine::BeginFrame()
     {
-        graphicsDevice_->RenderPassBegin( *swapChain_, 0 );
+        graphicsDevice_->RenderPassBegin( window_->GetWindowContext().swapChain, 0 );
     }
 
     void GameEngine::EndFrame()
     {
-        graphicsDevice_->RenderPassEnd( *swapChain_, 0 );
+        graphicsDevice_->RenderPassEnd( window_->GetWindowContext().swapChain, 0 );
         frameCount_++;
     }
 
     void GameEngine::Terminate()
     {
-        delete swapChain_;
         delete inputManager_;
         delete window_;
         delete application_;
         delete graphicsDevice_;
+
+        SDL_Quit();
     }
 
     void GameEngine::ShouldTerminate()

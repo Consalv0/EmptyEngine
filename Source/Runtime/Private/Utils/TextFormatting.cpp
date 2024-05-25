@@ -4,53 +4,53 @@
 
 namespace EE::Text
 {
-	NString WideToNarrow( const WChar* From )
+	NString WideToNarrow( const WChar* from )
 	{
-		if ( From == NULL )
+		if ( from == NULL )
 			return "";
 
 		std::mbstate_t state = std::mbstate_t();
-		size_t SizeNeeded = std::wcsrtombs( NULL, &From, 0, &state );
-		NString To = NString( SizeNeeded, '\0' );
-		std::wcsrtombs( &To[ 0 ], &From, SizeNeeded, &state );
+		size_t sizeNeeded = std::wcsrtombs( NULL, &from, 0, &state );
+		NString to = NString( sizeNeeded, '\0' );
+		std::wcsrtombs( &to[ 0 ], &from, sizeNeeded, &state );
 
-		return To;
+		return to;
 	}
 
-	WString NarrowToWide( const NChar* From )
+	WString NarrowToWide( const NChar* from )
 	{
-		if ( From == NULL )
+		if ( from == NULL )
 			return L"";
 
 		std::mbstate_t state = std::mbstate_t();
-		size_t SizeNeeded = std::mbsrtowcs( NULL, &From, 0, &state );
-		WString To = WString( SizeNeeded, L'\0' );
-		std::mbsrtowcs( &To[ 0 ], &From, SizeNeeded, &state );
+		size_t sizeNeeded = std::mbsrtowcs( NULL, &from, 0, &state );
+		WString to = WString( sizeNeeded, L'\0' );
+		std::mbsrtowcs( &to[ 0 ], &from, sizeNeeded, &state );
 
-		return To;
+		return to;
 	}
 
-	NString WideToNarrow( const WString& From )
+	NString WideToNarrow( const WString& from )
 	{
-		if ( From.empty() )
+		if ( from.empty() )
 			return NString();
 
-		size_t SizeNeeded = std::wcstombs( NULL, &From[ 0 ], 0 );
-		NString To = NString( SizeNeeded, '\0' );
-		To.resize( std::wcstombs( &To[ 0 ], From.c_str(), SizeNeeded ) );
+		size_t sizeNeeded = std::wcstombs( NULL, &from[ 0 ], 0 );
+		NString to = NString( sizeNeeded, '\0' );
+		to.resize( std::wcstombs( &to[ 0 ], from.c_str(), sizeNeeded ) );
 
-		return To;
+		return to;
 	}
 
-	WString NarrowToWide( const NString& From )
+	WString NarrowToWide( const NString& from )
 	{
-		if ( From.empty() )
+		if ( from.empty() )
 			return WString();
 
-		size_t SizeNeeded = std::mbstowcs( NULL, &From[ 0 ], 0 );
-		WString To = WString( SizeNeeded, '\0' );
-		To.resize( std::mbstowcs( &To[ 0 ], From.c_str(), SizeNeeded ) );
+		size_t sizeNeeded = std::mbstowcs( NULL, &from[ 0 ], 0 );
+		WString to = WString( sizeNeeded, '\0' );
+		to.resize( std::mbstowcs( &to[ 0 ], from.c_str(), sizeNeeded ) );
 
-		return To;
+		return to;
 	}
 }

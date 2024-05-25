@@ -26,7 +26,6 @@ namespace EE
             width_ = GetSystemMetrics( SM_CXSCREEN );
         if ( height_ < 0 )
             height_ = GetSystemMetrics( SM_CYSCREEN );
-        Initialize();
     }
 
     WindowsWindow::~WindowsWindow()
@@ -40,7 +39,7 @@ namespace EE
         SDL_version version;
         SDL_VERSION( &version ); /* initialize info structure with SDL version info */
 
-        SDL_GetWindowWMInfo( (SDL_Window*)windowHandle_, &info, *(Uint32*)(&version) );
+        SDL_GetWindowWMInfo( (SDL_Window*)windowHandle_, &info, *(uint32*)(&version) );
         HWND hWnd = info.info.win.window;
 
         SetWindowLong( hWnd, GWL_EXSTYLE, GetWindowLong( hWnd, GWL_EXSTYLE ) | WS_EX_LAYERED );
@@ -50,8 +49,8 @@ namespace EE
         return true;
     }
 
-    Window* Window::Create( const WindowProperties& parameters )
+    Window* Window::Create( const WindowProperties& properties )
     {
-        return new WindowsWindow( parameters );
+        return new WindowsWindow( properties );
     }
 }

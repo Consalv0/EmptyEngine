@@ -34,10 +34,10 @@ namespace EE
 		switch (Status.ACLineStatus) {
 			case 0://	"Offline"
 			case 255://	"Unknown status"
-				return true;
+                return false;
 			case 1://	"Online"
 			default:
-				return false;
+				return true;
 		}
 	}
 
@@ -49,7 +49,7 @@ namespace EE
 			case 128://	"No system battery"
 			case 255://	"Unknown status-unable to read the battery flag information"
 			default:
-				return -1.F;
+                break;
 		}
 
 		return Status.BatteryLifePercent;

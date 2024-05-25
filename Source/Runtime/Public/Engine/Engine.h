@@ -6,6 +6,8 @@
 #include "Engine/Window.h"
 #include "Engine/Input.h"
 
+#include "Graphics/GraphicsDevice.h"
+
 namespace EE
 {
 	class GameEngine
@@ -14,9 +16,7 @@ namespace EE
 		
 		bool initialized_ = false;
 
-        uint64_t frameCount_ = 0;
-
-        SwapChain* swapChain_;
+        uint64 frameCount_ = 0;
 
         Application* application_ = NULL;
 
@@ -31,7 +31,7 @@ namespace EE
 		DeviceFunctions* deviceFunctions_ = NULL;
 
 	public:
-        void Initialize();
+        bool Initialize();
 
         void Run();
 
@@ -42,7 +42,7 @@ namespace EE
         void Terminate();
 
         //* Get the total count of frames rendered
-        FORCEINLINE uint64_t GetFrameCount() const { return frameCount_; };
+        FORCEINLINE uint64 GetFrameCount() const { return frameCount_; };
 
 		FORCEINLINE Application* GetApplication() const { return application_; };
 
@@ -50,9 +50,9 @@ namespace EE
 
         FORCEINLINE Window* GetWindow() const { return window_; };
 
-        FORCEINLINE SwapChain* GetSwapChain() const { return swapChain_; };
+        FORCEINLINE Input* GetInputManager() const { return inputManager_; };
 
-		FORCEINLINE Input* GetInputManager() const { return inputManager_; };
+        FORCEINLINE DeviceFunctions* GetPlatformDevice() const { return deviceFunctions_; };
 
 		FORCEINLINE AudioDevice* GetAudioDevice() const { return audioDevice_; };
 

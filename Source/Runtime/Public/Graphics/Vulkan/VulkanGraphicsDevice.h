@@ -3,11 +3,21 @@
 
 namespace EE
 {
-	class CPUGraphicsDevice : public GraphicsDevice
+	class VulkanGraphicsDevice : public GraphicsDevice
 	{
+    protected:
+        void* VulkanInstance;
+        void* VulkanPhysicalDevice;
+        void* VulkanDevice;
+        bool Initialized;
+
+    private:
+        ~VulkanGraphicsDevice();
+
         EWindowGraphicsAPI GetWindowGraphicsAPI() const;
 
         bool Initialize();
+        bool StartDevices();
 
         bool CreateWindowContext( class Window* window, WindowContext& windowContext ) const;
         bool CreateWindowSurface( const WindowSurfaceDescription& description, WindowSurface& outWindowSurface ) const;
@@ -15,7 +25,7 @@ namespace EE
 		bool CreateBuffer( const GPUBufferDescription& description, const SubresourceData* pInitialData, Buffer& outBuffer ) const;
 		bool CreateTexture( const TextureDescription& description, const SubresourceData* pInitialData, Texture& outTexture ) const;
 		bool CreateSampler( const SamplerDescription& description, Sampler& outSampler ) const;
-		bool CreateShader( EShaderStage stage, const void* pShaderBytecode, size_t bytecodeLength, Shader& outShader ) const;
+		bool CreateShader( EShaderStage stage, const void* pShaderBytecode, size_t BytecodeLength, Shader& outShader ) const;
 
 		void SetName( GraphicsDeviceResource* pResource, const NChar* name );
 
@@ -64,6 +74,6 @@ namespace EE
 		void EventEnd( CommandList cmd );
 		void SetMarker( const char* name, CommandList cmd );
 
-        void* GetDeviceInstance() { return NULL; };
+        void* GetDeviceInstance() { return VulkanInstance; };
 	};
 }

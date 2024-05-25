@@ -13,6 +13,7 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL.h>
 
+
 namespace EE
 {
     int WindowEventsHandler( void* userData, SDL_Event* sdlEvent )
@@ -48,17 +49,19 @@ namespace EE
         return 0;
     }
 
-    void Window::Initialize()
+    bool Window::Initialize()
     {
-        if ( windowHandle_ != NULL ) return;
+        if ( windowHandle_ != NULL ) 
+            return false;
 
-        if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_HAPTIC ) != 0 )
+        uint32 windowFlags = SDL_WINDOW_KEYBOARD_GRABBED;
+        EWindowGraphicsAPI graphicsAPI = EE::GEngine->graphicsDevice_->GetWindowGraphicsAPI();
+
+        if ( graphicsAPI == WindowGraphicsAPI_Vulkan )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to initialize SDL3: {0}\n", Text::NarrowToWide( SDL_GetError() ) );
-            return;
+            windowFlags |= SDL_WINDOW_VULKAN;
         }
 
-        Uint32 windowFlags = SDL_WINDOW_KEYBOARD_GRABBED;
         if ( options_ & WindowOption_Resizable )
         {
             windowFlags |= SDL_WINDOW_RESIZABLE;
@@ -81,16 +84,19 @@ namespace EE
             SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED,
             width_, height_,
-            windowFlags | mode_ // | GraphicsDevice::GetWindowMode()
+            windowFlags | mode_
         )) == NULL )
         {
             EE_LOG_CORE_CRITICAL( L"Window: \"{0}\" could not be initialized: {1}", name_, Text::NarrowToWide( SDL_GetError() ) );
-            return;
+            return false;
         }
+
+        EE::GEngine->graphicsDevice_->CreateWindowContext( this, windowContext_ );
 
         SDL_SetWindowKeyboardGrab( (SDL_Window*)windowHandle_, SDL_bool( false ) );
         SDL_SetWindowData( (SDL_Window*)windowHandle_, "WindowData", this );
         SDL_AddEventWatch( WindowEventsHandler, (void*)this );
+        return true;
     }
 
     Window::Window( const WindowProperties& parameters )
@@ -106,7 +112,6 @@ namespace EE
     Window::~Window()
     {
         Terminate();
-        SDL_Quit();
     }
 
     void Window::Resize( const uint32& width, const uint32& height )
@@ -137,7 +142,7 @@ namespace EE
 
     void Window::SetIcon( PixelMap* Icon )
     {
-        if ( Icon->GetColorFormat() != PixelFormat_RGBA8 ) return;
+        if ( Icon->GetColorFormat() != PixelFormat_R8G8B8A8 ) return;
         SDL_Surface* Surface = SDL_CreateSurfaceFrom(
             (void*)Icon->PointerToValue(),
             Icon->GetWidth(), Icon->GetHeight(),
@@ -154,6 +159,7 @@ namespace EE
 #endif // EE_DEBUG
         SDL_DestroyWindow( (SDL_Window*)(windowHandle_) );
         windowHandle_ = NULL;
+        windowContext_ = WindowContext();
         SDL_DelEventWatch( WindowEventsHandler, (void*)this );
     }
 

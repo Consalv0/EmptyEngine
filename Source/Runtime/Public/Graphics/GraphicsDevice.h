@@ -12,19 +12,24 @@ namespace EE
 	class GraphicsDevice
 	{
 	protected:
-		static const uint32 bufferCount_ = 2;
-		bool debugDevice_ = false;
-		uint32 capabilities_ = 0;
-		uint64_t timeStampFrecuency_ = 0;
+		static const uint32 BUFFER_COUNT = 2;
+		bool DebugDevice = false;
+		uint32 Capabilities = 0;
+		uint64 TimeStampFrecuency = 0;
 
 	public:
 		virtual ~GraphicsDevice() = default;
 
+        virtual EWindowGraphicsAPI GetWindowGraphicsAPI() const = 0;
+
+        virtual bool Initialize() = 0;
+        virtual bool CreateWindowContext( Window* window, WindowContext& windowContext ) const = 0;
+        virtual bool CreateWindowSurface( const WindowSurfaceDescription& description, WindowSurface& outWindowSurface ) const = 0;
 		virtual bool CreateSwapChain( const SwapChainDescription& description, class Window* window, SwapChain& outSwapChain ) const = 0;
 		virtual bool CreateBuffer( const GPUBufferDescription& description, const SubresourceData* pInitialData, Buffer& outBuffer ) const = 0;
 		virtual bool CreateTexture( const TextureDescription& description, const SubresourceData* pInitialData, Texture& outTexture ) const = 0;
 		virtual bool CreateSampler( const SamplerDescription& description, Sampler& outSampler ) const = 0;
-		virtual bool CreateShader( EShaderStage stage, const void* pShaderBytecode, size_t BytecodeLength, Shader& outShader ) const = 0;
+		virtual bool CreateShader( EShaderStage stage, const void* pShaderBytecode, size_t bytecodeLength, Shader& outShader ) const = 0;
 		// virtual bool CreateQueryHeap( const GPUQueryHeapDesc* pDesc, GPUQueryHeap* pQueryHeap ) const = 0;
 		// virtual bool CreatePipelineState( const PipelineStateDescription& description, PipelineState* outPipeline ) const = 0;
 		// virtual bool CreateRenderPass( const RenderPassDesc* pDesc, RenderPass* renderpass ) const = 0;
@@ -53,17 +58,17 @@ namespace EE
 		virtual void WaitForDevice() const = 0;
 		virtual void ClearPipelineStateCache() {};
 
-		FORCEINLINE bool CheckCapability( EGraphicDeviceCapability capability ) const { return capabilities_ & capability; }
+		FORCEINLINE bool CheckCapability( EGraphicsDeviceCapability capability ) const { return Capabilities & capability; }
 
-		static constexpr uint32 GetBufferCount() { return bufferCount_; }
+		static constexpr uint32 GetBufferCount() { return BUFFER_COUNT; }
 
-		constexpr bool IsDebugDevice() const { return debugDevice_; }
+		constexpr bool IsDebugDevice() const { return DebugDevice; }
 
-		constexpr uint64_t GetTimestampFrequency() const { return timeStampFrecuency_; }
+		constexpr uint64_t GetTimestampFrequency() const { return TimeStampFrecuency; }
 
 		virtual EShaderFormat GetShaderFormat() const { return ShaderFormat_None; }
 
-		virtual Texture GetBackBuffer( const SwapChain& swapchain ) const = 0;
+		virtual Texture* GetBackBuffer( const SwapChain& swapchain ) const = 0;
 
 		///////////////Thread-sensitive////////////////////////
 
@@ -105,7 +110,7 @@ namespace EE
 		// virtual void QueryEnd( const GPUQueryHeap* heap, uint32 index, CommandList cmd ) = 0;
 		// virtual void QueryResolve( const GPUQueryHeap* heap, uint32 index, uint32 count, CommandList cmd ) {}
 		// virtual void Barrier( const GPUBarrier* barriers, uint32 numBarriers, CommandList cmd ) = 0;
-		virtual void PushConstants( const void* data, uint32 size_, CommandList cmd ) {}
+		virtual void PushConstants( const void* data, uint32 size, CommandList cmd ) {}
 
 		struct DeviceAllocation
 		{
@@ -125,5 +130,10 @@ namespace EE
 		virtual void EventBegin( const char* name, CommandList cmd ) = 0;
 		virtual void EventEnd( CommandList cmd ) = 0;
 		virtual void SetMarker( const char* name, CommandList cmd ) = 0;
+
+        virtual void* GetDeviceInstance() = 0;
 	};
+
+    //* Creates a handler
+    GraphicsDevice* CreateGraphicsDevice();
 }

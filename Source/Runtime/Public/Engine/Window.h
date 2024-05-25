@@ -4,27 +4,11 @@
 #include "Events/WindowEvent.h"
 #include "Events/InputEvent.h"
 #include "Graphics/Graphics.h"
-#include "Graphics/GraphicsDevice.h"
 
 union WindowEventData;
 
 namespace EE
 {
-    enum EWindowMode
-    {
-        WindowMode_Windowed = 0,
-        WindowMode_FullScreen = 1
-    };
-
-    enum EWindowOption
-    {
-        WindowOption_None = 0,
-        WindowOption_Borderless = 1 << 0,
-        WindowOption_Resizable = 1 << 1,
-        WindowOption_AlwaysOnTop = 1 << 2,
-        WindowOption_SkipTaskbar = 1 << 3,
-    };
-
     template <typename T>
     class Bitmap;
 
@@ -48,6 +32,14 @@ namespace EE
 
     };
 
+    typedef void* WindowHandle;
+
+    struct WindowContext : GraphicsDeviceObject
+    {
+        WindowSurface windowSurface;
+        SwapChain swapChain;
+    };
+
     //* Cointains the properties and functions of a window
     class Window
     {
@@ -56,14 +48,13 @@ namespace EE
         {
             WString name_;
             EWindowMode mode_;
-            void* windowHandle_;
+            WindowHandle windowHandle_;
+            WindowContext windowContext_;
             uint32 options_;
             int32 width_;
             int32 height_;
             bool vsync_;
         };
-
-        void Initialize();
 
     public:
         Window( const WindowProperties& parameters );
@@ -72,6 +63,9 @@ namespace EE
 
         //* Set the window display mode
         virtual void SetWindowMode(EWindowMode mode);
+
+        //* Initialize window (window creation)
+        bool Initialize();
 
         //* Resize the size of the window
         void Resize( const uint32& width, const uint32& height );
@@ -114,6 +108,12 @@ namespace EE
 
         //* Terminates this window
         void Terminate();
+
+        //* Graphica device context
+        const WindowContext& GetWindowContext() const { return windowContext_; };
+
+        //* OS specific window handle
+        WindowHandle GetWindowHandle() const { return windowHandle_; };
 
         //* Creates a Window with a Name, Width and Height
         static Window* Create( const WindowProperties& parameters );

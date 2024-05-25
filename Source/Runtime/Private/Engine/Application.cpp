@@ -79,8 +79,6 @@ namespace EE
                 GEngine->EndFrame();
             }
 
-            EE_LOG_CORE_INFO( Ticker::GetDeltaTime<Ticker::Mili>() );
-
         } while (
             GEngine->WantToTerminate() == false
         );

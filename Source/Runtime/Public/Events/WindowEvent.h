@@ -13,7 +13,7 @@ namespace EE
         EventWindow_Moved
     };
 
-#ifdef IGNORE_EVENT
+#ifndef IGNORE_EVENT
     const class WindowEvent : public Event
     {
     public:
