@@ -7,6 +7,6 @@ IncludeDir["VulkanSDK"] = "External/VulkanSDK"
 IncludeDir["spdlog"] = "External/spdlog";
 
 LibrariesDir = {}
-LibrariesDir["SDL"] = "%{prj.location}/Libraries/SDL";
-LibrariesDir["VulkanSDK"] = "External/VulkanSDK/Lib"
+LibrariesDir["SDL"] = "%{IncludeDir.SDL}";
+LibrariesDir["VulkanSDK"] = "%{IncludeDir.VulkanSDK}/Lib"
 LibrariesDir["spdlog"] = "%{prj.location}/Libraries/spdlog";

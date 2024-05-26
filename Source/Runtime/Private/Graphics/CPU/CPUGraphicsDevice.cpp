@@ -8,7 +8,7 @@
 
 namespace EE
 {
-    uint32 ConvertPixelFormat( EPixelFormat format )
+    SDL_PixelFormatEnum ConvertPixelFormat( EPixelFormat format )
     {
         switch ( format )
         {
@@ -19,13 +19,13 @@ namespace EE
         case EE::PixelFormat_R32F:
             break;
         case EE::PixelFormat_R8G8:
-            return SDL_PIXELFORMAT_RGB888;
+            break;
         case EE::PixelFormat_RG32F:
             break;
         case EE::PixelFormat_RG16F:
             break;
         case EE::PixelFormat_R8G8B8:
-            return SDL_PIXELFORMAT_RGB888;
+            return SDL_PIXELFORMAT_XRGB8888;
         case EE::PixelFormat_RGB32F:
             break;
         case EE::PixelFormat_RGB16F:
@@ -35,7 +35,7 @@ namespace EE
         case EE::PixelFormat_RGBA16_UShort:
             break;
         case EE::PixelFormat_RGBA32F:
-            return SDL_PIXELFORMAT_ARGB8888;
+            return SDL_PIXELFORMAT_RGBA32;
         case EE::PixelFormat_DepthComponent24:
             break;
         case EE::PixelFormat_DepthStencil:
@@ -48,7 +48,7 @@ namespace EE
             break;
         }
 
-        return 0;
+        return SDL_PIXELFORMAT_RGBA8888;
     }
 
     struct CPUWindowContext
@@ -146,7 +146,7 @@ namespace EE
 	{
 		auto internalState = std::make_shared<CPUSwapChain>();
 
-		internalState->renderer = SDL_CreateRenderer( (SDL_Window*)window->GetHandle(), NULL, SDL_RENDERER_SOFTWARE );
+		internalState->renderer = SDL_CreateRenderer( (SDL_Window*)window->GetHandle(), NULL );
 		if ( internalState->renderer == NULL )
 		{
 			EE_LOG_CORE_ERROR( L"Error creating SDL renderer" );

@@ -76,13 +76,11 @@ namespace EE
         }
         if ( options_ & WindowOption_SkipTaskbar )
         {
-            windowFlags |= SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_TRANSPARENT;
+            windowFlags |= SDL_WINDOW_UTILITY | SDL_WINDOW_TRANSPARENT;
         }
 
-        if ( (windowHandle_ = SDL_CreateWindowWithPosition(
+        if ( (windowHandle_ = SDL_CreateWindow(
             Text::WideToNarrow( name_ ).c_str(),
-            SDL_WINDOWPOS_CENTERED,
-            SDL_WINDOWPOS_CENTERED,
             width_, height_,
             windowFlags | mode_
         )) == NULL )
@@ -94,7 +92,6 @@ namespace EE
         EE::GEngine->graphicsDevice_->CreateWindowContext( this, windowContext_ );
 
         SDL_SetWindowKeyboardGrab( (SDL_Window*)windowHandle_, SDL_bool( false ) );
-        SDL_SetWindowData( (SDL_Window*)windowHandle_, "WindowData", this );
         SDL_AddEventWatch( WindowEventsHandler, (void*)this );
         return true;
     }

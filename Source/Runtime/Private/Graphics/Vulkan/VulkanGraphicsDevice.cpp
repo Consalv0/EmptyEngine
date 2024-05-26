@@ -150,8 +150,10 @@ namespace EE
 
     struct VulkanTexture
     {
+        VkSampler sampler;
         VkDevice device;
         VkImage resource;
+        VkImageView imageView;
         VkDeviceMemory memory;
 
         ~VulkanTexture()
@@ -160,6 +162,8 @@ namespace EE
             {
                 vkDestroyImage( device, resource, NULL );
             }
+
+            vkDestroyImageView( device, imageView, NULL );
         }
     };
 
@@ -170,7 +174,6 @@ namespace EE
         VkExtent2D size;
         uint32 imageCount;
         std::vector<VkImage> images;
-        std::vector<VkImageView> imageViews;
         std::vector<Texture> imageTextures;
 
         ~VulkanSwapChain()
@@ -179,12 +182,6 @@ namespace EE
             {
                 images[ i ] = NULL;
                 ToInternal( imageTextures[ i ] )->resource = NULL;
-            }
-
-            size_t imageViewCount = imageViews.size();
-            for ( size_t i = 0; i < imageViewCount; i++ )
-            {
-                vkDestroyImageView( device, imageViews[ i ], NULL );
             }
 
             vkDestroySwapchainKHR( device, swapChain, NULL );
@@ -457,26 +454,20 @@ namespace EE
 
         SDL_Vulkan_LoadLibrary( nullptr );
 
-        uint32_t extensionCount;
-        const char** extensionNames = 0;
-        if ( SDL_Vulkan_GetInstanceExtensions( &extensionCount, nullptr ) == SDL_FALSE )
-        {
-            EE_LOG_CORE_CRITICAL( L"SDL_Vulkan_GetInstanceExtensions failed! {0}", Text::NarrowToWide( SDL_GetError() ) );
-            return false;
-        }
-        extensionNames = new const char* [ extensionCount ];
-        SDL_Vulkan_GetInstanceExtensions( &extensionCount, extensionNames );
+        uint32 extensionCount;
+        const char* const* extensionNames = 0;
+        extensionNames = SDL_Vulkan_GetInstanceExtensions( &extensionCount );
 
         VkInstanceCreateInfo createInfo
         {
-            VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-            NULL,
-            0,
-            &appInfo,
-            0,
-            NULL,
-            extensionCount,
-            extensionNames
+            VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,     // sType
+            NULL,                                       // pNext
+            0,                                          // flags
+            &appInfo,                                   // pApplicationInfo
+            0,                                          // enabledLayerCount
+            NULL,                                       // ppEnabledLayerNames
+            extensionCount,                             // enabledExtensionCount
+            extensionNames                              // ppEnabledExtensionNames
         };
 
         VkResult createResult;
@@ -537,7 +528,7 @@ namespace EE
         swapChainDesc.width = window->GetWidth();
         swapChainDesc.height = window->GetHeight();
         swapChainDesc.fullscreen = window->GetWindowMode();
-        swapChainDesc.format = PixelFormat_R8G8B8A8;
+        swapChainDesc.format = PixelFormat_RGBA32F;
         swapChainDesc.vsync = window->GetVSync();
         if ( CreateSwapChain( swapChainDesc, window, windowContext.swapChain ) == false )
         {
@@ -552,7 +543,7 @@ namespace EE
         auto internalState = std::make_shared<VulkanSurface>();
         internalState->surface = VkSurfaceKHR();
         internalState->instance = *(VkInstance*)VulkanInstance;
-        if ( SDL_Vulkan_CreateSurface( (SDL_Window*)description.window->GetWindowHandle(), internalState->instance, &internalState->surface ) == SDL_FALSE )
+        if ( SDL_Vulkan_CreateSurface( (SDL_Window*)description.window->GetWindowHandle(), internalState->instance, VK_NULL_HANDLE, &internalState->surface ) == SDL_FALSE )
         {
             EE_LOG_CORE_CRITICAL( L"SDL_Vulkan_CreateSurface failed! {0}", Text::NarrowToWide( SDL_GetError() ) );
             return false;
@@ -627,8 +618,7 @@ namespace EE
         return true;
     }
 
-    //global createImageView
-    bool CreateImageView( VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView* outImageView )
+    bool CreateImageView( VkDevice device, const TextureDescription& description, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView* outImageView )
     {
         VkImageViewCreateInfo viewInfo = {};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -666,13 +656,29 @@ namespace EE
         surfaceFormats.resize( surfaceFormatsCount );
         vkGetPhysicalDeviceSurfaceFormatsKHR( (VkPhysicalDevice)VulkanPhysicalDevice, surface->surface, &surfaceFormatsCount, surfaceFormats.data() );
 
-        if ( surfaceFormats[ 0 ].format != ConvertPixelFormat( description.format ) )
+        VkSurfaceFormatKHR desiredFormat;
+        desiredFormat.format = ConvertPixelFormat( description.format );
+        bool contains = false;
+        for ( uint32 i = 0; i < surfaceFormatsCount; i++ )
         {
-            EE_LOG_CORE_CRITICAL( L"surfaceFormats[ 0 ].format != {0}", (uint32)description.format );
+            VkSurfaceFormatKHR& surfaceFormat = surfaceFormats[ i ];
+            if ( surfaceFormat.format == desiredFormat.format )
+            {
+                if ( description.allow_hdr && surfaceFormat.colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR )
+                {
+
+                }
+                contains = true;
+            }
+        }
+
+        if ( contains == false )
+        {
+            EE_LOG_CORE_CRITICAL( L"Surface Format {0} is not supported!", (uint32)description.format );
             return false;
         }
 
-        surface->surfaceFormat = surfaceFormats[ 0 ];
+        surface->surfaceFormat = desiredFormat;
         int width, height = 0;
         SDL_GetWindowSizeInPixels( (SDL_Window*)window->GetWindowHandle(), &width, &height);
         width = CLAMP( (uint32)width, surface->surfaceCapabilities.minImageExtent.width, surface->surfaceCapabilities.maxImageExtent.width );
@@ -711,18 +717,13 @@ namespace EE
         createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
         createInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR;
         createInfo.clipped = VK_TRUE;
+        createInfo.oldSwapchain = VK_NULL_HANDLE;
 
         vkCreateSwapchainKHR( *(VkDevice*)VulkanDevice, &createInfo, NULL, &internalState->swapChain );
 
         vkGetSwapchainImagesKHR( *(VkDevice*)VulkanDevice, internalState->swapChain, &internalState->imageCount, NULL );
         internalState->images.resize( internalState->imageCount );
         vkGetSwapchainImagesKHR( *(VkDevice*)VulkanDevice, internalState->swapChain, &internalState->imageCount, internalState->images.data() );
-
-        internalState->imageViews.resize( internalState->imageCount );
-        for ( uint32 i = 0; i < internalState->imageCount; i++ )
-        {
-            CreateImageView( *(VkDevice*)VulkanDevice, internalState->images[ i ], surface->surfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, &internalState->imageViews[i] );
-        }
 
         internalState->imageTextures.resize( internalState->imageCount );
         for ( uint32 i = 0; i < internalState->imageCount; i++ )
@@ -732,9 +733,16 @@ namespace EE
             textureInternalState->resource = internalState->images[ i ];
 
             Texture& texture = internalState->imageTextures[ i ];
-            texture.type = GraphicsResourceType_Texture;
             texture.description.type = TextureType_Texture2D;
             texture.description.format = description.format;
+            texture.description.height = height;
+            texture.description.width = width;
+            texture.description.arraySize = 1;
+            texture.description.mipLevels = 1;
+
+            CreateImageView( *(VkDevice*)VulkanDevice, texture.description, internalState->images[ i ], surface->surfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, &textureInternalState->imageView );
+
+            texture.type = GraphicsResourceType_Texture;
             texture.internalState = textureInternalState;
         }
 

@@ -92,7 +92,7 @@ namespace EE
         }
         const JoystickState* joystick;
         if ( GetJoystickState( index, &joystick ) && joystick->hapticDevice != NULL )
-            SDL_HapticRumblePlay( (SDL_Haptic*)joystick->hapticDevice, amplitude, duration );
+            SDL_PlayHapticRumble( (SDL_Haptic*)joystick->hapticDevice, amplitude, duration );
     }
 
     TArray<int> Input::GetJoysticksConnected()
@@ -226,7 +226,7 @@ namespace EE
                     }
                 }
 
-                SDL_Haptic* ControllerHaptic = SDL_HapticOpenFromJoystick( joystick );
+                SDL_Haptic* ControllerHaptic = SDL_OpenHapticFromJoystick( joystick );
                 if ( ControllerHaptic == NULL )
                 {
                     addedJoystickState->hasHaptics = false;
@@ -234,7 +234,7 @@ namespace EE
                 }
                 else
                 {
-                    if ( SDL_HapticRumbleInit( ControllerHaptic ) == 0 )
+                    if ( SDL_InitHapticRumble( ControllerHaptic ) == 0 )
                     {
                         addedJoystickState->hasHaptics = true;
                         addedJoystickState->hapticDevice = ControllerHaptic;
@@ -243,7 +243,7 @@ namespace EE
                     {
                         addedJoystickState->hasHaptics = false;
                         addedJoystickState->hapticDevice = NULL;
-                        SDL_HapticClose( ControllerHaptic );
+                        SDL_CloseHaptic( ControllerHaptic );
                     }
                 }
                 addedJoystickState->instanceID = sdlEvent->jdevice.which;
@@ -285,7 +285,7 @@ namespace EE
                 );
                 input.InputEventsHandler( inEvent );
 
-                SDL_HapticClose( (SDL_Haptic*)joystickState->hapticDevice );
+                SDL_CloseHaptic( (SDL_Haptic*)joystickState->hapticDevice );
                 SDL_CloseJoystick( joystick );
             }
             break;
@@ -325,7 +325,6 @@ namespace EE
 
         case SDL_EVENT_JOYSTICK_HAT_MOTION:
         {
-            EE_LOG_CORE_WARN( "{}", SDL_NumHaptics() );
             EE_LOG_CORE_INFO( "Hat motion {}, {}", sdlEvent->jhat.hat, sdlEvent->jhat.value );
             break;
         }
@@ -530,7 +529,7 @@ namespace EE
                 }
             }
 
-            SDL_Haptic* haptic = SDL_HapticOpenFromJoystick( joystick );
+            SDL_Haptic* haptic = SDL_OpenHapticFromJoystick( joystick );
             if ( haptic == NULL )
             {
                 connectedJoystick->hasHaptics = false;
@@ -538,7 +537,7 @@ namespace EE
             }
             else
             {
-                if ( SDL_HapticRumbleInit( haptic ) == 0 )
+                if ( SDL_InitHapticRumble( haptic ) == 0 )
                 {
                     connectedJoystick->hasHaptics = true;
                     connectedJoystick->hapticDevice = haptic;
@@ -547,7 +546,7 @@ namespace EE
                 {
                     connectedJoystick->hasHaptics = false;
                     connectedJoystick->hapticDevice = NULL;
-                    SDL_HapticClose( haptic );
+                    SDL_CloseHaptic( haptic );
                 }
             }
             connectedJoystick->instanceID = ids[ i ];

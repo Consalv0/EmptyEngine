@@ -30,12 +30,11 @@ project "EmptyEngine"
         "%{IncludeDir.SDL}/include",
         "%{IncludeDir.VulkanSDK}/include",
         "%{IncludeDir.spdlog}/include"
-    }      
+    }
 
     libdirs { 
         "%{prj.location}/Libraries",
         "%{LibrariesDir.VulkanSDK}",
-        "%{LibrariesDir.SDL}/%{cfg.buildcfg}"
     }
 
     links {
@@ -46,8 +45,20 @@ project "EmptyEngine"
 
     filter "system:windows"
         systemversion "latest"
+
+        libdirs { 
+            "%{LibrariesDir.SDL}/VisualC/SDL/%{outputdir}"
+        }
+        
+        prebuildcommands { 
+            "{MKDIR} %[%{LibrariesDir.SDL}/VisualC/SDL/%{outputdir}]",
+            "IF EXIST %[%{wks.location}/x64/] ({MOVE} %[%{wks.location}/x64/%{cfg.buildcfg}/*.*] %[%{LibrariesDir.SDL}/VisualC/SDL/%{outputdir}/])",
+            "{RMDIR} %[%{wks.location}/x64/]"
+        }
+
         postbuildcommands {
         }
+
         defines {
             "EE_PLATFORM_WINDOWS",
         }
@@ -103,3 +114,9 @@ project "spdlog"
     filter "configurations:Release"
         runtime "Release"
         optimize "on"
+
+externalproject "SDL"
+    location "%{IncludeDir.SDL}/VisualC/SDL"
+    uuid "57940020-8E99-AEB6-271F-61E0F7F6B73B"
+    kind "StaticLib"
+    language "C++"

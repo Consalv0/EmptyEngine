@@ -14,47 +14,47 @@ namespace EE
 		static SDL_AudioSpec sampleSpecs;
 
 		sampleSpecs.channels = 2;
-		sampleSpecs.format = SDL_AUDIO_F32LSB;
+		sampleSpecs.format = SDL_AUDIO_F32;
 		sampleSpecs.freq = 48000;
 
-		sampleSpecs.callback = []( void* UserData, Uint8* Stream, int32 Length ) -> void
-		{
-			SDL_memset( Stream, 0, Length );
-			AudioDevice& Device = *(AudioDevice*)UserData;
-
-			for ( auto KeyValue : Device )
-			{
-				SamplePlayInfo* info = KeyValue.second;
-				if ( info->Sample->GetBufferLength() <= 0 )
-					return;
-
-				int32 fixLength = ((uint32)Length > info->Sample->GetBufferLength() - info->Pos) ? info->Sample->GetBufferLength() - info->Pos : (uint32)Length;
-
-				if ( !info->bPause )
-				{
-					SDL_MixAudioFormat( Stream, info->Sample->GetBufferAt( info->Pos ), sampleSpecs.format, fixLength, (int32)(SDL_MIX_MAXVOLUME * Device.volume * info->volume) );
-					info->Pos += fixLength;
-				}
-
-				if ( info->Sample->GetBufferLength() - info->Pos <= 0 )
-				{
-					info->Pos = 0;
-					info->bPause = !info->bLoop;
-				}
-			}
-
-			memcpy( Device.CurrentSample, Stream, Length );
-			Device.LastAudioUpdate = Ticker::GetEpochTimeNow<Ticker::Nano>();
-		};
-
-		sampleSpecs.userdata = this;
+		// sampleSpecs.callback = []( void* UserData, Uint8* Stream, int32 Length ) -> void
+		// {
+		// 	SDL_memset( Stream, 0, Length );
+		// 	AudioDevice& Device = *(AudioDevice*)UserData;
+        // 
+		// 	for ( auto KeyValue : Device )
+		// 	{
+		// 		SamplePlayInfo* info = KeyValue.second;
+		// 		if ( info->Sample->GetBufferLength() <= 0 )
+		// 			return;
+        // 
+		// 		int32 fixLength = ((uint32)Length > info->Sample->GetBufferLength() - info->Pos) ? info->Sample->GetBufferLength() - info->Pos : (uint32)Length;
+        // 
+		// 		if ( !info->bPause )
+		// 		{
+		// 			SDL_MixAudioFormat( Stream, info->Sample->GetBufferAt( info->Pos ), sampleSpecs.format, fixLength, (int32)(SDL_MIX_MAXVOLUME * Device.volume * info->volume) );
+		// 			info->Pos += fixLength;
+		// 		}
+        // 
+		// 		if ( info->Sample->GetBufferLength() - info->Pos <= 0 )
+		// 		{
+		// 			info->Pos = 0;
+		// 			info->bPause = !info->bLoop;
+		// 		}
+		// 	}
+        // 
+		// 	memcpy( Device.CurrentSample, Stream, Length );
+		// 	Device.LastAudioUpdate = Ticker::GetEpochTimeNow<Ticker::Nano>();
+		// };
+        // 
+		// sampleSpecs.userdata = this;
 
 		/* Open the audio device */
-		if ( deviceID_ = SDL_OpenAudioDevice( SDL_GetAudioDeviceName( 0, 0 ), 0, &sampleSpecs, NULL, 0 ) < 0 )
-		{
-			EE_CORE_ASSERT( true, L"Couldn't open audio device: {0}\n", Text::NarrowToWide( SDL_GetError() ) );
-			bInitialized = false;
-		}
+		// if ( deviceID_ = SDL_OpenAudioDevice( SDL_GetAudioDeviceName( 0, 0 ), 0, &sampleSpecs, NULL, 0 ) < 0 )
+		// {
+		// 	EE_CORE_ASSERT( true, L"Couldn't open audio device: {0}\n", Text::NarrowToWide( SDL_GetError() ) );
+		// 	bInitialized = false;
+		// }
 		/* Start playing */
 		SDL_PauseAudioDevice( deviceID_ );
 		bInitialized = true;

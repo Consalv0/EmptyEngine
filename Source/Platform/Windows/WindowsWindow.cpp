@@ -14,8 +14,8 @@
 #include "Platform/Windows/WindowsInput.h"
 
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_video.h>
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_syswm.h>
 #include <dwmapi.h>
 
 namespace EE
@@ -35,12 +35,7 @@ namespace EE
 
     bool WindowsWindow::MakeTransparent( const uint8& r, const uint8& g, const uint8& b, const uint8& a )
     {
-        SDL_SysWMinfo info;
-        SDL_version version;
-        SDL_VERSION( &version ); /* initialize info structure with SDL version info */
-
-        SDL_GetWindowWMInfo( (SDL_Window*)windowHandle_, &info, *(uint32*)(&version) );
-        HWND hWnd = info.info.win.window;
+        HWND hWnd = (HWND)SDL_GetProperty( SDL_GetWindowProperties( (SDL_Window*)GetWindowHandle() ), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL );
 
         SetWindowLong( hWnd, GWL_EXSTYLE, GetWindowLong( hWnd, GWL_EXSTYLE ) | WS_EX_LAYERED );
 
