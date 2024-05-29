@@ -13,28 +13,30 @@ namespace EE
 
     bool GameEngine::Initialize()
     {
-        application_ = EE::CreateApplication();
-        graphicsDevice_ = EE::CreateGraphicsDevice();
-        window_ = EE::CreateWindow();
+        application = EE::CreateApplication();
+        renderingInterface = EE::CreateRenderingInterface();
+        windows.push_back( EE::CreateWindow() );
 
-        if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_HAPTIC ) != 0 )
+        if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK ) != 0 )
         {
             EE_LOG_CORE_CRITICAL( L"Failed to initialize SDL3: {0}\n", Text::NarrowToWide( SDL_GetError() ) );
             return false;
         }
 
-        if ( graphicsDevice_->Initialize() == false )
+        if ( windows.size() > 0 )
         {
-            return false;
-        }
-        if ( window_->Initialize() == false )
-        {
-            return false;
+            if ( renderingInterface->Initialize() == false )
+            {
+                return false;
+            }
+            if ( GetMainWindow()->Initialize() == false )
+            {
+                return false;
+            }
         }
 
-
-        inputManager_ = Input::Create();
-        deviceFunctions_ = DeviceFunctions::Create();
+        inputManager = Input::Create();
+        deviceFunctions = DeviceFunctions::Create();
 
         ModelParser::Initialize();
 
@@ -52,27 +54,31 @@ namespace EE
 
     void GameEngine::Run()
     {
-        inputManager_->Initialize();
-        application_->Run();
+        inputManager->Initialize();
+        application->Run();
     }
 
-    void GameEngine::BeginFrame()
+    void GameEngine::BeginFrame( Window* window )
     {
-        graphicsDevice_->RenderPassBegin( window_->GetWindowContext().swapChain, 0 );
+        renderingInterface->RenderPassBegin( window->GetPresentContext().swapChain, 0 );
     }
 
-    void GameEngine::EndFrame()
+    void GameEngine::EndFrame( Window* window )
     {
-        graphicsDevice_->RenderPassEnd( window_->GetWindowContext().swapChain, 0 );
-        frameCount_++;
+        renderingInterface->RenderPassEnd( window->GetPresentContext().swapChain, 0 );
+        frameCount++;
     }
 
     void GameEngine::Terminate()
     {
-        delete inputManager_;
-        delete window_;
-        delete application_;
-        delete graphicsDevice_;
+        delete inputManager;
+        size_t windowCount = windows.size();
+        for ( size_t i = 0; i < windowCount; i++ )
+        {
+            delete windows[ i ];
+        }
+        delete application;
+        delete renderingInterface;
 
         SDL_Quit();
     }

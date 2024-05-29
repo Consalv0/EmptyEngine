@@ -8,7 +8,7 @@
 
 #include "Math/Transform.h"
 
-#include "Graphics/Mesh.h"
+#include "Rendering/Mesh.h"
 #include "Files/FileManager.h"
 #include "Resources/MeshParser.h"
 #include "Resources/OBJParser.h"

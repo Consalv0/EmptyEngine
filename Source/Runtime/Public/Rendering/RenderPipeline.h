@@ -2,7 +2,8 @@
 
 #include "CoreTypes.h"
 #include "Math/Transform.h"
-#include "Graphics/Graphics.h"
+#include "Rendering/Common.h"
+#include "Rendering/Objects.h"
 
 namespace EE
 {
@@ -39,22 +40,22 @@ namespace EE
 		virtual void EndOfFrame() = 0;
 
 	protected:
-		TDictionary<size_t, class RenderStage*> renderStages_;
+		TDictionary<size_t, class RenderStage*> renderStages;
 
-		Texture* mainScreenTarget_;
+		Texture* mainScreenTarget;
 
-		Texture* frameBuffer_;
+		Texture* frameBuffer;
 
 		// Render Scale Target
-		float renderScale_;
+		float renderScale;
 	};
 
 	template<typename T>
 	bool RenderPipeline::CreateStage( const EName& stageName )
 	{
-		if ( renderStages_.find( stageName.GetID() ) == renderStages_.end() )
+		if ( renderStages.find( stageName.GetID() ) == renderStages.end() )
 		{
-			renderStages_.insert( std::pair<size_t, RenderStage*>( stageName.GetID(), new T( stageName, this ) ) );
+			renderStages.insert( std::pair<size_t, RenderStage*>( stageName.GetID(), new T( stageName, this ) ) );
 			return true;
 		}
 		return false;

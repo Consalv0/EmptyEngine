@@ -7,7 +7,7 @@
 #include "Engine/Input.h"
 
 #include "Math/CoreMath.h"
-#include "Graphics/RenderPipeline.h"
+#include "Rendering/RenderPipeline.h"
 
 #if defined(ES_PLATFORM_WINDOWS) & defined(ES_PLATFORM_CUDA)
 #include "CUDA/CoreCUDA.h"
@@ -69,14 +69,18 @@ namespace EE
 
             if ( !Ticker::IsSkippingRender() )
             {
-                GEngine->BeginFrame();
-                // GetRenderPipeline().BeginFrame();
+                size_t windowCount = GEngine->windows.size();
+                for ( size_t i = 0; i < windowCount; i++ )
+                {
+                    GEngine->BeginFrame( GEngine->windows[ i ] );
+                    // GetRenderPipeline().BeginFrame();
 
-                OnRender();
-                OnPostRender();
+                    OnRender();
+                    OnPostRender();
 
-                // GetRenderPipeline().EndOfFrame();
-                GEngine->EndFrame();
+                    // GetRenderPipeline().EndOfFrame();
+                    GEngine->EndFrame( GEngine->windows[ i ] );
+                }
             }
 
         } while (

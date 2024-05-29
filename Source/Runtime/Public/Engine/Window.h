@@ -3,12 +3,28 @@
 #include "CoreMinimal.h"
 #include "Events/WindowEvent.h"
 #include "Events/InputEvent.h"
-#include "Graphics/Graphics.h"
+#include "Rendering/Common.h"
+#include "Rendering/Objects.h"
 
 union WindowEventData;
 
 namespace EE
 {
+    enum EWindowMode
+    {
+        WindowMode_Windowed = 0,
+        WindowMode_FullScreen = 1
+    };
+
+    enum EWindowOption
+    {
+        WindowOption_None = 0,
+        WindowOption_Borderless = 1 << 0,
+        WindowOption_Resizable = 1 << 1,
+        WindowOption_AlwaysOnTop = 1 << 2,
+        WindowOption_SkipTaskbar = 1 << 3,
+    };
+
     template <typename T>
     class Bitmap;
 
@@ -19,6 +35,7 @@ namespace EE
         uint32 width;
         uint32 height;
         EWindowMode windowMode;
+        bool allowHDR;
         uint32 options;
 
         WindowProperties(
@@ -26,19 +43,15 @@ namespace EE
             uint32 width = -1,
             uint32 height = -1,
             EWindowMode mode = WindowMode_Windowed,
-            uint32 options = WindowOption_None )
-            : name(title), width(width), height(height), windowMode(mode), options(options) {
+            bool allowHDR = false,
+            uint32 options = WindowOption_None
+        )
+            : name(title), width(width), height(height), windowMode(mode), allowHDR(allowHDR), options(options) {
         }
 
     };
 
-    typedef void* WindowHandle;
-
-    struct WindowContext : GraphicsDeviceObject
-    {
-        WindowSurface windowSurface;
-        SwapChain swapChain;
-    };
+    typedef void* WindowHandleRef;
 
     //* Cointains the properties and functions of a window
     class Window
@@ -46,14 +59,15 @@ namespace EE
     protected:
         struct
         {
-            WString name_;
-            EWindowMode mode_;
-            WindowHandle windowHandle_;
-            WindowContext windowContext_;
-            uint32 options_;
-            int32 width_;
-            int32 height_;
-            bool vsync_;
+            WString name;
+            EWindowMode mode;
+            WindowHandleRef windowHandle;
+            PresentContext presentContext;
+            uint32 options;
+            int32 width;
+            int32 height;
+            bool allowHDR;
+            bool vsync;
         };
 
     public:
@@ -88,6 +102,9 @@ namespace EE
         //* Get vsync options
         virtual bool GetVSync() const;
 
+        //* Get hdr option
+        virtual bool GetAllowHDR() const;
+
         //* Get the size of the window in pixels
         virtual IntVector2 GetSize() const;
 
@@ -109,11 +126,11 @@ namespace EE
         //* Terminates this window
         void Terminate();
 
-        //* Graphica device context
-        const WindowContext& GetWindowContext() const { return windowContext_; };
+        //* Graphica present frame context
+        const PresentContext& GetPresentContext() const { return presentContext; };
 
         //* OS specific window handle
-        WindowHandle GetWindowHandle() const { return windowHandle_; };
+        WindowHandleRef GetWindowHandle() const { return windowHandle; };
 
         //* Creates a Window with a Name, Width and Height
         static Window* Create( const WindowProperties& parameters );

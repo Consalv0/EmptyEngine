@@ -29,6 +29,7 @@ project "EmptyEngine"
         "%{prj.location}/Source/Runtime/Public",
         "%{IncludeDir.SDL}/include",
         "%{IncludeDir.VulkanSDK}/include",
+        "%{IncludeDir.VMA}/include",
         "%{IncludeDir.spdlog}/include"
     }
 
@@ -39,6 +40,7 @@ project "EmptyEngine"
 
     links {
         "spdlog",
+        "VMA",
         "vulkan-1.lib",
         "SDL3.lib",
     }
@@ -50,10 +52,10 @@ project "EmptyEngine"
             "%{LibrariesDir.SDL}/VisualC/SDL/%{outputdir}"
         }
         
-        prebuildcommands { 
+        prelinkcommands  { 
             "{MKDIR} %[%{LibrariesDir.SDL}/VisualC/SDL/%{outputdir}]",
-            "IF EXIST %[%{wks.location}/x64/] ({MOVE} %[%{wks.location}/x64/%{cfg.buildcfg}/*.*] %[%{LibrariesDir.SDL}/VisualC/SDL/%{outputdir}/])",
-            "{RMDIR} %[%{wks.location}/x64/]"
+            "IF EXIST %[%{wks.location}/x64/%{cfg.buildcfg}/] ({MOVE} %[%{wks.location}/x64/%{cfg.buildcfg}/*.*] %[%{LibrariesDir.SDL}/VisualC/SDL/%{outputdir}/])",
+            "IF EXIST %[%{wks.location}/x64/] ({RMDIR} %[%{wks.location}/x64/])"
         }
 
         postbuildcommands {
@@ -73,6 +75,51 @@ project "EmptyEngine"
 
     filter "configurations:Release"
         defines "EE_RELEASE"
+        runtime "Release"
+        optimize "on"
+
+project "VMA"
+    location "%{IncludeDir.VMA}"
+    kind "StaticLib"
+    language "C++"
+    cppdialect "C++20"
+    staticruntime "on"
+    pic "on"
+
+    targetdir ("%{prj.location}/Build/" .. outputdir)
+    objdir ("%{prj.location}/BinObjs/" .. outputdir)
+    
+    defines {
+    }
+
+    files {
+        "%{prj.location}/include/**.h",
+        "%{prj.location}/src/VmaUsage.h",
+        "%{prj.location}/src/VmaUsage.cpp"
+    }
+
+    includedirs {
+        "%{prj.location}/src",
+        "%{prj.location}/include",
+        "%{IncludeDir.VulkanSDK}/include",
+    }
+
+    libdirs {
+        "%{LibrariesDir.VulkanSDK}",
+    }
+
+    links {
+        "vulkan-1.lib",
+    }
+
+    filter "system:windows"
+        systemversion "latest"
+
+    filter "configurations:Debug"
+        runtime "Debug"
+        symbols "on"
+
+    filter "configurations:Release"
         runtime "Release"
         optimize "on"
 
@@ -118,5 +165,5 @@ project "spdlog"
 externalproject "SDL"
     location "%{IncludeDir.SDL}/VisualC/SDL"
     uuid "57940020-8E99-AEB6-271F-61E0F7F6B73B"
-    kind "StaticLib"
+    kind "SharedLib"
     language "C++"

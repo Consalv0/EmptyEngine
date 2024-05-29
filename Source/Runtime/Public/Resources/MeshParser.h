@@ -2,7 +2,7 @@
 
 #include <future>
 
-#include "Graphics/Mesh.h"
+#include "Rendering/Mesh.h"
 #include "Files/FileStream.h"
 
 namespace EE

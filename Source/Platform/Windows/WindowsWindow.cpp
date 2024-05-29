@@ -4,10 +4,6 @@
 #include "Engine/Engine.h"
 #include "Engine/Window.h"
 
-#include "Graphics/GraphicsDevice.h"
-#include "Graphics/CPU/CPUGraphicsDevice.h"
-#include "Graphics/PixelMap.h"
-
 #include "Utils/TextFormatting.h"
 
 #include "Platform/Windows/WindowsWindow.h"
@@ -22,10 +18,10 @@ namespace EE
 {
     WindowsWindow::WindowsWindow( const WindowProperties& properties ) : Super::Window( properties )
     {
-        if ( width_ < 0 )
-            width_ = GetSystemMetrics( SM_CXSCREEN );
-        if ( height_ < 0 )
-            height_ = GetSystemMetrics( SM_CYSCREEN );
+        if ( width < 0 )
+            width = GetSystemMetrics( SM_CXSCREEN );
+        if ( height < 0 )
+            height = GetSystemMetrics( SM_CYSCREEN );
     }
 
     WindowsWindow::~WindowsWindow()

@@ -188,13 +188,15 @@ Temporary Items
 **/[Rr]esources/[Ss]ounds/
 **/[Rr]esources/[Tt]extures/
 
-!External/*.exe
-!/**/Models/*.obj
-!/**/Libraries/*.dll
-!/**/Libraries/*.lib
-!/**/Libraries/*.dylib
-!/**/Libraries/*.a
-!/**/Libraries/*.la
+![Ee]xternal/*.exe
+!/**/[Mm]odels/*.obj
+!/**/[Ll]ibraries/*.dll
+!/**/[Ll]ibraries/*.lib
+!/**/[Ll]ibraries/*.dylib
+!/**/[Ll]ibraries/*.a
+!/**/[Ll]ibraries/*.la
+
+[Ee]xternal/[Vv]ulkan[Ss][Dd][Kk]
 
 #ImGui
 imgui.ini

@@ -1,6 +1,6 @@
 
 #include "CoreMinimal.h"
-#include "Graphics/Graphics.h"
+#include "Rendering/Common.h"
 
 namespace EE
 {

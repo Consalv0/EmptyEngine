@@ -1,27 +1,40 @@
 
 #include "CoreMinimal.h"
-#include "Graphics/Graphics.h"
-#include "Graphics/PixelMap.h"
+#include "Rendering/Common.h"
+#include "Rendering/PixelMap.h"
 
 namespace EE
 {
-    constexpr EE::PixelFormatInfo PixelFormats[ EPixelFormat::Private_Num + 1 ] = {
-        // Name                           Size   Channels  Supported   EPixelFormat
-        { L"PixelFormat_Unknown",           0,      0,       false,    PixelFormat_Unknown           },
-        { L"PixelFormat_R8",                1,      1,        true,    PixelFormat_R8                },
-        { L"PixelFormat_R32F",              4,      1,        true,    PixelFormat_R32F              },
-        { L"PixelFormat_R8G8",               2,      2,        true,    PixelFormat_R8G8               },
-        { L"PixelFormat_RG32F",             8,      2,        true,    PixelFormat_RG32F             },
-        { L"PixelFormat_RG16F",             4,      2,        true,    PixelFormat_RG16F             },
-        { L"PixelFormat_R8G8B8",              3,      3,        true,    PixelFormat_R8G8B8              },
-        { L"PixelFormat_RGB32F",            12,     3,        true,    PixelFormat_RGB32F            },
-        { L"PixelFormat_RGB16F",            8,      3,        true,    PixelFormat_RGB16F            },
-        { L"PixelFormat_R8G8B8A8",             4,      4,        true,    PixelFormat_R8G8B8A8             },
-        { L"PixelFormat_RGBA16_UShort",     8,      4,        true,    PixelFormat_RGBA16_UShort     },
-        { L"PixelFormat_RGBA32F",           16,     4,        true,    PixelFormat_RGBA32F           },
-        { L"PixelFormat_DepthComponent24",  4,      1,        true,    PixelFormat_DepthComponent24  },
-        { L"PixelFormat_DepthStencil",      4,      1,        true,    PixelFormat_DepthStencil      },
-        { L"PixelFormat_ShadowDepth",       4,      1,        true,    PixelFormat_ShadowDepth       }
+    constexpr EE::PixelFormatInfo PixelFormats[ EPixelFormat::PixelFormat_MAX + 1 ] = 
+    {
+          // Name                              Size   Channels  Supported    EPixelFormat
+        { L"PixelFormat_Unknown",                0,      0,       false,     PixelFormat_Unknown            },
+        { L"PixelFormat_R8_UINT",                1,      1,        true,     PixelFormat_R8_UINT            },
+        { L"PixelFormat_R8_SNORM",               1,      1,        true,     PixelFormat_R8_SNORM           },
+        { L"PixelFormat_R8_UNORM",               1,      1,        true,     PixelFormat_R8_UNORM           },
+        { L"PixelFormat_R16_UINT",               2,      1,        true,     PixelFormat_R16_UINT           },
+        { L"PixelFormat_R16_SNORM",              2,      1,        true,     PixelFormat_R16_SNORM          },
+        { L"PixelFormat_R16_UNORM",              2,      1,        true,     PixelFormat_R16_UNORM          },
+        { L"PixelFormat_R32_UINT",               4,      1,        true,     PixelFormat_R32_UINT           },
+        { L"PixelFormat_R32_SNORM",              4,      1,        true,     PixelFormat_R32_SNORM          },
+        { L"PixelFormat_R32_UNORM",              4,      1,        true,     PixelFormat_R32_UNORM          },
+        { L"PixelFormat_R8G8_UINT",              2,      2,        true,     PixelFormat_R8G8_UINT          },
+        { L"PixelFormat_R8G8_SNORM",             2,      2,        true,     PixelFormat_R8G8_SNORM         },
+        { L"PixelFormat_R8G8_UNORM",             2,      2,        true,     PixelFormat_R8G8_UNORM         },
+        { L"PixelFormat_R16G16_UINT",            4,      2,        true,     PixelFormat_R16G16_UINT        },
+        { L"PixelFormat_R16G16_SNORM",           4,      2,        true,     PixelFormat_R16G16_SNORM       },
+        { L"PixelFormat_R16G16_UNORM",           4,      2,        true,     PixelFormat_R16G16_UNORM       },
+        { L"PixelFormat_R32G32_UINT",            8,      2,        true,     PixelFormat_R32G32_UINT        },
+        { L"PixelFormat_R5G6B5_UINT",            2,      3,        true,     PixelFormat_R5G6B5_UINT        },
+        { L"PixelFormat_R8G8B8A8_UINT",          4,      4,        true,     PixelFormat_R8G8B8A8_UINT      },
+        { L"PixelFormat_R8G8B8A8_SNORM",         4,      4,        true,     PixelFormat_R8G8B8A8_SNORM     },
+        { L"PixelFormat_R8G8B8A8_UNORM",         4,      4,        true,     PixelFormat_R8G8B8A8_UNORM     },
+        { L"PixelFormat_R4G4B4A4_UINT",          2,      4,        true,     PixelFormat_R4G4B4A4_UINT      },
+        { L"PixelFormat_A2R10G10B10_UNORM",      4,      4,        true,     PixelFormat_A2R10G10B10_UNORM  },
+        { L"PixelFormat_R16G16B16A16_SNORM",     8,      4,        true,     PixelFormat_R16G16B16A16_SNORM },
+        { L"PixelFormat_DepthComponent24",       4,      2,        true,     PixelFormat_DepthComponent24   },
+        { L"PixelFormat_DepthStencil",           3,      2,        true,     PixelFormat_DepthStencil       },
+        { L"PixelFormat_ShadowDepth",            2,      1,        true,     PixelFormat_ShadowDepth        },
     };
 
     PixelMap::PixelMap()
@@ -85,18 +98,18 @@ namespace EE
     void PixelMapUtility::CreateData( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, void*& data )
     {
         if ( data != NULL ) return;
-        const size_t Size = width * height * depth * (size_t)PixelFormats[ pixelFormat ].size;
-        if ( Size == 0 )
+        const size_t size = width * height * depth * (size_t)PixelFormats[ pixelFormat ].size;
+        if ( size == 0 )
         {
             data = NULL;
             return;
         }
         if ( FormatIsFloat( pixelFormat ) )
-            data = new float[ Size ];
+            data = new float[ size ];
         else if ( FormatIsShort( pixelFormat ) )
-            data = new unsigned short[ Size ];
+            data = new unsigned short[ size ];
         else
-            data = new unsigned char[ Size ];
+            data = new unsigned char[ size ];
     }
 
     void PixelMapUtility::CreateData( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, void*& target, void* data )
@@ -110,14 +123,12 @@ namespace EE
     {
         switch ( map.pixelFormat )
         {
-        case PixelFormat_R8:      _FlipVertically< UCharRed>( map.width, map.height, map.depth, map.data ); break;
-        case PixelFormat_R32F:    _FlipVertically< FloatRed>( map.width, map.height, map.depth, map.data ); break;
-        case PixelFormat_R8G8:     _FlipVertically<  UCharRG>( map.width, map.height, map.depth, map.data ); break;
-        case PixelFormat_RG32F:   _FlipVertically<  FloatRG>( map.width, map.height, map.depth, map.data ); break;
-        case PixelFormat_R8G8B8:    _FlipVertically< UCharRGB>( map.width, map.height, map.depth, map.data ); break;
-        case PixelFormat_RGB32F:  _FlipVertically< FloatRGB>( map.width, map.height, map.depth, map.data ); break;
-        case PixelFormat_R8G8B8A8:   _FlipVertically<UCharRGBA>( map.width, map.height, map.depth, map.data ); break;
-        case PixelFormat_RGBA32F: _FlipVertically<FloatRGBA>( map.width, map.height, map.depth, map.data ); break;
+        case PixelFormat_R8_UINT:        _FlipVertically< UCharRed>( map.width, map.height, map.depth, map.data ); break;
+        case PixelFormat_R32_UNORM:      _FlipVertically< FloatRed>( map.width, map.height, map.depth, map.data ); break;
+        case PixelFormat_R8G8_UINT:      _FlipVertically<  UCharRG>( map.width, map.height, map.depth, map.data ); break;
+        case PixelFormat_R16G16_UNORM:   _FlipVertically<  FloatRG>( map.width, map.height, map.depth, map.data ); break;
+        case PixelFormat_R8G8B8A8_UINT:  _FlipVertically<UCharRGBA>( map.width, map.height, map.depth, map.data ); break;
+        case PixelFormat_R8G8B8A8_UNORM: _FlipVertically<FloatRGBA>( map.width, map.height, map.depth, map.data ); break;
         }
     }
 
@@ -187,11 +198,21 @@ namespace EE
     {
         switch ( format )
         {
-        case PixelFormat_R32F:
-        case PixelFormat_RG32F:
-        case PixelFormat_RG16F:
-        case PixelFormat_RGB32F:
-        case PixelFormat_RGBA32F:
+        case PixelFormat_R8_SNORM:
+        case PixelFormat_R8_UNORM:
+        case PixelFormat_R16_SNORM:
+        case PixelFormat_R16_UNORM:
+        case PixelFormat_R32_SNORM:
+        case PixelFormat_R32_UNORM:
+        case PixelFormat_R8G8_SNORM:
+        case PixelFormat_R8G8_UNORM:
+        case PixelFormat_R16G16_SNORM:
+        case PixelFormat_R16G16_UNORM:
+        case PixelFormat_R8G8B8A8_SNORM:
+        case PixelFormat_R8G8B8A8_UNORM:
+        case PixelFormat_A2R10G10B10_UNORM:
+        case PixelFormat_R16G16B16A16_SNORM:
+        case PixelFormat_DepthComponent24:
         case PixelFormat_DepthStencil:
         case PixelFormat_ShadowDepth:
             return true;
@@ -202,12 +223,6 @@ namespace EE
 
     bool PixelMapUtility::FormatIsShort( EPixelFormat format )
     {
-        switch ( format )
-        {
-        case PixelFormat_RGBA16_UShort:
-            return true;
-        default:
-            return false;
-        }
+        return false;
     }
 }

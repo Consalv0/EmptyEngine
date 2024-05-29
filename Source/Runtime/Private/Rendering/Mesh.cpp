@@ -1,6 +1,6 @@
 
 #include "CoreMinimal.h"
-#include "Graphics/Mesh.h"
+#include "Rendering/Mesh.h"
 
 namespace EE
 {

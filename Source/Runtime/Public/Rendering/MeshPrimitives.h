@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Graphics/Mesh.h"
+#include "Rendering/Mesh.h"
 #include "Math/Vector3.h"
 
 namespace EE

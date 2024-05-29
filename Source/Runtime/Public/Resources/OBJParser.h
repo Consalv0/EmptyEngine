@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 
-#include "Graphics/Mesh.h"
+#include "Rendering/Mesh.h"
 #include "Utils/Hasher.h"
 
 namespace EE

@@ -6,68 +6,68 @@
 #include "Engine/Window.h"
 #include "Engine/Input.h"
 
-#include "Graphics/GraphicsDevice.h"
+#include "Rendering/RenderInterface.h"
 
 namespace EE
 {
-	class GameEngine
-	{
-	protected:
-		
-		bool initialized_ = false;
+    class GameEngine
+    {
+    protected:
 
-        uint64 frameCount_ = 0;
+        bool initialized = false;
 
-        Application* application_ = NULL;
+        uint64 frameCount = 0;
 
-        GraphicsDevice* graphicsDevice_ = NULL;
+        Application* application = NULL;
 
-		Window* window_ = NULL;
+        RenderInterface* renderingInterface = NULL;
 
-		Input* inputManager_ = NULL;
+        std::vector<Window*> windows;
 
-		AudioDevice* audioDevice_ = NULL;
+        Input* inputManager = NULL;
 
-		DeviceFunctions* deviceFunctions_ = NULL;
+        AudioDevice* audioDevice = NULL;
 
-	public:
+        DeviceFunctions* deviceFunctions = NULL;
+
+    public:
         bool Initialize();
 
         void Run();
 
-		void ShouldTerminate();
+        void ShouldTerminate();
 
         bool WantToTerminate() const;
 
         void Terminate();
 
         //* Get the total count of frames rendered
-        FORCEINLINE uint64 GetFrameCount() const { return frameCount_; };
+        FORCEINLINE uint64 GetFrameCount() const { return frameCount; };
 
-		FORCEINLINE Application* GetApplication() const { return application_; };
+        FORCEINLINE Application* GetApplication() const { return application; };
 
-        FORCEINLINE GraphicsDevice* GetGraphicsDevice() const { return graphicsDevice_; };
+        FORCEINLINE RenderInterface* GetRenderingInterface() const { return renderingInterface; };
 
-        FORCEINLINE Window* GetWindow() const { return window_; };
+        FORCEINLINE Window* GetMainWindow() const { return windows[ 0 ]; };
 
-        FORCEINLINE Input* GetInputManager() const { return inputManager_; };
+        FORCEINLINE Input* GetInputManager() const { return inputManager; };
 
-        FORCEINLINE DeviceFunctions* GetPlatformDevice() const { return deviceFunctions_; };
+        FORCEINLINE DeviceFunctions* GetPlatformDevice() const { return deviceFunctions; };
 
-		FORCEINLINE AudioDevice* GetAudioDevice() const { return audioDevice_; };
+        FORCEINLINE AudioDevice* GetAudioDevice() const { return audioDevice; };
 
-	private:
+    private:
         friend Application;
         friend Window;
 
         //* Begin of frame functions
-        void BeginFrame();
+        void BeginFrame( Window* window );
 
         //* End of frame functions
-        void EndFrame();
+        void EndFrame( Window* window );
 
         void PollEvents();
-	};
+    };
 
     // Global engine pointer.
     extern class GameEngine* GEngine;
