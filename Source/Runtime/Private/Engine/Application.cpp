@@ -67,19 +67,26 @@ namespace EE
             GEngine->GetInputManager()->Update();
             OnUpdate( Ticker::GetTimeStamp() );
 
+            size_t windowCount = GEngine->windows.size();
             if ( !Ticker::IsSkippingRender() )
             {
-                size_t windowCount = GEngine->windows.size();
                 for ( size_t i = 0; i < windowCount; i++ )
                 {
                     GEngine->BeginFrame( GEngine->windows[ i ] );
-                    // GetRenderPipeline().BeginFrame();
 
                     OnRender();
                     OnPostRender();
 
-                    // GetRenderPipeline().EndOfFrame();
                     GEngine->EndFrame( GEngine->windows[ i ] );
+                }
+            }
+
+            for ( size_t i = 0; i < windowCount; i++ )
+            {
+                if ( GEngine->windows[ i ]->closeRequested )
+                {
+                    GEngine->DeleteWindow( GEngine->windows[ i ] );
+                    break;
                 }
             }
 

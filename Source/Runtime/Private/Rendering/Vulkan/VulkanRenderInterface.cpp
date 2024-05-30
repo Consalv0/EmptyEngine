@@ -924,6 +924,7 @@ namespace EE
         }
 
         outSwapChain.type = RenderingResourceType_Swapchain;
+        outSwapChain.description = description;
         outSwapChain.internalState = internalState;
 
         return true;
@@ -1106,7 +1107,7 @@ namespace EE
 	void VulkanRHI::RenderPassEnd( const SwapChain& swapchain, CommandList cmd )
 	{
 		auto internalSwapChain = ToInternal( swapchain, SwapChain );
-		// SDL_RenderPresent( internalSwapChain->renderer );
+		// SDL_RenderPresent( internalSwapChain->swapChain );
 	}
 
 	void VulkanRHI::BindScissorRects( uint32 numRects, const Rect* rects, CommandList cmd ) { }

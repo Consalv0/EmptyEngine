@@ -41,6 +41,10 @@ namespace EE
 
         void Terminate();
 
+        Window* CreateWindow();
+
+        void DeleteWindow( Window* window );
+
         //* Get the total count of frames rendered
         FORCEINLINE uint64 GetFrameCount() const { return frameCount; };
 
@@ -48,7 +52,9 @@ namespace EE
 
         FORCEINLINE RenderInterface* GetRenderingInterface() const { return renderingInterface; };
 
-        FORCEINLINE Window* GetMainWindow() const { return windows[ 0 ]; };
+        FORCEINLINE Window* GetWindow( int index ) const { return windows[ index ]; };
+
+        FORCEINLINE Window* GetMainWindow() const { return GetWindow( 0 ); };
 
         FORCEINLINE Input* GetInputManager() const { return inputManager; };
 

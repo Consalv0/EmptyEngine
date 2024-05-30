@@ -31,8 +31,8 @@ namespace EE
 #define EE_CORE_ASSERT(X, ...) { if(!(X)) { EE_LOG_CORE_CRITICAL(L"Assertion Failed: " __VA_ARGS__); __debugbreak(); } }
 #define EE_ASSERT(X, ...) { if(!(X)) { EE_LOG_CRITICAL(L"Assertion Failed: " __VA_ARGS__); __debugbreak(); } }
 #else
-#define EE_CORE_ASSERT(X, ...)
-#define EE_ASSERT(X, ...)
+#define EE_CORE_ASSERT(X, ...) (X)
+#define EE_ASSERT(X, ...) (X)
 #endif
 
 #else

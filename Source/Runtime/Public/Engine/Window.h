@@ -56,6 +56,9 @@ namespace EE
     //* Cointains the properties and functions of a window
     class Window
     {
+    public:
+        bool closeRequested;
+
     protected:
         struct
         {
@@ -136,5 +139,5 @@ namespace EE
         static Window* Create( const WindowProperties& parameters );
     };
 
-    Window* CreateWindow();
+    Window* CreateApplicationWindow();
 }

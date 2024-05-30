@@ -15,7 +15,7 @@ namespace EE
     {
         application = EE::CreateApplication();
         renderingInterface = EE::CreateRenderingInterface();
-        windows.push_back( EE::CreateWindow() );
+        CreateWindow();
 
         if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK ) != 0 )
         {
@@ -91,6 +91,22 @@ namespace EE
     bool GameEngine::WantToTerminate() const
     {
         return GWantToTerminate;
+    }
+
+    void GameEngine::DeleteWindow( Window* window )
+    {
+        windows.erase( std::remove( windows.begin(), windows.end(), window ) );
+        delete window;
+
+        if ( windows.size() == 0 )
+            ShouldTerminate();
+    }
+
+    Window* GameEngine::CreateWindow()
+    {
+        Window* window = EE::CreateApplicationWindow();
+        windows.push_back( window );
+        return window;
     }
 
     GameEngine* GEngine = NULL;

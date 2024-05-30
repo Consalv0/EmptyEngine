@@ -17,11 +17,11 @@ namespace EE
 {
     int WindowEventsHandler( void* userData, SDL_Event* sdlEvent )
     {
-        Window& window = *(Window*)userData;
+        Window* window = static_cast<Window*>( userData );
 
         if ( sdlEvent->type >= SDL_EVENT_WINDOW_FIRST && sdlEvent->type <= SDL_EVENT_WINDOW_LAST )
         {
-            if ( sdlEvent->window.windowID != SDL_GetWindowID( (SDL_Window*)window.GetHandle() ) )
+            if ( sdlEvent->window.windowID != SDL_GetWindowID( (SDL_Window*)window->GetHandle() ) )
                 return 0;
         }
 
@@ -35,12 +35,19 @@ namespace EE
 
         case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
         {
-            GEngine->ShouldTerminate();
+            if ( sdlEvent->window.windowID == SDL_GetWindowID( (SDL_Window*)window->GetHandle() ) )
+                window->closeRequested = true;
             break;
         }
         case SDL_EVENT_WINDOW_FOCUS_GAINED:
         case SDL_EVENT_WINDOW_FOCUS_LOST:
         {
+            break;
+        }
+        case SDL_EVENT_WINDOW_DESTROYED:
+        {
+            if ( sdlEvent->window.windowID == SDL_GetWindowID( (SDL_Window*)window->GetHandle() ) )
+                window->closeRequested = true;
             break;
         }
         }
@@ -90,13 +97,14 @@ namespace EE
 
         EE::GEngine->renderingInterface->CreatePresentContext( this, presentContext );
 
-        SDL_SetWindowKeyboardGrab( (SDL_Window*)windowHandle, SDL_bool( false ) );
+        // SDL_SetWindowKeyboardGrab( (SDL_Window*)windowHandle, SDL_bool( false ) );
         SDL_AddEventWatch( WindowEventsHandler, (void*)this );
         return true;
     }
 
     Window::Window( const WindowProperties& parameters )
     {
+        closeRequested = false;
         windowHandle = NULL;
         width = parameters.width;
         height = parameters.height;
@@ -159,10 +167,11 @@ namespace EE
 #ifdef EE_DEBUG
         EE_LOG_CORE_DEBUG( L"Window: \"{}\" closed!", GetName() );
 #endif // EE_DEBUG
+
+        SDL_DelEventWatch( WindowEventsHandler, (void*)this );
+        presentContext = PresentContext();
         SDL_DestroyWindow( (SDL_Window*)(windowHandle) );
         windowHandle = NULL;
-        presentContext = PresentContext();
-        SDL_DelEventWatch( WindowEventsHandler, (void*)this );
     }
 
     WString Window::GetName() const

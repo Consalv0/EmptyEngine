@@ -9,7 +9,7 @@
 
 extern EE::Application* EE::CreateApplication();
 
-extern EE::Window* EE::CreateWindow();
+extern EE::Window* EE::CreateApplicationWindow();
 
 #include "Platform/Platform.h"
 
