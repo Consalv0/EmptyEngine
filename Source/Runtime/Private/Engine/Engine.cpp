@@ -1,6 +1,8 @@
 
 #include "CoreMinimal.h"
 #include "Engine/Engine.h"
+#include "Platform/PlatformDevice.h"
+#include "RHI/RHI.h"
 
 #include "Resources/MeshParser.h"
 
@@ -13,8 +15,8 @@ namespace EE
 
     bool GameEngine::Initialize()
     {
-        application = EE::CreateApplication();
-        renderingInterface = EE::CreateRenderingInterface();
+        GMainApplication = EE::CreateApplication();
+        GDynamicRHI = EE::PlatformCreateDynamicRHI();
         CreateWindow();
 
         if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK ) != 0 )
@@ -23,9 +25,9 @@ namespace EE
             return false;
         }
 
-        if ( windows.size() > 0 )
+        if ( windowCount > 0 )
         {
-            if ( renderingInterface->Initialize() == false )
+            if ( GDynamicRHI->Initialize() == false )
             {
                 return false;
             }
@@ -36,7 +38,7 @@ namespace EE
         }
 
         inputManager = Input::Create();
-        deviceFunctions = DeviceFunctions::Create();
+        GPlatformDevice = PlatformCreatePlatformDevice();
 
         ModelParser::Initialize();
 
@@ -55,30 +57,18 @@ namespace EE
     void GameEngine::Run()
     {
         inputManager->Initialize();
-        application->Run();
-    }
-
-    void GameEngine::BeginFrame( Window* window )
-    {
-        renderingInterface->RenderPassBegin( window->GetPresentContext().swapChain, 0 );
-    }
-
-    void GameEngine::EndFrame( Window* window )
-    {
-        renderingInterface->RenderPassEnd( window->GetPresentContext().swapChain, 0 );
-        frameCount++;
+        GMainApplication->Run();
     }
 
     void GameEngine::Terminate()
     {
         delete inputManager;
-        size_t windowCount = windows.size();
-        for ( size_t i = 0; i < windowCount; i++ )
+        for ( uint64 i = 0; i < windowCount; i++ )
         {
             delete windows[ i ];
         }
-        delete application;
-        delete renderingInterface;
+        windowCount = 0;
+        delete GMainApplication;
 
         SDL_Quit();
     }
@@ -96,16 +86,18 @@ namespace EE
     void GameEngine::DeleteWindow( Window* window )
     {
         windows.erase( std::remove( windows.begin(), windows.end(), window ) );
+        windowCount--;
         delete window;
 
-        if ( windows.size() == 0 )
+        if ( windowCount == 0 )
             ShouldTerminate();
     }
 
     Window* GameEngine::CreateWindow()
     {
-        Window* window = EE::CreateApplicationWindow();
+        Window* window = EE::CreateMainWindow();
         windows.push_back( window );
+        windowCount++;
         return window;
     }
 

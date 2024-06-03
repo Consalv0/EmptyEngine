@@ -1,7 +1,7 @@
 
 #include "CoreMinimal.h"
 #include "Platform/Platform.h"
-#include "Platform/Windows/WindowsDeviceFunctions.h"
+#include "Platform/Windows/WindowsPlatformDevice.h"
 
 #ifdef EE_PLATFORM_NVML
 #include <nvml.h>
@@ -9,7 +9,7 @@
 
 namespace EE
 {
-	WindowsDeviceFunctions::WindowsDeviceFunctions() {
+    WindowsPlatformDevice::WindowsPlatformDevice() {
 #ifdef EE_PLATFORM_NVML
 		nvmlReturn_t DeviceResult = nvmlInit();
 
@@ -18,7 +18,7 @@ namespace EE
 #endif
 	}
 
-	WindowsDeviceFunctions::~WindowsDeviceFunctions() {
+    WindowsPlatformDevice::~WindowsPlatformDevice() {
 #ifdef EE_PLATFORM_NVML
 		nvmlReturn_t DeviceResult = nvmlShutdown();
 
@@ -27,7 +27,7 @@ namespace EE
 #endif
 	}
 
-	bool WindowsDeviceFunctions::IsRunningOnBattery() {
+	bool WindowsPlatformDevice::IsRunningOnBattery() {
 		SYSTEM_POWER_STATUS Status;
 		GetSystemPowerStatus(&Status);
 
@@ -41,7 +41,7 @@ namespace EE
 		}
 	}
 
-	float WindowsDeviceFunctions::GetBatteryStatus() {
+	float WindowsPlatformDevice::GetBatteryStatus() {
 		SYSTEM_POWER_STATUS Status;
 		GetSystemPowerStatus(&Status);
 
@@ -55,7 +55,7 @@ namespace EE
 		return Status.BatteryLifePercent;
 	}
 
-	float WindowsDeviceFunctions::GetDeviceTemperature(const int & DeviceIndex) {
+	float WindowsPlatformDevice::GetDeviceTemperature(const int & DeviceIndex) {
 		uint32 DeviceTemperature = 0;
 #ifdef EE_PLATFORM_NVML
 		nvmlDevice_t Device;
@@ -75,8 +75,10 @@ namespace EE
 		return (float)DeviceTemperature;
 	};
 
-	DeviceFunctions * DeviceFunctions::Create() {
-		return new WindowsDeviceFunctions();
+    PlatformDevice* GPlatformDevice = NULL;
+
+    PlatformDevice* PlatformCreatePlatformDevice() {
+		return new WindowsPlatformDevice();
 	}
 
 }

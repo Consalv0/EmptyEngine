@@ -20,7 +20,7 @@ using TList = std::list<T>;
 template<class T>
 using TQueue = std::queue<T>;
 template<class K, class T>
-using TDictionary = std::unordered_map<K, T>;
+using TMap = std::unordered_map<K, T>;
 
 typedef int8_t          int8;
 typedef int16_t         int16;

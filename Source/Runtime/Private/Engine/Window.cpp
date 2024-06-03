@@ -4,7 +4,7 @@
 #include "Engine/Engine.h"
 #include "Engine/Window.h"
 
-#include "Rendering/RenderInterface.h"
+#include "RHI/RHI.h"
 #include "Rendering/PixelMap.h"
 
 #include "Utils/TextFormatting.h"
@@ -61,9 +61,9 @@ namespace EE
             return false;
 
         uint32 windowFlags = SDL_WINDOW_KEYBOARD_GRABBED;
-        ERenderInterface renderingInterface = EE::GEngine->renderingInterface->GetType();
+        EDynamicRHI renderingInterface = EE::GDynamicRHI->GetType();
 
-        if ( renderingInterface == RenderInterface_Vulkan )
+        if ( renderingInterface == EDynamicRHI::Vulkan )
         {
             windowFlags |= SDL_WINDOW_VULKAN;
         }
@@ -95,14 +95,14 @@ namespace EE
             return false;
         }
 
-        EE::GEngine->renderingInterface->CreatePresentContext( this, presentContext );
+        CreatePresentContextOfWindow( this );
 
         // SDL_SetWindowKeyboardGrab( (SDL_Window*)windowHandle, SDL_bool( false ) );
         SDL_AddEventWatch( WindowEventsHandler, (void*)this );
         return true;
     }
 
-    Window::Window( const WindowProperties& parameters )
+    Window::Window( const WindowParameters& parameters )
     {
         closeRequested = false;
         windowHandle = NULL;
@@ -112,6 +112,7 @@ namespace EE
         mode = parameters.windowMode;
         allowHDR = parameters.allowHDR;
         options = parameters.options;
+        vsync = true;
     }
 
     Window::~Window()
@@ -169,7 +170,7 @@ namespace EE
 #endif // EE_DEBUG
 
         SDL_DelEventWatch( WindowEventsHandler, (void*)this );
-        presentContext = PresentContext();
+        FreePresentContextOfWindow( this );
         SDL_DestroyWindow( (SDL_Window*)(windowHandle) );
         windowHandle = NULL;
     }

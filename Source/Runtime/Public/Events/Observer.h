@@ -20,7 +20,7 @@ namespace ESource {
 		virtual ~Observer();
 
 	private:
-		TDictionary<NString, std::function<void()>> Callbacks;
+		TMap<NString, std::function<void()>> Callbacks;
 	};
 
 }

@@ -36,8 +36,8 @@ namespace EE
 
 		void RemoveSample(const size_t& Identifier);
 
-		inline TDictionary<size_t, SamplePlayInfo *>::iterator begin() { return PlayInfoList.begin(); }
-		inline TDictionary<size_t, SamplePlayInfo *>::iterator end() { return PlayInfoList.end(); }
+		inline TMap<size_t, SamplePlayInfo *>::iterator begin() { return PlayInfoList.begin(); }
+		inline TMap<size_t, SamplePlayInfo *>::iterator end() { return PlayInfoList.end(); }
 
 	public:
 		float volume;
@@ -50,7 +50,7 @@ namespace EE
 
 		uint32 deviceID_;
 
-		TDictionary<size_t, SamplePlayInfo *> PlayInfoList;
+		TMap<size_t, SamplePlayInfo *> PlayInfoList;
 	};
 
 }

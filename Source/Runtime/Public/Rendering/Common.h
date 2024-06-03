@@ -88,7 +88,7 @@ namespace EE
         SharingMode_Static,
     };
 
-    enum EBufferUsageFlags
+    enum EBufferUsageFlags : uint32
     {
         BufferUsage_None =              0,
         BufferUsage_SourceCopy =        1 << 1,
@@ -235,6 +235,14 @@ namespace EE
         DrawMode_Triangles
     };
 
+    enum EClearFlags : uint32
+    {
+        ClearFlags_None     = 0,
+        ClearFlags_Color    = 1 << 0,
+        ClearFlags_Depth    = 1 << 1,
+        ClearFlags_Stencil  = 1 << 2
+    };
+
     enum ESamplerBorder
     {
         SamplerBorder_BlackTransparent,
@@ -254,15 +262,13 @@ namespace EE
 
     enum ECommandQueueType
     {
-        ComandQueue_Graphics,
-        ComandQueue_Compute,
-        ComandQueue_Count,
+        CommandQueue_Graphics,
+        CommandQueue_Compute,
+        CommandQueue_Copy
     };
 
-    enum ERenderInterface
+    enum class EDynamicRHI
     {
-        RenderInterface_CPU,
-        RenderInterface_OpenGL,
-        RenderInterface_Vulkan
+        Vulkan
     };
 }

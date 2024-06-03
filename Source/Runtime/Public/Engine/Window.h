@@ -4,7 +4,6 @@
 #include "Events/WindowEvent.h"
 #include "Events/InputEvent.h"
 #include "Rendering/Common.h"
-#include "Rendering/Objects.h"
 
 union WindowEventData;
 
@@ -25,20 +24,17 @@ namespace EE
         WindowOption_SkipTaskbar = 1 << 3,
     };
 
-    template <typename T>
-    class Bitmap;
-
-    struct WindowProperties
+    struct WindowParameters
     {
         //* Name displayed in header window
-        WString name;
+        EWindowMode windowMode;
         uint32 width;
         uint32 height;
-        EWindowMode windowMode;
         bool allowHDR;
         uint32 options;
+        WString name;
 
-        WindowProperties(
+        WindowParameters(
             const WString& title = L"Empty Engine",
             uint32 width = -1,
             uint32 height = -1,
@@ -48,7 +44,6 @@ namespace EE
         )
             : name(title), width(width), height(height), windowMode(mode), allowHDR(allowHDR), options(options) {
         }
-
     };
 
     typedef void* WindowHandleRef;
@@ -65,7 +60,6 @@ namespace EE
             WString name;
             EWindowMode mode;
             WindowHandleRef windowHandle;
-            PresentContext presentContext;
             uint32 options;
             int32 width;
             int32 height;
@@ -74,7 +68,7 @@ namespace EE
         };
 
     public:
-        Window( const WindowProperties& parameters );
+        Window( const WindowParameters& parameters );
 
         ~Window();
 
@@ -129,15 +123,12 @@ namespace EE
         //* Terminates this window
         void Terminate();
 
-        //* Graphica present frame context
-        const PresentContext& GetPresentContext() const { return presentContext; };
-
         //* OS specific window handle
         WindowHandleRef GetWindowHandle() const { return windowHandle; };
 
         //* Creates a Window with a Name, Width and Height
-        static Window* Create( const WindowProperties& parameters );
+        static Window* Create( const WindowParameters& parameters );
     };
 
-    Window* CreateApplicationWindow();
+    Window* CreateMainWindow();
 }

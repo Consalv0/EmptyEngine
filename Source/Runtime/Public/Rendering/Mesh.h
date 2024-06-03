@@ -86,24 +86,24 @@ namespace EE
     typedef TArray<Vector2f>           MeshUVs;
     typedef TArray<Vector4f>           MeshColors;
     typedef TArray<StaticVertex>      MeshVertices;
-    typedef TDictionary<int32, NString> MeshMaterials;
+    typedef TMap<int32, NString> MeshMaterials;
 
     struct MeshData
     {
         NString name;
         TArray<MeshFace> faces;
-        TDictionary<int32, Subdivision> subdivisionsMap;
-        TDictionary<int32, NString> materialsMap;
+        TMap<int32, Subdivision> subdivisionsMap;
+        TMap<int32, NString> materialsMap;
         TArray<StaticVertex> staticVertices;
         TArray<SkinVertex> skinVertices;
         BoundingBox3f bounding;
 
-        bool hasNormals;
-        bool hasTangents;
-        bool hasVertexColor;
-        int32  uvChannels;
-        bool hasBoundingBox;
-        bool hasBones;
+        bool hasNormals = false;
+        bool hasTangents = false;
+        bool hasVertexColor = false;
+        int32  uvChannels = 0;
+        bool hasBoundingBox = false;
+        bool hasBones = false;
 
         void Transfer( MeshData& Other );
         void ComputeBounding();

@@ -50,7 +50,7 @@ namespace EE
 
         static bool GetSimilarVertexIndex(
             const StaticVertex& vertex,
-            TDictionary<StaticVertex, uint32>& vertexToIndex,
+            TMap<StaticVertex, uint32>& vertexToIndex,
             uint32& result
         );
 

@@ -113,9 +113,9 @@ namespace EE
         return sign * (intPart + fractionPart) * exponentPart;
     }
 
-    bool OBJLoader::GetSimilarVertexIndex( const StaticVertex& vertex, TDictionary<StaticVertex, uint32>& vertexToIndex, uint32& result )
+    bool OBJLoader::GetSimilarVertexIndex( const StaticVertex& vertex, TMap<StaticVertex, uint32>& vertexToIndex, uint32& result )
     {
-        TDictionary<StaticVertex, uint32>::iterator it = vertexToIndex.find( vertex );
+        TMap<StaticVertex, uint32>::iterator it = vertexToIndex.find( vertex );
         if ( it == vertexToIndex.end() )
         {
             return false;
@@ -423,7 +423,7 @@ namespace EE
             ObjectData& data = modelData.objects[ objectCount ];
             if ( data.vertexIndicesCount == 0 ) continue;
 
-            TDictionary<StaticVertex, unsigned> vertexToIndex;
+            TMap<StaticVertex, unsigned> vertexToIndex;
             vertexToIndex.reserve( data.vertexIndicesCount );
 
             info.parentNode.children.push_back( new ModelNode( data.name ) );

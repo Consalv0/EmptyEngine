@@ -6,8 +6,6 @@
 #include "Engine/Window.h"
 #include "Engine/Input.h"
 
-#include "Rendering/RenderInterface.h"
-
 namespace EE
 {
     class GameEngine
@@ -18,17 +16,12 @@ namespace EE
 
         uint64 frameCount = 0;
 
-        Application* application = NULL;
-
-        RenderInterface* renderingInterface = NULL;
-
-        std::vector<Window*> windows;
+        uint64 windowCount = 0;
+        TArray<Window*> windows;
 
         Input* inputManager = NULL;
 
         AudioDevice* audioDevice = NULL;
-
-        DeviceFunctions* deviceFunctions = NULL;
 
     public:
         bool Initialize();
@@ -48,29 +41,19 @@ namespace EE
         //* Get the total count of frames rendered
         FORCEINLINE uint64 GetFrameCount() const { return frameCount; };
 
-        FORCEINLINE Application* GetApplication() const { return application; };
+        FORCEINLINE const uint64& GetWindowCount() const { return windowCount; };
 
-        FORCEINLINE RenderInterface* GetRenderingInterface() const { return renderingInterface; };
-
-        FORCEINLINE Window* GetWindow( int index ) const { return windows[ index ]; };
+        FORCEINLINE Window* GetWindow( uint64 index ) const { if ( windowCount > 0 && index < windowCount ) return windows[ index ]; else return NULL; };
 
         FORCEINLINE Window* GetMainWindow() const { return GetWindow( 0 ); };
 
         FORCEINLINE Input* GetInputManager() const { return inputManager; };
-
-        FORCEINLINE DeviceFunctions* GetPlatformDevice() const { return deviceFunctions; };
 
         FORCEINLINE AudioDevice* GetAudioDevice() const { return audioDevice; };
 
     private:
         friend Application;
         friend Window;
-
-        //* Begin of frame functions
-        void BeginFrame( Window* window );
-
-        //* End of frame functions
-        void EndFrame( Window* window );
 
         void PollEvents();
     };

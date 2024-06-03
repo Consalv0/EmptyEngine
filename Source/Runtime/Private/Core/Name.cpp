@@ -6,8 +6,8 @@
 
 namespace EE
 {
-	TDictionary<size_t, WString> EName::GNamesTable = TDictionary<size_t, WString>();
-	TDictionary<size_t, size_t> EName::GNameCountTable = TDictionary<size_t, size_t>();
+	TMap<size_t, WString> EName::GNamesTable = TMap<size_t, WString>();
+	TMap<size_t, size_t> EName::GNameCountTable = TMap<size_t, size_t>();
     
     EName GEmptyName = { L"", 0 };
 
@@ -60,11 +60,11 @@ namespace EE
 	}
 
 	WString EName::GetInstanceName() const {
-		return entryName + L"_" + std::to_wstring(number);
+		return entryName + L"_" + Text::ToWide(number);
 	}
 
 	NString EName::GetNarrowInstanceName() const {
-		return Text::WideToNarrow(entryName) + "_" + std::to_string(number);
+		return Text::WideToNarrow(entryName) + "_" + Text::ToNarrow(number);
 	}
 
 	size_t EName::GetNumber() const {
@@ -72,7 +72,7 @@ namespace EE
 	}
 
 	size_t EName::GetInstanceID() const {
-		return WStringToHash(entryName + L"_" + std::to_wstring(number));
+		return WStringToHash(entryName + L"_" + Text::ToWide(number));
 	}
 
 	size_t EName::GetID() const {

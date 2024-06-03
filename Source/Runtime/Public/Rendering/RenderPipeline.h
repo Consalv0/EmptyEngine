@@ -2,15 +2,15 @@
 
 #include "CoreTypes.h"
 #include "Math/Transform.h"
-#include "Rendering/Common.h"
-#include "Rendering/Objects.h"
+
+#include "RHI/RHI.h"
 
 namespace EE
 {
 	class RenderPipeline
 	{
 	public:
-		bool needResize;
+		bool needResize = false;
 
 		virtual void Initialize() = 0;
 
@@ -20,13 +20,13 @@ namespace EE
 
 		virtual void End() = 0;
 
-		virtual void SetCamera( const Transform& eyeTransform, const Matrix4x4& projection, uint8_t renderingMask ) = 0;
+		virtual void SetCamera( const Transform& eyeTransform, const Matrix4x4& projection, uint8 renderingMask ) = 0;
 
 		virtual IntVector2 GetRenderSize() const = 0;
 
 		virtual void SetRenderScale( float scale ) = 0;
 
-		virtual Texture* GetFramebuffer() const = 0;
+		virtual RHITexture* GetFramebuffer() const = 0;
 
 		template <typename T>
 		bool CreateStage( const EName& stageName );
@@ -40,14 +40,7 @@ namespace EE
 		virtual void EndOfFrame() = 0;
 
 	protected:
-		TDictionary<size_t, class RenderStage*> renderStages;
-
-		Texture* mainScreenTarget;
-
-		Texture* frameBuffer;
-
-		// Render Scale Target
-		float renderScale;
+		TMap<size_t, class RenderStage*> renderStages;
 	};
 
 	template<typename T>

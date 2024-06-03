@@ -4,48 +4,51 @@
 
 namespace EE
 {
-	class Application {
+    class Application
+    {
 
-	public:
-		class RenderPipeline& GetRenderPipeline();
+    public:
+        class RenderPipeline& GetRenderPipeline();
 
-		//* Entry point of the application
-		void Run();
+        //* Entry point of the application
+        void Run();
 
-		virtual ~Application();
+        virtual ~Application();
 
-	protected:
+    protected:
 
         Application();
 
-		virtual void OnInitialize() {};
+        virtual void OnInitialize() {};
 
-		virtual void OnAwake() {};
+        virtual void OnAwake() {};
 
-		virtual void OnRender() {};
+        //* This is called after pulling all events,
+        //* you need to update the input manager here
+        virtual void OnUpdate( Timestamp stamp ) {};
 
-		virtual void OnPostRender() {};
+        virtual void OnTerminate() {};
 
-		virtual void OnUpdate( Timestamp stamp ) {};
+        virtual void OnDestroy() {};
 
-		virtual void OnTerminate() {};
+    private:
 
-	private:
+        bool initialized;
 
-		bool initialized_;
+        //* Initialize the application objects
+        void Initialize();
 
-		//* Initialize the application, it creates a window, a context and loads GL functions.
-		void Initalize();
+        //* Application loading point
+        void Awake();
 
-		//* Application loading point, awakens the layers
-		void Awake();
+        //* Application loop
+        void UpdateLoop();
 
-		//* Application loop
-		void UpdateLoop();
+        //* Terminates Application
+        void Terminate();
+    };
 
-		//* Terminates Application
-		void Terminate();
-	};
+    extern Application* GMainApplication;
 
     Application* CreateApplication();
 }

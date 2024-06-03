@@ -11,7 +11,7 @@ namespace EE
     protected:
 
     public:
-        WindowsWindow( const WindowProperties& parameters = WindowProperties() );
+        WindowsWindow( const WindowParameters& parameters = WindowParameters() );
 
         ~WindowsWindow();
 

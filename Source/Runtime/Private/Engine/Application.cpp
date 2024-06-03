@@ -17,18 +17,18 @@ namespace EE
 {
     Application::Application()
     {
-        initialized_ = false;
+        initialized = false;
     }
 
     Application::~Application()
     {
-        Terminate();
+        OnDestroy();
     }
 
     void Application::Run()
     {
-        EE_LOG_CORE_INFO( L"Initalizing Application:\n" );
-        Initalize();
+        EE_LOG_CORE_INFO( L"Initializing Application:\n" );
+        Initialize();
         Awake();
         UpdateLoop();
     }
@@ -39,49 +39,34 @@ namespace EE
         return *pipeline;
     }
 
-    void Application::Initalize()
+    void Application::Initialize()
     {
-        if ( initialized_ ) return;
+        if ( initialized ) return;
 
         OnInitialize();
 
-        initialized_ = true;
+        initialized = true;
     }
 
     void Application::Awake()
     {
-        if ( !initialized_ ) return;
+        if ( !initialized ) return;
 
         OnAwake();
     }
 
     void Application::UpdateLoop()
     {
-        if ( !initialized_ ) return;
+        if ( !initialized ) return;
 
         do
         {
             Ticker::Tick();
             GEngine->PollEvents();
 
-            GEngine->GetInputManager()->Update();
             OnUpdate( Ticker::GetTimeStamp() );
 
-            size_t windowCount = GEngine->windows.size();
-            if ( !Ticker::IsSkippingRender() )
-            {
-                for ( size_t i = 0; i < windowCount; i++ )
-                {
-                    GEngine->BeginFrame( GEngine->windows[ i ] );
-
-                    OnRender();
-                    OnPostRender();
-
-                    GEngine->EndFrame( GEngine->windows[ i ] );
-                }
-            }
-
-            for ( size_t i = 0; i < windowCount; i++ )
+            for ( uint64 i = 0; i < GEngine->windowCount; i++ )
             {
                 if ( GEngine->windows[ i ]->closeRequested )
                 {
@@ -90,6 +75,8 @@ namespace EE
                 }
             }
 
+            GEngine->frameCount++;
+
         } while (
             GEngine->WantToTerminate() == false
         );
@@ -97,6 +84,9 @@ namespace EE
 
     void Application::Terminate()
     {
+        GEngine->ShouldTerminate();
         OnTerminate();
     }
+
+    Application* GMainApplication = NULL;
 }

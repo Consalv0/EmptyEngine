@@ -39,8 +39,8 @@ namespace EE
 		WString entryName;
 		size_t id;
 
-		static TDictionary<size_t, WString> GNamesTable;
-		static TDictionary<size_t, size_t> GNameCountTable;
+		static TMap<size_t, WString> GNamesTable;
+		static TMap<size_t, size_t> GNameCountTable;
 	};
 
     extern EE::EName GEmptyName;

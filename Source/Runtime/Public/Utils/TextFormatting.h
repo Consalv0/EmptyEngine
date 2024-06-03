@@ -7,6 +7,28 @@ namespace EE
 {
     namespace Text
     {
+        NString ToNarrow( const int8& number );
+        NString ToNarrow( const int16& number );
+        NString ToNarrow( const int32& number );
+        NString ToNarrow( const int64& number );
+        NString ToNarrow( const uint8& number );
+        NString ToNarrow( const uint16& number );
+        NString ToNarrow( const uint32& number );
+        NString ToNarrow( const uint64& number );
+        NString ToNarrow( const float& number );
+        NString ToNarrow( const double& number );
+
+        WString ToWide( const int8& number );
+        WString ToWide( const int16& number );
+        WString ToWide( const int32& number );
+        WString ToWide( const int64& number );
+        WString ToWide( const uint8& number );
+        WString ToWide( const uint16& number );
+        WString ToWide( const uint32& number );
+        WString ToWide( const uint64& number );
+        WString ToWide( const float& number );
+        WString ToWide( const double& number );
+
         NString WideToNarrow( const WChar* From );
 
         WString NarrowToWide( const NChar* From );

@@ -2,13 +2,13 @@
 
 namespace EE
 {
-    struct RenderObject
+    struct RHIObject
     {
         std::shared_ptr<void> internalState;
         FORCEINLINE bool IsValid() const { return internalState.get() != nullptr; }
     };
 
-    struct RenderResource : public RenderObject
+    struct RHIResource : public RHIObject
     {
         ERenderingResourceType type = RenderingResourceType_Unknown;
         FORCEINLINE bool IsTexture() const { return type == RenderingResourceType_Texture; }
@@ -19,20 +19,18 @@ namespace EE
 
     struct SurfaceDescription
     {
-        class Window* window;
+        class Window* window = NULL;
     };
 
-    struct Surface : public RenderResource
+    struct RHISurface : public RHIResource
     {
-        SurfaceDescription description;
-        FORCEINLINE const SurfaceDescription& GetDescription() const { return description; }
     };
 
     struct SwapChainDescription
     {
         uint32 width = 0;
         uint32 height = 0;
-        uint32 buffercount = 2;
+        uint32 bufferCount = 2;
         EPixelFormat format = PixelFormat_Unknown;
         EColorSpace colorSpace = ColorSpace_Unknown;
         bool fullscreen = false;
@@ -40,43 +38,48 @@ namespace EE
         Vector4 clearcolor = { 0,0,0,1 };
     };
 
-    struct SwapChain : public RenderResource
-    {
-        SwapChainDescription description;
-        FORCEINLINE const SwapChainDescription& GetDescription() const { return description; }
-    };
-
-    struct RenderInstance : RenderObject
+    struct RHISwapChain : public RHIResource
     {
     };
 
-    struct PresentContext : RenderObject
+    struct RHIInstance : RHIObject
     {
-        Surface surface;
-        SwapChain swapChain;
     };
 
-    struct RenderDevice : RenderObject
+    struct RHIPresentContext : RHIObject
     {
-        PresentContext context;
+        RHISurface surface;
+        RHISwapChain swapChain;
+    };
+
+    struct RHIDevice : RHIObject
+    {
+        RHIPresentContext context;
     };
 
     struct BufferDescription
     {
         uint64 size = 0;
-        EBufferUsageFlags usages;
-        ESharingMode sharing;
+        EBufferUsageFlags usages = BufferUsage_None;
+        ESharingMode sharing = SharingMode_Default;
     };
 
-    struct ShaderStage : public RenderResource
+    struct RHIShaderStage : public RHIResource
     {
         EShaderStage stage = ShaderStage_Unknown;
     };
 
-    struct Buffer : public RenderResource
+    struct CommandBufferDescription
     {
-        BufferDescription description;
-        FORCEINLINE const BufferDescription& GetDescription() const { return description; }
+        EUsageMode usage;
+    };
+
+    struct RHICommandBuffer : public RHIResource
+    {
+    };
+
+    struct RHIBuffer : public RHIResource
+    {
     };
 
     struct TextureDescription
@@ -100,10 +103,10 @@ namespace EE
         EImageLayout layout = ImageLayout_ShaderResource;
     };
 
-    struct Texture : public RenderResource
+    typedef struct RHITexture* RHITextureRef;
+
+    struct RHITexture : public RHIResource
     {
-        TextureDescription description;
-        FORCEINLINE const TextureDescription& GetDescription() const { return description; }
     };
 
     struct SamplerDescription
@@ -120,21 +123,19 @@ namespace EE
         float maxLOD = FLT_MAX;
     };
 
-    struct Sampler : public RenderObject
+    struct RHISampler : public RHIObject
     {
-        SamplerDescription description;
-        FORCEINLINE const SamplerDescription& GetDescription() const { return description; }
     };
 
     struct PipelineStateDescription
     {
-        const ShaderStage* vertex = nullptr;
-        const ShaderStage* pixel = nullptr;
-        const ShaderStage* hull = nullptr;
-        const ShaderStage* ds = nullptr;
-        const ShaderStage* geometry = nullptr;
-        const ShaderStage* ms = nullptr;
-        const ShaderStage* as = nullptr;
+        const RHIShaderStage* vertex = nullptr;
+        const RHIShaderStage* pixel = nullptr;
+        const RHIShaderStage* hull = nullptr;
+        const RHIShaderStage* ds = nullptr;
+        const RHIShaderStage* geometry = nullptr;
+        const RHIShaderStage* ms = nullptr;
+        const RHIShaderStage* as = nullptr;
 
         uint32 sampleMask = 0xFFFFFFFF;
     };
