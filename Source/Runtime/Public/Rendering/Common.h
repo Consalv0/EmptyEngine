@@ -100,6 +100,7 @@ namespace EE
         BufferUsage_Indirect =          1 << 7,
         BufferUsage_ShaderResource =    1 << 8,
     };
+    ENUM_FLAGS_OPERATORS( EBufferUsageFlags );
 
     enum EComparisonFunction
     {
@@ -242,6 +243,7 @@ namespace EE
         ClearFlags_Depth    = 1 << 1,
         ClearFlags_Stencil  = 1 << 2
     };
+    ENUM_FLAGS_OPERATORS( EClearFlags );
 
     enum ESamplerBorder
     {

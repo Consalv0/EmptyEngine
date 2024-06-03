@@ -37,8 +37,8 @@ namespace EE
 
 #else
 
-#define EE_CORE_ASSERT(X, ...)
-#define EE_ASSERT(X, ...)
+#define EE_CORE_ASSERT(X, ...) (X)
+#define EE_ASSERT(X, ...) (X)
 
 // Core log macros
 #define EE_LOG_CORE_DEBUG(...)    

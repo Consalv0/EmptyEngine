@@ -10,7 +10,7 @@
 
 namespace EE
 {
-    JoystickState GJoystickDeviceStates[EE_MAX_GAMEPAD_COUNT];
+    JoystickState GJoystickDeviceStates[ EE_MAX_GAMEPAD_COUNT ];
 
     GamepadButtonState GGamepadButtonStates[ EE_MAX_GAMEPAD_COUNT ][ EGamepadButton::Gamepad_Button_MAX ];
 
@@ -29,19 +29,19 @@ namespace EE
         return true;
     }
 
-    bool Input::IsKeyState( EScancode keyCode, EButtonState state )
+    bool Input::IsKeyState( EScancode keyCode, EButtonStateFlags state )
     {
         if ( state & ButtonState_Down ) return GScancodeStates[ keyCode ].framePressed;
         return GScancodeStates[ keyCode ].state & state;
     }
 
-    bool Input::IsMouseState( EMouseButton button, EButtonState state )
+    bool Input::IsMouseState( EMouseButton button, EButtonStateFlags state )
     {
         if ( state & ButtonState_Down ) return GMouseButtonStates[ button ].framePressed;
         return GMouseButtonStates[ button ].state & state;
     }
 
-    bool Input::IsButtonState( int index, EGamepadButton button, EButtonState state )
+    bool Input::IsButtonState( int index, EGamepadButton button, EButtonStateFlags state )
     {
         if ( index == -1 )
         {
@@ -169,9 +169,9 @@ namespace EE
 
         auto& keyState = GScancodeStates[ (EScancode)sdlEvent->key.keysym.scancode ];
         auto& mouseState = GMouseButtonStates[ (EMouseButton)sdlEvent->button.button ];
-        static int32_t mouseButtonPressedCount[ 255 ] = {
-            (int32_t)-1, (int32_t)-1, (int32_t)-1, (int32_t)-1, (int32_t)-1,
-            (int32_t)-1, (int32_t)-1, (int32_t)-1, (int32_t)-1, (int32_t)-1
+        static int32 mouseButtonPressedCount[ 255 ] = {
+            (int32)-1, (int32)-1, (int32)-1, (int32)-1, (int32)-1,
+            (int32)-1, (int32)-1, (int32)-1, (int32)-1, (int32)-1
         };
 
         switch ( sdlEvent->type )
@@ -437,7 +437,7 @@ namespace EE
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
         {
             mouseState.state = ButtonState_Pressed;
-            mouseState.Clicks = sdlEvent->button.clicks;
+            mouseState.clicks = sdlEvent->button.clicks;
 
             mouseButtonPressedCount[ sdlEvent->button.button ]++;
             MouseButtonPressedEvent inEvent( sdlEvent->button.button, sdlEvent->button.clicks == 2, mouseButtonPressedCount[ sdlEvent->button.button ] );
@@ -449,7 +449,7 @@ namespace EE
         {
             mouseState.state = ButtonState_Released;
             mouseState.framePressed = 0;
-            mouseState.Clicks = 0;
+            mouseState.clicks = 0;
 
             mouseButtonPressedCount[ sdlEvent->button.button ] = -1;
             MouseButtonReleasedEvent inEvent( sdlEvent->button.button );
@@ -495,6 +495,7 @@ namespace EE
 
             EName deviceName = EName( Text::NarrowToWide( SDL_GetJoystickName( SDL_GetGamepadJoystick( gamepad ) ) ), ids[ i ] );
             JoystickState* connectedJoystick = NULL;
+
             for ( int i = 0; i < EE_MAX_GAMEPAD_COUNT; i++ )
             {
                 if ( GJoystickDeviceStates[ i ].name == deviceName )

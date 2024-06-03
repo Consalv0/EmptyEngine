@@ -55,3 +55,13 @@ typedef size_t          intPNT;
 #define EE_DLLEXPORT __attribute__((visibility("default")))
 #define EE_DLLIMPORT __attribute__((visibility("default")))
 #endif
+
+#define ENUM_FLAGS_OPERATORS( Enum ) \
+    inline           Enum& operator|=(Enum& lft, Enum rgt) { return lft = (Enum)((__underlying_type(Enum))lft | (__underlying_type(Enum))rgt); } \
+    inline           Enum& operator&=(Enum& lft, Enum rgt) { return lft = (Enum)((__underlying_type(Enum))lft & (__underlying_type(Enum))rgt); } \
+    inline           Enum& operator^=(Enum& lft, Enum rgt) { return lft = (Enum)((__underlying_type(Enum))lft ^ (__underlying_type(Enum))rgt); } \
+    inline constexpr Enum  operator| (Enum  lft, Enum rgt) { return (Enum)((__underlying_type(Enum))lft | (__underlying_type(Enum))rgt); } \
+    inline constexpr Enum  operator& (Enum  lft, Enum rgt) { return (Enum)((__underlying_type(Enum))lft & (__underlying_type(Enum))rgt); } \
+    inline constexpr Enum  operator^ (Enum  lft, Enum rgt) { return (Enum)((__underlying_type(Enum))lft ^ (__underlying_type(Enum))rgt); } \
+    inline constexpr bool  operator! (Enum  e)             { return !(__underlying_type(Enum))e; } \
+    inline constexpr Enum  operator~ (Enum  e)             { return (Enum)~(__underlying_type(Enum))e; }

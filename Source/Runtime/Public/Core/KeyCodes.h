@@ -4,42 +4,43 @@
 
 namespace EE
 {
-	enum EButtonState : char
-	{
-		ButtonState_Up = 0,
-		ButtonState_Down = 1,
-		ButtonState_Pressed = 2,
-		ButtonState_Released = 4,
-		ButtonState_Typed = 8,
-	};
+    enum EButtonStateFlags : char
+    {
+        ButtonState_Up          = 0,
+        ButtonState_Down        = 1 << 0,
+        ButtonState_Pressed     = 1 << 1,
+        ButtonState_Released    = 1 << 2,
+        ButtonState_Typed       = 1 << 3
+    };
+    ENUM_FLAGS_OPERATORS( EButtonStateFlags );
 
-	struct ScancodeState
-	{
-		int state;
-		uint64 framePressed;
-		int repetitions;
-	};
+    struct ScancodeState
+    {
+        EButtonStateFlags state;
+        uint64 framePressed;
+        uint32 repetitions;
+    };
 
-	enum EMouseButton
-	{
-		Mouse_Button0 = 1,
-		Mouse_Button1,
-		Mouse_Button2,
-		Mouse_Button3,
-		Mouse_Button4,
-		Mouse_Button5,
+    enum EMouseButton
+    {
+        Mouse_Button0 = 1,
+        Mouse_Button1,
+        Mouse_Button2,
+        Mouse_Button3,
+        Mouse_Button4,
+        Mouse_Button5,
         Mouse_Button_NUM
-	};
+    };
 
-	struct GamepadButtonState
-	{
-		int state;
-		uint64_t framePressed;
-	};
+    struct GamepadButtonState
+    {
+        EButtonStateFlags state;
+        uint64 framePressed;
+    };
 
-	// Taken from SDL Gamepad for easy compatibility
-	enum EGamepadButton
-	{
+    // Taken from SDL Gamepad for easy compatibility
+    enum EGamepadButton
+    {
         Gamepad_Button_INVALID = -1,
         Gamepad_Button_A,
         Gamepad_Button_B,
@@ -63,10 +64,10 @@ namespace EE
         Gamepad_Button_Paddle4,  /* Xbox Elite paddle P4 (lower right, facing the back) */
         Gamepad_Button_Touchpad, /* PS4/PS5 touchpad button */
         Gamepad_Button_MAX
-	};
+    };
 
-	enum EGamepadAxis
-	{
+    enum EGamepadAxis
+    {
         Gamepad_Axis_INVALID = -1,
         Gamepad_Axis_LeftX,
         Gamepad_Axis_LeftY,
@@ -75,22 +76,22 @@ namespace EE
         Gamepad_Axis_LeftTrigger,
         Gamepad_Axis_RightTrigger,
         Gamepad_Axis_MAX
-	};
+    };
 
-	struct MouseButtonState
-	{
-		int state;
-		uint64 framePressed;
-		int Clicks;
-	};
+    struct MouseButtonState
+    {
+        EButtonStateFlags state;
+        uint64 framePressed;
+        uint32 clicks;
+    };
 
-	/**
-	 *  Taken from SDL Scancodes for easy compatibility
-	 *  The values in this enumeration are based on the USB usage page standard:
-	 *  https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
-	 */
-	enum EScancode
-	{
+    /**
+     *  Taken from SDL Scancodes for easy compatibility
+     *  The values in this enumeration are based on the USB usage page standard:
+     *  https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
+     */
+    enum EScancode
+    {
         Scancode_Unknown = 0,
 
         /**

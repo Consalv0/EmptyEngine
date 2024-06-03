@@ -161,9 +161,9 @@ namespace EE
     {
         switch ( sharing )
         {
-        case EE::SharingMode_Dynamic:       return VK_SHARING_MODE_CONCURRENT;
-        case EE::SharingMode_Static:        return VK_SHARING_MODE_EXCLUSIVE;
-        case EE::SharingMode_Default:       return VK_SHARING_MODE_EXCLUSIVE;
+        case SharingMode_Dynamic:       return VK_SHARING_MODE_CONCURRENT;
+        case SharingMode_Static:        return VK_SHARING_MODE_EXCLUSIVE;
+        case SharingMode_Default:       return VK_SHARING_MODE_EXCLUSIVE;
         default:
             return VK_SHARING_MODE_EXCLUSIVE;
         }

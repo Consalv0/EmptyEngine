@@ -25,11 +25,11 @@ namespace EE
 	public:
         virtual bool Initialize();
 
-        virtual bool IsKeyState( EScancode keyCode, EButtonState state );
+        virtual bool IsKeyState( EScancode keyCode, EButtonStateFlags state );
 
-		virtual bool IsMouseState( EMouseButton button, EButtonState state );
+		virtual bool IsMouseState( EMouseButton button, EButtonStateFlags state );
 
-		virtual bool IsButtonState( int index, EGamepadButton keyCode, EButtonState state );
+		virtual bool IsButtonState( int index, EGamepadButton keyCode, EButtonStateFlags state );
 
 		virtual float GetJoystickAxis( int index, EGamepadAxis axis );
 

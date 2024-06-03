@@ -7,7 +7,7 @@ namespace EE
 {
     DynamicRHI* GDynamicRHI = NULL;
 
-    TMap<Window*, EE::RHIPresentContext> GWindowPresentContexts;
+    TMap<Window*, RHIPresentContext> GWindowPresentContexts;
 
     const RHIPresentContext& GetPresentContextOfWindow( Window* window )
     {

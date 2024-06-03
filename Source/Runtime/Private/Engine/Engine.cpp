@@ -6,6 +6,9 @@
 
 #include "Resources/MeshParser.h"
 
+#define SDL_MAIN_HANDLED
+#include <SDL3/SDL_main.h>
+
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
 
@@ -15,8 +18,8 @@ namespace EE
 
     bool GameEngine::Initialize()
     {
-        GMainApplication = EE::CreateApplication();
-        GDynamicRHI = EE::PlatformCreateDynamicRHI();
+        GMainApplication = CreateApplication();
+        GDynamicRHI = PlatformCreateDynamicRHI();
         CreateWindow();
 
         if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK ) != 0 )
@@ -102,4 +105,6 @@ namespace EE
     }
 
     GameEngine* GEngine = NULL;
+
+    extern Window* CreateMainWindow();
 }

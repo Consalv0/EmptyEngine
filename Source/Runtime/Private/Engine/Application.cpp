@@ -89,4 +89,6 @@ namespace EE
     }
 
     Application* GMainApplication = NULL;
+
+    extern EE::Application* EE::CreateApplication();
 }
