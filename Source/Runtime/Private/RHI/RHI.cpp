@@ -7,22 +7,25 @@ namespace EE
 {
     DynamicRHI* GDynamicRHI = NULL;
 
-    TMap<Window*, RHIPresentContext> GWindowPresentContexts;
+    TMap<Window*, RHIPresentContext*> GWindowPresentContexts;
 
-    const RHIPresentContext& GetPresentContextOfWindow( Window* window )
+    const RHIPresentContext* CreatePresentContextOfWindow( Window* window )
     {
+        RHIPresentContext* presentContext = GDynamicRHI->CreateRHIPresentContext( window );
+        GWindowPresentContexts.emplace( window, presentContext );
         return GWindowPresentContexts[ window ];
     };
 
-    const RHIPresentContext& CreatePresentContextOfWindow( Window* window )
+    const RHIPresentContext* GetPresentContextOfWindow( Window* window )
     {
-        GWindowPresentContexts.insert( std::make_pair( window, RHIPresentContext() ) );
-        GDynamicRHI->CreatePresentContext( window, GWindowPresentContexts[ window ] );
         return GWindowPresentContexts[ window ];
     };
 
     void FreePresentContextOfWindow( Window* window )
     {
+        delete GWindowPresentContexts[ window ];
         GWindowPresentContexts.erase( window );
     };
+
+    DynamicRHI::DynamicRHI() { }
 }

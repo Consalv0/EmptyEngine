@@ -3,7 +3,6 @@
 #include "Utils/TextFormatting.h"
 
 #include "Engine/Engine.h"
-#include "Engine/Video.h"
 
 #include "RHI/Vulkan/VulkanRHI.h"
 
@@ -23,8 +22,6 @@ extern "C" {
 	// --- developer.amd.com/community/blog/2015/10/02/amd-enduro-system-for-developers/
 	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 0x00000001;
 }
-
-#define GetVulkanInternal( x, type ) static_cast<Vulkan##type*>( x.internalState.get() )
 
 namespace EE
 {
@@ -144,17 +141,23 @@ namespace EE
         }
     }
 
-    VkImageUsageFlags ConvertTextureUsage( EUsageMode usage )
+    VkImageUsageFlags ConvertTextureUsage( EUsageModeFlags usage )
     {
-        switch ( usage )
-        {
-        case UsageMode_Sampled:         return VK_IMAGE_USAGE_SAMPLED_BIT;
-        case UsageMode_Storage:         return VK_IMAGE_USAGE_STORAGE_BIT;
-        case UsageMode_Color:           return VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-        case UsageMode_DepthStencil:    return VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-        default:
-            return VK_IMAGE_USAGE_SAMPLED_BIT;
-        }
+        VkImageUsageFlags finalUsage = VkImageUsageFlags( 0 );
+        if ( usage & UsageMode_Sampled )         finalUsage &= VK_IMAGE_USAGE_SAMPLED_BIT;
+        if ( usage & UsageMode_Storage )         finalUsage &= VK_IMAGE_USAGE_STORAGE_BIT;
+        if ( usage & UsageMode_Color )           finalUsage &= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        if ( usage & UsageMode_DepthStencil )    finalUsage &= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        return finalUsage;
+    }
+
+    VkImageAspectFlags ConvertTextureAspect( EUsageModeFlags usage )
+    {
+        VkImageAspectFlags finalAspect = VK_IMAGE_ASPECT_NONE;
+        if ( usage & UsageMode_Color )      finalAspect &= VK_IMAGE_ASPECT_COLOR_BIT;
+        if ( usage & UsageMode_Depth )      finalAspect &= VK_IMAGE_ASPECT_DEPTH_BIT;
+        if ( usage & UsageMode_Stencil )    finalAspect &= VK_IMAGE_ASPECT_STENCIL_BIT;
+        return finalAspect;
     }
 
     VkSharingMode ConvertSharingMode( ESharingMode sharing )
@@ -185,38 +188,31 @@ namespace EE
         }
     }
 
-    struct VulkanRHIInstance;
-    struct VulkanRHIPhysicalDevice;
-    struct VulkanRHIDevice;
-    struct VulkanRHICommandPool;
-    struct VulkanRHICommandBuffer;
-    struct VulkanRHIPresentContext;
-    struct VulkanRHIBuffer;
-    struct VulkanRHITexture;
-    struct VulkanRHISwapChain;
-    struct VulkanRHISurface;
-    struct VulkanRHIShaderStage;
-
-    struct VulkanRHICommandPool
+    bool CreateNativeVmaAllocator( VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VmaAllocator* outAllocator )
     {
-        VkDevice device;
-        uint32 queueFamilyIndex;
-        VkCommandPool commandPool;
+        VmaVulkanFunctions vulkanFunctions = {};
+        vulkanFunctions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
+        vulkanFunctions.vkGetDeviceProcAddr = &vkGetDeviceProcAddr;
 
-        ~VulkanRHICommandPool()
+        VmaAllocatorCreateInfo info = {};
+        info.vulkanApiVersion = VK_API_VERSION_1_3;
+        info.instance = instance;
+        info.physicalDevice = physicalDevice;
+        info.device = device;
+        info.pVulkanFunctions = &vulkanFunctions;
+
+        return vmaCreateAllocator( &info, outAllocator );
+    }
+
+    struct QueueFamilyIndices
+    {
+        std::optional<uint32> graphicsFamily;
+        std::optional<uint32> presentFamily;
+
+        bool isComplete()
         {
-            if ( commandPool != VK_NULL_HANDLE )
-            {
-                vkDestroyCommandPool( device, commandPool, VK_NULL_HANDLE );
-            }
+            return graphicsFamily.has_value() && presentFamily.has_value();
         }
-    };
-
-    struct VulkanCommandBuffer
-    {
-        VkDevice device;
-        uint32 queueFamilyIndex;
-        VkCommandBuffer commandBuffer;
     };
 
     struct VulkanSurfaceSupportDetails
@@ -228,281 +224,59 @@ namespace EE
         uint32 presentModeCount = 0;
         TArray<VkPresentModeKHR> presentModes;
     };
+}
 
-    struct VulkanRHIPhysicalDevice
+#include "RHI/Vulkan/VulkanRHIObjects.h"
+
+namespace EE
+{
+    VulkanRHIDevice* GVulkanDevice;
+    VulkanRHIInstance* GVulkanInstance;
+
+    const TArray<const NChar*> DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+    const float QueuePriorities[] = { 1.0F };
+
+    VulkanRHIPhysicalDevice::VulkanRHIPhysicalDevice( VkInstance instance, VkPhysicalDevice physicalDevice ) :
+        instance( instance ),
+        physicalDevice( physicalDevice )
     {
-        VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-        VkPhysicalDeviceProperties deviceProperties{};
-        VkPhysicalDeviceFeatures deviceFeatures{};
-        uint32 extensionCount = 0;
-        TArray<VkExtensionProperties> extensions;
-        uint32 queueFamilyCount = 0;
-        TArray<VkQueueFamilyProperties> queueFamilies;
-        TMap<VkSurfaceKHR, VulkanSurfaceSupportDetails> surfaceSupportDetails;
-    };
+        vkGetPhysicalDeviceProperties( physicalDevice, &deviceProperties );
+        vkGetPhysicalDeviceFeatures( physicalDevice, &deviceFeatures );
 
-    struct VulkanRHIInstance
-    {
-        VkInstance instance = VK_NULL_HANDLE;
+        // Logic to find queue family indices to populate struct with
+        vkGetPhysicalDeviceQueueFamilyProperties( physicalDevice, &queueFamilyCount, VK_NULL_HANDLE );
+        queueFamilies.resize( queueFamilyCount );
+        vkGetPhysicalDeviceQueueFamilyProperties( physicalDevice, &queueFamilyCount, queueFamilies.data() );
 
-        uint32 physicalDeviceCount = 0;
-        TArray<VulkanRHIPhysicalDevice> physicalDevices;
-        uint32 selectedDeviceIndex = 0;
-
-        ~VulkanRHIInstance()
-        {
-            vkDestroyInstance( instance, nullptr );
-        }
-    };
-
-    struct VulkanRHIDevice
-    {
-        uint32 physicalDeviceIndex = 0;
-        VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-        VkDevice device = VK_NULL_HANDLE;
-        VmaAllocator allocator = VK_NULL_HANDLE;
-        // map of command pools by queue family index
-        TMap<uint32, VulkanRHICommandPool*> commandPools;
-
-        union
-        {
-            uint32 graphicsQueueIndex;
-            uint32 presentQueueIndex;
-            uint32 queueFamilyIndices[ 2 ]{};
-        };
-
-        VkQueue graphicsQueue = VK_NULL_HANDLE;
-        VkQueue presentQueue = VK_NULL_HANDLE;
-
-        ~VulkanRHIDevice()
-        {
-            for ( auto& pair : commandPools )
-                delete pair.second;
-            vmaDestroyAllocator( allocator );
-            vkDestroyDevice( device, nullptr );
-        }
-    };
-
-    struct VulkanRHIPresentContext
-    {
-    };
-
-    struct VulkanRHIBuffer : public RHIBuffer
-    {
-        VkDevice device = VK_NULL_HANDLE;
-        VkBuffer buffer = VK_NULL_HANDLE;
-        VmaAllocation nativeAllocation = VK_NULL_HANDLE;
-        EBufferUsageFlags usages = BufferUsage_None;
-
-        ~VulkanRHIBuffer()
-        {
-            if ( buffer != NULL )
-            {
-                vkDestroyBuffer( device, buffer, NULL );
-            }
-        }
-    };
-
-    struct VulkanRHITexture
-    {
-        VkDevice device = VK_NULL_HANDLE;
-        VkSampler sampler = VK_NULL_HANDLE;
-        VkImage resource = VK_NULL_HANDLE;
-        VkImageView imageView = VK_NULL_HANDLE;
-        VmaAllocation memory = VK_NULL_HANDLE;
-
-        ~VulkanRHITexture()
-        {
-            if ( resource != NULL )
-            {
-                vkDestroyImage( device, resource, NULL );
-            }
-
-            vkDestroyImageView( device, imageView, NULL );
-        }
-    };
-
-    struct VulkanRHISwapChain
-    {
-        VkDevice device = VK_NULL_HANDLE;
-        VkSwapchainKHR swapChain = VK_NULL_HANDLE;
-        VkExtent2D size = {};
-        uint32 imageCount = 0;
-        TArray<VkImage> images;
-        TArray<RHITexture> imageTextures;
-
-        ~VulkanRHISwapChain()
-        {
-            for ( uint32 i = 0; i < imageCount; i++ )
-            {
-                images[ i ] = NULL;
-                GetVulkanInternal( imageTextures[ i ], RHITexture )->resource = NULL;
-            }
-
-            vkDestroySwapchainKHR( device, swapChain, NULL );
-        }
-    };
-
-    struct VulkanRHISurface
-    {
-        VkInstance instance = VK_NULL_HANDLE;
-        VulkanSurfaceSupportDetails details;
-        VkSurfaceKHR surface = VK_NULL_HANDLE;
-
-        ~VulkanRHISurface()
-        {
-            vkDestroySurfaceKHR( instance, surface, nullptr);
-        }
-    };
-
-    struct VulkanRHIShaderStage
-    {
-        VkDevice device = VK_NULL_HANDLE;
-        VkShaderModule shaderModule = VK_NULL_HANDLE;
-        
-        ~VulkanRHIShaderStage()
-        {
-            vkDestroyShaderModule( device, shaderModule, nullptr );
-        }
-    };
-    
-    struct QueueFamilyIndices
-    {
-        std::optional<uint32> graphicsFamily;
-        std::optional<uint32> presentFamily;
-        
-        bool isComplete()
-        {
-            return graphicsFamily.has_value() && presentFamily.has_value();
-        }
-    };
-
-    VulkanRHI::~VulkanRHI()
-    {
-        if ( initialized )
-        {
-            device.internalState.reset();
-            instance.internalState.reset();
-
-            SDL_Vulkan_UnloadLibrary();
-        }
+        // Get extension support
+        vkEnumerateDeviceExtensionProperties( physicalDevice, VK_NULL_HANDLE, &extensionCount, VK_NULL_HANDLE );
+        extensions.resize( extensionCount );
+        vkEnumerateDeviceExtensionProperties( physicalDevice, VK_NULL_HANDLE, &extensionCount, extensions.data() );
     }
 
-    EDynamicRHI VulkanRHI::GetType() const
+    VulkanRHIPhysicalDevice::~VulkanRHIPhysicalDevice()
     {
-        return EDynamicRHI::Vulkan;
+
     }
 
-    bool GetPhysicalDeviceSurfaceCapabilities( VulkanRHIInstance* instance, VulkanRHISurface* surface )
+    bool VulkanRHIPhysicalDevice::CheckDeviceExtensionSupport() const
     {
-        for ( uint32 i = 0; i < instance->physicalDeviceCount; i++ )
+        std::set<std::string> requiredExtensions( DeviceExtensions.begin(), DeviceExtensions.end() );
+
+        for ( const auto& extension : extensions )
         {
-            auto& internalPhysicalDevice = instance->physicalDevices[ i ];
-            auto& surfaceSupportDetails = internalPhysicalDevice.surfaceSupportDetails;
-            
-            if ( auto search = surfaceSupportDetails.find( surface->surface ); search != surfaceSupportDetails.end() )
-                continue;
-            
-            VulkanSurfaceSupportDetails internalSurfaceDetails;
-            vkGetPhysicalDeviceSurfaceSupportKHR( internalPhysicalDevice.physicalDevice, i, surface->surface, &internalSurfaceDetails.supported );
-
-            if ( internalSurfaceDetails.supported == VK_FALSE )
-            {
-                surface->details = internalSurfaceDetails;
-                surfaceSupportDetails.insert( std::make_pair( surface->surface, internalSurfaceDetails ) );
-                continue;
-            }
-
-            vkGetPhysicalDeviceSurfaceCapabilitiesKHR( internalPhysicalDevice.physicalDevice, surface->surface, &internalSurfaceDetails.capabilities );
-
-            vkGetPhysicalDeviceSurfaceFormatsKHR( internalPhysicalDevice.physicalDevice, surface->surface,
-                &internalSurfaceDetails.formatCount, VK_NULL_HANDLE );
-            if ( internalSurfaceDetails.formatCount != 0 )
-            {
-                internalSurfaceDetails.formats.resize( internalSurfaceDetails.formatCount );
-                vkGetPhysicalDeviceSurfaceFormatsKHR( internalPhysicalDevice.physicalDevice, surface->surface,
-                    &internalSurfaceDetails.formatCount, internalSurfaceDetails.formats.data() );
-            }
-
-            vkGetPhysicalDeviceSurfacePresentModesKHR( internalPhysicalDevice.physicalDevice, surface->surface,
-                &internalSurfaceDetails.presentModeCount, VK_NULL_HANDLE );
-            if ( internalSurfaceDetails.presentModeCount != 0 )
-            {
-                internalSurfaceDetails.presentModes.resize( internalSurfaceDetails.presentModeCount );
-                vkGetPhysicalDeviceSurfacePresentModesKHR( internalPhysicalDevice.physicalDevice, surface->surface,
-                    &internalSurfaceDetails.presentModeCount, internalSurfaceDetails.presentModes.data() );
-            }
-
-            surface->details = internalSurfaceDetails;
-            surfaceSupportDetails.insert( std::make_pair( surface->surface, internalSurfaceDetails ) );
+            requiredExtensions.erase( extension.extensionName );
         }
 
-        return true;
+        return requiredExtensions.empty();
     }
 
-    bool IsDeviceSuitable( VulkanRHIPhysicalDevice* physicalDevice, VulkanRHISurface* surface );
-
-    int RateDeviceSuitabilityForSurface( VulkanRHIPhysicalDevice* physicalDevice, VulkanRHISurface* surface )
-    {
-        int score = 0;
-
-        // Discrete GPUs have a significant performance advantage
-        if ( physicalDevice->deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU )
-        {
-            score += 1000;
-        }
-
-        // Maximum possible size of textures affects graphics quality
-        score += physicalDevice->deviceProperties.limits.maxImageDimension2D;
-
-        // Application can't function without geometry shaders
-        if ( physicalDevice->deviceFeatures.geometryShader == VK_FALSE )
-        {
-            return 0;
-        }
-
-        if ( IsDeviceSuitable( physicalDevice, surface ) == false )
-        {
-            return 0;
-        }
-
-        EE_LOG_CORE_INFO(
-            L"\u2570\u2500> {0} : {1}",
-            Text::NarrowToWide( physicalDevice->deviceProperties.deviceName ),
-            score
-        );
-
-        return score;
-    }
-
-    int32 PickPhysicalDeviceForSurface( VulkanRHIInstance* instance, VulkanRHISurface* surface )
-    {
-        // Use an ordered map to automatically sort candidates by increasing score
-        std::multimap<int, int> candidates;
-
-        for ( uint32 i = 0; i < instance->physicalDeviceCount; i++ )
-        {
-            int score = RateDeviceSuitabilityForSurface( &instance->physicalDevices[ i ], surface );
-            candidates.insert( std::make_pair( score, i ) );
-        }
-
-        // Check if the best candidate is suitable at all
-        if ( candidates.rbegin()->first > 0 )
-        {
-            return candidates.rbegin()->second;
-        }
-        else
-        {
-            return -1;
-        }
-    }
-    
-    QueueFamilyIndices GetQueueFamilies( VulkanRHIPhysicalDevice* physicalDevice )
+    QueueFamilyIndices VulkanRHIPhysicalDevice::GetQueueFamilies() const
     {
         QueueFamilyIndices indices;
 
         int i = 0;
-        for ( const auto& queueFamily : physicalDevice->queueFamilies )
+        for ( const auto& queueFamily : queueFamilies )
         {
             if ( queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT )
             {
@@ -526,75 +300,159 @@ namespace EE
         return indices;
     }
 
-
-    const TArray<const NChar*> DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
-    const float QueuePriorities[] = { 1.0F };
-    
-    bool CheckDeviceExtensionSupport( VulkanRHIPhysicalDevice* physicalDevice )
+    bool VulkanRHIPhysicalDevice::IsDeviceSuitable( VulkanRHISurface* surface ) const
     {
-        std::set<std::string> requiredExtensions( DeviceExtensions.begin(), DeviceExtensions.end() );
-
-        for ( const auto& extension : physicalDevice->extensions )
-        {
-            requiredExtensions.erase( extension.extensionName );
-        }
-
-        return requiredExtensions.empty();
-    }
-    
-    bool IsDeviceSuitable( VulkanRHIPhysicalDevice* physicalDevice, VulkanRHISurface* surface )
-    {
-        QueueFamilyIndices indices = GetQueueFamilies( physicalDevice );
-        bool extensionsSupported = CheckDeviceExtensionSupport( physicalDevice );
+        QueueFamilyIndices indices = GetQueueFamilies();
+        bool extensionsSupported = CheckDeviceExtensionSupport();
 
         bool swapChainAdequate = false;
-        if ( auto search = physicalDevice->surfaceSupportDetails.find( surface->surface ); search != physicalDevice->surfaceSupportDetails.end() )
+        if ( auto search = surfaceSupportDetails.find( surface->GetVulkanSurface() ); search != surfaceSupportDetails.end() )
         {
             if ( search->second.supported )
             {
-                swapChainAdequate = !surface->details.formats.empty() && !surface->details.presentModes.empty();
+                swapChainAdequate = HasSurfaceAnyFormat( surface->GetVulkanSurface() ) && HasSurfaceAnyPresentMode( surface->GetVulkanSurface() );
             }
         }
 
         return indices.isComplete() && extensionsSupported && swapChainAdequate;
     }
-    
-    uint32 FindMemoryType( VkPhysicalDevice physicalDevice, uint32 typeFilter, VkMemoryPropertyFlags properties )
-    {
-        VkPhysicalDeviceMemoryProperties memProperties;
-        vkGetPhysicalDeviceMemoryProperties( physicalDevice, &memProperties );
 
-        for ( uint32 i = 0; i < memProperties.memoryTypeCount; i++ )
+    int VulkanRHIPhysicalDevice::RateDeviceSuitabilityForSurface( VulkanRHISurface* surface ) const
+    {
+        int score = 0;
+
+        // Discrete GPUs have a significant performance advantage
+        if ( deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU )
         {
-            if ( (typeFilter & (1 << i)) && (memProperties.memoryTypes[ i ].propertyFlags & properties) == properties )
-            {
-                return i;
-            }
+            score += 1000;
         }
 
-        EE_LOG_CORE_CRITICAL( L"Failed to find suitable memory type!" );
-        return -1;
+        // Maximum possible size of textures affects graphics quality
+        score += deviceProperties.limits.maxImageDimension2D;
+
+        // Application can't function without geometry shaders
+        if ( deviceFeatures.geometryShader == VK_FALSE )
+        {
+            return 0;
+        }
+
+        if ( IsDeviceSuitable( surface ) == false )
+        {
+            return 0;
+        }
+
+        EE_LOG_CORE_INFO(
+            L"\u2570\u2500> {0} : {1}",
+            Text::NarrowToWide( deviceProperties.deviceName ),
+            score
+        );
+
+        return score;
     }
 
-    bool CreateNativeVmaAllocator( VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VmaAllocator* outAllocator )
+    void VulkanRHIPhysicalDevice::AddSurfaceSupportDetails( VkSurfaceKHR surface, uint32 queueFamilyIndex )
     {
-        VmaVulkanFunctions vulkanFunctions = {};
-        vulkanFunctions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
-        vulkanFunctions.vkGetDeviceProcAddr = &vkGetDeviceProcAddr;
+        VulkanSurfaceSupportDetails surfaceDetails;
+        vkGetPhysicalDeviceSurfaceSupportKHR( physicalDevice, queueFamilyIndex, surface, &surfaceDetails.supported );
 
-        VmaAllocatorCreateInfo info = {};
-        info.vulkanApiVersion = VK_API_VERSION_1_3;
-        info.instance = instance;
-        info.physicalDevice = physicalDevice;
-        info.device = device;
-        info.pVulkanFunctions = &vulkanFunctions;
+        if ( surfaceDetails.supported == VK_FALSE )
+        {
+            surfaceSupportDetails.insert( std::make_pair( surface, surfaceDetails ) );
+            return;
+        }
 
-        return vmaCreateAllocator( &info, outAllocator );
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR( physicalDevice, surface, &surfaceDetails.capabilities );
+
+        vkGetPhysicalDeviceSurfaceFormatsKHR( physicalDevice, surface, &surfaceDetails.formatCount, VK_NULL_HANDLE );
+        if ( surfaceDetails.formatCount != 0 )
+        {
+            surfaceDetails.formats.resize( surfaceDetails.formatCount );
+            vkGetPhysicalDeviceSurfaceFormatsKHR( physicalDevice, surface, &surfaceDetails.formatCount, surfaceDetails.formats.data() );
+        }
+
+        vkGetPhysicalDeviceSurfacePresentModesKHR( physicalDevice, surface, &surfaceDetails.presentModeCount, VK_NULL_HANDLE );
+        if ( surfaceDetails.presentModeCount != 0 )
+        {
+            surfaceDetails.presentModes.resize( surfaceDetails.presentModeCount );
+            vkGetPhysicalDeviceSurfacePresentModesKHR( physicalDevice, surface, &surfaceDetails.presentModeCount, surfaceDetails.presentModes.data() );
+        }
+
+        surfaceSupportDetails.insert( std::make_pair( surface, surfaceDetails ) );
     }
 
-    bool SelectSuitableDevice( VulkanRHIInstance* instance, VulkanRHISurface* surface )
+    const VulkanSurfaceSupportDetails* VulkanRHIPhysicalDevice::GetSurfaceSupportDetails( VkSurfaceKHR surface ) const
     {
-        int selection = PickPhysicalDeviceForSurface( instance, surface );
+        if ( auto search = surfaceSupportDetails.find( surface ); search != surfaceSupportDetails.end() )
+            return NULL;
+        else
+            return &search->second;
+    };
+
+    VulkanRHIInstance::VulkanRHIInstance( VkInstanceCreateInfo& createInfo ) :
+        RHIInstance::RHIInstance(),
+        instance( VK_NULL_HANDLE ),
+        physicalDeviceCount( 0 ),
+        physicalDevices(),
+        selectedDeviceIndex()
+    {
+        VkResult createResult;
+        if ( (createResult = vkCreateInstance( &createInfo, VK_NULL_HANDLE, &instance )) != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"vkCreateInstance failed : {}", (int32)createResult );
+            return;
+        }
+
+        // Get physical devices
+        vkEnumeratePhysicalDevices( instance, &physicalDeviceCount, VK_NULL_HANDLE );
+        if ( physicalDeviceCount == 0 )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to find GPUs with Vulkan support!" );
+            return;
+        }
+
+        EE_LOG_CORE_INFO( L"\u250C> Available devices : {}", physicalDeviceCount );
+
+        // Get physical device info
+        TArray<VkPhysicalDevice> vulkanPhysicalDevices( physicalDeviceCount );
+        vkEnumeratePhysicalDevices( instance, &physicalDeviceCount, vulkanPhysicalDevices.data() );
+
+        for ( uint32 i = 0; i < physicalDeviceCount; i++ )
+        {
+            VkPhysicalDevice& vulkanPhysicalDevice = vulkanPhysicalDevices[ i ];
+            VulkanRHIPhysicalDevice& physicalDevice = physicalDevices.emplace_back( instance, vulkanPhysicalDevice );
+        }
+    }
+
+    VulkanRHIInstance::~VulkanRHIInstance()
+    {
+        vkDestroyInstance( instance, VK_NULL_HANDLE );
+    }
+
+    int32 VulkanRHIInstance::PickPhysicalDeviceForSurface( VulkanRHISurface* surface ) const
+    {
+        // Use an ordered map to automatically sort candidates by increasing score
+        std::multimap<int, int> candidates;
+
+        for ( uint32 i = 0; i < physicalDeviceCount; i++ )
+        {
+            int score = physicalDevices[ i ].RateDeviceSuitabilityForSurface( surface );
+            candidates.insert( std::make_pair( score, i ) );
+        }
+
+        // Check if the best candidate is suitable at all
+        if ( candidates.rbegin()->first > 0 )
+        {
+            return candidates.rbegin()->second;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
+    bool VulkanRHIInstance::SelectSuitableDevice( VulkanRHISurface* surface )
+    {
+        int selection = PickPhysicalDeviceForSurface( surface );
 
         if ( selection < 0 )
         {
@@ -602,132 +460,50 @@ namespace EE
             return false;
         }
 
-        instance->selectedDeviceIndex = selection;
+        selectedDeviceIndex = selection;
 
         return true;
     }
 
-    bool CreateCommandBufferPools( VulkanRHIDevice* device )
+    const VulkanRHIPhysicalDevice* VulkanRHIInstance::GetSelectedPhysicalDevice() const
     {
-        std::set<uint32> uniqueQueueFamilies = { device->graphicsQueueIndex, device->physicalDeviceIndex };
+        return &physicalDevices[ selectedDeviceIndex ];
+    };
 
-        for ( uint32 queueFamily : uniqueQueueFamilies )
+    VulkanRHIPhysicalDevice* VulkanRHIInstance::GetSelectedPhysicalDevice()
+    {
+        return &physicalDevices[ selectedDeviceIndex ];
+    };
+
+    bool VulkanRHIInstance::AddSurfaceSupportDetails( VulkanRHISurface* surface )
+    {
+        for ( uint32 i = 0; i < physicalDeviceCount; i++ )
         {
-            VkCommandPoolCreateInfo createInfo
-            {
-                VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, // sType;
-                VK_NULL_HANDLE,                             // pNext;
-                0,                                          // flags;
-                queueFamily                                 // queueFamilyIndex;
-            };
-
-            auto commandPool = new VulkanRHICommandPool();
-            commandPool->device = device->device;
-            commandPool->queueFamilyIndex = queueFamily;
-
-            auto createResult = vkCreateCommandPool( device->device, &createInfo, NULL, &commandPool->commandPool );
-            if ( createResult != VK_SUCCESS )
-            {
-                EE_LOG_CORE_CRITICAL( L"Failed to create command pool: {0}", (int32)createResult );
-                return false;
-            }
-
-            device->commandPools.insert( std::make_pair( queueFamily, commandPool ) );
+            auto& internalPhysicalDevice = physicalDevices[ i ];
+            internalPhysicalDevice.AddSurfaceSupportDetails( surface->GetVulkanSurface(), internalPhysicalDevice.GetQueueFamilies().graphicsFamily.value() );
         }
-
         return true;
     }
 
-    bool VulkanRHI::Initialize()
+    bool VulkanRHIInstance::IsValid() const { return instance != VK_NULL_HANDLE; }
+    
+    const VulkanRHICommandPool* VulkanRHIDevice::GetCommandPool( uint32 familyIndex ) const { return commandPools.find( familyIndex )->second; }
+
+    VulkanRHIDevice::~VulkanRHIDevice()
     {
-        if ( initialized )
-            return false;
-        
-        auto internalState = std::make_shared<VulkanRHIInstance>();
-
-        VkApplicationInfo appInfo = 
-        {
-            VK_STRUCTURE_TYPE_APPLICATION_INFO,
-            NULL,
-            "Vulkan",
-            VK_MAKE_VERSION( 1, 0, 0 ),
-            "Empty Engine",
-            VK_MAKE_VERSION( 1, 0, 0 ),
-            VK_API_VERSION_1_3
-        };
-
-        SDL_Vulkan_LoadLibrary( nullptr );
-
-        uint32 extensionCount;
-        const char* const* extensionNames = Vulkan_GetInstanceExtensions( &extensionCount );
-
-        VkInstanceCreateInfo createInfo
-        {
-            VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,     // sType
-            NULL,                                       // pNext
-            0,                                          // flags
-            &appInfo,                                   // pApplicationInfo
-            0,                                          // enabledLayerCount
-            NULL,                                       // ppEnabledLayerNames
-            extensionCount,                             // enabledExtensionCount
-            extensionNames                              // ppEnabledExtensionNames
-        };
-
-        VkResult createResult;
-        if ( (createResult = vkCreateInstance( &createInfo, VK_NULL_HANDLE, &internalState->instance )) != VK_SUCCESS )
-        {
-            EE_LOG_CORE_CRITICAL( L"vkCreateInstance failed : {0}", (int32)createResult );
-            return false;
-        }
-
-        // Get physical devices
-        vkEnumeratePhysicalDevices( internalState->instance, &internalState->physicalDeviceCount, VK_NULL_HANDLE );
-        if ( internalState->physicalDeviceCount == 0 )
-        {
-            EE_LOG_CORE_CRITICAL( L"Failed to find GPUs with Vulkan support!" );
-            return false;
-        }
-
-        EE_LOG_CORE_INFO( L"\u250C> Available devices : {0}", internalState->physicalDeviceCount );
-
-        // Get physical device info
-        internalState->physicalDevices.resize( internalState->physicalDeviceCount );
-        TArray<VkPhysicalDevice> physicalDevices( internalState->physicalDeviceCount );
-        vkEnumeratePhysicalDevices( internalState->instance, &internalState->physicalDeviceCount, physicalDevices.data() );
-
-        for ( uint32 i = 0; i < internalState->physicalDeviceCount; i++ )
-        {
-            auto& physicalDevice = physicalDevices[ i ];
-            auto& internalPhysicalDevice = internalState->physicalDevices[ i ];
-            internalPhysicalDevice.physicalDevice = physicalDevice; 
-            vkGetPhysicalDeviceFeatures( physicalDevice, &internalPhysicalDevice.deviceFeatures );
-            vkGetPhysicalDeviceProperties( physicalDevice, &internalPhysicalDevice.deviceProperties );
-
-            // Logic to find queue family indices to populate struct with
-            vkGetPhysicalDeviceQueueFamilyProperties( physicalDevice, &internalPhysicalDevice.queueFamilyCount, VK_NULL_HANDLE );
-            internalPhysicalDevice.queueFamilies.resize( internalPhysicalDevice.queueFamilyCount );
-            vkGetPhysicalDeviceQueueFamilyProperties( physicalDevice, &internalPhysicalDevice.queueFamilyCount, internalPhysicalDevice.queueFamilies.data() );
-
-            // Get extension support
-            vkEnumerateDeviceExtensionProperties( physicalDevice, VK_NULL_HANDLE, &internalPhysicalDevice.extensionCount, VK_NULL_HANDLE );
-            internalPhysicalDevice.extensions.resize( internalPhysicalDevice.extensionCount );
-            vkEnumerateDeviceExtensionProperties( physicalDevice, VK_NULL_HANDLE, &internalPhysicalDevice.extensionCount, internalPhysicalDevice.extensions.data() );
-        }
-
-        instance.internalState = internalState;
-        return initialized = true;
+        for ( auto& pair : commandPools )
+            delete pair.second;
+        vmaDestroyAllocator( allocator );
+        vkDestroyDevice( device, nullptr );
     }
 
-    bool VulkanRHI::CreateDevice( RHISurface& surface, RHIDevice& outDevice ) const
+    VulkanRHIDevice::VulkanRHIDevice( VulkanRHIInstance* instance )
+        : physicalDevice( instance->GetSelectedPhysicalDevice() )
     {
-        VulkanRHIInstance* internalInstance = GetVulkanInternal( instance, RHIInstance );
-        auto internalState = std::make_shared<VulkanRHIDevice>();
-        VulkanRHIPhysicalDevice* physicalDevice = &internalInstance->physicalDevices[ internalInstance->selectedDeviceIndex ];
-        internalState->physicalDevice = physicalDevice->physicalDevice;
-        internalState->physicalDeviceIndex = internalInstance->selectedDeviceIndex;
+        EE_CORE_ASSERT( GVulkanDevice == NULL, L"Creating a second device!, Aborting..." );
 
         // Specifying the queues to be created
-        QueueFamilyIndices indices = GetQueueFamilies( physicalDevice );
+        QueueFamilyIndices indices = physicalDevice->GetQueueFamilies();
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
         std::set<uint32> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
@@ -749,7 +525,7 @@ namespace EE
 
         VkDeviceQueueCreateInfo queueCreateInfo = {};
         queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueCreateInfo.queueFamilyIndex = internalState->graphicsQueueIndex;
+        queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
         queueCreateInfo.queueCount = 1;
         queueCreateInfo.pQueuePriorities = &queuePriority;
 
@@ -773,55 +549,74 @@ namespace EE
 
         EE_CORE_ASSERT
         (
-            vkCreateDevice( internalState->physicalDevice, &deviceCreateInfo, nullptr, &internalState->device ) == VK_SUCCESS,
+            vkCreateDevice( physicalDevice->GetPhysicalDevice(), &deviceCreateInfo, nullptr, &device ) == VK_SUCCESS,
             L"Failed to create logical device!"
         );
 
         EE_CORE_ASSERT
         (
-            CreateNativeVmaAllocator( GetVulkanInternal( instance, RHIInstance )->instance, internalState->physicalDevice, internalState->device, &internalState->allocator ) == VK_SUCCESS,
+            CreateNativeVmaAllocator( instance->GetVulkanInstance(), physicalDevice->GetPhysicalDevice(), device, &allocator ) == VK_SUCCESS,
             L"Failed to create VMA Allocator!"
         );
 
-        vkGetDeviceQueue( internalState->device, internalState->graphicsQueueIndex = indices.graphicsFamily.value(), 0, &internalState->graphicsQueue );
-        vkGetDeviceQueue( internalState->device, internalState->presentQueueIndex  = indices.presentFamily.value(),  0, &internalState->presentQueue  );
-        
-        if ( CreateCommandBufferPools( internalState.get() ) == false )
+        vkGetDeviceQueue( device, graphicsQueueIndex = indices.graphicsFamily.value(), 0, &graphicsQueue );
+        vkGetDeviceQueue( device, presentQueueIndex = indices.presentFamily.value(), 0, &presentQueue );
+
+        if ( CreateCommandBufferPools( this ) == false )
         {
-            return false;
+            return;
         }
 
-        outDevice.internalState = internalState;
+        GVulkanDevice = this;
+    }
+
+    bool VulkanRHIDevice::IsValid() const { return device != VK_NULL_HANDLE; }
+
+    bool VulkanRHIDevice::CreateCommandBufferPools( VulkanRHIDevice* device )
+    {
+        std::set<uint32> uniqueQueueFamilies = { device->graphicsQueueIndex, device->presentQueueIndex };
+
+        for ( uint32 queueFamily : uniqueQueueFamilies )
+        {
+            device->commandPools.emplace( queueFamily, new VulkanRHICommandPool( device, queueFamily ) );
+        }
+
         return true;
     }
 
-    bool VulkanRHI::CreatePresentContext( Window* window, RHIPresentContext& outContext )
+    VulkanRHIPresentContext::~VulkanRHIPresentContext()
     {
-        auto internalState = std::make_shared<VulkanRHIPresentContext>();
+        delete surface;
+        delete swapChain;
+    }
 
-        SurfaceDescription surfaceDescription{};
-        surfaceDescription.window = window;
-        if ( CreateSurface( surfaceDescription, outContext.surface ) == false )
-        {
-            return false;
-        }
+    VulkanRHIPresentContext::VulkanRHIPresentContext( Window* window, VulkanRHIInstance* instance ) :
+        window( window ), instance( instance ),
+        swapChain( NULL ), surface( NULL )
+    {
+        CreateSurface();
+        CreateSwapChain();
+    }
 
+    void VulkanRHIPresentContext::CreateSurface()
+    {
+        surface = new VulkanRHISurface( window, instance );
+
+        instance->AddSurfaceSupportDetails( surface );
         // Vulkan needs the surface information in order to determine the driver, so the driver creation is here, the device selection is handled inside CreateSurface
-        if ( device.internalState == NULL )
+        if ( GVulkanDevice == NULL )
         {
-            if ( SelectSuitableDevice( GetVulkanInternal( instance, RHIInstance ), GetVulkanInternal( outContext.surface, RHISurface ) ) == false )
+            if ( instance->SelectSuitableDevice( surface ) == false )
             {
-                return false;
+                return;
             }
 
-            if ( CreateDevice( outContext.surface, device ) == false )
-            {
-                return false;
-            }
+            GVulkanDevice = new VulkanRHIDevice( instance );
         }
+    }
 
-        VulkanRHISurface* surface = GetVulkanInternal( outContext.surface, RHISurface );
-        
+    void VulkanRHIPresentContext::CreateSwapChain()
+    {
         bool tryHDR = false;
         if ( window->GetAllowHDR() && SDL_GetBooleanProperty( SDL_GetDisplayProperties( SDL_GetPrimaryDisplay() ), SDL_PROP_DISPLAY_HDR_ENABLED_BOOLEAN, SDL_FALSE ) )
         {
@@ -830,11 +625,13 @@ namespace EE
 
         EPixelFormat desiredFormat = PixelFormat_R8G8B8A8_UNORM;
         EColorSpace desiredColorSpace = ColorSpace_sRGB;
+
+        auto& surfaceDetails = GVulkanDevice->GetVulkanPhysicalDevice()->GetSurfaceDetails( surface->GetVulkanSurface() );
         // Find best format
         bool contains = false;
-        for ( uint32 i = 0; i < surface->details.formatCount; i++ )
+        for ( uint32 i = 0; i < surfaceDetails.formatCount; i++ )
         {
-            VkSurfaceFormatKHR& surfaceFormat = surface->details.formats[ i ];
+            const VkSurfaceFormatKHR& surfaceFormat = surfaceDetails.formats[ i ];
             bool colorSpaceHDR = FrameColorSpaceIsHDR( surfaceFormat.colorSpace );
             EColorSpace colorSpace = ConvertColorSpace( surfaceFormat.colorSpace );
             EPixelFormat format = ConvertPixelFormat( surfaceFormat.format );
@@ -880,82 +677,170 @@ namespace EE
             }
         }
 
-        SwapChainDescription swapChainDesc{};
+        RHISwapChainCreateDescription swapChainDesc{};
         swapChainDesc.width = window->GetWidth();
         swapChainDesc.height = window->GetHeight();
         swapChainDesc.fullscreen = window->GetWindowMode();
         swapChainDesc.format = desiredFormat;
         swapChainDesc.colorSpace = desiredColorSpace;
         swapChainDesc.vsync = window->GetVSync();
-        if ( CreateSwapChain( swapChainDesc, window, outContext.swapChain ) == false )
-        {
-            return false;
-        }
-        VulkanRHISwapChain* swapChain = GetVulkanInternal( outContext.swapChain, RHISwapChain );
 
-        outContext.internalState = internalState;
-        return true;
+        swapChain = new VulkanRHISwapChain( swapChainDesc, this, GVulkanDevice );
     }
 
-    bool VulkanRHI::CreateSurface( const SurfaceDescription& description, RHISurface& outSurface ) const
+    bool VulkanRHIPresentContext::IsValid() const
     {
-        auto internalState = std::make_shared<VulkanRHISurface>();
-        internalState->surface = VkSurfaceKHR();
-        internalState->instance = GetVulkanInternal( instance, RHIInstance )->instance;
-
-        if ( SDL_Vulkan_CreateSurface( (SDL_Window*)description.window->GetWindowHandle(), internalState->instance, VK_NULL_HANDLE, &internalState->surface ) == SDL_FALSE )
-        {
-            EE_LOG_CORE_CRITICAL( L"SDL_Vulkan_CreateSurface failed! {0}", Text::NarrowToWide( SDL_GetError() ) );
-            return false;
-        }
-        
-        GetPhysicalDeviceSurfaceCapabilities( GetVulkanInternal( instance, RHIInstance ), internalState.get() );
-
-        description.window;
-        outSurface.type = RenderingResourceType_Surface;
-        outSurface.internalState = internalState;
-
-        return true;
+        return surface->IsValid() && swapChain->IsValid();
     }
 
-    bool CreateImageView( VkDevice device, const TextureDescription& description, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView* outImageView )
+    VulkanRHIBuffer::~VulkanRHIBuffer()
+    {
+        if ( buffer != NULL )
+        {
+            vkDestroyBuffer( device->GetVulkanDevice(), buffer, NULL );
+        }
+    }
+
+    VulkanRHIBuffer::VulkanRHIBuffer( RHIBufferCreateDescription& description, VulkanRHIDevice* device ) :
+        device( device ), usages( BufferUsage_None )
+    {
+        VkBufferCreateInfo bufferInfo = {};
+        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferInfo.sharingMode = ConvertSharingMode( description.sharing );
+        bufferInfo.usage = ConvertBufferUsageFlags( description.usages );
+        bufferInfo.size = description.size;
+
+        VmaAllocationCreateInfo allocInfo = {};
+        allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
+
+        if ( vmaCreateBuffer( device->GetVulkanAllocator(), &bufferInfo, &allocInfo, &buffer, &nativeAllocation, VK_NULL_HANDLE ) != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to allocate buffer memory!" );
+        }
+
+    }
+
+    VulkanRHITexture::VulkanRHITexture( RHITextureCreateDescription& description, VulkanRHIDevice* device, VkImage image ) :
+        device( device ),
+        format( ConvertPixelFormat( description.format, description.colorSpace ) ),
+        memory( VK_NULL_HANDLE ),
+        image( image ),
+        ownership( false ),
+        sampler( NULL )
     {
         VkImageViewCreateInfo viewInfo = {};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         viewInfo.image = image;
         viewInfo.viewType = ConvertTextureType( description.type );
         viewInfo.format = format;
-        viewInfo.subresourceRange.aspectMask = aspectFlags;
+        viewInfo.subresourceRange.aspectMask = ConvertTextureAspect( description.viewUsage );
         viewInfo.subresourceRange.baseMipLevel = 0;
         viewInfo.subresourceRange.levelCount = 1;
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount = 1;
 
-        if ( vkCreateImageView( device, &viewInfo, nullptr, outImageView ) != VK_SUCCESS )
+        if ( vkCreateImageView( device->GetVulkanDevice(), &viewInfo, nullptr, &imageView ) != VK_SUCCESS )
         {
             EE_LOG_CORE_CRITICAL( L"Failed to create texture image view!" );
-            return false;
+            return;
         }
-
-        return true;
     }
 
-    #define CLAMP(x, lo, hi)    ((x) < (lo) ? (lo) : (x) > (hi) ? (hi) : (x))
-    bool VulkanRHI::CreateSwapChain( const SwapChainDescription& description, Window* window, RHISwapChain& outSwapChain ) const
+    VulkanRHITexture::VulkanRHITexture( RHITextureCreateDescription& description, VulkanRHIDevice* device ) :
+        device( device ),
+        format( ConvertPixelFormat( description.format, description.colorSpace ) ),
+        ownership( true ),
+        sampler( NULL )
     {
-        VulkanRHIDevice* internalDevice = GetVulkanInternal( device, RHIDevice );
-        auto internalState = std::make_shared<VulkanRHISwapChain>();
-        internalState->device = internalDevice->device;
+        VkImageCreateInfo imageInfo = {
+            VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,                // sType
+            VK_NULL_HANDLE,                                     // pNext
+            0,                                                  // flags
+            VK_IMAGE_TYPE_2D,                                   // imageType
+            format,                                             // format
+            VkExtent3D {                                        // extent
+                .width = description.width,
+                .height = description.height,
+                .depth = description.depth },
+            description.mipLevels,                              // mipLevels
+            description.arraySize,                              // arrayLayers
+            (VkSampleCountFlagBits)description.sampleCount,     // samples
+            ConvertTextureTiling( description.tiling ),         // tiling
+            ConvertTextureUsage( description.usage ),           // usage
+            ConvertSharingMode( description.sharing ),          // sharingMode
+            1,                                                  // queueFamilyIndexCount
+            device->GetFamilyIndices(),                         // pQueueFamilyIndices
+            VK_IMAGE_LAYOUT_UNDEFINED,                          // initialLayout
+        };
 
-        auto& presentContext = GetPresentContextOfWindow( window );
-        auto surface = GetVulkanInternal( presentContext.surface, RHISurface );
+        if ( vkCreateImage( device->GetVulkanDevice(), &imageInfo, VK_NULL_HANDLE, &image ) != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to create image!" );
+            return;
+        }
+
+        VmaAllocationCreateInfo allocInfo = {};
+        allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
+
+        if ( vmaCreateImage( device->GetVulkanAllocator(), &imageInfo, &allocInfo, &image, &memory, NULL ) != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to allocate image memory!" );
+            return;
+        }
+
+        VkImageViewCreateInfo viewInfo = {};
+        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        viewInfo.image = image;
+        viewInfo.viewType = ConvertTextureType( description.type );
+        viewInfo.format = format;
+        viewInfo.subresourceRange.aspectMask = ConvertTextureAspect( description.viewUsage );
+        viewInfo.subresourceRange.baseMipLevel = 0;
+        viewInfo.subresourceRange.levelCount = 1;
+        viewInfo.subresourceRange.baseArrayLayer = 0;
+        viewInfo.subresourceRange.layerCount = 1;
+
+        if ( vkCreateImageView( device->GetVulkanDevice(), &viewInfo, nullptr, &imageView ) != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to create texture image view!" );
+            return;
+        }
+    }
+
+    VulkanRHITexture::~VulkanRHITexture()
+    {
+        if ( image != NULL && ownership )
+        {
+            vkDestroyImage( device->GetVulkanDevice(), image, NULL );
+        }
+
+        vkDestroyImageView( device->GetVulkanDevice(), imageView, NULL );
+    }
+
+    bool VulkanRHITexture::IsValid() const
+    {
+        return image != VK_NULL_HANDLE;
+    }
+
+    bool VulkanRHISwapChain::IsValid() const
+    {
+        return swapChain != VK_NULL_HANDLE;
+    }
+
+    VulkanRHISwapChain::VulkanRHISwapChain( const RHISwapChainCreateDescription& description, const VulkanRHIPresentContext* presentContext, VulkanRHIDevice* device ) :
+        device( device ),
+        presentContext( presentContext ),
+        swapChain( VK_NULL_HANDLE ),
+        imageCount(), size()
+    {
+        const VulkanRHISurface* surface = presentContext->GetRHISurface();
+        const VulkanSurfaceSupportDetails& surfaceDetails = device->GetVulkanPhysicalDevice()->GetSurfaceDetails( surface->GetVulkanSurface() );
 
         VkSurfaceFormatKHR desiredFormat;
 
         bool contains = false;
-        for ( uint32 i = 0; i < surface->details.formatCount; i++ )
+        for ( uint32 i = 0; i < surfaceDetails.formatCount; i++ )
         {
-            VkSurfaceFormatKHR& surfaceFormat = surface->details.formats[ i ];
+            const VkSurfaceFormatKHR& surfaceFormat = surfaceDetails.formats[ i ];
             if ( ConvertPixelFormat( surfaceFormat.format ) == description.format )
             {
                 if ( ConvertColorSpace( surfaceFormat.colorSpace ) == description.colorSpace )
@@ -969,68 +854,61 @@ namespace EE
         if ( contains == false )
         {
             EE_LOG_CORE_CRITICAL( L"Surface Format {} is not supported!", (uint32)description.format, (uint32)description.colorSpace );
-            return false;
+            return;
         }
 
         int width, height = 0;
-        SDL_GetWindowSizeInPixels( (SDL_Window*)window->GetWindowHandle(), &width, &height);
-        width = CLAMP( (uint32)width, surface->details.capabilities.minImageExtent.width, surface->details.capabilities.maxImageExtent.width );
-        height = CLAMP( (uint32)height, surface->details.capabilities.minImageExtent.height, surface->details.capabilities.maxImageExtent.height );
-        internalState->size.width = width;
-        internalState->size.height = height;
+        SDL_GetWindowSizeInPixels( (SDL_Window*)presentContext->GetWindow()->GetWindowHandle(), &width, &height );
+        width = EE_CLAMP( (uint32)width, surfaceDetails.capabilities.minImageExtent.width, surfaceDetails.capabilities.maxImageExtent.width );
+        height = EE_CLAMP( (uint32)height, surfaceDetails.capabilities.minImageExtent.height, surfaceDetails.capabilities.maxImageExtent.height );
+        size.width = width;
+        size.height = height;
 
-        uint32 imageCount;
-        imageCount = Math::Max( surface->details.capabilities.minImageCount + 1, description.bufferCount );
-        imageCount = Math::Min( surface->details.capabilities.maxImageCount, description.bufferCount );
+        imageCount = Math::Max( surfaceDetails.capabilities.minImageCount + 1, description.bufferCount );
+        imageCount = Math::Min( surfaceDetails.capabilities.maxImageCount, description.bufferCount );
 
-        VkSwapchainCreateInfoKHR createInfo = 
+        VkSwapchainCreateInfoKHR createInfo =
         {
             VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,                            // sType
             VK_NULL_HANDLE,                                                         // pNext
             0,                                                                      // flags
-            surface->surface,                                                       // surface
+            surface->GetVulkanSurface(),                                            // surface
             imageCount,                                                             // minImageCount
             desiredFormat.format,                                                   // imageFormat
             desiredFormat.colorSpace,                                               // imageColorSpace
-            internalState->size,                                                    // imageExtent
+            size,                                                                   // imageExtent
             1,                                                                      // imageArrayLayers
             VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,  // imageUsage
         };
 
-        if ( internalDevice->graphicsQueueIndex != internalDevice->presentQueueIndex )
+        if ( device->GetGraphicsFamilyIndex() != device->GetPresentFamilyIndex() )
         {
             createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
             createInfo.queueFamilyIndexCount = 2;
-            createInfo.pQueueFamilyIndices = internalDevice->queueFamilyIndices;
+            createInfo.pQueueFamilyIndices = device->GetFamilyIndices();
         }
         else
         {
             createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
             createInfo.queueFamilyIndexCount = 1;
-            createInfo.pQueueFamilyIndices = internalDevice->queueFamilyIndices;
+            createInfo.pQueueFamilyIndices = device->GetFamilyIndices();
         }
 
-        createInfo.preTransform = surface->details.capabilities.currentTransform;
+        createInfo.preTransform = surfaceDetails.capabilities.currentTransform;
         createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
         createInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR;
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-        vkCreateSwapchainKHR( internalState->device, &createInfo, NULL, &internalState->swapChain );
+        vkCreateSwapchainKHR( device->GetVulkanDevice(), &createInfo, NULL, &swapChain );
 
-        vkGetSwapchainImagesKHR( internalState->device, internalState->swapChain, &internalState->imageCount, NULL );
-        internalState->images.resize( internalState->imageCount );
-        vkGetSwapchainImagesKHR( internalState->device, internalState->swapChain, &internalState->imageCount, internalState->images.data() );
+        vkGetSwapchainImagesKHR( device->GetVulkanDevice(), swapChain, &imageCount, NULL );
+        images.resize( imageCount );
+        vkGetSwapchainImagesKHR( device->GetVulkanDevice(), swapChain, &imageCount, images.data() );
 
-        internalState->imageTextures.resize( internalState->imageCount );
-        for ( uint32 i = 0; i < internalState->imageCount; i++ )
+        for ( uint32 i = 0; i < imageCount; i++ )
         {
-            auto textureInternalState = std::make_shared<VulkanRHITexture>();
-            textureInternalState->device = internalState->device;
-            textureInternalState->resource = internalState->images[ i ];
-
-            RHITexture& texture = internalState->imageTextures[ i ];
-            TextureDescription description{};
+            RHITextureCreateDescription description{};
             description.type = TextureType_Texture2D;
             description.format = description.format;
             description.colorSpace = description.colorSpace;
@@ -1039,166 +917,197 @@ namespace EE
             description.arraySize = 1;
             description.mipLevels = 1;
 
-            CreateImageView( internalState->device, description, internalState->images[ i ], desiredFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, &textureInternalState->imageView );
-
-            texture.type = RenderingResourceType_Texture;
-            texture.internalState = textureInternalState;
+            textures.emplace_back( description, device, images[ i ] );
         }
+    }
 
-        outSwapChain.type = RenderingResourceType_Swapchain;
-        outSwapChain.internalState = internalState;
-
-        return true;
-	}
-    
-    bool VulkanRHI::CreateCommandBuffer( const CommandBufferDescription& description, RHICommandBuffer& commandBuffer ) const
+    VulkanRHISwapChain::~VulkanRHISwapChain()
     {
-        VulkanRHIDevice* internalDevice = GetVulkanInternal( device, RHIDevice );
-        auto internalState = std::make_shared<VulkanCommandBuffer>();
-        internalState->device = internalDevice->device;
-        internalState->queueFamilyIndex = internalDevice->graphicsQueueIndex;
+        textures.clear();
 
-        VkCommandBufferAllocateInfo allocateInfo
+        vkDestroySwapchainKHR( device->GetVulkanDevice(), swapChain, NULL );
+    }
+
+    VulkanRHISurface::~VulkanRHISurface()
+    {
+        vkDestroySurfaceKHR( instance->GetVulkanInstance(), surface, nullptr );
+    }
+
+    VulkanRHISurface::VulkanRHISurface( Window* window, VulkanRHIInstance* instance ) :
+        instance( instance )
+    {
+        if ( SDL_Vulkan_CreateSurface( (SDL_Window*)window->GetWindowHandle(), instance->GetVulkanInstance(), VK_NULL_HANDLE, &surface ) == SDL_FALSE )
         {
-            VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,                                 // sType
-            NULL,                                                                           // pNext
-            internalDevice->commandPools[ internalState->queueFamilyIndex ]->commandPool,   // commandPool
-            VK_COMMAND_BUFFER_LEVEL_PRIMARY,                                                // level
-            1                                                                               // commandBufferCount
+            EE_LOG_CORE_CRITICAL( L"SDL_Vulkan_CreateSurface failed! {}", Text::NarrowToWide( SDL_GetError() ) );
+            return;
+        }
+    }
+
+    bool VulkanRHISurface::IsValid() const
+    {
+        return surface != VK_NULL_HANDLE;
+    }
+
+    VulkanRHICommandPool::~VulkanRHICommandPool()
+    {
+        if ( commandPool != VK_NULL_HANDLE )
+        {
+            vkDestroyCommandPool( device->GetVulkanDevice(), commandPool, VK_NULL_HANDLE );
+        }
+    }
+
+    VulkanRHICommandPool::VulkanRHICommandPool( VulkanRHIDevice* device, uint32 queueFamilyIndex ) :
+        device( device ),
+        queueFamilyIndex( queueFamilyIndex )
+    {
+
+        VkCommandPoolCreateInfo createInfo
+        {
+            VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, // sType;
+            VK_NULL_HANDLE,                             // pNext;
+            0,                                          // flags;
+            queueFamilyIndex                            // queueFamilyIndex;
         };
 
-        VkResult result = vkAllocateCommandBuffers( internalState->device, &allocateInfo, &internalState->commandBuffer );
+        auto createResult = vkCreateCommandPool( device->GetVulkanDevice(), &createInfo, NULL, &commandPool );
+        if ( createResult != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to create command pool: {}", (int32)createResult );
+            return;
+        }
+    }
+
+    VulkanRHICommandBuffer::~VulkanRHICommandBuffer()
+    {
+        vkFreeCommandBuffers( device->GetVulkanDevice(), device->GetCommandPool( queueFamilyIndex )->GetVulkanCommandPool(), 1, &commandBuffer );
+    }
+
+    VulkanRHICommandBuffer::VulkanRHICommandBuffer( VulkanRHIDevice* device, uint32 queueFamilyIndex ) :
+        device( device ),
+        queueFamilyIndex( queueFamilyIndex )
+    {
+        VkCommandBufferAllocateInfo allocateInfo
+        {
+            VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,                     // sType
+            NULL,                                                               // pNext
+            device->GetCommandPool( queueFamilyIndex )->GetVulkanCommandPool(), // commandPool
+            VK_COMMAND_BUFFER_LEVEL_PRIMARY,                                    // level
+            1                                                                   // commandBufferCount
+        };
+
+        VkResult result = vkAllocateCommandBuffers( device->GetVulkanDevice(), &allocateInfo, &commandBuffer );
         if ( result != VK_SUCCESS )
         {
             EE_LOG_CORE_CRITICAL( L"Unable to allocate command buffer {}", (int32)result );
         }
-
-        return true;
     }
 
-	bool VulkanRHI::CreateTexture( const TextureDescription& description, RHITexture& outTexture ) const
+    VulkanRHIShaderStage::~VulkanRHIShaderStage()
     {
-        VulkanRHIDevice* internalDevice = GetVulkanInternal( device, RHIDevice );
-        auto internalState = std::make_shared<VulkanRHITexture>();
-        internalState->device = internalDevice->device;
-
-        VkImageCreateInfo imageInfo = {
-            VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,                                        // sType
-            VK_NULL_HANDLE,                                                             // pNext
-            0,                                                                          // flags
-            VK_IMAGE_TYPE_2D,                                                           // imageType
-            ConvertPixelFormat( description.format, description.colorSpace ),           // format
-            VkExtent3D {                                                                // extent
-                .width = description.width,
-                .height = description.height,
-                .depth = description.depth },
-            description.mipLevels,                                                      // mipLevels
-            description.arraySize,                                                      // arrayLayers
-            (VkSampleCountFlagBits)description.sampleCount,                             // samples
-            ConvertTextureTiling( description.tiling ),                                 // tiling
-            ConvertTextureUsage( description.usage ),                                   // usage
-            ConvertSharingMode( description.sharing ),                                  // sharingMode
-            0,                                                                          // queueFamilyIndexCount
-            NULL,                                                                       // pQueueFamilyIndices
-            VK_IMAGE_LAYOUT_UNDEFINED,                                                  // initialLayout
-        };
-
-        if ( vkCreateImage( internalState->device, &imageInfo, VK_NULL_HANDLE, &internalState->resource ) != VK_SUCCESS )
-        {
-            EE_LOG_CORE_CRITICAL( L"Failed to create image!" );
-            return false;
-        }
-
-        VmaAllocationCreateInfo allocInfo = {};
-        allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
-
-        if ( vmaCreateImage( internalDevice->allocator, &imageInfo, &allocInfo, &internalState->resource, &internalState->memory, NULL ) != VK_SUCCESS )
-        {
-            EE_LOG_CORE_CRITICAL( L"Failed to allocate image memory!" );
-            return false;
-        }
-        
-        outTexture.type = RenderingResourceType_Texture;
-        outTexture.internalState = internalState;
-
-        return true;
+        vkDestroyShaderModule( device->GetVulkanDevice(), shaderModule, nullptr );
     }
 
-    bool VulkanRHI::CreateSampler( const SamplerDescription& description, RHISampler& outSampler ) const { return false; }
-
-    bool VulkanRHI::CreateShaderStage( EShaderStage stage, const void* code, size_t codeLength, RHIShaderStage& outShaderStage ) const
+    VulkanRHIShaderStage::VulkanRHIShaderStage( VulkanRHIDevice* device, size_t codeLength, const uint32* code, const EShaderStage stage ) :
+        device( device )
     {
-        VulkanRHIDevice* internalDevice = GetVulkanInternal( device, RHIDevice );
-        auto internalState = std::make_shared<VulkanRHIShaderStage>();
-        internalState->device = internalDevice->device;
-
         VkShaderModuleCreateInfo createInfo
         {
-            VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO, // sType
-            NULL,                                        // pNext
-            0,                                           // flags
-            codeLength,                                  // codeSize
-            reinterpret_cast<const uint32_t*>( code ),   // pCode
+            VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,    // sType
+            NULL,                                           // pNext
+            0,                                              // flags
+            codeLength,                                     // codeSize
+            reinterpret_cast<const uint32*>(code),          // pCode
         };
-        
-        if ( vkCreateShaderModule( internalState->device, &createInfo, nullptr, &internalState->shaderModule ) != VK_SUCCESS )
+
+        if ( vkCreateShaderModule( device->GetVulkanDevice(), &createInfo, nullptr, &shaderModule ) != VK_SUCCESS )
         {
             EE_LOG_CORE_ERROR( "Failed to create shader module!" );
-            return false;
+            return;
         }
-        
+
         VkPipelineShaderStageCreateInfo shaderStageInfo
         {
             VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,    // sType;
             VK_NULL_HANDLE,                                         // pNext;
             0,                                                      // flags;
             ConvertShaderStage( stage ),                            // stage;
-            internalState->shaderModule,                            // module;
+            shaderModule,                                           // module;
             "main",                                                 // pName;
             NULL                                                    // pSpecializationInfo;
         };
-
-        outShaderStage.type = RenderingResourceType_Shader;
-        outShaderStage.stage = stage;
-        outShaderStage.internalState = internalState;
-
-        return true;
     }
 
-    bool VulkanRHI::CreateBuffer( const BufferDescription& description, RHIBuffer& outBuffer ) const
+    VulkanRHI::~VulkanRHI()
     {
-        VulkanRHIDevice* internalDevice = GetVulkanInternal( device, RHIDevice );
-        auto internalState = std::make_shared<VulkanRHIBuffer>();
-        internalState->device = internalDevice->device;
+        delete device;
+        delete instance;
+        SDL_Vulkan_UnloadLibrary();
+    }
 
-        VkBufferCreateInfo bufferInfo = {};
-        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferInfo.sharingMode = ConvertSharingMode( description.sharing );
-        bufferInfo.usage = ConvertBufferUsageFlags( description.usages );
-        bufferInfo.size = description.size;
+    EDynamicRHI VulkanRHI::GetType() const
+    {
+        return EDynamicRHI::Vulkan;
+    }
+    
+    uint32 FindMemoryType( VkPhysicalDevice physicalDevice, uint32 typeFilter, VkMemoryPropertyFlags properties )
+    {
+        VkPhysicalDeviceMemoryProperties memProperties;
+        vkGetPhysicalDeviceMemoryProperties( physicalDevice, &memProperties );
 
-        VmaAllocationCreateInfo allocInfo = {};
-        allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
-
-        if ( vmaCreateBuffer( internalDevice->allocator, &bufferInfo, &allocInfo, &internalState->buffer, &internalState->nativeAllocation, VK_NULL_HANDLE ) != VK_SUCCESS )
+        for ( uint32 i = 0; i < memProperties.memoryTypeCount; i++ )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to allocate buffer memory!" );
-            return false;
+            if ( (typeFilter & (1 << i)) && (memProperties.memoryTypes[ i ].propertyFlags & properties) == properties )
+            {
+                return i;
+            }
         }
 
-        outBuffer.type = RenderingResourceType_Buffer;
-        outBuffer.internalState = internalState;
-        return true;
+        EE_LOG_CORE_CRITICAL( L"Failed to find suitable memory type!" );
+        return -1;
+    }
+
+    VulkanRHI::VulkanRHI() : DynamicRHI()
+    {
+        VkApplicationInfo appInfo = 
+        {
+            VK_STRUCTURE_TYPE_APPLICATION_INFO,
+            NULL,
+            "Vulkan",
+            VK_MAKE_VERSION( 1, 0, 0 ),
+            "Empty Engine",
+            VK_MAKE_VERSION( 1, 0, 0 ),
+            VK_API_VERSION_1_3
+        };
+
+        SDL_Vulkan_LoadLibrary( nullptr );
+
+        uint32 extensionCount;
+        const NChar* const* extensionNames = NULL;
+        GetVulkanInstanceExtensions( &extensionCount, extensionNames );
+
+        VkInstanceCreateInfo createInfo
+        {
+            VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,     // sType
+            NULL,                                       // pNext
+            0,                                          // flags
+            &appInfo,                                   // pApplicationInfo
+            0,                                          // enabledLayerCount
+            NULL,                                       // ppEnabledLayerNames
+            extensionCount,                             // enabledExtensionCount
+            extensionNames                              // ppEnabledExtensionNames
+        };
+
+        instance = new VulkanRHIInstance( createInfo );
     }
 
 	void VulkanRHI::SetName( RHIResource* pResource, const NChar* name ) { }
 
 	void VulkanRHI::WaitForDevice() const { }
 
-    RHITexture* VulkanRHI::GetBackBuffer( const RHISwapChain& swapchain ) const
+    RHITexture* VulkanRHI::GetBackTexure( const RHISwapChain& swapchain, uint32 index ) const
     {
-        auto swapchainInternal = GetVulkanInternal( swapchain, RHISwapChain );
-        return (RHITexture*)&swapchainInternal->imageTextures[0];
+        // return swapchain->imageTextures[0];
+        return NULL;
     }
 
     WString const& VulkanRHI::GetName() const
@@ -1207,63 +1116,43 @@ namespace EE
         return deviceName;
     }
 
-	// void VulkanRHI::BindScissorRects( uint32 numRects, const Rect* rects, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::BindResource( EShaderStage stage, const RHIResource* resource, uint32 slot, CommandList cmd, int subresource ) { }
-    // 
-	// void VulkanRHI::BindResources( EShaderStage stage, const RHIResource* const* resources, uint32 slot, uint32 count, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::BindUAV( EShaderStage stage, const RHIResource* resource, uint32 slot, CommandList cmd, int subresource ) { }
-    // 
-	// void VulkanRHI::BindUAVs( EShaderStage stage, const RHIResource* const* resources, uint32 slot, uint32 count, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::UnbindResources( uint32 slot, uint32 num, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::UnbindUAVs( uint32 slot, uint32 num, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::BindSampler( EShaderStage stage, const RHISampler* sampler, uint32 slot, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::BindConstantBuffer( EShaderStage stage, const RHIBuffer* buffer, uint32 slot, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::BindVertexBuffers( const RHIBuffer* const* vertexBuffers, uint32 slot, uint32 count, const uint32* strides, const uint32* offsets, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::BindIndexBuffer( constRHI Buffer* indexBuffer, uint32 offset, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::BindStencilRef( uint32 value, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::BindBlendFactor( float r, float g, float b, float a, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::Draw( uint32 vertexCount, uint32 startVertexLocation, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::DrawIndexed( uint32 indexCount, uint32 startIndexLocation, uint32 baseVertexLocation, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::DrawInstanced( uint32 vertexCount, uint32 instanceCount, uint32 startVertexLocation, uint32 startInstanceLocation, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::DrawIndexedInstanced( uint32 indexCount, uint32 instanceCount, uint32 startIndexLocation, uint32 baseVertexLocation, uint32 startInstanceLocation, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::DrawInstancedIndirect( const RHIBuffer* args, uint32 args_offset, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::DrawIndexedInstancedIndirect( const RHIBuffer* args, uint32 args_offset, CommandList cmd ) { }
-	// 
-	// void VulkanRHI::Dispatch( uint32 threadGroupCountX, uint32 threadGroupCountY, uint32 threadGroupCountZ, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::DispatchIndirect( const RHIBuffer* args, uint32 args_offset, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::CopyResource( const RHIResource* pDst, const RHIResource* pSrc, CommandList cmd ) { }
-    // 
-    // void VulkanRHI::UpdateTexture( const RHITexture& texture, const void* data )
-    // {
-    //     auto textureInternal = GetVulkanInternal( texture, RHITexture );
-    // 
-    //     // SDL_UpdateTexture(
-    //     //     textureInternal->resource,
-    //     //     NULL, data, (int)(texture.description.width * sizeof( uint32 ))
-    //     // );
-    // }
-    // 
-	// void VulkanRHI::EventBegin( const char* name, CommandList cmd ) { }
-    // 
-	// void VulkanRHI::EventEnd( CommandList cmd ) { }
-    // 
-	// void VulkanRHI::SetMarker( const char* name, CommandList cmd ) { }
+    RHIPresentContext* VulkanRHI::CreateRHIPresentContext( Window* window ) const
+    {
+        return new VulkanRHIPresentContext( window, this->instance );
+    }
+
+    RHISurface* VulkanRHI::CreateRHISurface( Window* window ) const
+    {
+        return new VulkanRHISurface( window, this->instance );
+    }
+
+    RHISwapChain* VulkanRHI::CreateRHISwapChain( const RHISwapChainCreateDescription& description, class Window* window ) const
+    {
+        return new VulkanRHISwapChain( description, static_cast<const VulkanRHIPresentContext*>( GetPresentContextOfWindow( window ) ), this->device);
+    }
+
+    RHICommandBuffer* VulkanRHI::CreateRHICommandBuffer( const RHICommandBufferCreateDescription& description ) const
+    {
+        return NULL;
+    }
+    
+    RHIBuffer* VulkanRHI::CreateRHIBuffer( const RHIBufferCreateDescription& description ) const
+    {
+        return NULL;
+    }
+    
+    RHITexture* VulkanRHI::CreateRHITexture( const RHITextureCreateDescription& description ) const
+    {
+        return NULL;
+    }
+    
+    RHISampler* VulkanRHI::CreateRHISampler( const RHISamplerCreateDescription& description ) const
+    {
+        return NULL;
+    }
+    
+    RHIShaderStage* VulkanRHI::CreateRHIShaderStage( EShaderStage stage, const void* pShaderBytecode, size_t bytecodeLength ) const
+    {
+        return NULL;
+    }
 }

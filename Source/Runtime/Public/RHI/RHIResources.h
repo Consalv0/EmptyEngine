@@ -2,31 +2,28 @@
 
 namespace EE
 {
-    struct RHIObject
+    class RHIObject
     {
-        std::shared_ptr<void> internalState;
-        FORCEINLINE bool IsValid() const { return internalState.get() != nullptr; }
+    public:
+        virtual bool IsValid() const = 0;
     };
 
-    struct RHIResource : public RHIObject
+    class RHIResource : public RHIObject
     {
+    public:
         ERenderingResourceType type = RenderingResourceType_Unknown;
-        FORCEINLINE bool IsTexture() const { return type == RenderingResourceType_Texture; }
-        FORCEINLINE bool IsBuffer() const { return type == RenderingResourceType_Buffer; }
+        FORCEINLINE bool IsTexture()   const { return type == RenderingResourceType_Texture; }
+        FORCEINLINE bool IsBuffer()    const { return type == RenderingResourceType_Buffer; }
         FORCEINLINE bool IsSwapChain() const { return type == RenderingResourceType_Swapchain; }
-        FORCEINLINE bool IsSurface() const { return type == RenderingResourceType_Surface; }
+        FORCEINLINE bool IsSurface()   const { return type == RenderingResourceType_Surface; }
+        FORCEINLINE bool IsShader()    const { return type == RenderingResourceType_Shader; }
     };
 
-    struct SurfaceDescription
-    {
-        class Window* window = NULL;
-    };
-
-    struct RHISurface : public RHIResource
+    class RHISurface : public RHIResource
     {
     };
 
-    struct SwapChainDescription
+    struct RHISwapChainCreateDescription
     {
         uint32 width = 0;
         uint32 height = 0;
@@ -38,51 +35,47 @@ namespace EE
         Vector4 clearcolor = { 0,0,0,1 };
     };
 
-    struct RHISwapChain : public RHIResource
+    class RHISwapChain : public RHIResource
     {
     };
 
-    struct RHIInstance : RHIObject
+    class RHIInstance : public RHIObject
     {
     };
 
-    struct RHIPresentContext : RHIObject
+    class RHIPresentContext : public RHIObject
     {
-        RHISurface surface;
-        RHISwapChain swapChain;
     };
 
-    struct RHIDevice : RHIObject
+    class RHIDevice : public RHIObject
     {
-        RHIPresentContext context;
     };
 
-    struct BufferDescription
+    struct RHIBufferCreateDescription
     {
         uint64 size = 0;
         EBufferUsageFlags usages = BufferUsage_None;
         ESharingMode sharing = SharingMode_Default;
     };
 
-    struct RHIShaderStage : public RHIResource
+    class RHIShaderStage : public RHIResource
     {
         EShaderStage stage = ShaderStage_Unknown;
     };
 
-    struct CommandBufferDescription
-    {
-        EUsageMode usage;
-    };
-
-    struct RHICommandBuffer : public RHIResource
+    struct RHICommandBufferCreateDescription
     {
     };
 
-    struct RHIBuffer : public RHIResource
+    class RHICommandBuffer : public RHIResource
     {
     };
 
-    struct TextureDescription
+    class RHIBuffer : public RHIResource
+    {
+    };
+
+    struct RHITextureCreateDescription
     {
         ETextureType type = TextureType_Texture2D;
         uint32 width = 0;
@@ -94,7 +87,8 @@ namespace EE
         EColorSpace colorSpace = ColorSpace_Unknown;
         ETilingMode tiling = TilingMode_Default;
         uint32 sampleCount = 1;
-        EUsageMode usage = UsageMode_Color;
+        EUsageModeFlags usage = UsageMode_Color;
+        EUsageModeFlags viewUsage = UsageMode_Color;
         ESharingMode sharing = SharingMode_Default;
         uint32 bindFlags = 0;
         uint32 accessFlags = 0;
@@ -103,13 +97,13 @@ namespace EE
         EImageLayout layout = ImageLayout_ShaderResource;
     };
 
-    typedef struct RHITexture* RHITextureRef;
+    typedef class RHITexture* RHITextureRef;
 
-    struct RHITexture : public RHIResource
+    class RHITexture : public RHIResource
     {
     };
 
-    struct SamplerDescription
+    struct RHISamplerCreateDescription
     {
         EFilterMode filter = FilterMode_MinMagNearest;
         ESamplerAddressMode addressU = SamplerAdressMode_Clamp;
@@ -123,7 +117,7 @@ namespace EE
         float maxLOD = FLT_MAX;
     };
 
-    struct RHISampler : public RHIObject
+    class RHISampler : public RHIObject
     {
     };
 

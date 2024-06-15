@@ -73,13 +73,18 @@ namespace EE
         TilingMode_Linear
     };
 
-    enum EUsageMode
+    enum EUsageModeFlags : uint32
     {
-        UsageMode_Sampled,
-        UsageMode_Storage,
-        UsageMode_Color,
-        UsageMode_DepthStencil,
+        UsageMode_None          = 0,
+        UsageMode_Color         = 1 << 0,
+        UsageMode_Stencil       = 1 << 1,
+        UsageMode_Depth         = 1 << 2,
+        UsageMode_Sampled       = 1 << 3,
+        UsageMode_Storage       = 1 << 4,
+
+        UsageMode_DepthStencil = UsageMode_Depth | UsageMode_Stencil,
     };
+    ENUM_FLAGS_OPERATORS( EUsageModeFlags );
 
     enum ESharingMode
     {

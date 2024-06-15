@@ -30,10 +30,10 @@ namespace EE
 
         if ( windowCount > 0 )
         {
-            if ( GDynamicRHI->Initialize() == false )
-            {
-                return false;
-            }
+            // if ( GDynamicRHI->Initialize() == false )
+            // {
+            //     return false;
+            // }
             if ( GetMainWindow()->Initialize() == false )
             {
                 return false;

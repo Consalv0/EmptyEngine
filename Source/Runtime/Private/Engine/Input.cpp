@@ -112,7 +112,7 @@ namespace EE
     {
         SDL_GetMouseState( &GMousePosition.x, &GMousePosition.y );
         int windowX, windowY;
-        SDL_GetWindowPosition( (SDL_Window*)GEngine->GetMainWindow()->GetHandle(), &windowX, &windowY );
+        SDL_GetWindowPosition( (SDL_Window*)GEngine->GetMainWindow()->GetWindowHandle(), &windowX, &windowY );
         GRelativeMousePosition.x = GMousePosition.x - windowX;
         GRelativeMousePosition.y = GMousePosition.y - windowY;
     }

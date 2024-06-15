@@ -21,7 +21,7 @@ namespace EE
 
         if ( sdlEvent->type >= SDL_EVENT_WINDOW_FIRST && sdlEvent->type <= SDL_EVENT_WINDOW_LAST )
         {
-            if ( sdlEvent->window.windowID != SDL_GetWindowID( (SDL_Window*)window->GetHandle() ) )
+            if ( sdlEvent->window.windowID != SDL_GetWindowID( (SDL_Window*)window->GetWindowHandle() ) )
                 return 0;
         }
 
@@ -35,7 +35,7 @@ namespace EE
 
         case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
         {
-            if ( sdlEvent->window.windowID == SDL_GetWindowID( (SDL_Window*)window->GetHandle() ) )
+            if ( sdlEvent->window.windowID == SDL_GetWindowID( (SDL_Window*)window->GetWindowHandle() ) )
                 window->closeRequested = true;
             break;
         }
@@ -46,7 +46,7 @@ namespace EE
         }
         case SDL_EVENT_WINDOW_DESTROYED:
         {
-            if ( sdlEvent->window.windowID == SDL_GetWindowID( (SDL_Window*)window->GetHandle() ) )
+            if ( sdlEvent->window.windowID == SDL_GetWindowID( (SDL_Window*)window->GetWindowHandle() ) )
                 window->closeRequested = true;
             break;
         }
@@ -208,11 +208,6 @@ namespace EE
     IntBox2 Window::GetViewport() const
     {
         return IntBox2( 0, 0, width, height );
-    }
-
-    void* Window::GetHandle() const
-    {
-        return windowHandle;
     }
 
     bool Window::MakeTransparent( const uint8& r, const uint8& g, const uint8& b, const uint8& a )

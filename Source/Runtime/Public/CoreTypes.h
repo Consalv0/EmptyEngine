@@ -56,6 +56,8 @@ typedef size_t          intPNT;
 #define EE_DLLIMPORT __attribute__((visibility("default")))
 #endif
 
+#define EE_ARRAYSIZE( array ) (sizeof( array ) / sizeof( array[ 0 ] ))
+
 #define ENUM_FLAGS_OPERATORS( Enum ) \
     inline           Enum& operator|=(Enum& lft, Enum rgt) { return lft = (Enum)((__underlying_type(Enum))lft | (__underlying_type(Enum))rgt); } \
     inline           Enum& operator&=(Enum& lft, Enum rgt) { return lft = (Enum)((__underlying_type(Enum))lft & (__underlying_type(Enum))rgt); } \

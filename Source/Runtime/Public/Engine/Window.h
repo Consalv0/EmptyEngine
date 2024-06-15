@@ -111,20 +111,18 @@ namespace EE
         //* Get the aspect of width divided by height in pixels of the window
         virtual float GetAspectRatio() const;
 
-        //* Get SDL_Window Pointer
-        virtual void* GetHandle() const;
-
         //* Makes a window transparent by setting a transparency color.
         virtual bool MakeTransparent( const uint8& r, const uint8& g, const uint8& b, const uint8& a );
 
         //* Sets the window icon
-        void SetIcon( class PixelMap* Icon );
+        void SetIcon( class PixelMap* icon );
 
         //* Terminates this window
         void Terminate();
 
         //* OS specific window handle
-        WindowHandleRef GetWindowHandle() const { return windowHandle; };
+        //* Get SDL_Window Pointer
+        FORCEINLINE WindowHandleRef GetWindowHandle() const { return windowHandle; };
 
         //* Creates a Window with a Name, Width and Height
         static Window* Create( const WindowParameters& parameters );
