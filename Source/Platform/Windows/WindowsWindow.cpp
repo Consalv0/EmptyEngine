@@ -16,7 +16,7 @@
 
 namespace EE
 {
-    WindowsWindow::WindowsWindow( const WindowParameters& properties ) : Super::Window( properties )
+    WindowsWindow::WindowsWindow( const WindowCreateDescription& description ) : Super::Window( description )
     {
         if ( width < 0 )
             width = GetSystemMetrics( SM_CXSCREEN );
@@ -40,8 +40,8 @@ namespace EE
         return true;
     }
 
-    Window* Window::Create( const WindowParameters& properties )
+    Window* Window::Create( const WindowCreateDescription& description )
     {
-        return new WindowsWindow( properties );
+        return new WindowsWindow( description );
     }
 }

@@ -78,8 +78,8 @@ namespace EE
 
         bool IsValid() const;
 
-        const uint32& GetPhysicalDeviceCount() const;
-        const VulkanRHIPhysicalDevice& GetPhysicalDevice( uint32& index ) const;
+        const uint32& GetPhysicalDeviceCount() const { return physicalDeviceCount; }
+        const VulkanRHIPhysicalDevice& GetPhysicalDevice( uint32& index ) const { return physicalDevices[ index ]; }
         VkInstance GetVulkanInstance() const { return instance; };
     };
 
@@ -137,6 +137,7 @@ namespace EE
         Window* window;
         VulkanRHISurface* surface;
         VulkanRHISwapChain* swapChain;
+        TList<VulkanRHICommandBuffer> commandBuffers;
 
     public:
         FORCEINLINE VulkanRHISurface* GetRHISurface() { return surface; }
@@ -152,6 +153,8 @@ namespace EE
         void CreateSurface();
 
         void CreateSwapChain();
+
+        void CreateCommandBuffers();
         
         bool IsValid() const;
     };
@@ -200,7 +203,7 @@ namespace EE
         VkExtent2D size;
         uint32 imageCount;
         TArray<VkImage> images;
-        TArray<VulkanRHITexture> textures;
+        TArray<VulkanRHITexture*> textures;
 
     public:
         bool IsValid() const;
@@ -208,6 +211,8 @@ namespace EE
         VulkanRHISwapChain( const RHISwapChainCreateDescription& description, const VulkanRHIPresentContext* presentContext, VulkanRHIDevice* device );
 
         ~VulkanRHISwapChain();
+
+        FORCEINLINE const uint32& GetImageCount() const { return imageCount; }
     };
 
     class VulkanRHISurface : public RHISurface
@@ -226,6 +231,7 @@ namespace EE
 
         bool IsValid() const;
     };
+
     class VulkanRHICommandPool
     {
     private:
@@ -242,7 +248,7 @@ namespace EE
 
     };
 
-    class VulkanRHICommandBuffer
+    class VulkanRHICommandBuffer : public RHICommandBuffer
     {
     private:
         VulkanRHIDevice* device;
@@ -253,6 +259,8 @@ namespace EE
         ~VulkanRHICommandBuffer();
 
         VulkanRHICommandBuffer( VulkanRHIDevice* device, uint32 queueFamilyIndex );
+
+        bool IsValid() const;
     };
 
     class VulkanRHIShaderStage
@@ -265,5 +273,18 @@ namespace EE
         ~VulkanRHIShaderStage();
 
         VulkanRHIShaderStage( VulkanRHIDevice* device, size_t codeLength, const uint32* code, const EShaderStage stage );
+    };
+
+    class VulkanRHIRasterPipeline : public RHIRasterPipeline
+    {
+    private:
+        VkPipeline pipeline;
+
+    public:
+        VulkanRHIRasterPipeline();
+
+        ~VulkanRHIRasterPipeline();
+
+        VkPipeline GetVulkanPipeline() const { return pipeline; }
     };
 }

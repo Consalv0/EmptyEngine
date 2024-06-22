@@ -16,6 +16,7 @@ namespace EE
 
         FileStream();
         FileStream( WString path );
+        ~FileStream();
 
         WString GetExtension() const;
         WString GetFileName() const;

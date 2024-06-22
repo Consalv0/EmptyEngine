@@ -67,3 +67,10 @@ typedef size_t          intPNT;
     inline constexpr Enum  operator^ (Enum  lft, Enum rgt) { return (Enum)((__underlying_type(Enum))lft ^ (__underlying_type(Enum))rgt); } \
     inline constexpr bool  operator! (Enum  e)             { return !(__underlying_type(Enum))e; } \
     inline constexpr Enum  operator~ (Enum  e)             { return (Enum)~(__underlying_type(Enum))e; }
+
+
+#define EE_CLASSNOCOPY( clz ) \
+    clz(clz&) = delete;   \
+    clz& operator=(clz&) = delete; \
+    clz(const clz&) = delete; \
+    clz& operator=(const clz&) = delete;

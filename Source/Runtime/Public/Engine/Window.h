@@ -24,7 +24,7 @@ namespace EE
         WindowOption_SkipTaskbar = 1 << 3,
     };
 
-    struct WindowParameters
+    struct WindowCreateDescription
     {
         //* Name displayed in header window
         EWindowMode windowMode;
@@ -34,7 +34,7 @@ namespace EE
         uint32 options;
         WString name;
 
-        WindowParameters(
+        WindowCreateDescription(
             const WString& title = L"Empty Engine",
             uint32 width = -1,
             uint32 height = -1,
@@ -68,7 +68,7 @@ namespace EE
         };
 
     public:
-        Window( const WindowParameters& parameters );
+        Window( const WindowCreateDescription& parameters );
 
         ~Window();
 
@@ -124,8 +124,8 @@ namespace EE
         //* Get SDL_Window Pointer
         FORCEINLINE WindowHandleRef GetWindowHandle() const { return windowHandle; };
 
-        //* Creates a Window with a Name, Width and Height
-        static Window* Create( const WindowParameters& parameters );
+        //* Creates a window
+        static Window* Create( const WindowCreateDescription& description );
     };
 
     Window* CreateMainWindow();

@@ -33,8 +33,6 @@ namespace EE
 
         virtual RHITexture* GetBackTexure( const RHISwapChain& swapchain, uint32 index ) const = 0;
 
-        const RHIDevice* GetDevice() const;
-        const RHIInstance* GetInstance() const;
         virtual WString const& GetName() const = 0;
     };
 

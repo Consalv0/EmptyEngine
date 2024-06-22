@@ -588,14 +588,16 @@ namespace EE
     {
         delete surface;
         delete swapChain;
+        commandBuffers.clear();
     }
 
     VulkanRHIPresentContext::VulkanRHIPresentContext( Window* window, VulkanRHIInstance* instance ) :
         window( window ), instance( instance ),
-        swapChain( NULL ), surface( NULL )
+        swapChain( NULL ), surface( NULL ), commandBuffers()
     {
         CreateSurface();
         CreateSwapChain();
+        CreateCommandBuffers();
     }
 
     void VulkanRHIPresentContext::CreateSurface()
@@ -688,6 +690,15 @@ namespace EE
         swapChain = new VulkanRHISwapChain( swapChainDesc, this, GVulkanDevice );
     }
 
+    void VulkanRHIPresentContext::CreateCommandBuffers()
+    {
+        const uint32& imageCount = swapChain->GetImageCount();
+        for ( uint32 i = 0; i < imageCount; i++ )
+        {
+            commandBuffers.emplace_back( GVulkanDevice, GVulkanDevice->GetPresentFamilyIndex() );
+        }
+    }
+
     bool VulkanRHIPresentContext::IsValid() const
     {
         return surface->IsValid() && swapChain->IsValid();
@@ -750,7 +761,7 @@ namespace EE
         device( device ),
         format( ConvertPixelFormat( description.format, description.colorSpace ) ),
         ownership( true ),
-        sampler( NULL )
+        sampler( NULL ), memory( VK_NULL_HANDLE ), imageView( VK_NULL_HANDLE )
     {
         VkImageCreateInfo imageInfo = {
             VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,                // sType
@@ -917,12 +928,16 @@ namespace EE
             description.arraySize = 1;
             description.mipLevels = 1;
 
-            textures.emplace_back( description, device, images[ i ] );
+            textures.emplace_back( new VulkanRHITexture( description, device, images[ i ] ) );
         }
     }
 
     VulkanRHISwapChain::~VulkanRHISwapChain()
     {
+        for ( VulkanRHITexture* texture : textures )
+        {
+            delete texture;
+        }
         textures.clear();
 
         vkDestroySwapchainKHR( device->GetVulkanDevice(), swapChain, NULL );
@@ -1002,6 +1017,11 @@ namespace EE
         }
     }
 
+    bool VulkanRHICommandBuffer::IsValid() const
+    {
+        return commandBuffer != VK_NULL_HANDLE;
+    }
+
     VulkanRHIShaderStage::~VulkanRHIShaderStage()
     {
         vkDestroyShaderModule( device->GetVulkanDevice(), shaderModule, nullptr );
@@ -1066,7 +1086,8 @@ namespace EE
         return -1;
     }
 
-    VulkanRHI::VulkanRHI() : DynamicRHI()
+    VulkanRHI::VulkanRHI() : DynamicRHI(),
+        device( VK_NULL_HANDLE )
     {
         VkApplicationInfo appInfo = 
         {
@@ -1133,7 +1154,7 @@ namespace EE
 
     RHICommandBuffer* VulkanRHI::CreateRHICommandBuffer( const RHICommandBufferCreateDescription& description ) const
     {
-        return NULL;
+        return new VulkanRHICommandBuffer( this->device, this->device->GetGraphicsFamilyIndex() );
     }
     
     RHIBuffer* VulkanRHI::CreateRHIBuffer( const RHIBufferCreateDescription& description ) const

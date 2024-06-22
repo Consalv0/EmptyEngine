@@ -102,7 +102,7 @@ namespace EE
         return true;
     }
 
-    Window::Window( const WindowParameters& parameters )
+    Window::Window( const WindowCreateDescription& parameters )
     {
         closeRequested = false;
         windowHandle = NULL;

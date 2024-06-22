@@ -5,22 +5,36 @@ namespace EE
     class RHIObject
     {
     public:
+        EE_CLASSNOCOPY( RHIObject )
+
+    protected:
+        RHIObject() {}
+        ~RHIObject() {}
+
+    public:
         virtual bool IsValid() const = 0;
     };
 
     class RHIResource : public RHIObject
     {
+    protected:
+        RHIResource() {}
+        ~RHIResource() {}
+
     public:
-        ERenderingResourceType type = RenderingResourceType_Unknown;
-        FORCEINLINE bool IsTexture()   const { return type == RenderingResourceType_Texture; }
-        FORCEINLINE bool IsBuffer()    const { return type == RenderingResourceType_Buffer; }
-        FORCEINLINE bool IsSwapChain() const { return type == RenderingResourceType_Swapchain; }
-        FORCEINLINE bool IsSurface()   const { return type == RenderingResourceType_Surface; }
-        FORCEINLINE bool IsShader()    const { return type == RenderingResourceType_Shader; }
+        // FORCEINLINE bool IsTexture()   const { return type == RenderingResourceType_Texture; }
+        // FORCEINLINE bool IsBuffer()    const { return type == RenderingResourceType_Buffer; }
+        // FORCEINLINE bool IsSwapChain() const { return type == RenderingResourceType_Swapchain; }
+        // FORCEINLINE bool IsSurface()   const { return type == RenderingResourceType_Surface; }
+        // FORCEINLINE bool IsShader()    const { return type == RenderingResourceType_Shader; }
     };
 
     class RHISurface : public RHIResource
     {
+    protected:
+        RHISurface() {}
+    public:
+        virtual ~RHISurface() {};
     };
 
     struct RHISwapChainCreateDescription
@@ -37,18 +51,34 @@ namespace EE
 
     class RHISwapChain : public RHIResource
     {
+    protected:
+        RHISwapChain() {}
+    public:
+        virtual ~RHISwapChain() {};
     };
 
     class RHIInstance : public RHIObject
     {
+    protected:
+        RHIInstance() {}
+    public:
+        virtual ~RHIInstance() {};
     };
 
     class RHIPresentContext : public RHIObject
     {
+    protected:
+        RHIPresentContext() {}
+    public:
+        virtual ~RHIPresentContext() {};
     };
 
     class RHIDevice : public RHIObject
     {
+    protected:
+        RHIDevice() {}
+    public:
+        virtual ~RHIDevice() {};
     };
 
     struct RHIBufferCreateDescription
@@ -69,10 +99,18 @@ namespace EE
 
     class RHICommandBuffer : public RHIResource
     {
+    protected:
+        RHICommandBuffer() {}
+    public:
+        virtual ~RHICommandBuffer() {};
     };
 
     class RHIBuffer : public RHIResource
     {
+    protected:
+        RHIBuffer() {}
+    public:
+        virtual ~RHIBuffer() {};
     };
 
     struct RHITextureCreateDescription
@@ -101,6 +139,10 @@ namespace EE
 
     class RHITexture : public RHIResource
     {
+    protected:
+        RHITexture() {}
+    public:
+        virtual ~RHITexture() {};
     };
 
     struct RHISamplerCreateDescription
@@ -109,19 +151,23 @@ namespace EE
         ESamplerAddressMode addressU = SamplerAdressMode_Clamp;
         ESamplerAddressMode addressV = SamplerAdressMode_Clamp;
         ESamplerAddressMode addressW = SamplerAdressMode_Clamp;
-        float mipLODBias = 0.0f;
+        float mipLODBias = 0.0F;
         uint32 maxAnisotropy = 0;
         EComparisonFunction comparison = ComparisonFuntion_Always;
         ESamplerBorder border = SamplerBorder_BlackTransparent;
-        float minLOD = 0.0f;
+        float minLOD = 0.0F;
         float maxLOD = FLT_MAX;
     };
 
     class RHISampler : public RHIObject
     {
+    protected:
+        RHISampler() {}
+    public:
+        virtual ~RHISampler() {};
     };
 
-    struct PipelineStateDescription
+    struct RHIPipelineStateDescription
     {
         const RHIShaderStage* vertex = nullptr;
         const RHIShaderStage* pixel = nullptr;
@@ -132,5 +178,13 @@ namespace EE
         const RHIShaderStage* as = nullptr;
 
         uint32 sampleMask = 0xFFFFFFFF;
+    };
+
+    class RHIRasterPipeline : public RHIObject
+    {
+    protected:
+        RHIRasterPipeline() {}
+    public:
+        virtual ~RHIRasterPipeline() {};
     };
 }

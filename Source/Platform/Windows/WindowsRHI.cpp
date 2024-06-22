@@ -10,9 +10,9 @@
 
 namespace EE
 {
-    EDynamicRHI GetDefaultRHI( EWindowsRHI InWindowsRHI )
+    EDynamicRHI GetDefaultRHI( EWindowsRHI inWindowsRHI )
     {
-        switch ( InWindowsRHI )
+        switch ( inWindowsRHI )
         {
         case EWindowsRHI::Vulkan: return EDynamicRHI::Vulkan;
         default: return EDynamicRHI::Vulkan;

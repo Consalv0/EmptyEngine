@@ -6,6 +6,7 @@
 #ifdef __APPLE__
 #include <unistd.h>
 #endif
+#include <filesystem>
 #include <sstream>
 #include <fstream>
 #include <iostream>
@@ -34,6 +35,11 @@ namespace EE
             EE_LOG_CORE_ERROR( L"File '{}' is not valid or do not exist", filePath );
         else
             LocaleToUTF8( NULL );
+    }
+
+    FileStream::~FileStream()
+    {
+        delete stream;
     }
 
     template <typename T>

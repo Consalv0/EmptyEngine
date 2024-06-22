@@ -8,5 +8,5 @@ namespace EE
         Vulkan,
     };
 
-    EDynamicRHI GetDefaultRHI( EWindowsRHI InWindowsRHI );
+    EDynamicRHI GetDefaultRHI( EWindowsRHI inWindowsRHI );
 };
