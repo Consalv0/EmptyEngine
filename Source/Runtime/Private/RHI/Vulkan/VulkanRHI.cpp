@@ -1131,9 +1131,12 @@ namespace EE
         return NULL;
     }
 
-    WString const& VulkanRHI::GetName() const
+    const WString& VulkanRHI::GetName() const
     {
-        static WString const deviceName = L"Vulkan " + Text::FormatUnit( VK_API_VERSION_MAJOR( VK_API_VERSION_1_3 ), 0 ) + L'.' + Text::FormatUnit( VK_API_VERSION_MINOR( VK_API_VERSION_1_3 ), 0 );
+        static WString const deviceName = L"Vulkan " 
+            + Text::FormatUnit( VK_API_VERSION_MAJOR( VK_HEADER_VERSION_COMPLETE ), 0 ) + L'.'
+            + Text::FormatUnit( VK_API_VERSION_MINOR( VK_HEADER_VERSION_COMPLETE ), 0 ) + L'.' 
+            + Text::FormatUnit( VK_API_VERSION_PATCH( VK_HEADER_VERSION_COMPLETE ), 0 );
         return deviceName;
     }
 
