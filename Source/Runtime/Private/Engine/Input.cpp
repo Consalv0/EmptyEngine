@@ -175,7 +175,7 @@ namespace EE
     {
         Input& input = *(Input*)userData; 
 
-        auto& keyState = GScancodeStates[ (EScancode)sdlEvent->key.keysym.scancode ];
+        auto& keyState = GScancodeStates[ (EScancode)sdlEvent->key.scancode ];
         auto& mouseState = GMouseButtonStates[ (EMouseButton)sdlEvent->button.button ];
         static int32 mouseButtonPressedCount[ 255 ] = {
             (int32)-1, (int32)-1, (int32)-1, (int32)-1, (int32)-1,
@@ -407,7 +407,7 @@ namespace EE
             keyState.repetitions = sdlEvent->key.repeat;
 
             KeyPressedEvent inEvent(
-                sdlEvent->key.keysym.scancode,
+                sdlEvent->key.scancode,
                 (SDL_GetModState() & SDL_KMOD_SHIFT) != 0,
                 (SDL_GetModState() & SDL_KMOD_CTRL) != 0,
                 (SDL_GetModState() & SDL_KMOD_ALT) != 0,
@@ -425,7 +425,7 @@ namespace EE
             keyState.repetitions = 0;
 
             KeyReleasedEvent inEvent(
-                sdlEvent->key.keysym.scancode,
+                sdlEvent->key.scancode,
                 (SDL_GetModState() & SDL_KMOD_SHIFT) != 0,
                 (SDL_GetModState() & SDL_KMOD_CTRL) != 0,
                 (SDL_GetModState() & SDL_KMOD_ALT) != 0,
