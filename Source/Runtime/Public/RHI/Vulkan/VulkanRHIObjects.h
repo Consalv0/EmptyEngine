@@ -5,6 +5,7 @@ namespace EE
     class VulkanRHIInstance;
     class VulkanRHIDevice;
     class VulkanRHIPresentContext;
+    class VulkanRHIQueue;
     class VulkanRHIBuffer;
     class VulkanRHITexture;
     class VulkanRHISwapChain;
@@ -100,8 +101,8 @@ namespace EE
             uint32 queueFamilyIndices[ 2 ]{};
         };
 
-        VkQueue graphicsQueue;
-        VkQueue presentQueue;
+        VulkanRHIQueue* graphicsQueue;
+        VulkanRHIQueue* presentQueue;
 
     public:
         FORCEINLINE const VkDevice GetVulkanDevice() const { return device; }
@@ -156,6 +157,20 @@ namespace EE
 
         void CreateCommandBuffers();
         
+        bool IsValid() const;
+    };
+
+    class VulkanRHIQueue : public RHIResource
+    {
+    private:
+        VkQueue queue;
+        const VulkanRHIDevice* device;
+
+    public:
+        ~VulkanRHIQueue();
+
+        VulkanRHIQueue( const VulkanRHIDevice* device, const uint32& familyIndex, const uint32& queueIndex );
+
         bool IsValid() const;
     };
 

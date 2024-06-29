@@ -493,12 +493,17 @@ namespace EE
     {
         for ( auto& pair : commandPools )
             delete pair.second;
+
+        delete presentQueue;
+        delete graphicsQueue;
+        
         vmaDestroyAllocator( allocator );
         vkDestroyDevice( device, nullptr );
     }
 
     VulkanRHIDevice::VulkanRHIDevice( VulkanRHIInstance* instance )
-        : physicalDevice( instance->GetSelectedPhysicalDevice() )
+        : physicalDevice( instance->GetSelectedPhysicalDevice() ),
+        presentQueue( NULL ), graphicsQueue( NULL )
     {
         EE_CORE_ASSERT( GVulkanDevice == NULL, L"Creating a second device!, Aborting..." );
 
@@ -559,8 +564,8 @@ namespace EE
             L"Failed to create VMA Allocator!"
         );
 
-        vkGetDeviceQueue( device, graphicsQueueIndex = indices.graphicsFamily.value(), 0, &graphicsQueue );
-        vkGetDeviceQueue( device, presentQueueIndex = indices.presentFamily.value(), 0, &presentQueue );
+        graphicsQueue = new VulkanRHIQueue( this, graphicsQueueIndex = indices.graphicsFamily.value(), 0 );
+        presentQueue = new VulkanRHIQueue( this, presentQueueIndex = indices.presentFamily.value(), 0 );
 
         if ( CreateCommandBufferPools( this ) == false )
         {
@@ -702,6 +707,21 @@ namespace EE
     bool VulkanRHIPresentContext::IsValid() const
     {
         return surface->IsValid() && swapChain->IsValid();
+    }
+
+    VulkanRHIQueue::~VulkanRHIQueue()
+    {
+    }
+
+    VulkanRHIQueue::VulkanRHIQueue( const VulkanRHIDevice* device, const uint32& familyIndex, const uint32& queueIndex ) :
+        device( device ) 
+    {
+        vkGetDeviceQueue( device->GetVulkanDevice(), familyIndex, queueIndex, &queue);
+    }
+
+    bool VulkanRHIQueue::IsValid() const
+    {
+        return queue != VK_NULL_HANDLE;
     }
 
     VulkanRHIBuffer::~VulkanRHIBuffer()
