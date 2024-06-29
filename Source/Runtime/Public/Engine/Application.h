@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Audio/AudioDevice.h"
-
 namespace EE
 {
     class Application
@@ -14,6 +12,8 @@ namespace EE
         void Run();
 
         virtual ~Application();
+
+        virtual enum class EDynamicRHI GetPreferedRHI() const = 0;
 
     protected:
 

@@ -3,10 +3,5 @@
 
 namespace EE
 {
-    enum class EWindowsRHI
-    {
-        Vulkan,
-    };
-
-    EDynamicRHI GetDefaultRHI( EWindowsRHI inWindowsRHI );
+    EDynamicRHI GetDefaultRHI( EDynamicRHI inWindowsRHI );
 };

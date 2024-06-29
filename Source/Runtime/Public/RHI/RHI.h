@@ -46,5 +46,5 @@ namespace EE
 
     //* Called to create the instance of the dynamic RHI,
     //* this is implemented for each platform.
-    DynamicRHI* PlatformCreateDynamicRHI();
+    DynamicRHI* PlatformCreateDynamicRHI( EDynamicRHI rhi );
 }

@@ -27,7 +27,6 @@ namespace EE
 
     void Application::Run()
     {
-        EE_LOG_CORE_INFO( L"Initializing Application:\n" );
         Initialize();
         Awake();
         UpdateLoop();

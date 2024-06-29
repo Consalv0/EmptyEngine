@@ -50,7 +50,10 @@ namespace EE
 
         virtual void InputEventsHandler( const InputEvent& inputEvent );
 
-		//* Creates a input manager
-		static Input* Create();
 	};
+
+	extern Input* GInput;
+	
+	//* Creates a input manager
+	Input* PlatformCreateInput();
 }

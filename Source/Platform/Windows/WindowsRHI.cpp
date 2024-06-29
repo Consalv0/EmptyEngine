@@ -10,18 +10,18 @@
 
 namespace EE
 {
-    EDynamicRHI GetDefaultRHI( EWindowsRHI inWindowsRHI )
+    EDynamicRHI GetDefaultRHI( EDynamicRHI inRHI )
     {
-        switch ( inWindowsRHI )
+        switch ( inRHI )
         {
-        case EWindowsRHI::Vulkan: return EDynamicRHI::Vulkan;
+        case EDynamicRHI::Vulkan: return EDynamicRHI::Vulkan;
         default: return EDynamicRHI::Vulkan;
         }
     }
 
-    DynamicRHI* PlatformCreateDynamicRHI()
+    DynamicRHI* PlatformCreateDynamicRHI( EDynamicRHI preferedRHI )
     {
-        EDynamicRHI windowsRHI = GetDefaultRHI( EWindowsRHI::Vulkan );
+        EDynamicRHI windowsRHI = GetDefaultRHI( preferedRHI );
 
         switch ( windowsRHI )
         {

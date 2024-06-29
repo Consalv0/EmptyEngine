@@ -111,10 +111,18 @@ namespace EE
     void Input::UpdateMouseState()
     {
         SDL_GetMouseState( &GMousePosition.x, &GMousePosition.y );
-        int windowX, windowY;
-        SDL_GetWindowPosition( (SDL_Window*)GEngine->GetMainWindow()->GetWindowHandle(), &windowX, &windowY );
-        GRelativeMousePosition.x = GMousePosition.x - windowX;
-        GRelativeMousePosition.y = GMousePosition.y - windowY;
+        if ( GEngine->GetWindowCount() > 0 )
+        {
+            int windowX, windowY;
+            SDL_GetWindowPosition( (SDL_Window*)GEngine->GetWindow( 0 )->GetWindowHandle(), &windowX, &windowY );
+            GRelativeMousePosition.x = GMousePosition.x - windowX;
+            GRelativeMousePosition.y = GMousePosition.y - windowY;
+        }
+        else
+        {
+            GRelativeMousePosition.x = GMousePosition.x;
+            GRelativeMousePosition.y = GMousePosition.y;
+        }
     }
 
     const Point2f& Input::GetMousePosition( bool realtive ) const

@@ -12,7 +12,9 @@
 
 namespace EE
 {
-    Input* Input::Create()
+    Input* GInput = NULL;
+
+    Input* PlatformCreateInput()
     {
         return new WindowsInput();
     }

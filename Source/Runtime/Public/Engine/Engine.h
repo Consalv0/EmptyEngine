@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 
+#include "Audio/AudioDevice.h"
 #include "Engine/Application.h"
 #include "Engine/Window.h"
 #include "Engine/Input.h"
@@ -19,8 +20,6 @@ namespace EE
         uint64 windowCount = 0;
         TArray<Window*> windows;
 
-        Input* inputManager = NULL;
-
         AudioDevice* audioDevice = NULL;
 
     public:
@@ -34,7 +33,7 @@ namespace EE
 
         void Terminate();
 
-        Window* CreateWindow();
+        Window* CreateWindow( const WindowCreateDescription& description );
 
         void DeleteWindow( Window* window );
 
@@ -45,9 +44,7 @@ namespace EE
 
         FORCEINLINE Window* GetWindow( uint64 index ) const { if ( windowCount > 0 && index < windowCount ) return windows[ index ]; else return NULL; };
 
-        FORCEINLINE Window* GetMainWindow() const { return GetWindow( 0 ); };
-
-        FORCEINLINE Input* GetInputManager() const { return inputManager; };
+        FORCEINLINE Window* GetActiveWindow( uint64 index ) const { return GetWindow( 0 ); };
 
         FORCEINLINE AudioDevice* GetAudioDevice() const { return audioDevice; };
 

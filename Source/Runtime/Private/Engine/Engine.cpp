@@ -19,8 +19,7 @@ namespace EE
     bool GameEngine::Initialize()
     {
         GMainApplication = CreateApplication();
-        GDynamicRHI = PlatformCreateDynamicRHI();
-        CreateWindow();
+        GDynamicRHI = PlatformCreateDynamicRHI( GMainApplication->GetPreferedRHI() );
 
         if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK ) != 0 )
         {
@@ -28,19 +27,7 @@ namespace EE
             return false;
         }
 
-        if ( windowCount > 0 )
-        {
-            // if ( GDynamicRHI->Initialize() == false )
-            // {
-            //     return false;
-            // }
-            if ( GetMainWindow()->Initialize() == false )
-            {
-                return false;
-            }
-        }
-
-        inputManager = Input::Create();
+        GInput = PlatformCreateInput();
         GPlatformDevice = PlatformCreatePlatformDevice();
 
         ModelParser::Initialize();
@@ -59,19 +46,20 @@ namespace EE
 
     void GameEngine::Run()
     {
-        inputManager->Initialize();
+        GInput->Initialize();
         GMainApplication->Run();
     }
 
     void GameEngine::Terminate()
     {
-        delete inputManager;
+        delete GPlatformDevice;
+        delete GInput;
+        delete GMainApplication;
         for ( uint64 i = 0; i < windowCount; i++ )
         {
             delete windows[ i ];
         }
         windowCount = 0;
-        delete GMainApplication;
 
         SDL_Quit();
     }
@@ -96,15 +84,13 @@ namespace EE
             ShouldTerminate();
     }
 
-    Window* GameEngine::CreateWindow()
+    Window* GameEngine::CreateWindow( const WindowCreateDescription& description )
     {
-        Window* window = EE::CreateMainWindow();
+        Window* window = Window::Create( description );
         windows.push_back( window );
         windowCount++;
         return window;
     }
 
     GameEngine* GEngine = NULL;
-
-    extern Window* CreateMainWindow();
 }
