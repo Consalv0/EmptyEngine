@@ -123,10 +123,8 @@ namespace EE
         //* OS specific window handle
         //* Get SDL_Window Pointer
         FORCEINLINE WindowHandleRef GetWindowHandle() const { return windowHandle; };
-
-        //* Creates a window
-        static Window* Create( const WindowCreateDescription& description );
     };
 
-    Window* CreateMainWindow();
+    //* Creates a window
+    Window* PlatformCreateWindow( const WindowCreateDescription& description );
 }

@@ -88,7 +88,7 @@ namespace EE
 
     Window* GameEngine::CreateWindow( const WindowCreateDescription& description )
     {
-        Window* window = Window::Create( description );
+        Window* window = PlatformCreateWindow( description );
 
         EE_LOG_CORE_INFO( L"Window '{}' created!", description.name );
 
