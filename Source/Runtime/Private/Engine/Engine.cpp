@@ -81,9 +81,6 @@ namespace EE
 
         EE_LOG_CORE_INFO( L"Window '{}' destroying!", window->GetName() );
         delete window;
-
-        if ( windowCount == 0 )
-            ShouldTerminate();
     }
 
     Window* GameEngine::CreateWindow( const WindowCreateDescription& description )

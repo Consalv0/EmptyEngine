@@ -91,6 +91,10 @@ namespace EE
         RHIPresentContext() {}
     public:
         virtual ~RHIPresentContext() {};
+
+        virtual uint32 AquireBackbuffer( uint64 timeout ) const = 0;
+
+        virtual void Present( uint32 imageIndex ) const = 0;
     };
 
     class RHIDevice : public RHIObject

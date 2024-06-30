@@ -33,6 +33,7 @@ namespace EE
         bool allowHDR;
         uint32 options;
         WString name;
+        bool vsync;
 
         WindowCreateDescription(
             const WString& title = L"Empty Engine",

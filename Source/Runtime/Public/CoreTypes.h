@@ -2,9 +2,11 @@
 
 #include <string>
 #include <vector>
+#include <list>
 #include <queue>
 #include <unordered_map>
 #include <unordered_set>
+#include <iterator>
 
 typedef char            NChar;
 typedef wchar_t         WChar;

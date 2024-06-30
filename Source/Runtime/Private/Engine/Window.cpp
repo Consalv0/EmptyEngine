@@ -112,7 +112,7 @@ namespace EE
         mode = parameters.windowMode;
         allowHDR = parameters.allowHDR;
         options = parameters.options;
-        vsync = true;
+        vsync = parameters.vsync;
     }
 
     Window::~Window()

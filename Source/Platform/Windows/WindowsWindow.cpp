@@ -40,7 +40,7 @@ namespace EE
         return true;
     }
 
-    Window* Window::Create( const WindowCreateDescription& description )
+    Window* PlatformCreateWindow( const WindowCreateDescription& description )
     {
         return new WindowsWindow( description );
     }

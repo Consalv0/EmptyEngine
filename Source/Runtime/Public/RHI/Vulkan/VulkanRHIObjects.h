@@ -115,7 +115,11 @@ namespace EE
 
         FORCEINLINE uint32 GetGraphicsFamilyIndex() const { return graphicsQueueIndex; }
 
+        FORCEINLINE VulkanRHIQueue* GetGraphicsQueue() const { return graphicsQueue; }
+
         FORCEINLINE uint32 GetPresentFamilyIndex() const { return presentQueueIndex; }
+
+        FORCEINLINE VulkanRHIQueue* GetPresentQueue() const { return presentQueue; }
 
         FORCEINLINE const uint32* GetFamilyIndices() const { return queueFamilyIndices; }
 
@@ -164,7 +168,13 @@ namespace EE
 
         VulkanRHIPresentContext( Window* window, VulkanRHIInstance* instance );
 
-        void SubmitPresentImage( uint32 imageIndex, VulkanRHIQueue* queue );
+        const VulkanRHISemaphore& GetSempahoreOfImage( uint32 imageIndex ) const;
+
+        uint32 AquireBackbuffer( uint64 timeout ) const override;
+
+        void Present( uint32 imageIndex ) const override;
+
+        void SubmitPresentImage( uint32 imageIndex, VulkanRHIQueue* queue ) const;
         
         bool IsValid() const;
     };
@@ -234,6 +244,7 @@ namespace EE
         uint32 imageCount;
         TArray<VkImage> images;
         TArray<VulkanRHITexture*> textures;
+        uint32 nextImageIndex;
 
     public:
         bool IsValid() const;
@@ -247,6 +258,8 @@ namespace EE
         FORCEINLINE const VkSwapchainKHR& GetVulkanSwapChain() const { return swapChain; }
 
         uint32 AquireNextImage( uint64 timeout, const VulkanRHISemaphore* semaphore, const VulkanRHIFence* fence );
+
+        uint32 NextImageIndex() const { return (nextImageIndex + 1) % imageCount; }
     };
 
     class VulkanRHISurface : public RHISurface

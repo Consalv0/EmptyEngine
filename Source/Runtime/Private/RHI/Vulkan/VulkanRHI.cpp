@@ -655,15 +655,32 @@ namespace EE
         CreateSyncObjects();
     }
 
-    void VulkanRHIPresentContext::SubmitPresentImage( uint32 imageIndex, VulkanRHIQueue* queue )
+    const VulkanRHISemaphore& VulkanRHIPresentContext::GetSempahoreOfImage( uint32 imageIndex ) const
     {
-        auto imageSemaphore = std::next( imageSemaphores.begin(), imageIndex );
+        TList<VulkanRHISemaphore>::const_iterator it = imageSemaphores.begin();
+        for ( uint32 i = 0; i < imageIndex; i++ ) ++it;
+        return *it;
+    }
+
+    uint32 VulkanRHIPresentContext::AquireBackbuffer( uint64 timeout ) const
+    {
+        return swapChain->AquireNextImage( timeout, &GetSempahoreOfImage( swapChain->NextImageIndex() ), NULL);
+    }
+
+    void VulkanRHIPresentContext::Present( uint32 imageIndex ) const
+    {
+        SubmitPresentImage( imageIndex, GVulkanDevice->GetPresentQueue() );
+    }
+
+    void VulkanRHIPresentContext::SubmitPresentImage( uint32 imageIndex, VulkanRHIQueue* queue ) const
+    {
+        auto& imageSemaphore = GetSempahoreOfImage( imageIndex );
         VkPresentInfoKHR presentInfo
         {
             VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,     // sType
             NULL,                                   // pNext
             1,                                      // waitSemaphoreCount
-            &imageSemaphore->GetVulkanSemaphore(),  // pWaitSemaphores
+            &imageSemaphore.GetVulkanSemaphore(),   // pWaitSemaphores
             1,                                      // swapchainCount
             &swapChain->GetVulkanSwapChain(),       // pSwapchains
             &imageIndex,                            // pImageIndices
@@ -1009,7 +1026,8 @@ namespace EE
         device( device ),
         presentContext( presentContext ),
         swapChain( VK_NULL_HANDLE ),
-        imageCount(), size()
+        imageCount(), size(),
+        nextImageIndex( 0 )
     {
         const VulkanRHISurface* surface = presentContext->GetRHISurface();
         const VulkanSurfaceSupportDetails& surfaceDetails = device->GetVulkanPhysicalDevice()->GetSurfaceDetails( surface->GetVulkanSurface() );
@@ -1075,7 +1093,7 @@ namespace EE
 
         createInfo.preTransform = surfaceDetails.capabilities.currentTransform;
         createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-        createInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR;
+        createInfo.presentMode = description.vsync ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_MAILBOX_KHR;
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = VK_NULL_HANDLE;
 
@@ -1116,13 +1134,15 @@ namespace EE
 
     uint32 VulkanRHISwapChain::AquireNextImage( uint64 timeout, const VulkanRHISemaphore* semaphore, const VulkanRHIFence* fence )
     {
-        uint32 imageIndex;
-        auto result = vkAcquireNextImageKHR( device->GetVulkanDevice(), swapChain, timeout, semaphore->GetVulkanSemaphore(), fence->GetVulkanFence(), &imageIndex);
+        auto vulkanSemaphore = semaphore == NULL ? VK_NULL_HANDLE : semaphore->GetVulkanSemaphore();
+        auto vulkanFence = fence == NULL ? VK_NULL_HANDLE : fence->GetVulkanFence();
+
+        auto result = vkAcquireNextImageKHR( device->GetVulkanDevice(), swapChain, timeout, vulkanSemaphore, vulkanFence, &nextImageIndex );
         if ( result != VK_SUCCESS )
         {
             EE_LOG_CORE_CRITICAL( L"Failed vkAcquireNextImageKHR! {}", (int32)result );
         }
-        return imageIndex;
+        return nextImageIndex;
     }
 
     VulkanRHISurface::~VulkanRHISurface()
