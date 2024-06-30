@@ -5,10 +5,6 @@ namespace EE
 {
     class VulkanRHI : public DynamicRHI
     {
-    private:
-        class VulkanRHIDevice* device;
-        class VulkanRHIInstance* instance;
-
     public:
         VulkanRHI();
 
@@ -35,9 +31,6 @@ namespace EE
         EShaderFormat GetShaderFormat() const { return ShaderFormat_GLSL; }
 
         WString const& GetName() const;
-
-        const RHIDevice* GetDevice() const;
-        const RHIInstance* GetInstance() const;
     };
 
     void GetVulkanInstanceExtensions( uint32* count, const NChar* const*& extensions );

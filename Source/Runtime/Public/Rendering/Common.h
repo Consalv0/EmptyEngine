@@ -270,8 +270,15 @@ namespace EE
     enum ECommandQueueType
     {
         CommandQueue_Graphics,
-        CommandQueue_Compute,
+        CommandQueue_Present,
         CommandQueue_Copy
+    };
+
+    enum EPipelineStage
+    {
+        PipelineStage_None,
+        PipelineStage_OutputColor,
+        PipelineStage_Top
     };
 
     enum class EDynamicRHI

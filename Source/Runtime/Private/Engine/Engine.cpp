@@ -19,14 +19,14 @@ namespace EE
     bool GameEngine::Initialize()
     {
         GMainApplication = CreateApplication();
-        GDynamicRHI = PlatformCreateDynamicRHI( GMainApplication->GetPreferedRHI() );
 
         if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK ) != 0 )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to initialize SDL3: {0}\n", Text::NarrowToWide( SDL_GetError() ) );
+            EE_LOG_CORE_CRITICAL( L"Failed to initialize SDL3: {}\n", Text::NarrowToWide( SDL_GetError() ) );
             return false;
         }
 
+        GDynamicRHI = PlatformCreateDynamicRHI( GMainApplication->GetPreferedRHI() );
         GInput = PlatformCreateInput();
         GPlatformDevice = PlatformCreatePlatformDevice();
 
@@ -78,6 +78,8 @@ namespace EE
     {
         windows.erase( std::remove( windows.begin(), windows.end(), window ) );
         windowCount--;
+
+        EE_LOG_CORE_INFO( L"Window '{}' destroying!", window->GetName() );
         delete window;
 
         if ( windowCount == 0 )
@@ -87,6 +89,9 @@ namespace EE
     Window* GameEngine::CreateWindow( const WindowCreateDescription& description )
     {
         Window* window = Window::Create( description );
+
+        EE_LOG_CORE_INFO( L"Window '{}' created!", description.name );
+
         windows.push_back( window );
         windowCount++;
         return window;

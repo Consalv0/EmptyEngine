@@ -5,6 +5,8 @@ namespace EE
     class VulkanRHIInstance;
     class VulkanRHIDevice;
     class VulkanRHIPresentContext;
+    class VulkanRHISemaphore;
+    class VulkanRHIFence;
     class VulkanRHIQueue;
     class VulkanRHIBuffer;
     class VulkanRHITexture;
@@ -79,9 +81,9 @@ namespace EE
 
         bool IsValid() const;
 
-        const uint32& GetPhysicalDeviceCount() const { return physicalDeviceCount; }
-        const VulkanRHIPhysicalDevice& GetPhysicalDevice( uint32& index ) const { return physicalDevices[ index ]; }
-        VkInstance GetVulkanInstance() const { return instance; };
+        FORCEINLINE const uint32& GetPhysicalDeviceCount() const { return physicalDeviceCount; }
+        FORCEINLINE const VulkanRHIPhysicalDevice& GetPhysicalDevice( uint32& index ) const { return physicalDevices[ index ]; }
+        FORCEINLINE const VkInstance& GetVulkanInstance() const { return instance; };
     };
 
     class VulkanRHIDevice : public RHIDevice
@@ -139,6 +141,17 @@ namespace EE
         VulkanRHISurface* surface;
         VulkanRHISwapChain* swapChain;
         TList<VulkanRHICommandBuffer> commandBuffers;
+        TList<VulkanRHISemaphore> imageSemaphores;
+        TList<VulkanRHISemaphore> renderSemaphores;
+        TList<VulkanRHIFence> renderFences;
+
+        void CreateSurface();
+
+        void CreateSwapChain();
+
+        void CreateCommandBuffers();
+
+        void CreateSyncObjects();
 
     public:
         FORCEINLINE VulkanRHISurface* GetRHISurface() { return surface; }
@@ -151,16 +164,12 @@ namespace EE
 
         VulkanRHIPresentContext( Window* window, VulkanRHIInstance* instance );
 
-        void CreateSurface();
-
-        void CreateSwapChain();
-
-        void CreateCommandBuffers();
+        void SubmitPresentImage( uint32 imageIndex, VulkanRHIQueue* queue );
         
         bool IsValid() const;
     };
 
-    class VulkanRHIQueue : public RHIResource
+    class VulkanRHIQueue : public RHIQueue
     {
     private:
         VkQueue queue;
@@ -172,6 +181,12 @@ namespace EE
         VulkanRHIQueue( const VulkanRHIDevice* device, const uint32& familyIndex, const uint32& queueIndex );
 
         bool IsValid() const;
+
+        FORCEINLINE const VkQueue& GetVulkanQueue() const { return queue; }
+
+        void WaitIdle() const;
+        
+        void SubmitCommandBuffer( const RHICommandBuffer* commandBuffer, const RHIQueueSubmitInfo& info ) override;
     };
 
     class VulkanRHIBuffer : public RHIBuffer
@@ -228,6 +243,10 @@ namespace EE
         ~VulkanRHISwapChain();
 
         FORCEINLINE const uint32& GetImageCount() const { return imageCount; }
+
+        FORCEINLINE const VkSwapchainKHR& GetVulkanSwapChain() const { return swapChain; }
+
+        uint32 AquireNextImage( uint64 timeout, const VulkanRHISemaphore* semaphore, const VulkanRHIFence* fence );
     };
 
     class VulkanRHISurface : public RHISurface
@@ -247,6 +266,40 @@ namespace EE
         bool IsValid() const;
     };
 
+    class VulkanRHIFence : public RHIFence
+    {
+    private:
+        VulkanRHIDevice* device;
+        VkFence fence;
+
+    public:
+        VulkanRHIFence( VulkanRHIDevice* device, bool initSignaled );
+        ~VulkanRHIFence() override;
+
+        FORCEINLINE const VkFence& GetVulkanFence() const { return fence; }
+
+        bool IsSignaled() const;
+        void Reset();
+        void Wait();
+
+        bool IsValid() const;
+    };
+
+    class VulkanRHISemaphore : public RHISemaphore
+    {
+    private:
+        VulkanRHIDevice* device;
+        VkSemaphore semaphore;
+
+    public:
+        VulkanRHISemaphore( VulkanRHIDevice* device );
+        ~VulkanRHISemaphore() override;
+
+        FORCEINLINE const VkSemaphore& GetVulkanSemaphore() const { return semaphore; }
+
+        bool IsValid() const;
+    };
+
     class VulkanRHICommandPool
     {
     private:
@@ -259,7 +312,7 @@ namespace EE
 
         VulkanRHICommandPool( VulkanRHIDevice* device, uint32 queueFamilyIndex );
 
-        FORCEINLINE VkCommandPool GetVulkanCommandPool() const { return commandPool; }
+        FORCEINLINE const VkCommandPool& GetVulkanCommandPool() const { return commandPool; }
 
     };
 
@@ -276,6 +329,8 @@ namespace EE
         VulkanRHICommandBuffer( VulkanRHIDevice* device, uint32 queueFamilyIndex );
 
         bool IsValid() const;
+
+        FORCEINLINE const VkCommandBuffer& GetVulkanCommandBuffer() const { return commandBuffer; }
     };
 
     class VulkanRHIShaderStage

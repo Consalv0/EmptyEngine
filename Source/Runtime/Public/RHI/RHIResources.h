@@ -37,6 +37,26 @@ namespace EE
         virtual ~RHISurface() {};
     };
 
+    class RHIFence : public RHIResource
+    {
+    protected:
+        RHIFence() {}
+    public:
+        virtual ~RHIFence() {};
+
+        virtual bool IsSignaled() const = 0;
+        virtual void Reset() = 0;
+        virtual void Wait() = 0;
+    };
+
+    class RHISemaphore : public RHIResource
+    {
+    protected:
+        RHISemaphore() {}
+    public:
+        virtual ~RHISemaphore() {};
+    };
+
     struct RHISwapChainCreateDescription
     {
         uint32 width = 0;
@@ -103,6 +123,26 @@ namespace EE
         RHICommandBuffer() {}
     public:
         virtual ~RHICommandBuffer() {};
+    };
+
+    struct RHIQueueSubmitInfo
+    {
+    public:
+        std::vector<RHISemaphore*> waitSemaphores;
+        std::vector<RHISemaphore*> signalSemaphores;
+        EPipelineStage stageFlags;
+
+        RHIFence* signalFence;
+    };
+
+    class RHIQueue : public RHIResource
+    {
+    protected:
+        RHIQueue() {}
+    public:
+        virtual ~RHIQueue() {};
+
+        virtual void SubmitCommandBuffer( const RHICommandBuffer* commandBuffer, const RHIQueueSubmitInfo& info ) = 0;
     };
 
     class RHIBuffer : public RHIResource

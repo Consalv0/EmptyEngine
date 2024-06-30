@@ -144,19 +144,19 @@ namespace EE
     VkImageUsageFlags ConvertTextureUsage( EUsageModeFlags usage )
     {
         VkImageUsageFlags finalUsage = VkImageUsageFlags( 0 );
-        if ( usage & UsageMode_Sampled )         finalUsage &= VK_IMAGE_USAGE_SAMPLED_BIT;
-        if ( usage & UsageMode_Storage )         finalUsage &= VK_IMAGE_USAGE_STORAGE_BIT;
-        if ( usage & UsageMode_Color )           finalUsage &= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-        if ( usage & UsageMode_DepthStencil )    finalUsage &= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        if ( usage & UsageMode_Sampled )         finalUsage |= VK_IMAGE_USAGE_SAMPLED_BIT;
+        if ( usage & UsageMode_Storage )         finalUsage |= VK_IMAGE_USAGE_STORAGE_BIT;
+        if ( usage & UsageMode_Color )           finalUsage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        if ( usage & UsageMode_DepthStencil )    finalUsage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
         return finalUsage;
     }
 
     VkImageAspectFlags ConvertTextureAspect( EUsageModeFlags usage )
     {
         VkImageAspectFlags finalAspect = VK_IMAGE_ASPECT_NONE;
-        if ( usage & UsageMode_Color )      finalAspect &= VK_IMAGE_ASPECT_COLOR_BIT;
-        if ( usage & UsageMode_Depth )      finalAspect &= VK_IMAGE_ASPECT_DEPTH_BIT;
-        if ( usage & UsageMode_Stencil )    finalAspect &= VK_IMAGE_ASPECT_STENCIL_BIT;
+        if ( usage & UsageMode_Color )      finalAspect |= VK_IMAGE_ASPECT_COLOR_BIT;
+        if ( usage & UsageMode_Depth )      finalAspect |= VK_IMAGE_ASPECT_DEPTH_BIT;
+        if ( usage & UsageMode_Stencil )    finalAspect |= VK_IMAGE_ASPECT_STENCIL_BIT;
         return finalAspect;
     }
 
@@ -185,6 +185,20 @@ namespace EE
         case BufferUsage_Indirect:          return VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
         default:
             return 0;
+        }
+    }
+
+    VkPipelineStageFlags ConvertPipelineStageFlags( EPipelineStage stage )
+    {
+        switch ( stage )
+        {
+        case PipelineStage_OutputColor:
+            return VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        case PipelineStage_Top:
+            return VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        case PipelineStage_None:
+        default:
+            return VK_PIPELINE_STAGE_NONE;
         }
     }
 
@@ -232,6 +246,38 @@ namespace EE
 {
     VulkanRHIDevice* GVulkanDevice;
     VulkanRHIInstance* GVulkanInstance;
+#ifdef EMPTYENGINE_CORE_LOG
+    VkDebugUtilsMessengerEXT GVulkanDebugMessager = VK_NULL_HANDLE;
+
+    static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugCallback(
+        VkDebugUtilsMessageSeverityFlagBitsEXT           messageSeverity,
+        VkDebugUtilsMessageTypeFlagsEXT                  messageTypes,
+        const VkDebugUtilsMessengerCallbackDataEXT*      callbackData,
+        void* pUserData)
+    {
+        if ( messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT )
+        {
+            EE_LOG_CORE_ERROR( L"Vulkan: {}", Text::NarrowToWide( callbackData->pMessage ) );
+            return VK_FALSE;
+        }
+        if ( messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT )
+        {
+            EE_LOG_CORE_WARN( L"Vulkan: {}", Text::NarrowToWide( callbackData->pMessage ) );
+            return VK_FALSE;
+        }
+        if ( messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT )
+        {
+            EE_LOG_CORE_INFO( L"Vulkan: {}", Text::NarrowToWide( callbackData->pMessage ) );
+            return VK_FALSE;
+        }
+        if ( messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT )
+        {
+            EE_LOG_CORE_INFO( L"Vulkan: {}", Text::NarrowToWide( callbackData->pMessage ) );
+            return VK_FALSE;
+        }
+        return VK_FALSE;
+    }
+#endif
 
     const TArray<const NChar*> DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
     const float QueuePriorities[] = { 1.0F };
@@ -591,9 +637,12 @@ namespace EE
 
     VulkanRHIPresentContext::~VulkanRHIPresentContext()
     {
-        delete surface;
         delete swapChain;
         commandBuffers.clear();
+        imageSemaphores.clear();
+        renderSemaphores.clear();
+        renderFences.clear();
+        delete surface;
     }
 
     VulkanRHIPresentContext::VulkanRHIPresentContext( Window* window, VulkanRHIInstance* instance ) :
@@ -603,6 +652,29 @@ namespace EE
         CreateSurface();
         CreateSwapChain();
         CreateCommandBuffers();
+        CreateSyncObjects();
+    }
+
+    void VulkanRHIPresentContext::SubmitPresentImage( uint32 imageIndex, VulkanRHIQueue* queue )
+    {
+        auto imageSemaphore = std::next( imageSemaphores.begin(), imageIndex );
+        VkPresentInfoKHR presentInfo
+        {
+            VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,     // sType
+            NULL,                                   // pNext
+            1,                                      // waitSemaphoreCount
+            &imageSemaphore->GetVulkanSemaphore(),  // pWaitSemaphores
+            1,                                      // swapchainCount
+            &swapChain->GetVulkanSwapChain(),       // pSwapchains
+            &imageIndex,                            // pImageIndices
+            NULL                                    // pResults
+        };
+
+        auto result = vkQueuePresentKHR( queue->GetVulkanQueue(), &presentInfo );
+        if ( result != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to present image index: {}! {}", imageIndex, (uint32)result );
+        }
     }
 
     void VulkanRHIPresentContext::CreateSurface()
@@ -704,6 +776,17 @@ namespace EE
         }
     }
 
+    void VulkanRHIPresentContext::CreateSyncObjects()
+    {
+        const uint32& imageCount = swapChain->GetImageCount();
+        for ( uint32 i = 0; i < imageCount; i++ )
+        {
+            imageSemaphores.emplace_back( GVulkanDevice );
+            renderSemaphores.emplace_back( GVulkanDevice );
+            renderFences.emplace_back( GVulkanDevice, true );
+        }
+    }
+
     bool VulkanRHIPresentContext::IsValid() const
     {
         return surface->IsValid() && swapChain->IsValid();
@@ -722,6 +805,57 @@ namespace EE
     bool VulkanRHIQueue::IsValid() const
     {
         return queue != VK_NULL_HANDLE;
+    }
+
+    void VulkanRHIQueue::WaitIdle() const
+    {
+        vkQueueWaitIdle( queue );
+    }
+
+    void VulkanRHIQueue::SubmitCommandBuffer( const RHICommandBuffer* commandBuffer, const RHIQueueSubmitInfo& info )
+    {
+        auto vulkanCommandBuffer = static_cast<const VulkanRHICommandBuffer*>( commandBuffer );
+        auto vulkanFence = static_cast<const VulkanRHIFence*>( info.signalFence );
+
+        uint32 waitSemaphoreCount = (uint32)info.waitSemaphores.size();
+        std::vector<VkSemaphore> waitSemaphores;
+        std::vector<VkPipelineStageFlags> waitStageFlags;
+        waitSemaphores.resize( waitSemaphoreCount );
+        waitStageFlags.resize( waitSemaphoreCount );
+        for ( uint32 i = 0; i < waitSemaphoreCount; i++ )
+        {
+            auto* vkSemaphore = static_cast<VulkanRHISemaphore*>(info.waitSemaphores[ i ]);
+            waitSemaphores[ i ] = vkSemaphore->GetVulkanSemaphore();
+            waitStageFlags[ i ] = ConvertPipelineStageFlags( info.stageFlags );
+        }
+
+        uint32 signalSemaphoreCount = (uint32)info.signalSemaphores.size();
+        std::vector<VkSemaphore> signalSemaphores;
+        signalSemaphores.resize( signalSemaphoreCount );
+        for ( uint32 i = 0; i < signalSemaphoreCount; i++ )
+        {
+            auto* vkSemaphore = static_cast<VulkanRHISemaphore*>(info.signalSemaphores[ i ]);
+            signalSemaphores[ i ] = vkSemaphore->GetVulkanSemaphore();
+        }
+
+        VkSubmitInfo vkSubmitInfo = {
+            VK_STRUCTURE_TYPE_SUBMIT_INFO,                  // sType
+            NULL,                                           // pNext
+            waitSemaphoreCount,                             // waitSemaphoreCount
+            waitSemaphores.data(),                          // pWaitSemaphores
+            waitStageFlags.data(),                          // pWaitDstStageMask
+            1,                                              // commandBufferCount
+            &vulkanCommandBuffer->GetVulkanCommandBuffer(), // pCommandBuffers
+            signalSemaphoreCount,                           // signalSemaphoreCount
+            signalSemaphores.data()                         // pSignalSemaphores
+        };
+
+        VkFence nativeFence = vulkanFence == NULL ? VK_NULL_HANDLE : vulkanFence->GetVulkanFence();
+        auto result = vkQueueSubmit( queue, 1, &vkSubmitInfo, nativeFence );
+        if ( result != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed command vkQueueSubmit! {}", (uint32)result );
+        }
     }
 
     VulkanRHIBuffer::~VulkanRHIBuffer()
@@ -759,16 +893,30 @@ namespace EE
         ownership( false ),
         sampler( NULL )
     {
-        VkImageViewCreateInfo viewInfo = {};
-        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        viewInfo.image = image;
-        viewInfo.viewType = ConvertTextureType( description.type );
-        viewInfo.format = format;
-        viewInfo.subresourceRange.aspectMask = ConvertTextureAspect( description.viewUsage );
-        viewInfo.subresourceRange.baseMipLevel = 0;
-        viewInfo.subresourceRange.levelCount = 1;
-        viewInfo.subresourceRange.baseArrayLayer = 0;
-        viewInfo.subresourceRange.layerCount = 1;
+        VkImageViewCreateInfo viewInfo =
+        {
+            VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+            NULL,
+            0,
+            image,
+            ConvertTextureType( description.type ),
+            format,
+            VkComponentMapping
+            {
+                VK_COMPONENT_SWIZZLE_IDENTITY, // r
+                VK_COMPONENT_SWIZZLE_IDENTITY, // g
+                VK_COMPONENT_SWIZZLE_IDENTITY, // b
+                VK_COMPONENT_SWIZZLE_IDENTITY  // a
+            },
+            VkImageSubresourceRange
+            {
+                ConvertTextureAspect( description.viewUsage ),  // aspectMask
+                0,                                              // baseMipLevel
+                1,                                              // levelCount
+                0,                                              // baseArrayLayer
+                1                                               // layerCount
+            } 
+        };
 
         if ( vkCreateImageView( device->GetVulkanDevice(), &viewInfo, nullptr, &imageView ) != VK_SUCCESS )
         {
@@ -939,16 +1087,19 @@ namespace EE
 
         for ( uint32 i = 0; i < imageCount; i++ )
         {
-            RHITextureCreateDescription description{};
-            description.type = TextureType_Texture2D;
-            description.format = description.format;
-            description.colorSpace = description.colorSpace;
-            description.height = height;
-            description.width = width;
-            description.arraySize = 1;
-            description.mipLevels = 1;
+            RHITextureCreateDescription textureCreateDescription
+            {
+                TextureType_Texture2D,
+                (uint32)width,
+                (uint32)height,
+                0,
+                1,
+                1,
+                description.format,
+                description.colorSpace
+            };
 
-            textures.emplace_back( new VulkanRHITexture( description, device, images[ i ] ) );
+            textures.emplace_back( new VulkanRHITexture( textureCreateDescription, device, images[ i ] ) );
         }
     }
 
@@ -963,17 +1114,29 @@ namespace EE
         vkDestroySwapchainKHR( device->GetVulkanDevice(), swapChain, NULL );
     }
 
+    uint32 VulkanRHISwapChain::AquireNextImage( uint64 timeout, const VulkanRHISemaphore* semaphore, const VulkanRHIFence* fence )
+    {
+        uint32 imageIndex;
+        auto result = vkAcquireNextImageKHR( device->GetVulkanDevice(), swapChain, timeout, semaphore->GetVulkanSemaphore(), fence->GetVulkanFence(), &imageIndex);
+        if ( result != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed vkAcquireNextImageKHR! {}", (int32)result );
+        }
+        return imageIndex;
+    }
+
     VulkanRHISurface::~VulkanRHISurface()
     {
         vkDestroySurfaceKHR( instance->GetVulkanInstance(), surface, nullptr );
     }
 
     VulkanRHISurface::VulkanRHISurface( Window* window, VulkanRHIInstance* instance ) :
-        instance( instance )
+        instance( instance ),
+        surface( VK_NULL_HANDLE )
     {
-        if ( SDL_Vulkan_CreateSurface( (SDL_Window*)window->GetWindowHandle(), instance->GetVulkanInstance(), VK_NULL_HANDLE, &surface ) == SDL_FALSE )
+        if ( SDL_Vulkan_CreateSurface( (SDL_Window*)window->GetWindowHandle(), instance->GetVulkanInstance(), VK_NULL_HANDLE, &surface ) != 0 )
         {
-            EE_LOG_CORE_CRITICAL( L"SDL_Vulkan_CreateSurface failed! {}", Text::NarrowToWide( SDL_GetError() ) );
+            EE_LOG_CORE_CRITICAL( L"Failed SDL_Vulkan_CreateSurface! {}", Text::NarrowToWide( SDL_GetError() ) );
             return;
         }
     }
@@ -983,11 +1146,90 @@ namespace EE
         return surface != VK_NULL_HANDLE;
     }
 
+    VulkanRHIFence::~VulkanRHIFence()
+    {
+        vkDestroyFence( device->GetVulkanDevice(), fence, nullptr );
+    }
+
+    VulkanRHIFence::VulkanRHIFence( VulkanRHIDevice* device, bool initSignaled ) :
+        device( device ),
+        fence( VK_NULL_HANDLE )
+    {
+        VkFenceCreateInfo fenceCreateInfo
+        {
+            VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,                // sType
+            NULL,                                               // pNext
+            initSignaled ? VK_FENCE_CREATE_SIGNALED_BIT : 0u    // flags
+        };
+
+        auto createResult = vkCreateFence( device->GetVulkanDevice(), &fenceCreateInfo, nullptr, &fence);
+        if ( createResult != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to fence: {}", (int32)createResult );
+        }
+    }
+
+    bool VulkanRHIFence::IsSignaled() const
+    {
+        return vkGetFenceStatus( device->GetVulkanDevice(), fence ) == VK_SUCCESS;
+    }
+
+    void VulkanRHIFence::Reset()
+    {
+        auto result = vkResetFences( device->GetVulkanDevice(), 1, &fence );
+        if ( result != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed reset fence: {}", (int32)result );
+        }
+    }
+
+    void VulkanRHIFence::Wait()
+    {
+        auto result = vkWaitForFences( device->GetVulkanDevice(), 1, &fence, VK_TRUE, UINT64_MAX );
+        if ( result != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed reset fence: {}", (int32)result );
+        }
+    }
+
+    bool VulkanRHIFence::IsValid() const
+    {
+        return fence != VK_NULL_HANDLE;
+    }
+
+    VulkanRHISemaphore::~VulkanRHISemaphore()
+    {
+        vkDestroySemaphore( device->GetVulkanDevice(), semaphore, nullptr );
+    }
+    
+    VulkanRHISemaphore::VulkanRHISemaphore( VulkanRHIDevice* device ) :
+        device( device ),
+        semaphore( VK_NULL_HANDLE )
+    {
+        VkSemaphoreCreateInfo createInfo
+        {
+            VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,    // sType
+            NULL,                                       // pNext
+            0                                           // flags
+        };
+
+        auto createResult = vkCreateSemaphore( device->GetVulkanDevice(), &createInfo, nullptr, &semaphore );
+        if ( createResult != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to create semaphore: {}", (int32)createResult );
+        }
+    }
+
+    bool VulkanRHISemaphore::IsValid() const
+    {
+        return semaphore != VK_NULL_HANDLE;
+    }
+
     VulkanRHICommandPool::~VulkanRHICommandPool()
     {
         if ( commandPool != VK_NULL_HANDLE )
         {
-            vkDestroyCommandPool( device->GetVulkanDevice(), commandPool, VK_NULL_HANDLE );
+            vkDestroyCommandPool( device->GetVulkanDevice(), commandPool, nullptr );
         }
     }
 
@@ -1008,7 +1250,6 @@ namespace EE
         if ( createResult != VK_SUCCESS )
         {
             EE_LOG_CORE_CRITICAL( L"Failed to create command pool: {}", (int32)createResult );
-            return;
         }
     }
 
@@ -1079,8 +1320,8 @@ namespace EE
 
     VulkanRHI::~VulkanRHI()
     {
-        delete device;
-        delete instance;
+        delete GVulkanDevice;
+        delete GVulkanInstance;
         SDL_Vulkan_UnloadLibrary();
     }
 
@@ -1106,10 +1347,9 @@ namespace EE
         return -1;
     }
 
-    VulkanRHI::VulkanRHI() : DynamicRHI(),
-        device( VK_NULL_HANDLE )
+    VulkanRHI::VulkanRHI() : DynamicRHI()
     {
-        VkApplicationInfo appInfo = 
+        VkApplicationInfo appInfo =
         {
             VK_STRUCTURE_TYPE_APPLICATION_INFO,
             NULL,
@@ -1120,11 +1360,28 @@ namespace EE
             VK_API_VERSION_1_3
         };
 
-        SDL_Vulkan_LoadLibrary( nullptr );
+        if ( SDL_Vulkan_LoadLibrary( nullptr ) != 0 )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to load SDL Vulkan Library! {}", Text::NarrowToWide( SDL_GetError() ) );
+        }
+
+        TArray<const NChar*> layers;
+#ifdef EMPTYENGINE_CORE_LOG
+        layers.emplace_back( "VK_LAYER_KHRONOS_validation" );
+#endif
 
         uint32 extensionCount;
         const NChar* const* extensionNames = NULL;
         GetVulkanInstanceExtensions( &extensionCount, extensionNames );
+
+        TArray<const NChar*> extensions;
+        for ( uint32 i = 0; i < extensionCount; i++ )
+        {
+            extensions.emplace_back( extensionNames[ i ] );
+        }
+#ifdef EMPTYENGINE_CORE_LOG
+        extensions.emplace_back( VK_EXT_DEBUG_UTILS_EXTENSION_NAME );
+#endif
 
         VkInstanceCreateInfo createInfo
         {
@@ -1132,13 +1389,45 @@ namespace EE
             NULL,                                       // pNext
             0,                                          // flags
             &appInfo,                                   // pApplicationInfo
-            0,                                          // enabledLayerCount
-            NULL,                                       // ppEnabledLayerNames
-            extensionCount,                             // enabledExtensionCount
-            extensionNames                              // ppEnabledExtensionNames
+            (uint32)layers.size(),                      // enabledLayerCount
+            layers.data(),                              // ppEnabledLayerNames
+            (uint32)extensions.size(),                  // enabledExtensionCount
+            extensions.data()                           // ppEnabledExtensionNames
         };
 
-        instance = new VulkanRHIInstance( createInfo );
+        GVulkanInstance = new VulkanRHIInstance( createInfo );
+
+#ifdef EMPTYENGINE_CORE_LOG
+        PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessenger = VK_NULL_HANDLE;
+        vkCreateDebugUtilsMessenger = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr( GVulkanInstance->GetVulkanInstance(), "vkCreateDebugUtilsMessengerEXT");
+        if ( vkCreateDebugUtilsMessenger == VK_NULL_HANDLE )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to find function vkCreateDebugUtilsMessengerEXT" );
+            return;
+        }
+
+        VkDebugUtilsMessengerCreateInfoEXT messageCreateInfo
+        {
+            VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT, // sType
+            NULL,                                                    // pNext
+            0,                                                       // flags
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |        // messageSeverity
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
+            VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |            // messageType
+            VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+            VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
+            VulkanDebugCallback,                                     // pfnUserCallback
+            NULL                                                     // pUserData
+        };
+
+        VkResult result = vkCreateDebugUtilsMessenger( GVulkanInstance->GetVulkanInstance(), &messageCreateInfo, NULL, &GVulkanDebugMessager );
+        if ( result != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to create vulkan messenger {}", (uint32)result );
+        }
+#endif
     }
 
 	void VulkanRHI::SetName( RHIResource* pResource, const NChar* name ) { }
@@ -1162,22 +1451,22 @@ namespace EE
 
     RHIPresentContext* VulkanRHI::CreateRHIPresentContext( Window* window ) const
     {
-        return new VulkanRHIPresentContext( window, this->instance );
+        return new VulkanRHIPresentContext( window, GVulkanInstance );
     }
 
     RHISurface* VulkanRHI::CreateRHISurface( Window* window ) const
     {
-        return new VulkanRHISurface( window, this->instance );
+        return new VulkanRHISurface( window, GVulkanInstance );
     }
 
     RHISwapChain* VulkanRHI::CreateRHISwapChain( const RHISwapChainCreateDescription& description, class Window* window ) const
     {
-        return new VulkanRHISwapChain( description, static_cast<const VulkanRHIPresentContext*>( GetPresentContextOfWindow( window ) ), this->device);
+        return new VulkanRHISwapChain( description, static_cast<const VulkanRHIPresentContext*>( GetPresentContextOfWindow( window ) ), GVulkanDevice);
     }
 
     RHICommandBuffer* VulkanRHI::CreateRHICommandBuffer( const RHICommandBufferCreateDescription& description ) const
     {
-        return new VulkanRHICommandBuffer( this->device, this->device->GetGraphicsFamilyIndex() );
+        return new VulkanRHICommandBuffer( GVulkanDevice, GVulkanDevice->GetGraphicsFamilyIndex() );
     }
     
     RHIBuffer* VulkanRHI::CreateRHIBuffer( const RHIBufferCreateDescription& description ) const
