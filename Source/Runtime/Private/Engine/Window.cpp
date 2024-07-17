@@ -155,9 +155,10 @@ namespace EE
     {
         if ( Icon->GetColorFormat() != PixelFormat_R8G8B8A8_UINT ) return;
         SDL_Surface* Surface = SDL_CreateSurfaceFrom(
-            (void*)Icon->PointerToValue(),
             Icon->GetWidth(), Icon->GetHeight(),
-            NULL, SDL_PIXELFORMAT_RGBA32
+            SDL_PIXELFORMAT_RGBA32,
+            (void*)Icon->PointerToValue(),
+            NULL
         );
         SDL_SetWindowIcon( static_cast<SDL_Window*>(windowHandle), Surface );
         SDL_DestroySurface( Surface );

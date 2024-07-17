@@ -31,7 +31,7 @@ namespace EE
 
     bool WindowsWindow::MakeTransparent( const uint8& r, const uint8& g, const uint8& b, const uint8& a )
     {
-        HWND hWnd = (HWND)SDL_GetProperty( SDL_GetWindowProperties( (SDL_Window*)GetWindowHandle() ), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL );
+        HWND hWnd = (HWND)SDL_GetPointerProperty( SDL_GetWindowProperties( (SDL_Window*)GetWindowHandle() ), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL );
 
         SetWindowLong( hWnd, GWL_EXSTYLE, GetWindowLong( hWnd, GWL_EXSTYLE ) | WS_EX_LAYERED );
 

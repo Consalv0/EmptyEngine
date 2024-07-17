@@ -69,7 +69,7 @@ namespace EE
         const JoystickState* joystick = NULL;
         if ( GetJoystickState( index, &joystick ) )
         {
-            SDL_Gamepad* gamepad = SDL_GetGamepadFromInstanceID( joystick->instanceID );
+            SDL_Gamepad* gamepad = SDL_GetGamepadFromID( joystick->instanceID );
             return SDL_GetGamepadAxis( gamepad, (SDL_GamepadAxis)axis ) / 32768.F;
         }
         return 0.F;
@@ -302,7 +302,7 @@ namespace EE
         case SDL_EVENT_JOYSTICK_BUTTON_UP:
         case SDL_EVENT_GAMEPAD_BUTTON_UP:
         {
-            SDL_Joystick* joystick = SDL_GetJoystickFromInstanceID( sdlEvent->jbutton.which );
+            SDL_Joystick* joystick = SDL_GetJoystickFromID( sdlEvent->jbutton.which );
             if ( SDL_JoystickConnected( joystick ) )
             {
                 JoystickState* joystickState = NULL;
@@ -340,7 +340,7 @@ namespace EE
         case SDL_EVENT_JOYSTICK_BUTTON_DOWN:
         case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
         {
-            SDL_Joystick* joystick = SDL_GetJoystickFromInstanceID( sdlEvent->jbutton.which );
+            SDL_Joystick* joystick = SDL_GetJoystickFromID( sdlEvent->jbutton.which );
             if ( SDL_JoystickConnected( joystick ) )
             {
                 JoystickState* joystickState = NULL;
@@ -374,7 +374,7 @@ namespace EE
         case SDL_EVENT_JOYSTICK_AXIS_MOTION:
         case SDL_EVENT_GAMEPAD_AXIS_MOTION:
         {
-            SDL_Joystick* joystick = SDL_GetJoystickFromInstanceID( sdlEvent->jdevice.which );
+            SDL_Joystick* joystick = SDL_GetJoystickFromID( sdlEvent->jdevice.which );
 
             if ( SDL_JoystickConnected( joystick ) )
             {
