@@ -95,7 +95,7 @@ namespace EE
             return false;
         }
 
-        CreatePresentContextOfWindow( this );
+        GDynamicRHI->CreateRHIPresentContextOfWindow( this );
 
         // SDL_SetWindowKeyboardGrab( (SDL_Window*)windowHandle, SDL_bool( false ) );
         SDL_AddEventWatch( WindowEventsHandler, (void*)this );
@@ -170,7 +170,7 @@ namespace EE
 #endif // EE_DEBUG
 
         SDL_DelEventWatch( WindowEventsHandler, (void*)this );
-        FreePresentContextOfWindow( this );
+        GDynamicRHI->FreeRHIPresentContextOfWindow( this );
         SDL_DestroyWindow( (SDL_Window*)(windowHandle) );
         windowHandle = NULL;
     }

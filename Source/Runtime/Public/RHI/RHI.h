@@ -29,20 +29,20 @@ namespace EE
         virtual RHISampler* CreateRHISampler( const RHISamplerCreateDescription& description ) const = 0;
         virtual RHIShaderStage* CreateRHIShaderStage( EShaderStage stage, const void* pShaderBytecode, size_t bytecodeLength ) const = 0;
 
+        virtual const RHIDevice* GetRHIDevice() const = 0;
+
         virtual EShaderFormat GetShaderFormat() const = 0;
 
-        virtual RHITexture* GetBackTexure( const RHISwapChain& swapchain, uint32 index ) const = 0;
-
         virtual WString const& GetName() const = 0;
+
+        const RHIPresentContext* GetRHIPresentContextOfWindow( Window* window ) const;
+
+        const RHIPresentContext* CreateRHIPresentContextOfWindow( Window* window ) const;
+
+        void FreeRHIPresentContextOfWindow( Window* window ) const;
     };
 
     extern DynamicRHI* GDynamicRHI;
-
-    const RHIPresentContext* GetPresentContextOfWindow( Window* window );
-
-    const RHIPresentContext* CreatePresentContextOfWindow( Window* window );
-
-    void FreePresentContextOfWindow( Window* window );
 
     //* Called to create the instance of the dynamic RHI,
     //* this is implemented for each platform.

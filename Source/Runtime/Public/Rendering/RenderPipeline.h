@@ -26,8 +26,6 @@ namespace EE
 
 		virtual void SetRenderScale( float scale ) = 0;
 
-		virtual RHITexture* GetFramebuffer() const = 0;
-
 		template <typename T>
 		bool CreateStage( const EName& stageName );
 

@@ -86,6 +86,26 @@ namespace EE
         FORCEINLINE const VkInstance& GetVulkanInstance() const { return instance; };
     };
 
+    class VulkanRHIQueue : public RHIQueue
+    {
+    private:
+        VkQueue queue;
+        const VulkanRHIDevice* device;
+
+    public:
+        ~VulkanRHIQueue();
+
+        VulkanRHIQueue( const VulkanRHIDevice* device, const uint32& familyIndex, const uint32& queueIndex );
+
+        bool IsValid() const;
+
+        FORCEINLINE const VkQueue& GetVulkanQueue() const { return queue; }
+
+        void WaitIdle() const;
+
+        void SubmitCommandBuffer( const RHICommandBuffer* commandBuffer, const RHIQueueSubmitInfo& info ) override;
+    };
+
     class VulkanRHIDevice : public RHIDevice
     {
     private:
@@ -115,11 +135,15 @@ namespace EE
 
         FORCEINLINE uint32 GetGraphicsFamilyIndex() const { return graphicsQueueIndex; }
 
-        FORCEINLINE VulkanRHIQueue* GetGraphicsQueue() const { return graphicsQueue; }
+        FORCEINLINE VulkanRHIQueue* GetVulkanGraphicsQueue() const { return graphicsQueue; }
+
+        RHIQueue* GetGraphicsQueue() const override { return GetVulkanGraphicsQueue(); }
 
         FORCEINLINE uint32 GetPresentFamilyIndex() const { return presentQueueIndex; }
 
-        FORCEINLINE VulkanRHIQueue* GetPresentQueue() const { return presentQueue; }
+        FORCEINLINE VulkanRHIQueue* GetVulkanPresentQueue() const { return presentQueue; }
+
+        RHIQueue* GetPresentQueue() const override { return GetVulkanPresentQueue(); }
 
         FORCEINLINE const uint32* GetFamilyIndices() const { return queueFamilyIndices; }
 
@@ -170,33 +194,21 @@ namespace EE
 
         const VulkanRHISemaphore& GetSempahoreOfImage( uint32 imageIndex ) const;
 
+        const RHICommandBuffer* GetCommandBuffer( uint32 imageIndex ) const override;
+
+        const RHIFence* GetFence( uint32 imageIndex ) const override;
+
+        const RHITexture* GetBackbuffer( uint32 index ) const override;
+
         uint32 AquireBackbuffer( uint64 timeout ) const override;
 
         void Present( uint32 imageIndex ) const override;
 
         void SubmitPresentImage( uint32 imageIndex, VulkanRHIQueue* queue ) const;
-        
-        bool IsValid() const;
-    };
 
-    class VulkanRHIQueue : public RHIQueue
-    {
-    private:
-        VkQueue queue;
-        const VulkanRHIDevice* device;
-
-    public:
-        ~VulkanRHIQueue();
-
-        VulkanRHIQueue( const VulkanRHIDevice* device, const uint32& familyIndex, const uint32& queueIndex );
+        void SubmitCommandBuffer( uint32 imageIndex ) const override;
 
         bool IsValid() const;
-
-        FORCEINLINE const VkQueue& GetVulkanQueue() const { return queue; }
-
-        void WaitIdle() const;
-        
-        void SubmitCommandBuffer( const RHICommandBuffer* commandBuffer, const RHIQueueSubmitInfo& info ) override;
     };
 
     class VulkanRHIBuffer : public RHIBuffer
@@ -229,6 +241,8 @@ namespace EE
 
         VulkanRHITexture( RHITextureCreateDescription& description, VulkanRHIDevice* device );
 
+        VkImage GetVulkanImage() const { return image; }
+
         ~VulkanRHITexture();
 
         bool IsValid() const;
@@ -260,6 +274,12 @@ namespace EE
         uint32 AquireNextImage( uint64 timeout, const VulkanRHISemaphore* semaphore, const VulkanRHIFence* fence );
 
         uint32 NextImageIndex() const { return (nextImageIndex + 1) % imageCount; }
+
+        uint32 CurrentImageIndex() const { nextImageIndex; }
+
+        VkImage GetImage( uint32 index ) const { return images[ index ]; }
+
+        const VulkanRHITexture* GetTexture( uint32 index ) const { return textures[ index ]; }
     };
 
     class VulkanRHISurface : public RHISurface
@@ -291,9 +311,9 @@ namespace EE
 
         FORCEINLINE const VkFence& GetVulkanFence() const { return fence; }
 
-        bool IsSignaled() const;
-        void Reset();
-        void Wait();
+        bool IsSignaled() const override;
+        void Reset() const override;
+        void Wait( uint64 timeout ) const override;
 
         bool IsValid() const;
     };
@@ -313,6 +333,10 @@ namespace EE
         bool IsValid() const;
     };
 
+    // TODO 
+    // You can allocate as many VkCommandBuffer as you want from a given pool,
+    // but you can only record commands from one thread at a time.
+    // If you want multithreaded command recording, you need more VkCommandPool objects.
     class VulkanRHICommandPool
     {
     private:
@@ -344,6 +368,12 @@ namespace EE
         bool IsValid() const;
 
         FORCEINLINE const VkCommandBuffer& GetVulkanCommandBuffer() const { return commandBuffer; }
+
+        void Begin() const override;
+
+        void End() const override;
+
+        void ClearColor( Vector3f color, const RHITexture* texture ) const override;
     };
 
     class VulkanRHIShaderStage

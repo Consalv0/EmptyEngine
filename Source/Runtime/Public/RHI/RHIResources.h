@@ -37,6 +37,14 @@ namespace EE
         virtual ~RHISurface() {};
     };
 
+    class RHITexture : public RHIResource
+    {
+    protected:
+        RHITexture() {}
+    public:
+        virtual ~RHITexture() {};
+    };
+
     class RHIFence : public RHIResource
     {
     protected:
@@ -45,8 +53,8 @@ namespace EE
         virtual ~RHIFence() {};
 
         virtual bool IsSignaled() const = 0;
-        virtual void Reset() = 0;
-        virtual void Wait() = 0;
+        virtual void Reset() const = 0;
+        virtual void Wait( uint64 timeout ) const = 0;
     };
 
     class RHISemaphore : public RHIResource
@@ -85,26 +93,6 @@ namespace EE
         virtual ~RHIInstance() {};
     };
 
-    class RHIPresentContext : public RHIObject
-    {
-    protected:
-        RHIPresentContext() {}
-    public:
-        virtual ~RHIPresentContext() {};
-
-        virtual uint32 AquireBackbuffer( uint64 timeout ) const = 0;
-
-        virtual void Present( uint32 imageIndex ) const = 0;
-    };
-
-    class RHIDevice : public RHIObject
-    {
-    protected:
-        RHIDevice() {}
-    public:
-        virtual ~RHIDevice() {};
-    };
-
     struct RHIBufferCreateDescription
     {
         uint64 size = 0;
@@ -127,16 +115,42 @@ namespace EE
         RHICommandBuffer() {}
     public:
         virtual ~RHICommandBuffer() {};
+
+        virtual void Begin() const = 0;
+
+        virtual void End() const = 0;
+
+        virtual void ClearColor( Vector3f color, const RHITexture* texture ) const = 0;
+    };
+
+    class RHIPresentContext : public RHIObject
+    {
+    protected:
+        RHIPresentContext() {}
+    public:
+        virtual ~RHIPresentContext() {};
+
+        virtual const RHITexture* GetBackbuffer( uint32 index ) const = 0;
+
+        virtual uint32 AquireBackbuffer( uint64 timeout ) const = 0;
+
+        virtual void Present( uint32 imageIndex ) const = 0;
+
+        virtual void SubmitCommandBuffer( uint32 imageIndex ) const = 0;
+
+        virtual const RHICommandBuffer* GetCommandBuffer( uint32 imageIndex ) const = 0;
+
+        virtual const RHIFence* GetFence( uint32 imageIndex ) const = 0;
     };
 
     struct RHIQueueSubmitInfo
     {
     public:
-        std::vector<RHISemaphore*> waitSemaphores;
-        std::vector<RHISemaphore*> signalSemaphores;
+        std::vector<const RHISemaphore*> waitSemaphores;
+        std::vector<const RHISemaphore*> signalSemaphores;
         EPipelineStage stageFlags;
 
-        RHIFence* signalFence;
+        const RHIFence* signalFence;
     };
 
     class RHIQueue : public RHIResource
@@ -147,6 +161,18 @@ namespace EE
         virtual ~RHIQueue() {};
 
         virtual void SubmitCommandBuffer( const RHICommandBuffer* commandBuffer, const RHIQueueSubmitInfo& info ) = 0;
+    };
+
+    class RHIDevice : public RHIObject
+    {
+    protected:
+        RHIDevice() {}
+    public:
+        virtual ~RHIDevice() {};
+
+        virtual RHIQueue* GetGraphicsQueue() const = 0;
+
+        virtual RHIQueue* GetPresentQueue() const = 0;
     };
 
     class RHIBuffer : public RHIResource
@@ -177,16 +203,6 @@ namespace EE
         uint32 miscFlags = 0;
         Vector4 clear = {};
         EImageLayout layout = ImageLayout_ShaderResource;
-    };
-
-    typedef class RHITexture* RHITextureRef;
-
-    class RHITexture : public RHIResource
-    {
-    protected:
-        RHITexture() {}
-    public:
-        virtual ~RHITexture() {};
     };
 
     struct RHISamplerCreateDescription

@@ -637,6 +637,12 @@ namespace EE
 
     VulkanRHIPresentContext::~VulkanRHIPresentContext()
     {
+        // Wait for all commands of this context
+        for ( auto& fence : renderFences )
+        {
+            fence.Wait( UINT64_MAX );
+        }
+
         delete swapChain;
         commandBuffers.clear();
         imageSemaphores.clear();
@@ -657,19 +663,23 @@ namespace EE
 
     const VulkanRHISemaphore& VulkanRHIPresentContext::GetSempahoreOfImage( uint32 imageIndex ) const
     {
-        TList<VulkanRHISemaphore>::const_iterator it = imageSemaphores.begin();
-        for ( uint32 i = 0; i < imageIndex; i++ ) ++it;
-        return *it;
+        TList<VulkanRHISemaphore>::const_iterator imageSemaphoresIt = imageSemaphores.begin();
+        for ( uint32 i = 0; i < imageIndex; i++ ) ++imageSemaphoresIt;
+        return *imageSemaphoresIt;
     }
 
     uint32 VulkanRHIPresentContext::AquireBackbuffer( uint64 timeout ) const
     {
-        return swapChain->AquireNextImage( timeout, &GetSempahoreOfImage( swapChain->NextImageIndex() ), NULL);
+        uint32 nextFrameIndex = swapChain->NextImageIndex();
+        GetFence( nextFrameIndex )->Wait( timeout );
+        uint32 image = swapChain->AquireNextImage( timeout, &GetSempahoreOfImage( nextFrameIndex ), NULL);
+        GetFence( nextFrameIndex )->Reset();
+        return image;
     }
 
     void VulkanRHIPresentContext::Present( uint32 imageIndex ) const
     {
-        SubmitPresentImage( imageIndex, GVulkanDevice->GetPresentQueue() );
+        SubmitPresentImage( imageIndex, GVulkanDevice->GetVulkanPresentQueue() );
     }
 
     void VulkanRHIPresentContext::SubmitPresentImage( uint32 imageIndex, VulkanRHIQueue* queue ) const
@@ -692,6 +702,47 @@ namespace EE
         {
             EE_LOG_CORE_CRITICAL( L"Failed to present image index: {}! {}", imageIndex, (uint32)result );
         }
+    }
+
+    void VulkanRHIPresentContext::SubmitCommandBuffer( uint32 imageIndex ) const
+    {
+        TList<VulkanRHICommandBuffer>::const_iterator commandBuffersIt = commandBuffers.begin();
+        TList<VulkanRHISemaphore>::const_iterator imageSemaphoresIt = imageSemaphores.begin();
+        TList<VulkanRHISemaphore>::const_iterator renderSemaphoresIt = renderSemaphores.begin();
+        TList<VulkanRHIFence>::const_iterator renderFencesIt = renderFences.begin();
+        for ( uint32 i = 0; i < imageIndex; i++ )
+        {
+            commandBuffersIt++;
+            imageSemaphoresIt++;
+            renderSemaphoresIt++;
+            renderFencesIt++;
+        }
+
+        RHIQueueSubmitInfo ququeSubmitInfo{ };
+        ququeSubmitInfo.waitSemaphores.emplace_back( &*imageSemaphoresIt );
+        ququeSubmitInfo.signalSemaphores.emplace_back( &*renderSemaphoresIt );
+        ququeSubmitInfo.signalFence = &*renderFencesIt;
+        ququeSubmitInfo.stageFlags = PipelineStage_OutputColor;
+        GVulkanDevice->GetVulkanPresentQueue()->SubmitCommandBuffer( &*commandBuffersIt, ququeSubmitInfo );
+    }
+
+    const RHICommandBuffer* VulkanRHIPresentContext::GetCommandBuffer( uint32 imageIndex ) const
+    {
+        TList<VulkanRHICommandBuffer>::const_iterator commandBuffersIt = commandBuffers.begin();
+        for ( uint32 i = 0; i < imageIndex; i++ ) ++commandBuffersIt;
+        return &*commandBuffersIt;
+    }
+
+    const RHIFence* VulkanRHIPresentContext::GetFence( uint32 imageIndex ) const
+    {
+        TList<VulkanRHIFence>::const_iterator renderFencesIt = renderFences.begin();
+        for ( uint32 i = 0; i < imageIndex; i++ ) ++renderFencesIt;
+        return &*renderFencesIt;
+    }
+
+    const RHITexture* VulkanRHIPresentContext::GetBackbuffer( uint32 index ) const
+    {
+        return swapChain->GetTexture( index );
     }
 
     void VulkanRHIPresentContext::CreateSurface()
@@ -841,7 +892,7 @@ namespace EE
         waitStageFlags.resize( waitSemaphoreCount );
         for ( uint32 i = 0; i < waitSemaphoreCount; i++ )
         {
-            auto* vkSemaphore = static_cast<VulkanRHISemaphore*>(info.waitSemaphores[ i ]);
+            auto* vkSemaphore = static_cast<const VulkanRHISemaphore*>(info.waitSemaphores[ i ]);
             waitSemaphores[ i ] = vkSemaphore->GetVulkanSemaphore();
             waitStageFlags[ i ] = ConvertPipelineStageFlags( info.stageFlags );
         }
@@ -851,7 +902,7 @@ namespace EE
         signalSemaphores.resize( signalSemaphoreCount );
         for ( uint32 i = 0; i < signalSemaphoreCount; i++ )
         {
-            auto* vkSemaphore = static_cast<VulkanRHISemaphore*>(info.signalSemaphores[ i ]);
+            auto* vkSemaphore = static_cast<const VulkanRHISemaphore*>(info.signalSemaphores[ i ]);
             signalSemaphores[ i ] = vkSemaphore->GetVulkanSemaphore();
         }
 
@@ -1027,7 +1078,7 @@ namespace EE
         presentContext( presentContext ),
         swapChain( VK_NULL_HANDLE ),
         imageCount(), size(),
-        nextImageIndex( 0 )
+        nextImageIndex(0)
     {
         const VulkanRHISurface* surface = presentContext->GetRHISurface();
         const VulkanSurfaceSupportDetails& surfaceDetails = device->GetVulkanPhysicalDevice()->GetSurfaceDetails( surface->GetVulkanSurface() );
@@ -1119,6 +1170,8 @@ namespace EE
 
             textures.emplace_back( new VulkanRHITexture( textureCreateDescription, device, images[ i ] ) );
         }
+
+        nextImageIndex = imageCount - 1;
     }
 
     VulkanRHISwapChain::~VulkanRHISwapChain()
@@ -1194,7 +1247,7 @@ namespace EE
         return vkGetFenceStatus( device->GetVulkanDevice(), fence ) == VK_SUCCESS;
     }
 
-    void VulkanRHIFence::Reset()
+    void VulkanRHIFence::Reset() const
     {
         auto result = vkResetFences( device->GetVulkanDevice(), 1, &fence );
         if ( result != VK_SUCCESS )
@@ -1203,12 +1256,12 @@ namespace EE
         }
     }
 
-    void VulkanRHIFence::Wait()
+    void VulkanRHIFence::Wait( uint64 timeout ) const
     {
-        auto result = vkWaitForFences( device->GetVulkanDevice(), 1, &fence, VK_TRUE, UINT64_MAX );
+        auto result = vkWaitForFences( device->GetVulkanDevice(), 1, &fence, VK_TRUE, timeout );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed reset fence: {}", (int32)result );
+            EE_LOG_CORE_CRITICAL( L"Failed wait fence: {}", (int32)result );
         }
     }
 
@@ -1260,10 +1313,10 @@ namespace EE
 
         VkCommandPoolCreateInfo createInfo
         {
-            VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, // sType;
-            VK_NULL_HANDLE,                             // pNext;
-            0,                                          // flags;
-            queueFamilyIndex                            // queueFamilyIndex;
+            VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,         // sType;
+            VK_NULL_HANDLE,                                     // pNext;
+            VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,    // flags;
+            queueFamilyIndex                                    // queueFamilyIndex;
         };
 
         auto createResult = vkCreateCommandPool( device->GetVulkanDevice(), &createInfo, NULL, &commandPool );
@@ -1301,6 +1354,50 @@ namespace EE
     bool VulkanRHICommandBuffer::IsValid() const
     {
         return commandBuffer != VK_NULL_HANDLE;
+    }
+
+    void VulkanRHICommandBuffer::Begin() const
+    {
+        VkCommandBufferBeginInfo beginInfo
+        {
+            VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,// sType
+            NULL,                                       // pNext
+            0,                                          // flags
+            NULL,                                       // pInheritanceInfo
+        };
+
+        auto result = vkBeginCommandBuffer( commandBuffer, &beginInfo );
+        if ( result != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to end command buffer {}", (int32)result );
+        }
+    }
+
+    void VulkanRHICommandBuffer::End() const
+    {
+        auto result = vkEndCommandBuffer( commandBuffer );
+        if ( result != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to end command buffer {}", (int32)result );
+        }
+    }
+
+    void VulkanRHICommandBuffer::ClearColor( Vector3f color, const RHITexture* texture ) const
+    {
+        VkClearColorValue clearColor = { color.r, color.g, color.b };
+
+        VkImageSubresourceRange imageRange
+        {
+            VK_IMAGE_ASPECT_COLOR_BIT,  // aspectMask
+            0,                          // baseMipLevel
+            1,                          // levelCount
+            0,                          // baseArrayLayer
+            1                           // layerCount
+        };
+
+        auto vulkanTexture = static_cast<const VulkanRHITexture*>( texture );
+        
+        vkCmdClearColorImage( commandBuffer, vulkanTexture->GetVulkanImage(), VK_IMAGE_LAYOUT_GENERAL, &clearColor, 1, &imageRange );
     }
 
     VulkanRHIShaderStage::~VulkanRHIShaderStage()
@@ -1454,10 +1551,9 @@ namespace EE
 
 	void VulkanRHI::WaitForDevice() const { }
 
-    RHITexture* VulkanRHI::GetBackTexure( const RHISwapChain& swapchain, uint32 index ) const
+    const RHIDevice* VulkanRHI::GetRHIDevice() const
     {
-        // return swapchain->imageTextures[0];
-        return NULL;
+        return GVulkanDevice;
     }
 
     const WString& VulkanRHI::GetName() const
@@ -1481,7 +1577,7 @@ namespace EE
 
     RHISwapChain* VulkanRHI::CreateRHISwapChain( const RHISwapChainCreateDescription& description, class Window* window ) const
     {
-        return new VulkanRHISwapChain( description, static_cast<const VulkanRHIPresentContext*>( GetPresentContextOfWindow( window ) ), GVulkanDevice);
+        return new VulkanRHISwapChain( description, static_cast<const VulkanRHIPresentContext*>( GDynamicRHI->GetRHIPresentContextOfWindow( window ) ), GVulkanDevice);
     }
 
     RHICommandBuffer* VulkanRHI::CreateRHICommandBuffer( const RHICommandBufferCreateDescription& description ) const
