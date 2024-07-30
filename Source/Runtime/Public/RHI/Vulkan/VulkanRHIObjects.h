@@ -233,6 +233,7 @@ namespace EE
         VkImage image;
         VkImageView imageView;
         VmaAllocation memory;
+        UIntVector3 extent;
         VkFormat format;
         bool ownership;
 
@@ -242,6 +243,8 @@ namespace EE
         VulkanRHITexture( RHITextureCreateDescription& description, VulkanRHIDevice* device );
 
         VkImage GetVulkanImage() const { return image; }
+
+        const UIntVector3& GetExtent() const override { return extent; };
 
         ~VulkanRHITexture();
 

@@ -6,6 +6,7 @@
 
 #include "RHI/Vulkan/VulkanRHI.h"
 
+// #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
@@ -955,13 +956,13 @@ namespace EE
 
     VulkanRHITexture::VulkanRHITexture( RHITextureCreateDescription& description, VulkanRHIDevice* device, VkImage image ) :
         device( device ),
+        extent( description.width, description.height, description.depth ),
         format( ConvertPixelFormat( description.format, description.colorSpace ) ),
-        memory( VK_NULL_HANDLE ),
+        sampler( VK_NULL_HANDLE ), memory( VK_NULL_HANDLE ),
         image( image ),
-        ownership( false ),
-        sampler( NULL )
+        ownership( false )
     {
-        VkImageViewCreateInfo viewInfo =
+        VkImageViewCreateInfo viewInfo
         {
             VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
             NULL,
@@ -971,10 +972,10 @@ namespace EE
             format,
             VkComponentMapping
             {
-                VK_COMPONENT_SWIZZLE_IDENTITY, // r
-                VK_COMPONENT_SWIZZLE_IDENTITY, // g
-                VK_COMPONENT_SWIZZLE_IDENTITY, // b
-                VK_COMPONENT_SWIZZLE_IDENTITY  // a
+                .r = VK_COMPONENT_SWIZZLE_IDENTITY,
+                .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+                .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+                .a = VK_COMPONENT_SWIZZLE_IDENTITY
             },
             VkImageSubresourceRange
             {
@@ -995,20 +996,23 @@ namespace EE
 
     VulkanRHITexture::VulkanRHITexture( RHITextureCreateDescription& description, VulkanRHIDevice* device ) :
         device( device ),
+        extent( description.width, description.height, description.depth ),
         format( ConvertPixelFormat( description.format, description.colorSpace ) ),
         ownership( true ),
-        sampler( NULL ), memory( VK_NULL_HANDLE ), imageView( VK_NULL_HANDLE )
+        sampler( VK_NULL_HANDLE ), memory( VK_NULL_HANDLE ), imageView( VK_NULL_HANDLE )
     {
-        VkImageCreateInfo imageInfo = {
+        VkImageCreateInfo imageInfo
+        {
             VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,                // sType
             VK_NULL_HANDLE,                                     // pNext
             0,                                                  // flags
             VK_IMAGE_TYPE_2D,                                   // imageType
             format,                                             // format
-            VkExtent3D {                                        // extent
-                .width = description.width,
-                .height = description.height,
-                .depth = description.depth },
+            VkExtent3D {
+                .width =  extent.x,
+                .height = extent.y,
+                .depth =  extent.z 
+            },                                                  // extent
             description.mipLevels,                              // mipLevels
             description.arraySize,                              // arrayLayers
             (VkSampleCountFlagBits)description.sampleCount,     // samples
@@ -1026,8 +1030,17 @@ namespace EE
             return;
         }
 
-        VmaAllocationCreateInfo allocInfo = {};
-        allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
+        VmaAllocationCreateInfo allocInfo
+        {
+            0,                      // flags
+            VMA_MEMORY_USAGE_AUTO,  // usage
+            0,                      // requiredFlags
+            0,                      // preferredFlags
+            0,                      // memoryTypeBits
+            VK_NULL_HANDLE,         // pool
+            NULL,                   // pUserData
+            0.0F                    // priority
+        };
 
         if ( vmaCreateImage( device->GetVulkanAllocator(), &imageInfo, &allocInfo, &image, &memory, NULL ) != VK_SUCCESS )
         {
@@ -1035,16 +1048,30 @@ namespace EE
             return;
         }
 
-        VkImageViewCreateInfo viewInfo = {};
-        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        viewInfo.image = image;
-        viewInfo.viewType = ConvertTextureType( description.type );
-        viewInfo.format = format;
-        viewInfo.subresourceRange.aspectMask = ConvertTextureAspect( description.viewUsage );
-        viewInfo.subresourceRange.baseMipLevel = 0;
-        viewInfo.subresourceRange.levelCount = 1;
-        viewInfo.subresourceRange.baseArrayLayer = 0;
-        viewInfo.subresourceRange.layerCount = 1;
+        VkImageViewCreateInfo viewInfo
+        {
+            VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,   // sType
+            NULL,                                       // pNext
+            0,                                          // flags
+            image,                                      // image
+            ConvertTextureType( description.type ),     // viewType
+            format,                                     // format
+            VkComponentMapping
+            {
+                .r = VK_COMPONENT_SWIZZLE_IDENTITY,
+                .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+                .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+                .a = VK_COMPONENT_SWIZZLE_IDENTITY
+            },                                          // components
+            VkImageSubresourceRange
+            {
+                ConvertTextureAspect( description.viewUsage ),  // aspectMask
+                0,                                              // baseMipLevel
+                1,                                              // levelCount
+                0,                                              // baseArrayLayer
+                1                                               // layerCount
+            }                                           // subresourceRange
+        };
 
         if ( vkCreateImageView( device->GetVulkanDevice(), &viewInfo, nullptr, &imageView ) != VK_SUCCESS )
         {

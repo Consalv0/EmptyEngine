@@ -78,6 +78,9 @@ namespace EE
     using IntVector2 = Math::TIntVector2<int32>;
     using IntVector3 = Math::TIntVector3<int32>;
     using IntVector4 = Math::TIntVector4<int32>;
+
+    using UIntVector2 = Math::TIntVector2<uint32>;
+    using UIntVector3 = Math::TIntVector3<uint32>;
 }
 
 #define EE_CLAMP(x, lo, hi)    ((x) < (lo) ? (lo) : (x) > (hi) ? (hi) : (x))

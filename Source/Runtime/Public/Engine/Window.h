@@ -41,9 +41,10 @@ namespace EE
             uint32 height = -1,
             EWindowMode mode = WindowMode_Windowed,
             bool allowHDR = false,
-            uint32 options = WindowOption_None
+            uint32 options = WindowOption_None,
+            bool vsync = false
         )
-            : name(title), width(width), height(height), windowMode(mode), allowHDR(allowHDR), options(options) {
+            : name(title), width(width), height(height), windowMode(mode), allowHDR(allowHDR), options(options), vsync(vsync) {
         }
     };
 

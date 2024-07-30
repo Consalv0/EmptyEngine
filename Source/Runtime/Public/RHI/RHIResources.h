@@ -43,6 +43,8 @@ namespace EE
         RHITexture() {}
     public:
         virtual ~RHITexture() {};
+
+        virtual const UIntVector3& GetExtent() const = 0;
     };
 
     class RHIFence : public RHIResource
