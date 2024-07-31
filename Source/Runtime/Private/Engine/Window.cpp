@@ -21,35 +21,35 @@ namespace EE
 
         if ( sdlEvent->type >= SDL_EVENT_WINDOW_FIRST && sdlEvent->type <= SDL_EVENT_WINDOW_LAST )
         {
-            if ( sdlEvent->window.windowID != SDL_GetWindowID( (SDL_Window*)window->GetWindowHandle() ) )
+            SDL_WindowID windowID = SDL_GetWindowID( (SDL_Window*)window->GetWindowHandle() );
+
+            if ( sdlEvent->window.windowID != windowID )
                 return 0;
-        }
 
-        switch ( sdlEvent->type )
-        {
-        case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
-        case SDL_EVENT_WINDOW_RESIZED:
-        {
-            break;
-        }
+            switch ( sdlEvent->type )
+            {
+            case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+            case SDL_EVENT_WINDOW_RESIZED:
+            {
+                break;
+            }
 
-        case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-        {
-            if ( sdlEvent->window.windowID == SDL_GetWindowID( (SDL_Window*)window->GetWindowHandle() ) )
+            case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+            {
                 window->closeRequested = true;
-            break;
-        }
-        case SDL_EVENT_WINDOW_FOCUS_GAINED:
-        case SDL_EVENT_WINDOW_FOCUS_LOST:
-        {
-            break;
-        }
-        case SDL_EVENT_WINDOW_DESTROYED:
-        {
-            if ( sdlEvent->window.windowID == SDL_GetWindowID( (SDL_Window*)window->GetWindowHandle() ) )
+                break;
+            }
+            case SDL_EVENT_WINDOW_FOCUS_GAINED:
+            case SDL_EVENT_WINDOW_FOCUS_LOST:
+            {
+                break;
+            }
+            case SDL_EVENT_WINDOW_DESTROYED:
+            {
                 window->closeRequested = true;
-            break;
-        }
+                break;
+            }
+            }
         }
 
         return 0;
