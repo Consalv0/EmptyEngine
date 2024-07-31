@@ -26,6 +26,8 @@ namespace EE
             if ( sdlEvent->window.windowID != windowID )
                 return 0;
 
+            // EE_LOG_CORE_INFO( L"SDL: Window Event: WindowID({}), Event({})", windowID, sdlEvent->type );
+
             switch ( sdlEvent->type )
             {
             case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
