@@ -10,6 +10,7 @@
 #include <vk_mem_alloc.h>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
+#include <SDL3/SDL_video.h>
 #include <vulkan/vulkan.h>
 
 #include <optional>
@@ -51,8 +52,8 @@ namespace EE
         case PixelFormat_R16G16B16A16_SNORM:               return VK_FORMAT_R16G16B16A16_SFLOAT;
         case PixelFormat_A2R10G10B10_UNORM:                return VK_FORMAT_A2R10G10B10_UNORM_PACK32;
         case PixelFormat_R8G8B8A8_UNORM:
-            if ( colorspace == ColorSpace_Linear ) { return VK_FORMAT_B8G8R8A8_UNORM; }
-            return VK_FORMAT_B8G8R8A8_SRGB;
+            if ( colorspace == ColorSpace_Linear ) { return VK_FORMAT_R8G8B8A8_UNORM; }
+            return VK_FORMAT_R8G8B8A8_SRGB;
         case PixelFormat_DepthComponent24:                 return VK_FORMAT_D24_UNORM_S8_UINT;
         case PixelFormat_DepthStencil:                     return VK_FORMAT_D16_UNORM_S8_UINT;
         case PixelFormat_ShadowDepth:                      return VK_FORMAT_D16_UNORM;
@@ -65,12 +66,12 @@ namespace EE
     {
         switch ( vkFormat )
         {
-        case VK_FORMAT_B8G8R8A8_UNORM:
         case VK_FORMAT_R8G8B8A8_UNORM:
-        case VK_FORMAT_R8G8B8A8_SRGB:
-        case VK_FORMAT_B8G8R8A8_SRGB:               return PixelFormat_R8G8B8A8_UNORM;
-        case VK_FORMAT_A2R10G10B10_UNORM_PACK32:
-        case VK_FORMAT_A2B10G10R10_UNORM_PACK32:    return PixelFormat_A2R10G10B10_UNORM;
+        case VK_FORMAT_R8G8B8A8_SRGB:               return PixelFormat_R8G8B8A8_UNORM;
+        // case VK_FORMAT_B8G8R8A8_UNORM:
+        // case VK_FORMAT_B8G8R8A8_SRGB:               return PixelFormat_B8G8R8A8_UNORM;
+        case VK_FORMAT_A2R10G10B10_UNORM_PACK32:    return PixelFormat_A2R10G10B10_UNORM;
+        // case VK_FORMAT_A2B10G10R10_UNORM_PACK32:    return PixelFormat_A2B10G10R10_UNORM;
         case VK_FORMAT_R16G16B16A16_SFLOAT:         return PixelFormat_R16G16B16A16_SNORM;
         default:
             return PixelFormat_Unknown;
@@ -646,7 +647,7 @@ namespace EE
 
         delete swapChain;
         commandBuffers.clear();
-        imageSemaphores.clear();
+        presentSemaphores.clear();
         renderSemaphores.clear();
         renderFences.clear();
         delete surface;
@@ -662,18 +663,25 @@ namespace EE
         CreateSyncObjects();
     }
 
-    const VulkanRHISemaphore& VulkanRHIPresentContext::GetSempahoreOfImage( uint32 imageIndex ) const
+    const VulkanRHISemaphore& VulkanRHIPresentContext::GetPresentSempahoreOfImage( uint32 imageIndex ) const
     {
-        TList<VulkanRHISemaphore>::const_iterator imageSemaphoresIt = imageSemaphores.begin();
-        for ( uint32 i = 0; i < imageIndex; i++ ) ++imageSemaphoresIt;
-        return *imageSemaphoresIt;
+        TList<VulkanRHISemaphore>::const_iterator semaphoresIt = presentSemaphores.begin();
+        for ( uint32 i = 0; i < imageIndex; i++ ) ++semaphoresIt;
+        return *semaphoresIt;
+    }
+
+    const VulkanRHISemaphore& VulkanRHIPresentContext::GetRenderSempahoreOfImage( uint32 imageIndex ) const
+    {
+        TList<VulkanRHISemaphore>::const_iterator semaphoresIt = renderSemaphores.begin();
+        for ( uint32 i = 0; i < imageIndex; i++ ) ++semaphoresIt;
+        return *semaphoresIt;
     }
 
     uint32 VulkanRHIPresentContext::AquireBackbuffer( uint64 timeout ) const
     {
         uint32 nextFrameIndex = swapChain->NextImageIndex();
         GetFence( nextFrameIndex )->Wait( timeout );
-        uint32 image = swapChain->AquireNextImage( timeout, &GetSempahoreOfImage( nextFrameIndex ), NULL);
+        uint32 image = swapChain->AquireNextImage( timeout, &GetPresentSempahoreOfImage( swapChain->NextImageIndex() ), NULL);
         GetFence( nextFrameIndex )->Reset();
         return image;
     }
@@ -685,13 +693,13 @@ namespace EE
 
     void VulkanRHIPresentContext::SubmitPresentImage( uint32 imageIndex, VulkanRHIQueue* queue ) const
     {
-        auto& imageSemaphore = GetSempahoreOfImage( imageIndex );
+        auto& renderSemaphore = GetRenderSempahoreOfImage( imageIndex );
         VkPresentInfoKHR presentInfo
         {
             VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,     // sType
             NULL,                                   // pNext
             1,                                      // waitSemaphoreCount
-            &imageSemaphore.GetVulkanSemaphore(),   // pWaitSemaphores
+            &renderSemaphore.GetVulkanSemaphore(),  // pWaitSemaphores
             1,                                      // swapchainCount
             &swapChain->GetVulkanSwapChain(),       // pSwapchains
             &imageIndex,                            // pImageIndices
@@ -705,25 +713,25 @@ namespace EE
         }
     }
 
-    void VulkanRHIPresentContext::SubmitCommandBuffer( uint32 imageIndex ) const
+    void VulkanRHIPresentContext::SubmitCommandBuffer( uint32 imageIndex, EPipelineStage stage ) const
     {
         TList<VulkanRHICommandBuffer>::const_iterator commandBuffersIt = commandBuffers.begin();
-        TList<VulkanRHISemaphore>::const_iterator imageSemaphoresIt = imageSemaphores.begin();
+        TList<VulkanRHISemaphore>::const_iterator presentSemaphoresIt = presentSemaphores.begin();
         TList<VulkanRHISemaphore>::const_iterator renderSemaphoresIt = renderSemaphores.begin();
         TList<VulkanRHIFence>::const_iterator renderFencesIt = renderFences.begin();
         for ( uint32 i = 0; i < imageIndex; i++ )
         {
             commandBuffersIt++;
-            imageSemaphoresIt++;
+            presentSemaphoresIt++;
             renderSemaphoresIt++;
             renderFencesIt++;
         }
 
         RHIQueueSubmitInfo ququeSubmitInfo{ };
-        ququeSubmitInfo.waitSemaphores.emplace_back( &*imageSemaphoresIt );
+        ququeSubmitInfo.waitSemaphores.emplace_back( &*presentSemaphoresIt );
         ququeSubmitInfo.signalSemaphores.emplace_back( &*renderSemaphoresIt );
         ququeSubmitInfo.signalFence = &*renderFencesIt;
-        ququeSubmitInfo.stageFlags = PipelineStage_OutputColor;
+        ququeSubmitInfo.stageFlags = stage;
         GVulkanDevice->GetVulkanPresentQueue()->SubmitCommandBuffer( &*commandBuffersIt, ququeSubmitInfo );
     }
 
@@ -765,8 +773,10 @@ namespace EE
 
     void VulkanRHIPresentContext::CreateSwapChain()
     {
+        SDL_PropertiesID displayProperties = SDL_GetDisplayProperties( SDL_GetPrimaryDisplay() );
+
         bool tryHDR = false;
-        if ( window->GetAllowHDR() && SDL_GetBooleanProperty( SDL_GetDisplayProperties( SDL_GetPrimaryDisplay() ), SDL_PROP_DISPLAY_HDR_ENABLED_BOOLEAN, SDL_FALSE ) )
+        if ( window->GetAllowHDR() && SDL_GetBooleanProperty( displayProperties, SDL_PROP_DISPLAY_HDR_ENABLED_BOOLEAN, SDL_FALSE ) )
         {
             tryHDR = true;
         }
@@ -825,13 +835,15 @@ namespace EE
             }
         }
 
-        RHISwapChainCreateDescription swapChainDesc{};
-        swapChainDesc.width = window->GetWidth();
-        swapChainDesc.height = window->GetHeight();
-        swapChainDesc.fullscreen = window->GetWindowMode();
-        swapChainDesc.format = desiredFormat;
-        swapChainDesc.colorSpace = desiredColorSpace;
-        swapChainDesc.vsync = window->GetVSync();
+        RHISwapChainCreateDescription swapChainDesc
+        {
+            .width = (uint32)window->GetWidth(),
+            .height = (uint32)window->GetHeight(),
+            .bufferCount = 2,
+            .format = desiredFormat,
+            .colorSpace = desiredColorSpace,
+            .vsync = window->GetVSync(),
+        };
 
         swapChain = new VulkanRHISwapChain( swapChainDesc, this, GVulkanDevice );
     }
@@ -850,7 +862,7 @@ namespace EE
         const uint32& imageCount = swapChain->GetImageCount();
         for ( uint32 i = 0; i < imageCount; i++ )
         {
-            imageSemaphores.emplace_back( GVulkanDevice );
+            presentSemaphores.emplace_back( GVulkanDevice );
             renderSemaphores.emplace_back( GVulkanDevice );
             renderFences.emplace_back( GVulkanDevice, true );
         }
@@ -1175,7 +1187,11 @@ namespace EE
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-        vkCreateSwapchainKHR( device->GetVulkanDevice(), &createInfo, NULL, &swapChain );
+        auto result = vkCreateSwapchainKHR( device->GetVulkanDevice(), &createInfo, NULL, &swapChain );
+        if ( result != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed vkCreateSwapchainKHR! {}", (int32)result );
+        }
 
         vkGetSwapchainImagesKHR( device->GetVulkanDevice(), swapChain, &imageCount, NULL );
         images.resize( imageCount );
@@ -1387,10 +1403,10 @@ namespace EE
     {
         VkCommandBufferBeginInfo beginInfo
         {
-            VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,// sType
-            NULL,                                       // pNext
-            0,                                          // flags
-            NULL,                                       // pInheritanceInfo
+            VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,    // sType
+            NULL,                                           // pNext
+            0/*VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT*/,   // flags
+            NULL,                                           // pInheritanceInfo
         };
 
         auto result = vkBeginCommandBuffer( commandBuffer, &beginInfo );
@@ -1409,22 +1425,61 @@ namespace EE
         }
     }
 
-    void VulkanRHICommandBuffer::ClearColor( Vector3f color, const RHITexture* texture ) const
+    void VulkanRHICommandBuffer::ClearColor( Vector3f color, const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer ) const
     {
         VkClearColorValue clearColor = { color.r, color.g, color.b };
 
         VkImageSubresourceRange imageRange
         {
-            VK_IMAGE_ASPECT_COLOR_BIT,  // aspectMask
-            0,                          // baseMipLevel
-            1,                          // levelCount
-            0,                          // baseArrayLayer
-            1                           // layerCount
+            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .baseMipLevel = mipLevel,
+            .levelCount = 1,
+            .baseArrayLayer = arrayLayer,
+            .layerCount = 1
         };
 
         auto vulkanTexture = static_cast<const VulkanRHITexture*>( texture );
-        
-        vkCmdClearColorImage( commandBuffer, vulkanTexture->GetVulkanImage(), VK_IMAGE_LAYOUT_GENERAL, &clearColor, 1, &imageRange );
+
+        VkImageMemoryBarrier mbPresentToClearBarrier = {
+            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+            .pNext = NULL,
+            .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+            .dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+            .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            .newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .image = vulkanTexture->GetVulkanImage(),
+            .subresourceRange = imageRange
+        };
+
+        // Change layout of image to be optimal for presenting
+        VkImageMemoryBarrier mbClearToPresentBarrier = {
+            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+            .pNext = NULL,
+            .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+            .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+            .oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            .newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .image = vulkanTexture->GetVulkanImage(),
+            .subresourceRange = imageRange
+        };
+
+        vkCmdPipelineBarrier( commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+            0,                              // dependency flags
+            0, NULL,                        // memory barriers
+            0, NULL,                        // buffer memory barriers
+            1, &mbPresentToClearBarrier );  // image memory barriers
+
+        vkCmdClearColorImage( commandBuffer, vulkanTexture->GetVulkanImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColor, 1, &imageRange );
+
+        vkCmdPipelineBarrier( commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+            0,
+            0, NULL,
+            0, NULL,
+            1, &mbClearToPresentBarrier );
     }
 
     VulkanRHIShaderStage::~VulkanRHIShaderStage()

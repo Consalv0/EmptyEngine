@@ -113,6 +113,7 @@ namespace EE
         name = parameters.name;
         mode = parameters.windowMode;
         allowHDR = parameters.allowHDR;
+        whiteLevel = parameters.whiteLevel;
         options = parameters.options;
         vsync = parameters.vsync;
     }
@@ -146,6 +147,11 @@ namespace EE
     EWindowMode Window::GetWindowMode() const
     {
         return mode;
+    }
+
+    float Window::GetWhiteLevel() const
+    {
+        return whiteLevel;
     }
 
     bool Window::GetAllowHDR() const

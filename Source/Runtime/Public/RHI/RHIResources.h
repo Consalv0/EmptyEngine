@@ -74,9 +74,7 @@ namespace EE
         uint32 bufferCount = 2;
         EPixelFormat format = PixelFormat_Unknown;
         EColorSpace colorSpace = ColorSpace_Unknown;
-        bool fullscreen = false;
         bool vsync = true;
-        Vector4 clearcolor = { 0,0,0,1 };
     };
 
     class RHISwapChain : public RHIResource
@@ -122,7 +120,7 @@ namespace EE
 
         virtual void End() const = 0;
 
-        virtual void ClearColor( Vector3f color, const RHITexture* texture ) const = 0;
+        virtual void ClearColor( Vector3f color, const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer ) const = 0;
     };
 
     class RHIPresentContext : public RHIObject
@@ -138,7 +136,7 @@ namespace EE
 
         virtual void Present( uint32 imageIndex ) const = 0;
 
-        virtual void SubmitCommandBuffer( uint32 imageIndex ) const = 0;
+        virtual void SubmitCommandBuffer( uint32 imageIndex, EPipelineStage stage ) const = 0;
 
         virtual const RHICommandBuffer* GetCommandBuffer( uint32 imageIndex ) const = 0;
 

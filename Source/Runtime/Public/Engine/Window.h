@@ -30,6 +30,7 @@ namespace EE
         EWindowMode windowMode;
         uint32 width;
         uint32 height;
+        float whiteLevel;
         bool allowHDR;
         uint32 options;
         WString name;
@@ -40,11 +41,12 @@ namespace EE
             uint32 width = -1,
             uint32 height = -1,
             EWindowMode mode = WindowMode_Windowed,
+            float whiteLevel = 200, 
             bool allowHDR = false,
             uint32 options = WindowOption_None,
             bool vsync = false
         )
-            : name(title), width(width), height(height), windowMode(mode), allowHDR(allowHDR), options(options), vsync(vsync) {
+            : name(title), width(width), height(height), windowMode(mode), whiteLevel(whiteLevel), allowHDR(allowHDR), options(options), vsync(vsync) {
         }
     };
 
@@ -65,6 +67,7 @@ namespace EE
             uint32 options;
             int32 width;
             int32 height;
+            float whiteLevel;
             bool allowHDR;
             bool vsync;
         };
@@ -100,6 +103,9 @@ namespace EE
 
         //* Get vsync options
         virtual bool GetVSync() const;
+
+        //* Get SDR white level option
+        virtual float GetWhiteLevel() const;
 
         //* Get hdr option
         virtual bool GetAllowHDR() const;

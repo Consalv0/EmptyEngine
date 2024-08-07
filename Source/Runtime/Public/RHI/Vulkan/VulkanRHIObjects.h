@@ -168,9 +168,14 @@ namespace EE
         Window* window;
         VulkanRHISurface* surface;
         VulkanRHISwapChain* swapChain;
+
         TList<VulkanRHICommandBuffer> commandBuffers;
-        TList<VulkanRHISemaphore> imageSemaphores;
+
+        //* We'll need one semaphore to signal that an image has been acquired from the swapchain and is ready for rendering,
+        TList<VulkanRHISemaphore> presentSemaphores;
+        //* another one to signal that rendering has finished and presentation can happen,
         TList<VulkanRHISemaphore> renderSemaphores;
+        //* and a fence to make sure only one frame is rendering at a time.
         TList<VulkanRHIFence> renderFences;
 
         void CreateSurface();
@@ -192,7 +197,9 @@ namespace EE
 
         VulkanRHIPresentContext( Window* window, VulkanRHIInstance* instance );
 
-        const VulkanRHISemaphore& GetSempahoreOfImage( uint32 imageIndex ) const;
+        const VulkanRHISemaphore& GetPresentSempahoreOfImage( uint32 imageIndex ) const;
+
+        const VulkanRHISemaphore& GetRenderSempahoreOfImage( uint32 imageIndex ) const;
 
         const RHICommandBuffer* GetCommandBuffer( uint32 imageIndex ) const override;
 
@@ -206,7 +213,7 @@ namespace EE
 
         void SubmitPresentImage( uint32 imageIndex, VulkanRHIQueue* queue ) const;
 
-        void SubmitCommandBuffer( uint32 imageIndex ) const override;
+        void SubmitCommandBuffer( uint32 imageIndex, EPipelineStage stage ) const override;
 
         bool IsValid() const;
     };
@@ -278,7 +285,7 @@ namespace EE
 
         uint32 NextImageIndex() const { return (nextImageIndex + 1) % imageCount; }
 
-        uint32 CurrentImageIndex() const { nextImageIndex; }
+        uint32 CurrentImageIndex() const { return nextImageIndex; }
 
         VkImage GetImage( uint32 index ) const { return images[ index ]; }
 
@@ -376,7 +383,7 @@ namespace EE
 
         void End() const override;
 
-        void ClearColor( Vector3f color, const RHITexture* texture ) const override;
+        void ClearColor( Vector3f color, const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer ) const override;
     };
 
     class VulkanRHIShaderStage
