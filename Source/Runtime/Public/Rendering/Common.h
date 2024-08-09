@@ -170,6 +170,12 @@ namespace EE
         ColorSpace_sRGB,
     };
 
+    enum EPresentMode
+    {
+        PresentMode_Inmediate,
+        PresentMode_VSync
+    };
+
     enum EPixelFormat
     {
         PixelFormat_Unknown,

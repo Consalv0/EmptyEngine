@@ -31,6 +31,12 @@ namespace EE
             switch ( sdlEvent->type )
             {
             case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+            {
+                int w, h;
+                SDL_GetWindowSizeInPixels( (SDL_Window*)window->GetWindowHandle(), &w, &h );
+                window->Resize( w, h );
+                break;
+            }
             case SDL_EVENT_WINDOW_RESIZED:
             {
                 break;
@@ -115,7 +121,7 @@ namespace EE
         allowHDR = parameters.allowHDR;
         whiteLevel = parameters.whiteLevel;
         options = parameters.options;
-        vsync = parameters.vsync;
+        presentMode = parameters.presentMode;
     }
 
     Window::~Window()
@@ -125,7 +131,7 @@ namespace EE
 
     void Window::Resize( const uint32& width, const uint32& height )
     {
-        if ( width != width || height != height )
+        if ( this->width != width || this->height != height )
         {
             this->width = width; this->height = height;
             SDL_SetWindowSize( (SDL_Window*)(windowHandle), width, height );
@@ -204,9 +210,9 @@ namespace EE
         return height;
     }
 
-    bool Window::GetVSync() const
+    EPresentMode Window::GetPresentMode() const
     {
-        return vsync;
+        return presentMode;
     }
 
     IntVector2 Window::GetSize() const

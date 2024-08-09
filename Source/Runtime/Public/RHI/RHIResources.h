@@ -74,7 +74,7 @@ namespace EE
         uint32 bufferCount = 2;
         EPixelFormat format = PixelFormat_Unknown;
         EColorSpace colorSpace = ColorSpace_Unknown;
-        bool vsync = true;
+        EPresentMode presentMode = PresentMode_VSync;
     };
 
     class RHISwapChain : public RHIResource
@@ -120,27 +120,35 @@ namespace EE
 
         virtual void End() const = 0;
 
+        virtual void TransitionTexture( const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer, const ETextureLayout from, const ETextureLayout to ) const = 0;
+
         virtual void ClearColor( Vector3f color, const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer ) const = 0;
     };
 
     class RHIPresentContext : public RHIObject
     {
     protected:
-        RHIPresentContext() {}
+        uint32 currentFrameIndex;
+
+    protected:
+        RHIPresentContext() : currentFrameIndex( 0 ) {}
+
     public:
         virtual ~RHIPresentContext() {};
 
-        virtual const RHITexture* GetBackbuffer( uint32 index ) const = 0;
+        virtual const RHITexture* GetBackbuffer() const = 0;
 
-        virtual uint32 AquireBackbuffer( uint64 timeout ) const = 0;
+        virtual void SubmitCommandBuffer( EPipelineStage stage ) const = 0;
 
-        virtual void Present( uint32 imageIndex ) const = 0;
+        virtual const RHICommandBuffer* GetCommandBuffer() const = 0;
 
-        virtual void SubmitCommandBuffer( uint32 imageIndex, EPipelineStage stage ) const = 0;
+        virtual const RHIFence* GetRenderFence() const = 0;
 
-        virtual const RHICommandBuffer* GetCommandBuffer( uint32 imageIndex ) const = 0;
+        virtual void AquireBackbuffer( uint64 timeout ) = 0;
 
-        virtual const RHIFence* GetFence( uint32 imageIndex ) const = 0;
+        FORCEINLINE const uint32& CurrentFrameIndex() const { return currentFrameIndex; }
+
+        virtual void Present() = 0;
     };
 
     struct RHIQueueSubmitInfo

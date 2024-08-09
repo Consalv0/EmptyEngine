@@ -116,6 +116,17 @@ namespace EE
         }
     }
 
+    VkPresentModeKHR ConvertPresentMode( EPresentMode type )
+    {
+        switch ( type )
+        {
+        case PresentMode_Inmediate:     return VK_PRESENT_MODE_IMMEDIATE_KHR;
+        case PresentMode_VSync:         return VK_PRESENT_MODE_FIFO_KHR;
+        default:
+            return VK_PRESENT_MODE_IMMEDIATE_KHR;
+        }
+    }
+
     VkImageTiling ConvertTextureTiling( ETilingMode tiling )
     {
         switch ( tiling )
@@ -418,32 +429,40 @@ namespace EE
     void VulkanRHIPhysicalDevice::AddSurfaceSupportDetails( VkSurfaceKHR surface, uint32 queueFamilyIndex )
     {
         VulkanSurfaceSupportDetails surfaceDetails;
+
         vkGetPhysicalDeviceSurfaceSupportKHR( physicalDevice, queueFamilyIndex, surface, &surfaceDetails.supported );
+
+        surfaceSupportDetails.insert( std::make_pair( surface, surfaceDetails ) );
 
         if ( surfaceDetails.supported == VK_FALSE )
         {
-            surfaceSupportDetails.insert( std::make_pair( surface, surfaceDetails ) );
             return;
         }
 
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR( physicalDevice, surface, &surfaceDetails.capabilities );
-
-        vkGetPhysicalDeviceSurfaceFormatsKHR( physicalDevice, surface, &surfaceDetails.formatCount, VK_NULL_HANDLE );
-        if ( surfaceDetails.formatCount != 0 )
-        {
-            surfaceDetails.formats.resize( surfaceDetails.formatCount );
-            vkGetPhysicalDeviceSurfaceFormatsKHR( physicalDevice, surface, &surfaceDetails.formatCount, surfaceDetails.formats.data() );
-        }
-
-        vkGetPhysicalDeviceSurfacePresentModesKHR( physicalDevice, surface, &surfaceDetails.presentModeCount, VK_NULL_HANDLE );
-        if ( surfaceDetails.presentModeCount != 0 )
-        {
-            surfaceDetails.presentModes.resize( surfaceDetails.presentModeCount );
-            vkGetPhysicalDeviceSurfacePresentModesKHR( physicalDevice, surface, &surfaceDetails.presentModeCount, surfaceDetails.presentModes.data() );
-        }
-
-        surfaceSupportDetails.insert( std::make_pair( surface, surfaceDetails ) );
+        UpdateSurfaceSupportDetails( surface );
     }
+
+    void VulkanRHIPhysicalDevice::UpdateSurfaceSupportDetails( VkSurfaceKHR surface )
+    {
+        if ( auto search = surfaceSupportDetails.find( surface ); search != surfaceSupportDetails.end() )
+        {
+            vkGetPhysicalDeviceSurfaceCapabilitiesKHR( physicalDevice, surface, &search->second.capabilities );
+
+            vkGetPhysicalDeviceSurfaceFormatsKHR( physicalDevice, surface, &search->second.formatCount, VK_NULL_HANDLE );
+            if ( search->second.formatCount != 0 )
+            {
+                search->second.formats.resize( search->second.formatCount );
+                vkGetPhysicalDeviceSurfaceFormatsKHR( physicalDevice, surface, &search->second.formatCount, search->second.formats.data() );
+            }
+
+            vkGetPhysicalDeviceSurfacePresentModesKHR( physicalDevice, surface, &search->second.presentModeCount, VK_NULL_HANDLE );
+            if ( search->second.presentModeCount != 0 )
+            {
+                search->second.presentModes.resize( search->second.presentModeCount );
+                vkGetPhysicalDeviceSurfacePresentModesKHR( physicalDevice, surface, &search->second.presentModeCount, search->second.presentModes.data() );
+            }
+        }
+    };
 
     const VulkanSurfaceSupportDetails* VulkanRHIPhysicalDevice::GetSurfaceSupportDetails( VkSurfaceKHR surface ) const
     {
@@ -670,7 +689,7 @@ namespace EE
         delete surface;
     }
 
-    VulkanRHIPresentContext::VulkanRHIPresentContext( Window* window, VulkanRHIInstance* instance ) :
+    VulkanRHIPresentContext::VulkanRHIPresentContext( Window* window, VulkanRHIInstance* instance ) : RHIPresentContext(),
         window( window ), instance( instance ),
         swapChain( NULL ), surface( NULL ), commandBuffers()
     {
@@ -680,37 +699,44 @@ namespace EE
         CreateSyncObjects();
     }
 
-    const VulkanRHISemaphore& VulkanRHIPresentContext::GetPresentSempahoreOfImage( uint32 imageIndex ) const
+    const VulkanRHISemaphore& VulkanRHIPresentContext::GetPresentSempahore( uint32 frameIndex ) const
     {
         TList<VulkanRHISemaphore>::const_iterator semaphoresIt = presentSemaphores.begin();
-        for ( uint32 i = 0; i < imageIndex; i++ ) ++semaphoresIt;
+        for ( uint32 i = 0; i < frameIndex; i++ ) ++semaphoresIt;
         return *semaphoresIt;
     }
 
-    const VulkanRHISemaphore& VulkanRHIPresentContext::GetRenderSempahoreOfImage( uint32 imageIndex ) const
+    const VulkanRHISemaphore& VulkanRHIPresentContext::GetRenderSempahore( uint32 frameIndex ) const
     {
         TList<VulkanRHISemaphore>::const_iterator semaphoresIt = renderSemaphores.begin();
-        for ( uint32 i = 0; i < imageIndex; i++ ) ++semaphoresIt;
+        for ( uint32 i = 0; i < frameIndex; i++ ) ++semaphoresIt;
         return *semaphoresIt;
     }
 
-    uint32 VulkanRHIPresentContext::AquireBackbuffer( uint64 timeout ) const
+    void VulkanRHIPresentContext::AquireBackbuffer( uint64 timeout )
     {
-        uint32 nextFrameIndex = swapChain->NextImageIndex();
-        GetFence( nextFrameIndex )->Wait( timeout );
-        uint32 image = swapChain->AquireNextImage( timeout, &GetPresentSempahoreOfImage( swapChain->NextImageIndex() ), NULL);
-        GetFence( nextFrameIndex )->Reset();
-        return image;
+        GetRenderFence()->Wait( timeout );
+        bool success = swapChain->AquireNextImage( timeout, &GetPresentSempahore( CurrentFrameIndex() ), NULL );
+        if ( success == false )
+        {
+            RecreateSwapChain();
+        }
+        GetRenderFence()->Reset();
     }
 
-    void VulkanRHIPresentContext::Present( uint32 imageIndex ) const
+    void VulkanRHIPresentContext::Present()
     {
-        SubmitPresentImage( imageIndex, GVulkanDevice->GetVulkanPresentQueue() );
+        bool success = SubmitPresentImage( GVulkanDevice->GetVulkanPresentQueue() );
+        if ( success == false )
+        {
+            RecreateSwapChain();
+        }
+        currentFrameIndex = ( currentFrameIndex + 1 ) % swapChain->GetImageCount();
     }
 
-    void VulkanRHIPresentContext::SubmitPresentImage( uint32 imageIndex, VulkanRHIQueue* queue ) const
+    bool VulkanRHIPresentContext::SubmitPresentImage( VulkanRHIQueue* queue ) const
     {
-        auto& renderSemaphore = GetRenderSempahoreOfImage( imageIndex );
+        auto& renderSemaphore = GetRenderSempahore( CurrentFrameIndex() );
         VkPresentInfoKHR presentInfo
         {
             VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,     // sType
@@ -719,23 +745,29 @@ namespace EE
             &renderSemaphore.GetVulkanSemaphore(),  // pWaitSemaphores
             1,                                      // swapchainCount
             &swapChain->GetVulkanSwapChain(),       // pSwapchains
-            &imageIndex,                            // pImageIndices
+            &swapChain->BackImageIndex(),           // pImageIndices
             NULL                                    // pResults
         };
 
-        auto result = vkQueuePresentKHR( queue->GetVulkanQueue(), &presentInfo );
+        VkResult result = vkQueuePresentKHR( queue->GetVulkanQueue(), &presentInfo );
+        if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR )
+        {
+            return false;
+        }
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to present image index: {}! {}", imageIndex, (uint32)result );
+            EE_LOG_CORE_CRITICAL( L"Failed to present image: {}! {}", swapChain->BackImageIndex(), (int32)result );
         }
+        return true;
     }
 
-    void VulkanRHIPresentContext::SubmitCommandBuffer( uint32 imageIndex, EPipelineStage stage ) const
+    void VulkanRHIPresentContext::SubmitCommandBuffer( EPipelineStage stage ) const
     {
         TList<VulkanRHICommandBuffer>::const_iterator commandBuffersIt = commandBuffers.begin();
         TList<VulkanRHISemaphore>::const_iterator presentSemaphoresIt = presentSemaphores.begin();
         TList<VulkanRHISemaphore>::const_iterator renderSemaphoresIt = renderSemaphores.begin();
         TList<VulkanRHIFence>::const_iterator renderFencesIt = renderFences.begin();
+        const uint32& imageIndex = CurrentFrameIndex();
         for ( uint32 i = 0; i < imageIndex; i++ )
         {
             commandBuffersIt++;
@@ -752,23 +784,25 @@ namespace EE
         GVulkanDevice->GetVulkanPresentQueue()->SubmitCommandBuffer( &*commandBuffersIt, ququeSubmitInfo );
     }
 
-    const RHICommandBuffer* VulkanRHIPresentContext::GetCommandBuffer( uint32 imageIndex ) const
+    const RHICommandBuffer* VulkanRHIPresentContext::GetCommandBuffer() const
     {
+        const uint32& imageIndex = CurrentFrameIndex();
         TList<VulkanRHICommandBuffer>::const_iterator commandBuffersIt = commandBuffers.begin();
         for ( uint32 i = 0; i < imageIndex; i++ ) ++commandBuffersIt;
         return &*commandBuffersIt;
     }
 
-    const RHIFence* VulkanRHIPresentContext::GetFence( uint32 imageIndex ) const
+    const RHIFence* VulkanRHIPresentContext::GetRenderFence() const
     {
+        const uint32& imageIndex = CurrentFrameIndex();
         TList<VulkanRHIFence>::const_iterator renderFencesIt = renderFences.begin();
         for ( uint32 i = 0; i < imageIndex; i++ ) ++renderFencesIt;
         return &*renderFencesIt;
     }
 
-    const RHITexture* VulkanRHIPresentContext::GetBackbuffer( uint32 index ) const
+    const RHITexture* VulkanRHIPresentContext::GetBackbuffer() const
     {
-        return swapChain->GetTexture( index );
+        return swapChain->GetTexture( swapChain->BackImageIndex() );
     }
 
     void VulkanRHIPresentContext::CreateSurface()
@@ -800,7 +834,60 @@ namespace EE
 
         EPixelFormat desiredFormat = PixelFormat_R8G8B8A8_UNORM;
         EColorSpace desiredColorSpace = ColorSpace_sRGB;
+        GetSurfaceColorFormat( tryHDR, &desiredFormat, &desiredColorSpace );
 
+        RHISwapChainCreateDescription swapChainDesc
+        {
+            .width = (uint32)window->GetWidth(),
+            .height = (uint32)window->GetHeight(),
+            .bufferCount = 2,
+            .format = desiredFormat,
+            .colorSpace = desiredColorSpace,
+            .presentMode = window->GetPresentMode(),
+        };
+
+        swapChain = new VulkanRHISwapChain( swapChainDesc, this, GVulkanDevice );
+    }
+
+    void VulkanRHIPresentContext::RecreateSwapChain()
+    {
+        // Wait for all commands of this context
+        for ( auto& fence : renderFences )
+        {
+            fence.Wait( UINT64_MAX );
+        }
+
+        swapChain->Cleanup();
+        GVulkanDevice->GetVulkanPhysicalDevice()->UpdateSurfaceSupportDetails( surface->GetVulkanSurface() );
+
+        SDL_PropertiesID displayProperties = SDL_GetDisplayProperties( SDL_GetPrimaryDisplay() );
+
+        bool tryHDR = false;
+        if ( window->GetAllowHDR() && SDL_GetBooleanProperty( displayProperties, SDL_PROP_DISPLAY_HDR_ENABLED_BOOLEAN, SDL_FALSE ) )
+        {
+            tryHDR = true;
+        }
+
+        EPixelFormat desiredFormat = PixelFormat_R8G8B8A8_UNORM;
+        EColorSpace desiredColorSpace = ColorSpace_sRGB;
+        GetSurfaceColorFormat( tryHDR, &desiredFormat, &desiredColorSpace );
+
+        RHISwapChainCreateDescription swapChainDesc
+        {
+            .width = (uint32)window->GetWidth(),
+            .height = (uint32)window->GetHeight(),
+            .bufferCount = 2,
+            .format = desiredFormat,
+            .colorSpace = desiredColorSpace,
+            .presentMode = window->GetPresentMode(),
+        };
+
+        swapChain->CreateSwapChain( swapChainDesc );
+        // currentFrameIndex = swapChain->GetImageCount() - 1;
+    }
+
+    void VulkanRHIPresentContext::GetSurfaceColorFormat( bool hdr, EPixelFormat* outFormat, EColorSpace* outColorSpace ) const
+    {
         auto& surfaceDetails = GVulkanDevice->GetVulkanPhysicalDevice()->GetSurfaceDetails( surface->GetVulkanSurface() );
         // Find best format
         bool contains = false;
@@ -816,12 +903,12 @@ namespace EE
             if ( format == PixelFormat_Unknown )
                 continue;
 
-            if ( tryHDR )
+            if ( hdr )
             {
                 if ( colorSpaceHDR )
                 {
-                    desiredFormat = format;
-                    desiredColorSpace = colorSpace;
+                    *outFormat = format;
+                    *outColorSpace = colorSpace;
                     break;
                 }
 
@@ -829,40 +916,28 @@ namespace EE
                 {
                     if ( format == PixelFormat_A2R10G10B10_UNORM || format == PixelFormat_R16G16B16A16_SNORM )
                     {
-                        desiredFormat = format;
-                        desiredColorSpace = colorSpace;
+                        *outFormat = format;
+                        *outColorSpace = colorSpace;
                         break;
                     }
                 }
 
                 if ( colorSpaceHDR == false )
                 {
-                    desiredFormat = format;
-                    desiredColorSpace = colorSpace;
+                    *outFormat = format;
+                    *outColorSpace = colorSpace;
                 }
             }
             else
             {
                 if ( colorSpaceHDR == false )
                 {
-                    desiredFormat = format;
-                    desiredColorSpace = colorSpace;
+                    *outFormat = format;
+                    *outColorSpace = colorSpace;
                     break;
                 }
             }
         }
-
-        RHISwapChainCreateDescription swapChainDesc
-        {
-            .width = (uint32)window->GetWidth(),
-            .height = (uint32)window->GetHeight(),
-            .bufferCount = 2,
-            .format = desiredFormat,
-            .colorSpace = desiredColorSpace,
-            .vsync = window->GetVSync(),
-        };
-
-        swapChain = new VulkanRHISwapChain( swapChainDesc, this, GVulkanDevice );
     }
 
     void VulkanRHIPresentContext::CreateCommandBuffers()
@@ -1111,12 +1186,20 @@ namespace EE
 
     VulkanRHITexture::~VulkanRHITexture()
     {
-        if ( image != NULL && ownership )
+        if ( image != VK_NULL_HANDLE && ownership )
         {
             vkDestroyImage( device->GetVulkanDevice(), image, NULL );
         }
 
-        vkDestroyImageView( device->GetVulkanDevice(), imageView, NULL );
+        CleanImageView();
+    }
+
+    void VulkanRHITexture::CleanImageView() const
+    {
+        if ( imageView != VK_NULL_HANDLE )
+        {
+            vkDestroyImageView( device->GetVulkanDevice(), imageView, NULL );
+        }
     }
 
     bool VulkanRHITexture::IsValid() const
@@ -1134,7 +1217,17 @@ namespace EE
         presentContext( presentContext ),
         swapChain( VK_NULL_HANDLE ),
         imageCount(), size(),
-        nextImageIndex(0)
+        backImageIndex( -1 )
+    {
+        CreateSwapChain( description );
+    }
+
+    VulkanRHISwapChain::~VulkanRHISwapChain()
+    {
+        Cleanup();
+    }
+
+    void VulkanRHISwapChain::CreateSwapChain( const RHISwapChainCreateDescription& description )
     {
         const VulkanRHISurface* surface = presentContext->GetRHISurface();
         const VulkanSurfaceSupportDetails& surfaceDetails = device->GetVulkanPhysicalDevice()->GetSurfaceDetails( surface->GetVulkanSurface() );
@@ -1157,14 +1250,14 @@ namespace EE
 
         if ( contains == false )
         {
-            EE_LOG_CORE_CRITICAL( L"Surface Format {} is not supported!", (uint32)description.format, (uint32)description.colorSpace );
+            EE_LOG_CORE_CRITICAL( L"Surface format {}, {} is not supported!", (uint32)description.format, (uint32)description.colorSpace );
             return;
         }
 
-        int width, height = 0;
-        SDL_GetWindowSizeInPixels( (SDL_Window*)presentContext->GetWindow()->GetWindowHandle(), &width, &height );
-        width = EE_CLAMP( (uint32)width, surfaceDetails.capabilities.minImageExtent.width, surfaceDetails.capabilities.maxImageExtent.width );
-        height = EE_CLAMP( (uint32)height, surfaceDetails.capabilities.minImageExtent.height, surfaceDetails.capabilities.maxImageExtent.height );
+        uint32 width = description.width;
+        uint32 height = description.height;
+        width = EE_CLAMP( width, surfaceDetails.capabilities.minImageExtent.width, surfaceDetails.capabilities.maxImageExtent.width );
+        height = EE_CLAMP( height, surfaceDetails.capabilities.minImageExtent.height, surfaceDetails.capabilities.maxImageExtent.height );
         size.width = width;
         size.height = height;
 
@@ -1200,7 +1293,7 @@ namespace EE
 
         createInfo.preTransform = surfaceDetails.capabilities.currentTransform;
         createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-        createInfo.presentMode = description.vsync ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_MAILBOX_KHR;
+        createInfo.presentMode = ConvertPresentMode( description.presentMode );
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = VK_NULL_HANDLE;
 
@@ -1219,8 +1312,8 @@ namespace EE
             RHITextureCreateDescription textureCreateDescription
             {
                 TextureType_Texture2D,
-                (uint32)width,
-                (uint32)height,
+                width,
+                height,
                 0,
                 1,
                 1,
@@ -1230,11 +1323,9 @@ namespace EE
 
             textures.emplace_back( new VulkanRHITexture( textureCreateDescription, device, images[ i ] ) );
         }
-
-        nextImageIndex = imageCount - 1;
     }
 
-    VulkanRHISwapChain::~VulkanRHISwapChain()
+    void VulkanRHISwapChain::Cleanup()
     {
         for ( VulkanRHITexture* texture : textures )
         {
@@ -1245,17 +1336,23 @@ namespace EE
         vkDestroySwapchainKHR( device->GetVulkanDevice(), swapChain, NULL );
     }
 
-    uint32 VulkanRHISwapChain::AquireNextImage( uint64 timeout, const VulkanRHISemaphore* semaphore, const VulkanRHIFence* fence )
+    bool VulkanRHISwapChain::AquireNextImage( uint64 timeout, const VulkanRHISemaphore* semaphore, const VulkanRHIFence* fence )
     {
         auto vulkanSemaphore = semaphore == NULL ? VK_NULL_HANDLE : semaphore->GetVulkanSemaphore();
         auto vulkanFence = fence == NULL ? VK_NULL_HANDLE : fence->GetVulkanFence();
 
-        auto result = vkAcquireNextImageKHR( device->GetVulkanDevice(), swapChain, timeout, vulkanSemaphore, vulkanFence, &nextImageIndex );
+        auto result = vkAcquireNextImageKHR( device->GetVulkanDevice(), swapChain, timeout, vulkanSemaphore, VK_NULL_HANDLE, &backImageIndex );
+        if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR )
+        {
+            EE_LOG_CORE_INFO( L"Swap chain out of date!" );
+            return false;
+        }
         if ( result != VK_SUCCESS )
         {
             EE_LOG_CORE_CRITICAL( L"Failed vkAcquireNextImageKHR! {}", (int32)result );
         }
-        return nextImageIndex;
+
+        return true;
     }
 
     VulkanRHISurface::~VulkanRHISurface()
@@ -1422,7 +1519,7 @@ namespace EE
         {
             VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,    // sType
             NULL,                                           // pNext
-            0/*VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT*/,   // flags
+            VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,    // flags
             NULL,                                           // pInheritanceInfo
         };
 

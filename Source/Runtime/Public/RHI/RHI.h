@@ -40,6 +40,10 @@ namespace EE
         const RHIPresentContext* CreateRHIPresentContextOfWindow( Window* window ) const;
 
         void FreeRHIPresentContextOfWindow( Window* window ) const;
+
+        void BeginWindowRender( Window* window ) const;
+
+        void EndWindowRender( Window* window ) const;
     };
 
     extern DynamicRHI* GDynamicRHI;

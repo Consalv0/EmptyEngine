@@ -28,5 +28,17 @@ namespace EE
         GWindowRHIPresentContexts.erase( window );
     };
 
+    void DynamicRHI::BeginWindowRender( Window* window ) const
+    {
+        RHIPresentContext* presentContext = GWindowRHIPresentContexts[ window ];
+        presentContext->AquireBackbuffer( UINT64_MAX );
+    };
+
+    void DynamicRHI::EndWindowRender( Window* window ) const
+    {
+        RHIPresentContext* presentContext = GWindowRHIPresentContexts[ window ];
+        presentContext->Present();
+    };
+
     DynamicRHI::DynamicRHI() { }
 }

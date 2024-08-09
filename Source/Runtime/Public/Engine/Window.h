@@ -34,7 +34,7 @@ namespace EE
         bool allowHDR;
         uint32 options;
         WString name;
-        bool vsync;
+        EPresentMode presentMode;
 
         WindowCreateDescription(
             const WString& title = L"Empty Engine",
@@ -44,9 +44,9 @@ namespace EE
             float whiteLevel = 200, 
             bool allowHDR = false,
             uint32 options = WindowOption_None,
-            bool vsync = false
+            EPresentMode presentMode = PresentMode_VSync
         )
-            : name(title), width(width), height(height), windowMode(mode), whiteLevel(whiteLevel), allowHDR(allowHDR), options(options), vsync(vsync) {
+            : name(title), width(width), height(height), windowMode(mode), whiteLevel(whiteLevel), allowHDR(allowHDR), options(options), presentMode(presentMode) {
         }
     };
 
@@ -67,9 +67,9 @@ namespace EE
             uint32 options;
             int32 width;
             int32 height;
+            EPresentMode presentMode;
             float whiteLevel;
             bool allowHDR;
-            bool vsync;
         };
 
     public:
@@ -101,8 +101,8 @@ namespace EE
         //* Get the height in pixels of the window
         virtual int32 GetHeight() const;
 
-        //* Get vsync options
-        virtual bool GetVSync() const;
+        //* Get present mode
+        virtual EPresentMode GetPresentMode() const;
 
         //* Get SDR white level option
         virtual float GetWhiteLevel() const;

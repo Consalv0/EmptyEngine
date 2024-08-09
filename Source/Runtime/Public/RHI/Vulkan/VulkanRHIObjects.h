@@ -51,6 +51,8 @@ namespace EE
 
         const VulkanSurfaceSupportDetails* GetSurfaceSupportDetails( VkSurfaceKHR surface ) const;
 
+        void UpdateSurfaceSupportDetails( VkSurfaceKHR surface );
+
         FORCEINLINE const bool HasSurfaceAnyFormat( VkSurfaceKHR surface ) const { return surfaceSupportDetails.at( surface ).formatCount > 0; }
         FORCEINLINE const VulkanSurfaceSupportDetails& GetSurfaceDetails( VkSurfaceKHR surface ) const { return surfaceSupportDetails.at( surface ); }
         FORCEINLINE const bool HasSurfaceAnyPresentMode( VkSurfaceKHR surface ) const { return surfaceSupportDetails.at( surface ).presentModeCount > 0; }
@@ -128,8 +130,10 @@ namespace EE
 
     public:
         FORCEINLINE const VkDevice GetVulkanDevice() const { return device; }
-        
+
         FORCEINLINE const VulkanRHIPhysicalDevice* GetVulkanPhysicalDevice() const { return physicalDevice; }
+
+        FORCEINLINE VulkanRHIPhysicalDevice* GetVulkanPhysicalDevice() { return physicalDevice; }
 
         FORCEINLINE const VmaAllocator GetVulkanAllocator() const { return allocator; }
 
@@ -197,25 +201,31 @@ namespace EE
 
         VulkanRHIPresentContext( Window* window, VulkanRHIInstance* instance );
 
-        const VulkanRHISemaphore& GetPresentSempahoreOfImage( uint32 imageIndex ) const;
+        void GetSurfaceColorFormat( bool hdr, EPixelFormat* outFormat, EColorSpace* outColorSpace ) const;
 
-        const VulkanRHISemaphore& GetRenderSempahoreOfImage( uint32 imageIndex ) const;
+        const VulkanRHISemaphore& GetPresentSempahore( uint32 frameIndex ) const;
 
-        const RHICommandBuffer* GetCommandBuffer( uint32 imageIndex ) const override;
+        const VulkanRHISemaphore& GetRenderSempahore( uint32 frameIndex ) const;
 
-        const RHIFence* GetFence( uint32 imageIndex ) const override;
+        const RHICommandBuffer* GetCommandBuffer() const override;
 
-        const RHITexture* GetBackbuffer( uint32 index ) const override;
+        const RHIFence* GetRenderFence() const override;
 
-        uint32 AquireBackbuffer( uint64 timeout ) const override;
+        const RHITexture* GetBackbuffer() const override;
 
-        void Present( uint32 imageIndex ) const override;
+        void Present() override;
 
-        void SubmitPresentImage( uint32 imageIndex, VulkanRHIQueue* queue ) const;
+        bool SubmitPresentImage( VulkanRHIQueue* queue ) const;
 
-        void SubmitCommandBuffer( uint32 imageIndex, EPipelineStage stage ) const override;
+        void SubmitCommandBuffer( EPipelineStage stage ) const override;
+
+        void AquireBackbuffer( uint64 timeout ) override;
 
         bool IsValid() const;
+
+    protected:
+
+        void RecreateSwapChain();
     };
 
     class VulkanRHIBuffer : public RHIBuffer
@@ -249,11 +259,13 @@ namespace EE
 
         VulkanRHITexture( RHITextureCreateDescription& description, VulkanRHIDevice* device );
 
+        ~VulkanRHITexture();
+
+        void CleanImageView() const;
+
         VkImage GetVulkanImage() const { return image; }
 
         const UIntVector3& GetExtent() const override { return extent; };
-
-        ~VulkanRHITexture();
 
         bool IsValid() const;
     };
@@ -268,7 +280,7 @@ namespace EE
         uint32 imageCount;
         TArray<VkImage> images;
         TArray<VulkanRHITexture*> textures;
-        uint32 nextImageIndex;
+        uint32 backImageIndex;
 
     public:
         bool IsValid() const;
@@ -277,15 +289,17 @@ namespace EE
 
         ~VulkanRHISwapChain();
 
+        void Cleanup();
+
+        void CreateSwapChain( const RHISwapChainCreateDescription& description );
+
         FORCEINLINE const uint32& GetImageCount() const { return imageCount; }
 
         FORCEINLINE const VkSwapchainKHR& GetVulkanSwapChain() const { return swapChain; }
 
-        uint32 AquireNextImage( uint64 timeout, const VulkanRHISemaphore* semaphore, const VulkanRHIFence* fence );
+        FORCEINLINE const uint32& BackImageIndex() const { return backImageIndex; }
 
-        uint32 NextImageIndex() const { return (nextImageIndex + 1) % imageCount; }
-
-        uint32 CurrentImageIndex() const { return nextImageIndex; }
+        bool AquireNextImage( uint64 timeout, const VulkanRHISemaphore* semaphore, const VulkanRHIFence* fence );
 
         VkImage GetImage( uint32 index ) const { return images[ index ]; }
 
