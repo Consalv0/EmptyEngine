@@ -162,6 +162,23 @@ namespace EE
         return finalAspect;
     }
 
+    VkImageLayout ConvertTextureLayout( ETextureLayout layout )
+    {
+        switch ( layout )
+        {
+        case TextureLayout_Undefined:           return VK_IMAGE_LAYOUT_UNDEFINED;
+        case TextureLayout_General:             return VK_IMAGE_LAYOUT_GENERAL;
+        case TextureLayout_TransferSRC:         return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        case TextureLayout_TransferDST:         return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        case TextureLayout_ColorAttachment:     return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        case TextureLayout_DepthAttachment:     return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+        case TextureLayout_StencilAttachment:   return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        case TextureLayout_Present:             return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        default:
+            return VK_IMAGE_LAYOUT_UNDEFINED;
+        }
+    }
+
     VkSharingMode ConvertSharingMode( ESharingMode sharing )
     {
         switch ( sharing )
@@ -1425,6 +1442,47 @@ namespace EE
         }
     }
 
+    void VulkanRHICommandBuffer::TransitionTexture( const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer, const ETextureLayout from, const ETextureLayout to ) const
+    {
+        auto vulkanTexture = static_cast<const VulkanRHITexture*>(texture);
+
+        VkImageLayout oldLayout = ConvertTextureLayout( from );
+        VkImageLayout newLayout = ConvertTextureLayout( to );
+
+        VkImageSubresourceRange imageRange
+        {
+            .aspectMask = (uint32)((newLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL || newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT),
+            .baseMipLevel = mipLevel,
+            .levelCount = 1, // VK_REMAINING_MIP_LEVELS,
+            .baseArrayLayer = arrayLayer,
+            .layerCount = 1, // VK_REMAINING_ARRAY_LAYERS
+        };
+
+        VkImageMemoryBarrier imageBarrier = {
+            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+            .pNext = NULL,
+            .srcAccessMask = (uint32)((oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL || oldLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) ? VK_ACCESS_TRANSFER_WRITE_BIT : VK_ACCESS_MEMORY_READ_BIT),
+            .dstAccessMask = (uint32)((newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL || newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) ? VK_ACCESS_TRANSFER_WRITE_BIT : VK_ACCESS_MEMORY_READ_BIT),
+            .oldLayout = oldLayout,
+            .newLayout = newLayout,
+            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .image = vulkanTexture->GetVulkanImage(),
+            .subresourceRange = imageRange
+        };
+
+        vkCmdPipelineBarrier( 
+            commandBuffer,
+            (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL || oldLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) ? VK_PIPELINE_STAGE_TRANSFER_BIT :
+            (oldLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR) ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+            (newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL || newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) ? VK_PIPELINE_STAGE_TRANSFER_BIT :
+            (newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR) ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+            0,                  // dependency flags
+            0, NULL,            // memory barriers
+            0, NULL,            // buffer memory barriers
+            1, &imageBarrier ); // image memory barriers
+    }
+
     void VulkanRHICommandBuffer::ClearColor( Vector3f color, const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer ) const
     {
         VkClearColorValue clearColor = { color.r, color.g, color.b };
@@ -1440,46 +1498,7 @@ namespace EE
 
         auto vulkanTexture = static_cast<const VulkanRHITexture*>( texture );
 
-        VkImageMemoryBarrier mbPresentToClearBarrier = {
-            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-            .pNext = NULL,
-            .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,
-            .dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
-            .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-            .newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .image = vulkanTexture->GetVulkanImage(),
-            .subresourceRange = imageRange
-        };
-
-        // Change layout of image to be optimal for presenting
-        VkImageMemoryBarrier mbClearToPresentBarrier = {
-            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-            .pNext = NULL,
-            .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
-            .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
-            .oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            .newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .image = vulkanTexture->GetVulkanImage(),
-            .subresourceRange = imageRange
-        };
-
-        vkCmdPipelineBarrier( commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
-            0,                              // dependency flags
-            0, NULL,                        // memory barriers
-            0, NULL,                        // buffer memory barriers
-            1, &mbPresentToClearBarrier );  // image memory barriers
-
         vkCmdClearColorImage( commandBuffer, vulkanTexture->GetVulkanImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColor, 1, &imageRange );
-
-        vkCmdPipelineBarrier( commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-            0,
-            0, NULL,
-            0, NULL,
-            1, &mbClearToPresentBarrier );
     }
 
     VulkanRHIShaderStage::~VulkanRHIShaderStage()

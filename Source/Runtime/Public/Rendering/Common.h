@@ -234,6 +234,18 @@ namespace EE
         FilterMode_MinNearestMagLinear,
     };
 
+    enum ETextureLayout
+    {
+        TextureLayout_Undefined,
+        TextureLayout_General,
+        TextureLayout_TransferSRC,
+        TextureLayout_TransferDST,
+        TextureLayout_ColorAttachment,
+        TextureLayout_DepthAttachment,
+        TextureLayout_StencilAttachment,
+        TextureLayout_Present
+    };
+
     enum EDrawMode
     {
         DrawMode_Points,

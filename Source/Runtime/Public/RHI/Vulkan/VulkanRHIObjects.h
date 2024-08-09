@@ -383,6 +383,8 @@ namespace EE
 
         void End() const override;
 
+        void TransitionTexture( const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer, const ETextureLayout from, const ETextureLayout to ) const override;
+
         void ClearColor( Vector3f color, const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer ) const override;
     };
 
