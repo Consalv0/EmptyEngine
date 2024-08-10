@@ -761,7 +761,7 @@ namespace EE
         return true;
     }
 
-    void VulkanRHIPresentContext::SubmitCommandBuffer( EPipelineStage stage ) const
+    void VulkanRHIPresentContext::SubmitRenderCommandBuffer( EPipelineStage stage ) const
     {
         TList<VulkanRHICommandBuffer>::const_iterator commandBuffersIt = commandBuffers.begin();
         TList<VulkanRHISemaphore>::const_iterator presentSemaphoresIt = presentSemaphores.begin();
@@ -784,7 +784,7 @@ namespace EE
         GVulkanDevice->GetVulkanPresentQueue()->SubmitCommandBuffer( &*commandBuffersIt, ququeSubmitInfo );
     }
 
-    const RHICommandBuffer* VulkanRHIPresentContext::GetCommandBuffer() const
+    const RHICommandBuffer* VulkanRHIPresentContext::GetRenderCommandBuffer() const
     {
         const uint32& imageIndex = CurrentFrameIndex();
         TList<VulkanRHICommandBuffer>::const_iterator commandBuffersIt = commandBuffers.begin();

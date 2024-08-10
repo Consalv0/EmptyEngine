@@ -207,7 +207,7 @@ namespace EE
 
         const VulkanRHISemaphore& GetRenderSempahore( uint32 frameIndex ) const;
 
-        const RHICommandBuffer* GetCommandBuffer() const override;
+        const RHICommandBuffer* GetRenderCommandBuffer() const override;
 
         const RHIFence* GetRenderFence() const override;
 
@@ -217,7 +217,7 @@ namespace EE
 
         bool SubmitPresentImage( VulkanRHIQueue* queue ) const;
 
-        void SubmitCommandBuffer( EPipelineStage stage ) const override;
+        void SubmitRenderCommandBuffer( EPipelineStage stage ) const override;
 
         void AquireBackbuffer( uint64 timeout ) override;
 

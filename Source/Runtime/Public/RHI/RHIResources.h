@@ -138,9 +138,9 @@ namespace EE
 
         virtual const RHITexture* GetBackbuffer() const = 0;
 
-        virtual void SubmitCommandBuffer( EPipelineStage stage ) const = 0;
+        virtual void SubmitRenderCommandBuffer( EPipelineStage stage ) const = 0;
 
-        virtual const RHICommandBuffer* GetCommandBuffer() const = 0;
+        virtual const RHICommandBuffer* GetRenderCommandBuffer() const = 0;
 
         virtual const RHIFence* GetRenderFence() const = 0;
 
