@@ -16,7 +16,7 @@ namespace EE
 {
     bool GWantToTerminate = false;
 
-    bool GameEngine::Initialize( int argc, char** argv )
+    bool GameEngine::Initialize( int argc, NChar* argv[] )
     {
         GMainApplication = CreateApplication( argc, argv );
         if ( GMainApplication->CanInitialize() == false )

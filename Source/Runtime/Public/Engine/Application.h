@@ -53,5 +53,5 @@ namespace EE
 
     extern Application* GMainApplication;
 
-    Application* CreateApplication( int argc, char** argv );
+    Application* CreateApplication( int argc, NChar* argv[] );
 }
