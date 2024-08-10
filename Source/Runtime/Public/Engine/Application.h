@@ -4,6 +4,8 @@ namespace EE
 {
     class Application
     {
+    protected:
+        bool canInitialize;
 
     public:
         class RenderPipeline& GetRenderPipeline();
@@ -15,11 +17,13 @@ namespace EE
 
         virtual enum class EDynamicRHI GetPreferedRHI() const = 0;
 
+        bool CanInitialize() { return canInitialize; };
+
     protected:
 
         Application();
 
-        virtual void OnInitialize() {};
+        virtual bool OnInitialize() = 0;
 
         virtual void OnAwake() {};
 
@@ -27,16 +31,15 @@ namespace EE
         //* you need to update the input manager here
         virtual void OnUpdate( Timestamp stamp ) {};
 
-        virtual void OnTerminate() {};
+        virtual void OnTerminate();
 
         virtual void OnDestroy() {};
 
     private:
-
         bool initialized;
 
         //* Initialize the application objects
-        void Initialize();
+        bool Initialize();
 
         //* Application loading point
         void Awake();
@@ -50,5 +53,5 @@ namespace EE
 
     extern Application* GMainApplication;
 
-    Application* CreateApplication();
+    Application* CreateApplication( int argc, char** argv );
 }

@@ -12,7 +12,7 @@ int main( int argc, char** argv )
 
     EE::Log::Initialize();
     EE::GEngine = new EE::GameEngine();
-    if ( EE::GEngine->Initialize() )
+    if ( EE::GEngine->Initialize( argc, argv ) )
     {
         EE::GEngine->Run();
     }

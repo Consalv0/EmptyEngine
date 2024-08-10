@@ -16,9 +16,14 @@ namespace EE
 {
     bool GWantToTerminate = false;
 
-    bool GameEngine::Initialize()
+    bool GameEngine::Initialize( int argc, char** argv )
     {
-        GMainApplication = CreateApplication();
+        GMainApplication = CreateApplication( argc, argv );
+        if ( GMainApplication->CanInitialize() == false )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to application!\n" );
+            return false;
+        }
 
         if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK ) != 0 )
         {

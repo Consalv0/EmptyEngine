@@ -24,17 +24,17 @@ namespace EE
 	struct GenCRCTable : GenCRCTable<((C & 1) ? 0xedb88320 : 0) ^ (C >> 1), K - 1> {};
 	template <unsigned C> struct GenCRCTable<C, 0> { enum { value = C }; };
 
-#define A(x) B(x) B(x + 128)
-#define B(x) C(x) C(x +  64)
-#define C(x) D(x) D(x +  32)
-#define D(x) E(x) E(x +  16)
-#define E(x) F(x) F(x +   8)
-#define F(x) G(x) G(x +   4)
-#define G(x) H(x) H(x +   2)
-#define H(x) I(x) I(x +   1)
-#define I(x) GenCRCTable<x>::value,
+#define HASH_A(x) HASH_B(x) HASH_B(x + 128)
+#define HASH_B(x) HASH_C(x) HASH_C(x +  64)
+#define HASH_C(x) HASH_D(x) HASH_D(x +  32)
+#define HASH_D(x) HASH_E(x) HASH_E(x +  16)
+#define HASH_E(x) HASH_F(x) HASH_F(x +   8)
+#define HASH_F(x) HASH_G(x) HASH_G(x +   4)
+#define HASH_G(x) HASH_H(x) HASH_H(x +   2)
+#define HASH_H(x) HASH_I(x) HASH_I(x +   1)
+#define HASH_I(x) GenCRCTable<x>::value,
 
-	constexpr unsigned CRCTable[] = { A(0) };
+	constexpr unsigned CRCTable[] = { HASH_A(0) };
 
 	// Constexpr implementation and helpers
 	constexpr uint32 CRC32Implementation(const uint8_t* p, size_t len, uint32 crc) {

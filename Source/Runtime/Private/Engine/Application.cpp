@@ -15,9 +15,8 @@
 
 namespace EE
 {
-    Application::Application()
+    Application::Application() : initialized( false ), canInitialize( false )
     {
-        initialized = false;
     }
 
     Application::~Application()
@@ -38,13 +37,18 @@ namespace EE
         return *pipeline;
     }
 
-    void Application::Initialize()
+    void Application::OnTerminate()
     {
-        if ( initialized ) return;
+        canInitialize = false;
+    }
 
-        OnInitialize();
+    bool Application::Initialize()
+    {
+        if ( initialized ) return false;
 
-        initialized = true;
+        initialized = OnInitialize();
+
+        return initialized;
     }
 
     void Application::Awake()
@@ -89,5 +93,5 @@ namespace EE
 
     Application* GMainApplication = NULL;
 
-    extern EE::Application* EE::CreateApplication();
+    extern EE::Application* EE::CreateApplication( int argc, char** argv );
 }
