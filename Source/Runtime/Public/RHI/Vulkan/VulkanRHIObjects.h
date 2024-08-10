@@ -255,9 +255,9 @@ namespace EE
         bool ownership;
 
     public:
-        VulkanRHITexture( RHITextureCreateDescription& description, VulkanRHIDevice* device, VkImage image );
+        VulkanRHITexture( const RHITextureCreateDescription& description, VulkanRHIDevice* device, VkImage image );
 
-        VulkanRHITexture( RHITextureCreateDescription& description, VulkanRHIDevice* device );
+        VulkanRHITexture( const RHITextureCreateDescription& description, VulkanRHIDevice* device );
 
         ~VulkanRHITexture();
 

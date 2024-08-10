@@ -37,6 +37,28 @@ namespace EE
         virtual ~RHISurface() {};
     };
 
+    struct RHITextureCreateDescription
+    {
+        ETextureType type = TextureType_Texture2D;
+        uint32 width = 0;
+        uint32 height = 0;
+        uint32 depth = 0;
+        uint32 arraySize = 1;
+        uint32 mipLevels = 1;
+        EPixelFormat format = PixelFormat_Unknown;
+        EColorSpace colorSpace = ColorSpace_Unknown;
+        ETilingMode tiling = TilingMode_Default;
+        uint32 sampleCount = 1;
+        EUsageModeFlags usage = UsageMode_Color;
+        EUsageModeFlags viewUsage = UsageMode_Color;
+        ESharingMode sharing = SharingMode_Default;
+        uint32 bindFlags = 0;
+        uint32 accessFlags = 0;
+        uint32 miscFlags = 0;
+        Vector4 clear = {};
+        EImageLayout layout = ImageLayout_ShaderResource;
+    };
+
     class RHITexture : public RHIResource
     {
     protected:
@@ -189,28 +211,6 @@ namespace EE
         RHIBuffer() {}
     public:
         virtual ~RHIBuffer() {};
-    };
-
-    struct RHITextureCreateDescription
-    {
-        ETextureType type = TextureType_Texture2D;
-        uint32 width = 0;
-        uint32 height = 0;
-        uint32 depth = 0;
-        uint32 arraySize = 1;
-        uint32 mipLevels = 1;
-        EPixelFormat format = PixelFormat_Unknown;
-        EColorSpace colorSpace = ColorSpace_Unknown;
-        ETilingMode tiling = TilingMode_Default;
-        uint32 sampleCount = 1;
-        EUsageModeFlags usage = UsageMode_Color;
-        EUsageModeFlags viewUsage = UsageMode_Color;
-        ESharingMode sharing = SharingMode_Default;
-        uint32 bindFlags = 0;
-        uint32 accessFlags = 0;
-        uint32 miscFlags = 0;
-        Vector4 clear = {};
-        EImageLayout layout = ImageLayout_ShaderResource;
     };
 
     struct RHISamplerCreateDescription

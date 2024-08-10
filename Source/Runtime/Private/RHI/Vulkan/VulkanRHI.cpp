@@ -1058,7 +1058,7 @@ namespace EE
 
     }
 
-    VulkanRHITexture::VulkanRHITexture( RHITextureCreateDescription& description, VulkanRHIDevice* device, VkImage image ) :
+    VulkanRHITexture::VulkanRHITexture( const RHITextureCreateDescription& description, VulkanRHIDevice* device, VkImage image ) :
         device( device ),
         extent( description.width, description.height, description.depth ),
         format( ConvertPixelFormat( description.format, description.colorSpace ) ),
@@ -1098,7 +1098,7 @@ namespace EE
         }
     }
 
-    VulkanRHITexture::VulkanRHITexture( RHITextureCreateDescription& description, VulkanRHIDevice* device ) :
+    VulkanRHITexture::VulkanRHITexture( const RHITextureCreateDescription& description, VulkanRHIDevice* device ) :
         device( device ),
         extent( description.width, description.height, description.depth ),
         format( ConvertPixelFormat( description.format, description.colorSpace ) ),
@@ -1790,7 +1790,7 @@ namespace EE
     
     RHITexture* VulkanRHI::CreateRHITexture( const RHITextureCreateDescription& description ) const
     {
-        return NULL;
+        return new VulkanRHITexture( description, GVulkanDevice );
     }
     
     RHISampler* VulkanRHI::CreateRHISampler( const RHISamplerCreateDescription& description ) const
