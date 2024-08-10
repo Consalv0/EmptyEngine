@@ -602,12 +602,12 @@ namespace EE
         {
             VkDeviceQueueCreateInfo queueCreateInfo
             {
-                VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,     // sType
-                NULL,                                           // pNext
-                0,                                              // flags
-                queueFamily,                                    // queueFamilyIndex
-                1,                                              // queueCount
-                &queuePriority                                  // pQueuePriorities
+                .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+                .pNext = NULL,
+                .flags = 0,
+                .queueFamilyIndex = queueFamily,
+                .queueCount = 1,
+                .pQueuePriorities = &queuePriority
             };
             queueCreateInfos.push_back( queueCreateInfo );
         }
@@ -624,16 +624,16 @@ namespace EE
 
         VkDeviceCreateInfo deviceCreateInfo
         {
-            VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,           // sType
-            NULL,                                           // pNext
-            0,                                              // flags
-            static_cast<uint32>(queueCreateInfos.size()),   // queueCreateInfoCount
-            queueCreateInfos.data(),                        // pQueueCreateInfos
-            0,                                              // enabledLayerCount    deprecated?
-            NULL,                                           // ppEnabledLayerNames  deprecated?
-            (uint32)DeviceExtensions.size(),                // enabledExtensionCount
-            DeviceExtensions.data(),                        // ppEnabledExtensionNames
-            &deviceFeatures                                 // pEnabledFeatures
+            .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0,
+            .queueCreateInfoCount = static_cast<uint32>(queueCreateInfos.size()),
+            .pQueueCreateInfos = queueCreateInfos.data(),
+            .enabledLayerCount = 0,         //   deprecated?
+            .ppEnabledLayerNames = NULL,    //   deprecated?
+            .enabledExtensionCount = (uint32)DeviceExtensions.size(),
+            .ppEnabledExtensionNames = DeviceExtensions.data(),
+            .pEnabledFeatures = &deviceFeatures
         };
 
         EE_CORE_ASSERT
@@ -739,14 +739,14 @@ namespace EE
         auto& renderSemaphore = GetRenderSempahore( CurrentFrameIndex() );
         VkPresentInfoKHR presentInfo
         {
-            VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,     // sType
-            NULL,                                   // pNext
-            1,                                      // waitSemaphoreCount
-            &renderSemaphore.GetVulkanSemaphore(),  // pWaitSemaphores
-            1,                                      // swapchainCount
-            &swapChain->GetVulkanSwapChain(),       // pSwapchains
-            &swapChain->BackImageIndex(),           // pImageIndices
-            NULL                                    // pResults
+            .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+            .pNext = NULL,
+            .waitSemaphoreCount = 1,
+            .pWaitSemaphores = &renderSemaphore.GetVulkanSemaphore(),
+            .swapchainCount = 1,
+            .pSwapchains = &swapChain->GetVulkanSwapChain(),
+            .pImageIndices = &swapChain->BackImageIndex(),
+            .pResults = NULL
         };
 
         VkResult result = vkQueuePresentKHR( queue->GetVulkanQueue(), &presentInfo );
@@ -1011,16 +1011,17 @@ namespace EE
             signalSemaphores[ i ] = vkSemaphore->GetVulkanSemaphore();
         }
 
-        VkSubmitInfo vkSubmitInfo = {
-            VK_STRUCTURE_TYPE_SUBMIT_INFO,                  // sType
-            NULL,                                           // pNext
-            waitSemaphoreCount,                             // waitSemaphoreCount
-            waitSemaphores.data(),                          // pWaitSemaphores
-            waitStageFlags.data(),                          // pWaitDstStageMask
-            1,                                              // commandBufferCount
-            &vulkanCommandBuffer->GetVulkanCommandBuffer(), // pCommandBuffers
-            signalSemaphoreCount,                           // signalSemaphoreCount
-            signalSemaphores.data()                         // pSignalSemaphores
+        VkSubmitInfo vkSubmitInfo =
+        {
+            .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+            .pNext = NULL,
+            .waitSemaphoreCount = waitSemaphoreCount,
+            .pWaitSemaphores = waitSemaphores.data(),
+            .pWaitDstStageMask = waitStageFlags.data(),
+            .commandBufferCount = 1,
+            .pCommandBuffers = &vulkanCommandBuffer->GetVulkanCommandBuffer(),
+            .signalSemaphoreCount = signalSemaphoreCount,
+            .pSignalSemaphores = signalSemaphores.data()
         };
 
         VkFence nativeFence = vulkanFence == NULL ? VK_NULL_HANDLE : vulkanFence->GetVulkanFence();
@@ -1083,11 +1084,11 @@ namespace EE
             },
             VkImageSubresourceRange
             {
-                ConvertTextureAspect( description.viewUsage ),  // aspectMask
-                0,                                              // baseMipLevel
-                1,                                              // levelCount
-                0,                                              // baseArrayLayer
-                1                                               // layerCount
+                .aspectMask = ConvertTextureAspect( description.viewUsage ),
+                .baseMipLevel = 0,
+                .levelCount = 1,
+                .baseArrayLayer = 0,
+                .layerCount = 1
             } 
         };
 
@@ -1107,25 +1108,25 @@ namespace EE
     {
         VkImageCreateInfo imageInfo
         {
-            VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,                // sType
-            VK_NULL_HANDLE,                                     // pNext
-            0,                                                  // flags
-            VK_IMAGE_TYPE_2D,                                   // imageType
-            format,                                             // format
-            VkExtent3D {
-                .width =  extent.x,
+            .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+            .pNext = VK_NULL_HANDLE,
+            .flags = 0,
+            .imageType = VK_IMAGE_TYPE_2D,
+            .format = format,
+            .extent = VkExtent3D {
+                .width = extent.x,
                 .height = extent.y,
-                .depth =  extent.z 
-            },                                                  // extent
-            description.mipLevels,                              // mipLevels
-            description.arraySize,                              // arrayLayers
-            (VkSampleCountFlagBits)description.sampleCount,     // samples
-            ConvertTextureTiling( description.tiling ),         // tiling
-            ConvertTextureUsage( description.usage ),           // usage
-            ConvertSharingMode( description.sharing ),          // sharingMode
-            1,                                                  // queueFamilyIndexCount
-            device->GetFamilyIndices(),                         // pQueueFamilyIndices
-            VK_IMAGE_LAYOUT_UNDEFINED,                          // initialLayout
+                .depth = extent.z
+            },
+            . mipLevels = description.mipLevels,
+            . arrayLayers = description.arraySize,
+            . samples = (VkSampleCountFlagBits)description.sampleCount,
+            . tiling = ConvertTextureTiling( description.tiling ),
+            . usage = ConvertTextureUsage( description.usage ),
+            . sharingMode = ConvertSharingMode( description.sharing ),
+            . queueFamilyIndexCount = 1,
+            . pQueueFamilyIndices = device->GetFamilyIndices(),
+            . initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         };
 
         if ( vkCreateImage( device->GetVulkanDevice(), &imageInfo, VK_NULL_HANDLE, &image ) != VK_SUCCESS )
@@ -1136,14 +1137,14 @@ namespace EE
 
         VmaAllocationCreateInfo allocInfo
         {
-            0,                      // flags
-            VMA_MEMORY_USAGE_AUTO,  // usage
-            0,                      // requiredFlags
-            0,                      // preferredFlags
-            0,                      // memoryTypeBits
-            VK_NULL_HANDLE,         // pool
-            NULL,                   // pUserData
-            0.0F                    // priority
+            .flags = 0,
+            .usage = VMA_MEMORY_USAGE_AUTO,
+            .requiredFlags = 0,
+            .preferredFlags = 0,
+            .memoryTypeBits = 0,
+            .pool = VK_NULL_HANDLE,
+            .pUserData = NULL,
+            .priority = 0.0F
         };
 
         if ( vmaCreateImage( device->GetVulkanAllocator(), &imageInfo, &allocInfo, &image, &memory, NULL ) != VK_SUCCESS )
@@ -1154,27 +1155,27 @@ namespace EE
 
         VkImageViewCreateInfo viewInfo
         {
-            VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,   // sType
-            NULL,                                       // pNext
-            0,                                          // flags
-            image,                                      // image
-            ConvertTextureType( description.type ),     // viewType
-            format,                                     // format
-            VkComponentMapping
+            .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0,
+            .image = image,
+            .viewType = ConvertTextureType( description.type ),
+            .format = format,
+            .components = VkComponentMapping
             {
                 .r = VK_COMPONENT_SWIZZLE_IDENTITY,
                 .g = VK_COMPONENT_SWIZZLE_IDENTITY,
                 .b = VK_COMPONENT_SWIZZLE_IDENTITY,
                 .a = VK_COMPONENT_SWIZZLE_IDENTITY
-            },                                          // components
-            VkImageSubresourceRange
+            },
+            .subresourceRange = VkImageSubresourceRange
             {
-                ConvertTextureAspect( description.viewUsage ),  // aspectMask
-                0,                                              // baseMipLevel
-                1,                                              // levelCount
-                0,                                              // baseArrayLayer
-                1                                               // layerCount
-            }                                           // subresourceRange
+                .aspectMask = ConvertTextureAspect( description.viewUsage ),
+                .baseMipLevel = 0,
+                .levelCount = 1,
+                .baseArrayLayer = 0,
+                .layerCount = 1
+            }
         };
 
         if ( vkCreateImageView( device->GetVulkanDevice(), &viewInfo, nullptr, &imageView ) != VK_SUCCESS )
@@ -1266,16 +1267,16 @@ namespace EE
 
         VkSwapchainCreateInfoKHR createInfo =
         {
-            VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,                            // sType
-            VK_NULL_HANDLE,                                                         // pNext
-            0,                                                                      // flags
-            surface->GetVulkanSurface(),                                            // surface
-            imageCount,                                                             // minImageCount
-            desiredFormat.format,                                                   // imageFormat
-            desiredFormat.colorSpace,                                               // imageColorSpace
-            size,                                                                   // imageExtent
-            1,                                                                      // imageArrayLayers
-            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,  // imageUsage
+            .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+            .pNext = VK_NULL_HANDLE,
+            .flags = 0,
+            .surface = surface->GetVulkanSurface(),
+            .minImageCount = imageCount,
+            .imageFormat = desiredFormat.format,
+            .imageColorSpace = desiredFormat.colorSpace,
+            .imageExtent = size,
+            .imageArrayLayers = 1,
+            .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
         };
 
         if ( device->GetGraphicsFamilyIndex() != device->GetPresentFamilyIndex() )
@@ -1311,14 +1312,14 @@ namespace EE
         {
             RHITextureCreateDescription textureCreateDescription
             {
-                TextureType_Texture2D,
-                width,
-                height,
-                0,
-                1,
-                1,
-                description.format,
-                description.colorSpace
+                .type = TextureType_Texture2D,
+                .width = width,
+                .height = height,
+                .depth = 0,
+                .arraySize = 1,
+                .mipLevels = 1,
+                .format = description.format,
+                .colorSpace = description.colorSpace
             };
 
             textures.emplace_back( new VulkanRHITexture( textureCreateDescription, device, images[ i ] ) );
@@ -1387,9 +1388,9 @@ namespace EE
     {
         VkFenceCreateInfo fenceCreateInfo
         {
-            VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,                // sType
-            NULL,                                               // pNext
-            initSignaled ? VK_FENCE_CREATE_SIGNALED_BIT : 0u    // flags
+            .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+            .pNext = NULL,
+            .flags = initSignaled ? VK_FENCE_CREATE_SIGNALED_BIT : 0u
         };
 
         auto createResult = vkCreateFence( device->GetVulkanDevice(), &fenceCreateInfo, nullptr, &fence);
@@ -1438,9 +1439,9 @@ namespace EE
     {
         VkSemaphoreCreateInfo createInfo
         {
-            VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,    // sType
-            NULL,                                       // pNext
-            0                                           // flags
+            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0
         };
 
         auto createResult = vkCreateSemaphore( device->GetVulkanDevice(), &createInfo, nullptr, &semaphore );
@@ -1467,13 +1468,12 @@ namespace EE
         device( device ),
         queueFamilyIndex( queueFamilyIndex )
     {
-
         VkCommandPoolCreateInfo createInfo
         {
-            VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,         // sType;
-            VK_NULL_HANDLE,                                     // pNext;
-            VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,    // flags;
-            queueFamilyIndex                                    // queueFamilyIndex;
+            .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+            .pNext = VK_NULL_HANDLE,
+            .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+            .queueFamilyIndex = queueFamilyIndex
         };
 
         auto createResult = vkCreateCommandPool( device->GetVulkanDevice(), &createInfo, NULL, &commandPool );
@@ -1494,11 +1494,11 @@ namespace EE
     {
         VkCommandBufferAllocateInfo allocateInfo
         {
-            VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,                     // sType
-            NULL,                                                               // pNext
-            device->GetCommandPool( queueFamilyIndex )->GetVulkanCommandPool(), // commandPool
-            VK_COMMAND_BUFFER_LEVEL_PRIMARY,                                    // level
-            1                                                                   // commandBufferCount
+            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+            .pNext = NULL,
+            .commandPool = device->GetCommandPool( queueFamilyIndex )->GetVulkanCommandPool(),
+            .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+            .commandBufferCount = 1
         };
 
         VkResult result = vkAllocateCommandBuffers( device->GetVulkanDevice(), &allocateInfo, &commandBuffer );
@@ -1517,10 +1517,10 @@ namespace EE
     {
         VkCommandBufferBeginInfo beginInfo
         {
-            VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,    // sType
-            NULL,                                           // pNext
-            VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,    // flags
-            NULL,                                           // pInheritanceInfo
+            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+            .pNext = NULL,
+            .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+            .pInheritanceInfo = NULL
         };
 
         auto result = vkBeginCommandBuffer( commandBuffer, &beginInfo );
@@ -1608,11 +1608,11 @@ namespace EE
     {
         VkShaderModuleCreateInfo createInfo
         {
-            VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,    // sType
-            NULL,                                           // pNext
-            0,                                              // flags
-            codeLength,                                     // codeSize
-            reinterpret_cast<const uint32*>(code),          // pCode
+             .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+             .pNext = NULL,
+             .flags = 0,
+             .codeSize = codeLength,
+             .pCode = reinterpret_cast<const uint32*>(code)
         };
 
         if ( vkCreateShaderModule( device->GetVulkanDevice(), &createInfo, nullptr, &shaderModule ) != VK_SUCCESS )
@@ -1623,13 +1623,13 @@ namespace EE
 
         VkPipelineShaderStageCreateInfo shaderStageInfo
         {
-            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,    // sType;
-            VK_NULL_HANDLE,                                         // pNext;
-            0,                                                      // flags;
-            ConvertShaderStage( stage ),                            // stage;
-            shaderModule,                                           // module;
-            "main",                                                 // pName;
-            NULL                                                    // pSpecializationInfo;
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+            .pNext = VK_NULL_HANDLE,
+            .flags = 0,
+            .stage = ConvertShaderStage( stage ),
+            .module = shaderModule,
+            .pName = "main",
+            .pSpecializationInfo = NULL
         };
     }
 
@@ -1666,13 +1666,13 @@ namespace EE
     {
         VkApplicationInfo appInfo =
         {
-            VK_STRUCTURE_TYPE_APPLICATION_INFO,
-            NULL,
-            "Vulkan",
-            VK_MAKE_VERSION( 1, 0, 0 ),
-            "Empty Engine",
-            VK_MAKE_VERSION( 1, 0, 0 ),
-            VK_API_VERSION_1_3
+            .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+            .pNext = NULL,
+            .pApplicationName = "Vulkan",
+            .applicationVersion = VK_MAKE_VERSION( 1, 0, 0 ),
+            .pEngineName = "Empty Engine",
+            .engineVersion = VK_MAKE_VERSION( 1, 0, 0 ),
+            .apiVersion = VK_API_VERSION_1_3
         };
 
         if ( SDL_Vulkan_LoadLibrary( nullptr ) != 0 )
@@ -1700,14 +1700,14 @@ namespace EE
 
         VkInstanceCreateInfo createInfo
         {
-            VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,     // sType
-            NULL,                                       // pNext
-            0,                                          // flags
-            &appInfo,                                   // pApplicationInfo
-            (uint32)layers.size(),                      // enabledLayerCount
-            layers.data(),                              // ppEnabledLayerNames
-            (uint32)extensions.size(),                  // enabledExtensionCount
-            extensions.data()                           // ppEnabledExtensionNames
+            .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0,
+            .pApplicationInfo = &appInfo,
+            .enabledLayerCount = (uint32)layers.size(),
+            .ppEnabledLayerNames = layers.data(),
+            .enabledExtensionCount = (uint32)extensions.size(),
+            .ppEnabledExtensionNames = extensions.data()
         };
 
         GVulkanInstance = new VulkanRHIInstance( createInfo );
@@ -1723,18 +1723,18 @@ namespace EE
 
         VkDebugUtilsMessengerCreateInfoEXT messageCreateInfo
         {
-            VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT, // sType
-            NULL,                                                    // pNext
-            0,                                                       // flags
-            VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |        // messageSeverity
-            VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
-            VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-            VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
-            VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |            // messageType
-            VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-            VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
-            VulkanDebugCallback,                                     // pfnUserCallback
-            NULL                                                     // pUserData
+            .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
+            .pNext = NULL,
+            .flags = 0,
+            .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+                               VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
+                               VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                               VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
+            .messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                           VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+                           VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
+            .pfnUserCallback = VulkanDebugCallback,
+            .pUserData = NULL
         };
 
         VkResult result = vkCreateDebugUtilsMessenger( GVulkanInstance->GetVulkanInstance(), &messageCreateInfo, NULL, &GVulkanDebugMessager );
