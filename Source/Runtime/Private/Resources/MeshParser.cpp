@@ -56,7 +56,7 @@ namespace EE
 
     bool ModelParser::RecognizeFileExtensionAndLoad( ModelDataInfo& info, const ParsingOptions& options )
     {
-        const WString extension = options.file->GetExtension();
+        const WString extension = options.file.GetExtension();
         if ( Text::CompareIgnoreCase( extension, WString( L"OBJ" ) ) )
         {
             return OBJLoader::LoadModel( info, options );
@@ -86,7 +86,7 @@ namespace EE
         }
         if ( !pendingTasks.empty() && !currentFutureTask.valid() && !TaskRunning )
         {
-            currentFutureTask = pendingTasks.front()->futureTask( pendingTasks.front()->info, pendingTasks.front()->options );
+            pendingTasks.front()->futureTask( pendingTasks.front()->info, pendingTasks.front()->options, currentFutureTask );
         }
     }
 
@@ -123,7 +123,7 @@ namespace EE
 
     bool ModelParser::Load( ModelDataInfo& info, const ParsingOptions& options )
     {
-        if ( options.file == NULL ) return false;
+        if ( options.file.IsValid() == false ) return false;
 
         if ( TaskRunning )
         {
@@ -131,7 +131,7 @@ namespace EE
         }
 
         TaskRunning = true;
-        EE_LOG_CORE_INFO( L"Reading File Model '{}'", options.file->GetShortPath() );
+        EE_LOG_CORE_INFO( L"Reading File Model '{}'", options.file.GetShortPath() );
         RecognizeFileExtensionAndLoad( info, options );
         TaskRunning = false;
         return info.isValid;
@@ -139,19 +139,18 @@ namespace EE
 
     void ModelParser::LoadAsync( const ParsingOptions& options, FinishTaskFunction then )
     {
-        if ( options.file == NULL ) return;
+        if ( options.file.IsValid() == false ) return;
 
         pendingTasks.push(
-            new Task { options, then, []( ModelDataInfo& data, const ParsingOptions& options ) -> std::future<bool>
+            new Task { options, then, []( ModelDataInfo& data, const ParsingOptions& options, std::future<bool>& futureTask )
             {
-                std::future<bool> task = std::async( std::launch::async, Load, std::ref( data ), std::ref( options ) );
-                return std::move( task );
+                futureTask = std::async( std::launch::async, Load, std::ref( data ),  std::ref( options ) );
             } }
         );
     }
 
     ModelParser::ModelDataInfo::ModelDataInfo()
-        : meshes(), parentNode( "ParentNode" ), isValid( false )
+        : meshes(), parentNode( "ParentNode" ), isValid( false ), hasAnimations( false )
     {
     }
 

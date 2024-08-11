@@ -35,11 +35,11 @@ namespace EE
     {
         ShaderStage_Unknown,
         ShaderStage_Vertex,
+        ShaderStage_Fragment,
+        ShaderStage_Geometry,
+        ShaderStage_Compute,
         ShaderStage_Tesselation,
         ShaderStage_TesselationEval,
-        ShaderStage_Geometry,
-        ShaderStage_Pixel,
-        ShaderStage_Compute
     };
 
     enum EShaderFormat

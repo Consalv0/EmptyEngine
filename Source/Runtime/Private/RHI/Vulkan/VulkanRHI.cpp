@@ -35,7 +35,7 @@ namespace EE
         case ShaderStage_TesselationEval:   return VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
         case ShaderStage_Vertex:            return VK_SHADER_STAGE_VERTEX_BIT;
         case ShaderStage_Geometry:          return VK_SHADER_STAGE_GEOMETRY_BIT;
-        case ShaderStage_Pixel:             return VK_SHADER_STAGE_FRAGMENT_BIT;
+        case ShaderStage_Fragment:          return VK_SHADER_STAGE_FRAGMENT_BIT;
         case ShaderStage_Compute:           return VK_SHADER_STAGE_COMPUTE_BIT;
         default:
             return VK_SHADER_STAGE_ALL;
@@ -836,8 +836,9 @@ namespace EE
         EColorSpace desiredColorSpace = ColorSpace_sRGB;
         GetSurfaceColorFormat( tryHDR, &desiredFormat, &desiredColorSpace );
 
-        RHISwapChainCreateDescription swapChainDesc
+        RHISwapChainCreateInfo swapChainInfo
         {
+            .window = this->window,
             .width = (uint32)window->GetWidth(),
             .height = (uint32)window->GetHeight(),
             .bufferCount = 2,
@@ -846,7 +847,7 @@ namespace EE
             .presentMode = window->GetPresentMode(),
         };
 
-        swapChain = new VulkanRHISwapChain( swapChainDesc, this, GVulkanDevice );
+        swapChain = new VulkanRHISwapChain( swapChainInfo, this, GVulkanDevice );
     }
 
     void VulkanRHIPresentContext::RecreateSwapChain()
@@ -872,8 +873,9 @@ namespace EE
         EColorSpace desiredColorSpace = ColorSpace_sRGB;
         GetSurfaceColorFormat( tryHDR, &desiredFormat, &desiredColorSpace );
 
-        RHISwapChainCreateDescription swapChainDesc
+        RHISwapChainCreateInfo swapChainInfo
         {
+            .window = window,
             .width = (uint32)window->GetWidth(),
             .height = (uint32)window->GetHeight(),
             .bufferCount = 2,
@@ -882,7 +884,7 @@ namespace EE
             .presentMode = window->GetPresentMode(),
         };
 
-        swapChain->CreateSwapChain( swapChainDesc );
+        swapChain->CreateSwapChain( swapChainInfo );
         // currentFrameIndex = swapChain->GetImageCount() - 1;
     }
 
@@ -942,10 +944,12 @@ namespace EE
 
     void VulkanRHIPresentContext::CreateCommandBuffers()
     {
+        RHICommandBufferCreateInfo createInfo{};
+
         const uint32& imageCount = swapChain->GetImageCount();
         for ( uint32 i = 0; i < imageCount; i++ )
         {
-            commandBuffers.emplace_back( GVulkanDevice, GVulkanDevice->GetPresentFamilyIndex() );
+            commandBuffers.emplace_back( createInfo, GVulkanDevice, GVulkanDevice->GetPresentFamilyIndex() );
         }
     }
 
@@ -1040,14 +1044,14 @@ namespace EE
         }
     }
 
-    VulkanRHIBuffer::VulkanRHIBuffer( RHIBufferCreateDescription& description, VulkanRHIDevice* device ) :
+    VulkanRHIBuffer::VulkanRHIBuffer( RHIBufferCreateInfo& info, VulkanRHIDevice* device ) :
         device( device ), usages( BufferUsage_None )
     {
         VkBufferCreateInfo bufferInfo = {};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferInfo.sharingMode = ConvertSharingMode( description.sharing );
-        bufferInfo.usage = ConvertBufferUsageFlags( description.usages );
-        bufferInfo.size = description.size;
+        bufferInfo.sharingMode = ConvertSharingMode( info.sharing );
+        bufferInfo.usage = ConvertBufferUsageFlags( info.usages );
+        bufferInfo.size = info.size;
 
         VmaAllocationCreateInfo allocInfo = {};
         allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
@@ -1059,10 +1063,10 @@ namespace EE
 
     }
 
-    VulkanRHITexture::VulkanRHITexture( const RHITextureCreateDescription& description, VulkanRHIDevice* device, VkImage image ) :
+    VulkanRHITexture::VulkanRHITexture( const RHITextureCreateInfo& info, VulkanRHIDevice* device, VkImage image ) :
         device( device ),
-        extent( description.width, description.height, description.depth ),
-        format( ConvertPixelFormat( description.format, description.colorSpace ) ),
+        extent( info.width, info.height, info.depth ),
+        format( ConvertPixelFormat( info.format, info.colorSpace ) ),
         sampler( VK_NULL_HANDLE ), memory( VK_NULL_HANDLE ),
         image( image ),
         ownership( false )
@@ -1073,7 +1077,7 @@ namespace EE
             NULL,
             0,
             image,
-            ConvertTextureType( description.type ),
+            ConvertTextureType( info.type ),
             format,
             VkComponentMapping
             {
@@ -1084,7 +1088,7 @@ namespace EE
             },
             VkImageSubresourceRange
             {
-                .aspectMask = ConvertTextureAspect( description.viewUsage ),
+                .aspectMask = ConvertTextureAspect( info.viewUsage ),
                 .baseMipLevel = 0,
                 .levelCount = 1,
                 .baseArrayLayer = 0,
@@ -1099,10 +1103,10 @@ namespace EE
         }
     }
 
-    VulkanRHITexture::VulkanRHITexture( const RHITextureCreateDescription& description, VulkanRHIDevice* device ) :
+    VulkanRHITexture::VulkanRHITexture( const RHITextureCreateInfo& info, VulkanRHIDevice* device ) :
         device( device ),
-        extent( description.width, description.height, description.depth ),
-        format( ConvertPixelFormat( description.format, description.colorSpace ) ),
+        extent( info.width, info.height, info.depth ),
+        format( ConvertPixelFormat( info.format, info.colorSpace ) ),
         ownership( true ),
         sampler( VK_NULL_HANDLE ), memory( VK_NULL_HANDLE ), imageView( VK_NULL_HANDLE )
     {
@@ -1118,12 +1122,12 @@ namespace EE
                 .height = extent.y,
                 .depth = extent.z
             },
-            . mipLevels = description.mipLevels,
-            . arrayLayers = description.arraySize,
-            . samples = (VkSampleCountFlagBits)description.sampleCount,
-            . tiling = ConvertTextureTiling( description.tiling ),
-            . usage = ConvertTextureUsage( description.usage ),
-            . sharingMode = ConvertSharingMode( description.sharing ),
+            . mipLevels = info.mipLevels,
+            . arrayLayers = info.arraySize,
+            . samples = (VkSampleCountFlagBits)info.sampleCount,
+            . tiling = ConvertTextureTiling( info.tiling ),
+            . usage = ConvertTextureUsage( info.usage ),
+            . sharingMode = ConvertSharingMode( info.sharing ),
             . queueFamilyIndexCount = 1,
             . pQueueFamilyIndices = device->GetFamilyIndices(),
             . initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
@@ -1159,7 +1163,7 @@ namespace EE
             .pNext = NULL,
             .flags = 0,
             .image = image,
-            .viewType = ConvertTextureType( description.type ),
+            .viewType = ConvertTextureType( info.type ),
             .format = format,
             .components = VkComponentMapping
             {
@@ -1170,7 +1174,7 @@ namespace EE
             },
             .subresourceRange = VkImageSubresourceRange
             {
-                .aspectMask = ConvertTextureAspect( description.viewUsage ),
+                .aspectMask = ConvertTextureAspect( info.viewUsage ),
                 .baseMipLevel = 0,
                 .levelCount = 1,
                 .baseArrayLayer = 0,
@@ -1213,14 +1217,14 @@ namespace EE
         return swapChain != VK_NULL_HANDLE;
     }
 
-    VulkanRHISwapChain::VulkanRHISwapChain( const RHISwapChainCreateDescription& description, const VulkanRHIPresentContext* presentContext, VulkanRHIDevice* device ) :
+    VulkanRHISwapChain::VulkanRHISwapChain( const RHISwapChainCreateInfo& info, const VulkanRHIPresentContext* presentContext, VulkanRHIDevice* device ) :
         device( device ),
         presentContext( presentContext ),
         swapChain( VK_NULL_HANDLE ),
         imageCount(), size(),
         backImageIndex( -1 )
     {
-        CreateSwapChain( description );
+        CreateSwapChain( info );
     }
 
     VulkanRHISwapChain::~VulkanRHISwapChain()
@@ -1228,7 +1232,7 @@ namespace EE
         Cleanup();
     }
 
-    void VulkanRHISwapChain::CreateSwapChain( const RHISwapChainCreateDescription& description )
+    void VulkanRHISwapChain::CreateSwapChain( const RHISwapChainCreateInfo& info )
     {
         const VulkanRHISurface* surface = presentContext->GetRHISurface();
         const VulkanSurfaceSupportDetails& surfaceDetails = device->GetVulkanPhysicalDevice()->GetSurfaceDetails( surface->GetVulkanSurface() );
@@ -1239,9 +1243,9 @@ namespace EE
         for ( uint32 i = 0; i < surfaceDetails.formatCount; i++ )
         {
             const VkSurfaceFormatKHR& surfaceFormat = surfaceDetails.formats[ i ];
-            if ( ConvertPixelFormat( surfaceFormat.format ) == description.format )
+            if ( ConvertPixelFormat( surfaceFormat.format ) == info.format )
             {
-                if ( ConvertColorSpace( surfaceFormat.colorSpace ) == description.colorSpace )
+                if ( ConvertColorSpace( surfaceFormat.colorSpace ) == info.colorSpace )
                 {
                     contains = true;
                     desiredFormat = surfaceFormat;
@@ -1251,19 +1255,19 @@ namespace EE
 
         if ( contains == false )
         {
-            EE_LOG_CORE_CRITICAL( L"Surface format {}, {} is not supported!", (uint32)description.format, (uint32)description.colorSpace );
+            EE_LOG_CORE_CRITICAL( L"Surface format {}, {} is not supported!", (uint32)info.format, (uint32)info.colorSpace );
             return;
         }
 
-        uint32 width = description.width;
-        uint32 height = description.height;
+        uint32 width = info.width;
+        uint32 height = info.height;
         width = EE_CLAMP( width, surfaceDetails.capabilities.minImageExtent.width, surfaceDetails.capabilities.maxImageExtent.width );
         height = EE_CLAMP( height, surfaceDetails.capabilities.minImageExtent.height, surfaceDetails.capabilities.maxImageExtent.height );
         size.width = width;
         size.height = height;
 
-        imageCount = Math::Max( surfaceDetails.capabilities.minImageCount + 1, description.bufferCount );
-        imageCount = Math::Min( surfaceDetails.capabilities.maxImageCount, description.bufferCount );
+        imageCount = Math::Max( surfaceDetails.capabilities.minImageCount + 1, info.bufferCount );
+        imageCount = Math::Min( surfaceDetails.capabilities.maxImageCount, info.bufferCount );
 
         VkSwapchainCreateInfoKHR createInfo =
         {
@@ -1294,7 +1298,7 @@ namespace EE
 
         createInfo.preTransform = surfaceDetails.capabilities.currentTransform;
         createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-        createInfo.presentMode = ConvertPresentMode( description.presentMode );
+        createInfo.presentMode = ConvertPresentMode( info.presentMode );
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = VK_NULL_HANDLE;
 
@@ -1310,7 +1314,7 @@ namespace EE
 
         for ( uint32 i = 0; i < imageCount; i++ )
         {
-            RHITextureCreateDescription textureCreateDescription
+            RHITextureCreateInfo textureCreateInfo
             {
                 .type = TextureType_Texture2D,
                 .width = width,
@@ -1318,11 +1322,11 @@ namespace EE
                 .depth = 0,
                 .arraySize = 1,
                 .mipLevels = 1,
-                .format = description.format,
-                .colorSpace = description.colorSpace
+                .format = info.format,
+                .colorSpace = info.colorSpace
             };
 
-            textures.emplace_back( new VulkanRHITexture( textureCreateDescription, device, images[ i ] ) );
+            textures.emplace_back( new VulkanRHITexture( textureCreateInfo, device, images[ i ] ) );
         }
     }
 
@@ -1488,7 +1492,7 @@ namespace EE
         vkFreeCommandBuffers( device->GetVulkanDevice(), device->GetCommandPool( queueFamilyIndex )->GetVulkanCommandPool(), 1, &commandBuffer );
     }
 
-    VulkanRHICommandBuffer::VulkanRHICommandBuffer( VulkanRHIDevice* device, uint32 queueFamilyIndex ) :
+    VulkanRHICommandBuffer::VulkanRHICommandBuffer( const RHICommandBufferCreateInfo& info, VulkanRHIDevice* device, uint32 queueFamilyIndex ) :
         device( device ),
         queueFamilyIndex( queueFamilyIndex )
     {
@@ -1603,16 +1607,17 @@ namespace EE
         vkDestroyShaderModule( device->GetVulkanDevice(), shaderModule, nullptr );
     }
 
-    VulkanRHIShaderStage::VulkanRHIShaderStage( VulkanRHIDevice* device, size_t codeLength, const uint32* code, const EShaderStage stage ) :
-        device( device )
+    VulkanRHIShaderStage::VulkanRHIShaderStage( const RHIShaderStageCreateInfo& info, VulkanRHIDevice* device ) : RHIShaderStage( info.stage )
+        , device( device )
+        , entryPoint( info.entryPoint )
     {
         VkShaderModuleCreateInfo createInfo
         {
              .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
              .pNext = NULL,
              .flags = 0,
-             .codeSize = codeLength,
-             .pCode = reinterpret_cast<const uint32*>(code)
+             .codeSize = info.codeLength,
+             .pCode = reinterpret_cast<const uint32*>( info.code )
         };
 
         if ( vkCreateShaderModule( device->GetVulkanDevice(), &createInfo, nullptr, &shaderModule ) != VK_SUCCESS )
@@ -1620,17 +1625,53 @@ namespace EE
             EE_LOG_CORE_ERROR( "Failed to create shader module!" );
             return;
         }
+    }
 
-        VkPipelineShaderStageCreateInfo shaderStageInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-            .pNext = VK_NULL_HANDLE,
-            .flags = 0,
-            .stage = ConvertShaderStage( stage ),
-            .module = shaderModule,
-            .pName = "main",
-            .pSpecializationInfo = NULL
-        };
+    bool VulkanRHIShaderStage::IsValid() const
+    {
+        return shaderModule != VK_NULL_HANDLE;
+    }
+
+    const NChar* VulkanRHIShaderStage::GetEntryPoint() const
+    {
+        return entryPoint;
+    }
+
+    VulkanRHIGraphicsPipeline::VulkanRHIGraphicsPipeline( const RHIGraphicsPipelineCreateInfo& info, VulkanRHIDevice* device )
+        : pipeline( VK_NULL_HANDLE )
+        , device( device )
+    {
+        TArray<VkPipelineShaderStageCreateInfo> stages;
+        auto AddStage = [&stages]( const RHIShaderStageAttachment& shaderAttachment )
+            {
+                if ( shaderAttachment.shaderStage == NULL ) return;
+
+                const VulkanRHIShaderStage* vulkanShaderStage = static_cast<const VulkanRHIShaderStage*>(shaderAttachment.shaderStage);
+
+                VkPipelineShaderStageCreateInfo shaderStageInfo
+                {
+                    .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    .pNext = VK_NULL_HANDLE,
+                    .flags = 0,
+                    .stage = ConvertShaderStage( vulkanShaderStage->GetStage() ),
+                    .module = vulkanShaderStage->GetVulkanShaderModule(),
+                    .pName = vulkanShaderStage->GetEntryPoint(),
+                    .pSpecializationInfo = NULL
+                };
+                stages.emplace_back( shaderStageInfo );
+            };
+        AddStage( info.vertexShader );
+        AddStage( info.fragmentShader );
+        AddStage( info.geometryShader );
+    }
+
+    VulkanRHIGraphicsPipeline::~VulkanRHIGraphicsPipeline()
+    {
+    }
+    
+    bool VulkanRHIGraphicsPipeline::IsValid() const
+    {
+        return pipeline != VK_NULL_HANDLE;
     }
 
     VulkanRHI::~VulkanRHI()
@@ -1773,33 +1814,33 @@ namespace EE
         return new VulkanRHISurface( window, GVulkanInstance );
     }
 
-    RHISwapChain* VulkanRHI::CreateRHISwapChain( const RHISwapChainCreateDescription& description, class Window* window ) const
+    RHICommandBuffer* VulkanRHI::CreateRHICommandBuffer( const RHICommandBufferCreateInfo& info ) const
     {
-        return new VulkanRHISwapChain( description, static_cast<const VulkanRHIPresentContext*>( GDynamicRHI->GetRHIPresentContextOfWindow( window ) ), GVulkanDevice);
-    }
-
-    RHICommandBuffer* VulkanRHI::CreateRHICommandBuffer( const RHICommandBufferCreateDescription& description ) const
-    {
-        return new VulkanRHICommandBuffer( GVulkanDevice, GVulkanDevice->GetGraphicsFamilyIndex() );
+        return new VulkanRHICommandBuffer( info, GVulkanDevice, GVulkanDevice->GetGraphicsFamilyIndex() );
     }
     
-    RHIBuffer* VulkanRHI::CreateRHIBuffer( const RHIBufferCreateDescription& description ) const
+    RHIBuffer* VulkanRHI::CreateRHIBuffer( const RHIBufferCreateInfo& info ) const
     {
         return NULL;
     }
     
-    RHITexture* VulkanRHI::CreateRHITexture( const RHITextureCreateDescription& description ) const
+    RHITexture* VulkanRHI::CreateRHITexture( const RHITextureCreateInfo& info ) const
     {
-        return new VulkanRHITexture( description, GVulkanDevice );
+        return new VulkanRHITexture( info, GVulkanDevice );
     }
     
-    RHISampler* VulkanRHI::CreateRHISampler( const RHISamplerCreateDescription& description ) const
+    RHISampler* VulkanRHI::CreateRHISampler( const RHISamplerCreateInfo& info ) const
     {
         return NULL;
     }
     
-    RHIShaderStage* VulkanRHI::CreateRHIShaderStage( EShaderStage stage, const void* pShaderBytecode, size_t bytecodeLength ) const
+    RHIShaderStage* VulkanRHI::CreateRHIShaderStage( const RHIShaderStageCreateInfo& info ) const
     {
-        return NULL;
+        return new VulkanRHIShaderStage( info, GVulkanDevice );
+    }
+    
+    RHIGraphicsPipeline* VulkanRHI::CreateRHIGraphicsPipeline( const RHIGraphicsPipelineCreateInfo& info ) const
+    {
+        return new VulkanRHIGraphicsPipeline( info, GVulkanDevice );
     }
 }

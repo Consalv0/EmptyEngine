@@ -8,10 +8,11 @@ namespace EE
         bool canInitialize;
 
     public:
-        class RenderPipeline& GetRenderPipeline();
-
         //* Entry point of the application
-        void Run();
+        void Start();
+
+        //* Application loop
+        void MainLoop();
 
         virtual ~Application();
 
@@ -20,20 +21,21 @@ namespace EE
         bool CanInitialize() { return canInitialize; };
 
     protected:
-
         Application();
 
+        //* Called after creating the main window
         virtual bool OnInitialize() = 0;
 
-        virtual void OnAwake() {};
+        //* Called after Initialize
+        virtual void OnAwake() = 0;
 
-        //* This is called after pulling all events,
-        //* you need to update the input manager here
-        virtual void OnUpdate( Timestamp stamp ) {};
+        virtual void OnProcessInput() = 0;
 
-        virtual void OnTerminate();
+        //* This is called after pulling all events
+        virtual void OnTick( Timestamp stamp ) = 0;
 
-        virtual void OnDestroy() {};
+        //* Called when app is asked to terminate
+        virtual void OnTerminate() = 0;
 
     private:
         bool initialized;
@@ -43,9 +45,6 @@ namespace EE
 
         //* Application loading point
         void Awake();
-
-        //* Application loop
-        void UpdateLoop();
 
         //* Terminates Application
         void Terminate();

@@ -21,33 +21,15 @@ namespace EE
 {
     FileList FileManager::files = FileList();
 
-    FileStream* FileManager::GetFile( const WString& filePath )
+    const File& FileManager::GetFile( const WString& filePath )
     {
         WString fullFilePath = GetFullPath( filePath );
         FileList::iterator found = FindInFiles( fullFilePath );
 
-        if ( found != files.end() ) (*found)->Reset();
-        if ( found != files.end() && (*found)->IsValid() ) return *found;
+        if ( found != files.end() && found->IsValid() ) return *found;
 
-        FileStream* newStream = new FileStream( fullFilePath );
-
-        if ( !newStream->IsValid() ) return NULL;
-
-        files.push_back( newStream );
-        return newStream;
-    }
-
-    FileStream* FileManager::MakeFile( const WString& filePath )
-    {
-        std::fstream stream;
-#ifdef EE_PLATFORM_WINDOWS
-        stream.open( filePath, std::ios::in | std::ios::out | std::ios::trunc );
-#else
-        stream.open( WStringToString( filePath ), std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc );
-#endif
-        stream.close();
-
-        return GetFile( filePath );
+        files.emplace_back( filePath );
+        return files.back();
     }
 
     WString FileManager::GetFileExtension( const WString& path )
@@ -108,24 +90,51 @@ namespace EE
 
     FileList::iterator FileManager::FindInFiles( const WString& filePath )
     {
-        return std::find_if( files.begin(), files.end(), [filePath]( FileStream*& file )
+        return std::find_if( files.begin(), files.end(), [filePath]( File& file )
             -> bool
             {
-                return file->GetPath() == filePath;
+                return file.GetPath() == filePath;
             }
         );
     }
 
-    WString FileManager::ReadStream( FileStream* stream )
+    WString FileManager::ReadStream( const File* file )
     {
-        WString text = L"";
-
-        if ( stream != NULL && stream->IsValid() )
+        FileStream<WString> stream( *file );
+        WString str;
+        if ( stream.Open( std::ios::in, true ) )
         {
-            text = stream->ReadStream().str();
-            stream->Close();
+            stream.ReadStream( str );
+            stream.Close();
         }
+        return str;
+    }
 
-        return text;
+    NString FileManager::ReadNarrowStream( const File* file )
+    {
+        FileStream<NString> stream( *file );
+        NString str;
+        if ( stream.Open( std::ios::in, true ) )
+        {
+            stream.ReadStream( str );
+            stream.Close();
+        }
+        return str;
+    }
+
+    TArray<char> FileManager::ReadBinaryStream( const File* file )
+    {
+        FileStream<NString> stream( *file );
+        TArray<char> buffer;
+        if ( stream.Open( std::ios::ate | std::ios::binary | std::ios::in, false ) )
+        {
+            size_t fileSize = stream.GetPosition();
+            buffer.resize( fileSize );
+
+            stream.MoveCursor( 0 );
+            stream.ReadStream( buffer.data(), fileSize );
+            stream.Close();
+        }
+        return buffer;
     }
 }

@@ -24,5 +24,5 @@ int main( int argc, char** argv )
 
     delete EE::GEngine;
 
-    return 0;
+    return EXIT_SUCCESS;
 }

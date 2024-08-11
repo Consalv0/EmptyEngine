@@ -5,7 +5,7 @@
 
 namespace EE
 {
-    typedef TArray<FileStream*> FileList;
+    typedef TList<File> FileList;
 
     class FileManager
     {
@@ -15,9 +15,7 @@ namespace EE
         static FileList::iterator FindInFiles( const WString& filePath );
 
     public:
-        static FileStream* GetFile( const WString& filePath );
-
-        static FileStream* MakeFile( const WString& filePath );
+        static const File& GetFile( const WString& filePath );
 
         static WString GetFileExtension( const WString& path );
 
@@ -25,7 +23,10 @@ namespace EE
 
         static WString GetAppDirectory();
 
-        //* ReadStreams the file streams of the shader code
-        static WString ReadStream( FileStream* stream );
+        static WString ReadStream( const File* file );
+
+        static NString ReadNarrowStream( const File* file );
+
+        static TArray<char> ReadBinaryStream( const File* file );
     };
 }

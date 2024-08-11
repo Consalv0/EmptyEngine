@@ -21,20 +21,14 @@ namespace EE
 
     Application::~Application()
     {
-        OnDestroy();
     }
 
-    void Application::Run()
+    void Application::Start()
     {
-        Initialize();
-        Awake();
-        UpdateLoop();
-    }
-
-    RenderPipeline& Application::GetRenderPipeline()
-    {
-        static RenderPipeline* pipeline;
-        return *pipeline;
+        if ( Initialize() )
+        {
+            Awake();
+        }
     }
 
     void Application::OnTerminate()
@@ -53,36 +47,28 @@ namespace EE
 
     void Application::Awake()
     {
-        if ( !initialized ) return;
-
         OnAwake();
     }
 
-    void Application::UpdateLoop()
+    void Application::MainLoop()
     {
-        if ( !initialized ) return;
+        Ticker::Tick();
 
-        do
+        GEngine->PollEvents();
+        OnProcessInput();
+
+        OnTick( Ticker::GetTimeStamp() );
+
+        for ( uint64 i = 0; i < GEngine->windowCount; i++ )
         {
-            Ticker::Tick();
-            GEngine->PollEvents();
-
-            OnUpdate( Ticker::GetTimeStamp() );
-
-            for ( uint64 i = 0; i < GEngine->windowCount; i++ )
+            if ( GEngine->windows[ i ]->closeRequested )
             {
-                if ( GEngine->windows[ i ]->closeRequested )
-                {
-                    GEngine->DeleteWindow( GEngine->windows[ i ] );
-                    break;
-                }
+                GEngine->DeleteWindow( GEngine->windows[ i ] );
+                break;
             }
+        }
 
-            GEngine->frameCount++;
-
-        } while (
-            GEngine->WantToTerminate() == false
-        );
+        GEngine->frameCount++;
     }
 
     void Application::Terminate()

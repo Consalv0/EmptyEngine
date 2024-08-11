@@ -37,7 +37,7 @@ namespace EE
         virtual ~RHISurface() {};
     };
 
-    struct RHITextureCreateDescription
+    struct RHITextureCreateInfo
     {
         ETextureType type = TextureType_Texture2D;
         uint32 width = 0;
@@ -89,8 +89,9 @@ namespace EE
         virtual ~RHISemaphore() {};
     };
 
-    struct RHISwapChainCreateDescription
+    struct RHISwapChainCreateInfo
     {
+        Window* window = NULL;
         uint32 width = 0;
         uint32 height = 0;
         uint32 bufferCount = 2;
@@ -115,19 +116,30 @@ namespace EE
         virtual ~RHIInstance() {};
     };
 
-    struct RHIBufferCreateDescription
+    struct RHIShaderStageCreateInfo
     {
-        uint64 size = 0;
-        EBufferUsageFlags usages = BufferUsage_None;
-        ESharingMode sharing = SharingMode_Default;
+        EShaderStage stage;
+        size_t codeLength;
+        const void* code;
+        const NChar* entryPoint;
     };
 
     class RHIShaderStage : public RHIResource
     {
         EShaderStage stage = ShaderStage_Unknown;
+
+    protected:
+        RHIShaderStage( EShaderStage stage ) : stage( stage ) { }
+
+    public:
+        virtual ~RHIShaderStage() {};
+
+        FORCEINLINE const EShaderStage& GetStage() const { return stage; }
+        
+        virtual const NChar* GetEntryPoint() const = 0;
     };
 
-    struct RHICommandBufferCreateDescription
+    struct RHICommandBufferCreateInfo
     {
     };
 
@@ -205,6 +217,13 @@ namespace EE
         virtual RHIQueue* GetPresentQueue() const = 0;
     };
 
+    struct RHIBufferCreateInfo
+    {
+        uint64 size = 0;
+        EBufferUsageFlags usages = BufferUsage_None;
+        ESharingMode sharing = SharingMode_Default;
+    };
+
     class RHIBuffer : public RHIResource
     {
     protected:
@@ -213,7 +232,7 @@ namespace EE
         virtual ~RHIBuffer() {};
     };
 
-    struct RHISamplerCreateDescription
+    struct RHISamplerCreateInfo
     {
         EFilterMode filter = FilterMode_MinMagNearest;
         ESamplerAddressMode addressU = SamplerAdressMode_Clamp;
@@ -235,24 +254,33 @@ namespace EE
         virtual ~RHISampler() {};
     };
 
-    struct RHIPipelineStateDescription
+    struct RHIShaderStageAttachment
     {
-        const RHIShaderStage* vertex = nullptr;
-        const RHIShaderStage* pixel = nullptr;
-        const RHIShaderStage* hull = nullptr;
-        const RHIShaderStage* ds = nullptr;
-        const RHIShaderStage* geometry = nullptr;
-        const RHIShaderStage* ms = nullptr;
-        const RHIShaderStage* as = nullptr;
-
-        uint32 sampleMask = 0xFFFFFFFF;
+        const RHIShaderStage* shaderStage;
     };
 
-    class RHIRasterPipeline : public RHIObject
+    class RHIGraphicsPipelineCreateInfo
+    {
+    public:
+        RHIShaderStageAttachment vertexShader;
+        RHIShaderStageAttachment fragmentShader;
+        RHIShaderStageAttachment geometryShader;
+        RHIShaderStageAttachment domainShader;
+        RHIShaderStageAttachment hullShader;
+        
+    public:
+        RHIGraphicsPipelineCreateInfo();
+
+        ~RHIGraphicsPipelineCreateInfo();
+
+        void AddShaderStage( const RHIShaderStage* shaderStage );
+    };
+
+    class RHIGraphicsPipeline : public RHIObject
     {
     protected:
-        RHIRasterPipeline() {}
+        RHIGraphicsPipeline() {}
     public:
-        virtual ~RHIRasterPipeline() {};
+        virtual ~RHIGraphicsPipeline() {};
     };
 }

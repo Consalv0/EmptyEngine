@@ -3,7 +3,7 @@
 #include <future>
 
 #include "Rendering/Mesh.h"
-#include "Files/FileStream.h"
+#include "Files/FileManager.h"
 
 namespace EE
 {
@@ -42,7 +42,7 @@ namespace EE
     public:
         struct ParsingOptions
         {
-            const FileStream* file;
+            const File& file;
             bool optimize;
         };
 
@@ -64,7 +64,7 @@ namespace EE
 
     private:
         typedef std::function<void( ModelDataInfo& )> FinishTaskFunction;
-        typedef std::function<class std::future<bool>( ModelDataInfo&, const ParsingOptions& )> FutureTask;
+        typedef std::function<void( ModelDataInfo&, const ParsingOptions&, std::future<bool>& )> FutureTask;
 
         static bool TaskRunning;
 

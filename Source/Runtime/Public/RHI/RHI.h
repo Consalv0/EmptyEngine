@@ -22,12 +22,12 @@ namespace EE
 
         virtual RHIPresentContext* CreateRHIPresentContext( Window* window ) const = 0;
         virtual RHISurface* CreateRHISurface( Window* window ) const = 0;
-        virtual RHISwapChain* CreateRHISwapChain( const RHISwapChainCreateDescription& description, class Window* window ) const = 0;
-        virtual RHICommandBuffer* CreateRHICommandBuffer( const RHICommandBufferCreateDescription& description ) const = 0;
-        virtual RHIBuffer* CreateRHIBuffer( const RHIBufferCreateDescription& description ) const = 0;
-        virtual RHITexture* CreateRHITexture( const RHITextureCreateDescription& description ) const = 0;
-        virtual RHISampler* CreateRHISampler( const RHISamplerCreateDescription& description ) const = 0;
-        virtual RHIShaderStage* CreateRHIShaderStage( EShaderStage stage, const void* pShaderBytecode, size_t bytecodeLength ) const = 0;
+        virtual RHICommandBuffer* CreateRHICommandBuffer( const RHICommandBufferCreateInfo& info ) const = 0;
+        virtual RHIBuffer* CreateRHIBuffer( const RHIBufferCreateInfo& info ) const = 0;
+        virtual RHITexture* CreateRHITexture( const RHITextureCreateInfo& info ) const = 0;
+        virtual RHISampler* CreateRHISampler( const RHISamplerCreateInfo& info ) const = 0;
+        virtual RHIShaderStage* CreateRHIShaderStage( const RHIShaderStageCreateInfo& info ) const = 0;
+        virtual RHIGraphicsPipeline* CreateRHIGraphicsPipeline( const RHIGraphicsPipelineCreateInfo& info ) const = 0;
 
         virtual const RHIDevice* GetRHIDevice() const = 0;
 

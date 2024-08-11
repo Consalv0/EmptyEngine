@@ -52,7 +52,13 @@ namespace EE
     void GameEngine::Run()
     {
         GInput->Initialize();
-        GMainApplication->Run();
+        GMainApplication->Start();
+
+        do
+        {
+            GMainApplication->MainLoop();
+        } 
+        while ( GEngine->WantToTerminate() == false );
     }
 
     void GameEngine::Terminate()

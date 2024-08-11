@@ -239,7 +239,7 @@ namespace EE
     public:
         ~VulkanRHIBuffer();
 
-        VulkanRHIBuffer( RHIBufferCreateDescription& description, VulkanRHIDevice* device );
+        VulkanRHIBuffer( RHIBufferCreateInfo& info, VulkanRHIDevice* device );
     };
 
     class VulkanRHITexture : public RHITexture
@@ -255,9 +255,9 @@ namespace EE
         bool ownership;
 
     public:
-        VulkanRHITexture( const RHITextureCreateDescription& description, VulkanRHIDevice* device, VkImage image );
+        VulkanRHITexture( const RHITextureCreateInfo& info, VulkanRHIDevice* device, VkImage image );
 
-        VulkanRHITexture( const RHITextureCreateDescription& description, VulkanRHIDevice* device );
+        VulkanRHITexture( const RHITextureCreateInfo& info, VulkanRHIDevice* device );
 
         ~VulkanRHITexture();
 
@@ -285,13 +285,13 @@ namespace EE
     public:
         bool IsValid() const;
 
-        VulkanRHISwapChain( const RHISwapChainCreateDescription& description, const VulkanRHIPresentContext* presentContext, VulkanRHIDevice* device );
+        VulkanRHISwapChain( const RHISwapChainCreateInfo& info, const VulkanRHIPresentContext* presentContext, VulkanRHIDevice* device );
 
         ~VulkanRHISwapChain();
 
         void Cleanup();
 
-        void CreateSwapChain( const RHISwapChainCreateDescription& description );
+        void CreateSwapChain( const RHISwapChainCreateInfo& info );
 
         FORCEINLINE const uint32& GetImageCount() const { return imageCount; }
 
@@ -387,7 +387,7 @@ namespace EE
     public:
         ~VulkanRHICommandBuffer();
 
-        VulkanRHICommandBuffer( VulkanRHIDevice* device, uint32 queueFamilyIndex );
+        VulkanRHICommandBuffer( const RHICommandBufferCreateInfo& info, VulkanRHIDevice* device, uint32 queueFamilyIndex );
 
         bool IsValid() const;
 
@@ -402,28 +402,41 @@ namespace EE
         void ClearColor( Vector3f color, const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer ) const override;
     };
 
-    class VulkanRHIShaderStage
+    class VulkanRHIShaderStage : public RHIShaderStage
     {
     private:
         VulkanRHIDevice* device;
+
+        const NChar* entryPoint;
+
         VkShaderModule shaderModule;
 
     public:
         ~VulkanRHIShaderStage();
 
-        VulkanRHIShaderStage( VulkanRHIDevice* device, size_t codeLength, const uint32* code, const EShaderStage stage );
+        VulkanRHIShaderStage( const RHIShaderStageCreateInfo& info, VulkanRHIDevice* device );
+
+        bool IsValid() const;
+
+        FORCEINLINE const VkShaderModule GetVulkanShaderModule() const { return shaderModule; }
+
+        const NChar* GetEntryPoint() const override;
     };
 
-    class VulkanRHIRasterPipeline : public RHIRasterPipeline
+    class VulkanRHIGraphicsPipeline : public RHIGraphicsPipeline
     {
     private:
         VkPipeline pipeline;
 
+        VulkanRHIDevice* device;
+
     public:
-        VulkanRHIRasterPipeline();
+        VulkanRHIGraphicsPipeline( const RHIGraphicsPipelineCreateInfo& info, VulkanRHIDevice* device );
 
-        ~VulkanRHIRasterPipeline();
+        ~VulkanRHIGraphicsPipeline();
 
-        VkPipeline GetVulkanPipeline() const { return pipeline; }
+        bool IsValid() const;
+
+        FORCEINLINE VkPipeline GetVulkanPipeline() const { return pipeline; }
     };
 }

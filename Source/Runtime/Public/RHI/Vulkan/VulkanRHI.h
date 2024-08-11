@@ -15,12 +15,12 @@ namespace EE
 
         RHIPresentContext* CreateRHIPresentContext( Window* window ) const;
         RHISurface* CreateRHISurface( Window* window ) const;
-        RHISwapChain* CreateRHISwapChain( const RHISwapChainCreateDescription& description, class Window* window ) const;
-        RHICommandBuffer* CreateRHICommandBuffer( const RHICommandBufferCreateDescription& description ) const;
-        RHIBuffer* CreateRHIBuffer( const RHIBufferCreateDescription& description ) const;
-        RHITexture* CreateRHITexture( const RHITextureCreateDescription& description ) const;
-        RHISampler* CreateRHISampler( const RHISamplerCreateDescription& description ) const;
-        RHIShaderStage* CreateRHIShaderStage( EShaderStage stage, const void* pShaderBytecode, size_t bytecodeLength ) const;
+        RHICommandBuffer* CreateRHICommandBuffer( const RHICommandBufferCreateInfo& info ) const;
+        RHIBuffer* CreateRHIBuffer( const RHIBufferCreateInfo& info ) const;
+        RHITexture* CreateRHITexture( const RHITextureCreateInfo& info ) const;
+        RHISampler* CreateRHISampler( const RHISamplerCreateInfo& info ) const;
+        RHIShaderStage* CreateRHIShaderStage( const RHIShaderStageCreateInfo& info ) const;
+        RHIGraphicsPipeline* CreateRHIGraphicsPipeline( const RHIGraphicsPipelineCreateInfo& info ) const;
 
         const RHIDevice* GetRHIDevice() const override;
 

@@ -375,7 +375,7 @@ namespace EE
 
     bool OBJLoader::LoadModel( ModelParser::ModelDataInfo& info, const ModelParser::ParsingOptions& options )
     {
-        if ( options.file == NULL || !options.file->IsValid() ) return false;
+        if ( options.file.IsValid() == false ) return false;
 
         ExtractedData modelData;
 
@@ -384,10 +384,9 @@ namespace EE
             Timestamp timer;
 
             timer.Begin();
-            NString* memoryText = new NString();
-            options.file->ReadNarrowStream( memoryText );
+            NString memoryText = FileManager::ReadNarrowStream( &options.file );
 
-            PrepareData( memoryText->c_str(), modelData );
+            PrepareData( memoryText.c_str(), modelData );
             ParseFaces( modelData );
             ParseVertexPositions( modelData );
             ParseVertexNormals( modelData );
@@ -397,8 +396,6 @@ namespace EE
             modelData.linePositions.clear();
             modelData.lineUVs.clear();
             modelData.lineVertexIndices.clear();
-
-            delete memoryText;
 
             timer.Stop();
             EE_LOG_CORE_INFO(
