@@ -32,8 +32,11 @@ namespace EE
         return NULL;
     };
 
-    const NChar* const GVulkanExtensionsForWin32[] = {
-        VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_WIN32_SURFACE_EXTENSION_NAME, VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME
+    const NChar* const GVulkanExtensionsForWin32[] = 
+    {
+        VK_KHR_SURFACE_EXTENSION_NAME,
+        VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
+        VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME,
     };
 
     void GetVulkanInstanceExtensions( uint32* count, const NChar* const*& extensions )

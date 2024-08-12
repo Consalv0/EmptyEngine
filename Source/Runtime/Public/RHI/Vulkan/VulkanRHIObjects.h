@@ -213,6 +213,8 @@ namespace EE
 
         const RHITexture* GetBackbuffer() const override;
 
+        const EPixelFormat& GetFormat() const override;
+
         void Present() override;
 
         bool SubmitPresentImage( VulkanRHIQueue* queue ) const;
@@ -266,6 +268,8 @@ namespace EE
         VkImage GetVulkanImage() const { return image; }
 
         const UIntVector3& GetExtent() const override { return extent; };
+
+        const EPixelFormat& GetFormat() const override { return ConvertImageFormat( format ); };
 
         bool IsValid() const;
     };
@@ -426,6 +430,8 @@ namespace EE
     class VulkanRHIGraphicsPipeline : public RHIGraphicsPipeline
     {
     private:
+        VkPipelineLayout pipelineLayout;
+
         VkPipeline pipeline;
 
         VulkanRHIDevice* device;

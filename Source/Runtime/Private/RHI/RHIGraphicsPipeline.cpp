@@ -11,6 +11,8 @@ namespace EE
         , geometryShader()
         , domainShader()
         , hullShader()
+        , primitiveState()
+        , colorAttachments()
     {
     }
 
@@ -22,17 +24,16 @@ namespace EE
     {
         switch ( shaderStage->GetStage() )
         {
-        case ShaderStage_Vertex:
-            vertexShader.shaderStage = shaderStage;
-            break;
-        case ShaderStage_Fragment:
-            fragmentShader.shaderStage = shaderStage;
-            break;
-        case ShaderStage_Geometry:
-            geometryShader.shaderStage = shaderStage;
-            break;
+        case ShaderStage_Vertex:      vertexShader.shaderStage = shaderStage; break;
+        case ShaderStage_Fragment:  fragmentShader.shaderStage = shaderStage; break;
+        case ShaderStage_Geometry:  geometryShader.shaderStage = shaderStage; break;
         default:
             break;
         }
+    }
+
+    void RHIGraphicsPipelineCreateInfo::AddColorAttachment( const RHIColorAttachmentState& state )
+    {
+        colorAttachments.emplace_back( state );
     }
 }

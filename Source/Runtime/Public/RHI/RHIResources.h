@@ -49,8 +49,8 @@ namespace EE
         EColorSpace colorSpace = ColorSpace_Unknown;
         ETilingMode tiling = TilingMode_Default;
         uint32 sampleCount = 1;
-        EUsageModeFlags usage = UsageMode_Color;
-        EUsageModeFlags viewUsage = UsageMode_Color;
+        EUsageModeFlags usage = UsageMode_Color_Bit;
+        EUsageModeFlags viewUsage = UsageMode_Color_Bit;
         ESharingMode sharing = SharingMode_Default;
         uint32 bindFlags = 0;
         uint32 accessFlags = 0;
@@ -63,10 +63,13 @@ namespace EE
     {
     protected:
         RHITexture() {}
+
     public:
         virtual ~RHITexture() {};
 
         virtual const UIntVector3& GetExtent() const = 0;
+
+        virtual const EPixelFormat& GetFormat() const = 0;
     };
 
     class RHIFence : public RHIResource
@@ -119,6 +122,7 @@ namespace EE
     struct RHIShaderStageCreateInfo
     {
         EShaderStage stage;
+        EShaderFormat format;
         size_t codeLength;
         const void* code;
         const NChar* entryPoint;
@@ -181,6 +185,8 @@ namespace EE
         virtual void AquireBackbuffer( uint64 timeout ) = 0;
 
         FORCEINLINE const uint32& CurrentFrameIndex() const { return currentFrameIndex; }
+
+        virtual const EPixelFormat& GetFormat() const = 0;
 
         virtual void Present() = 0;
     };
@@ -259,6 +265,55 @@ namespace EE
         const RHIShaderStage* shaderStage;
     };
 
+    struct RHIPrimitiveState
+    {
+        ETopologyMode topologyMode = TopologyMode_TriangleList;
+        ERasterMode rasterMode = RasterMode_Solid;
+        ECullModeFlags cullMode = CullMode_Back_Bit;
+        EFaceWinding frontFace = FaceWinding_CounterClokwise;
+        // Clip or clamp depth
+        bool depthClip = false;
+    };
+
+    struct RHIStencilFaceState
+    {
+        EStencilFunction compareFunction = StencilFunction_Always;
+        EStencilOperation failOperation = StencilOperation_Keep;
+        EStencilOperation depthFailOperation = StencilOperation_Keep;
+        EStencilOperation passOperation = StencilOperation_Keep;
+    };
+
+    struct RHIDepthStencilState
+    {
+        bool depthEnabled = false;
+        bool stencilEnabled = false;
+        EPixelFormat format = PixelFormat_MAX;
+        EComparisonFunction depthCompareFunction = ComparisonFuntion_Always;
+        int32 depthBias = 0;
+        float depthBiasSlopeScale = 0.0F;
+        float depthBiasClamp = 0.0F;
+        RHIStencilFaceState stencilFront = RHIStencilFaceState();
+        RHIStencilFaceState stencilBack = RHIStencilFaceState();
+        uint8 stencilReadMask = 0u;
+        uint8 stencilWriteMask = 0u;
+    };
+
+    struct RHIBlendComponent
+    {
+        EBlendOperation operation = BlendOperation_Add;
+        EBlendFactor srcFactor = BlendFactor_One;
+        EBlendFactor dstFactor = BlendFactor_Zero;
+    };
+
+    struct RHIColorAttachmentState
+    {
+        EPixelFormat format = PixelFormat_MAX;
+        EColorComponentFlags writeFlags = ColorComponent_RGBA;
+        bool blendEnabled = false;
+        RHIBlendComponent colorBlend = RHIBlendComponent();
+        RHIBlendComponent alphaBlend = RHIBlendComponent();
+    };
+
     class RHIGraphicsPipelineCreateInfo
     {
     public:
@@ -267,6 +322,9 @@ namespace EE
         RHIShaderStageAttachment geometryShader;
         RHIShaderStageAttachment domainShader;
         RHIShaderStageAttachment hullShader;
+
+        TArray<RHIColorAttachmentState> colorAttachments;
+        RHIPrimitiveState primitiveState;
         
     public:
         RHIGraphicsPipelineCreateInfo();
@@ -274,6 +332,8 @@ namespace EE
         ~RHIGraphicsPipelineCreateInfo();
 
         void AddShaderStage( const RHIShaderStage* shaderStage );
+
+        void AddColorAttachment( const RHIColorAttachmentState& state );
     };
 
     class RHIGraphicsPipeline : public RHIObject

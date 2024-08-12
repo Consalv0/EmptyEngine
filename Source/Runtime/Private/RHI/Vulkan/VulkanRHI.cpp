@@ -62,7 +62,7 @@ namespace EE
         }
     }
 
-    static EPixelFormat ConvertPixelFormat( VkFormat vkFormat )
+    static EPixelFormat ConvertImageFormat( VkFormat vkFormat )
     {
         switch ( vkFormat )
         {
@@ -156,21 +156,21 @@ namespace EE
 
     VkImageUsageFlags ConvertTextureUsage( EUsageModeFlags usage )
     {
-        VkImageUsageFlags finalUsage = VkImageUsageFlags( 0 );
-        if ( usage & UsageMode_Sampled )         finalUsage |= VK_IMAGE_USAGE_SAMPLED_BIT;
-        if ( usage & UsageMode_Storage )         finalUsage |= VK_IMAGE_USAGE_STORAGE_BIT;
-        if ( usage & UsageMode_Color )           finalUsage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-        if ( usage & UsageMode_DepthStencil )    finalUsage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-        return finalUsage;
+        VkImageUsageFlags flags = VkImageUsageFlags( 0 );
+        if ( usage & UsageMode_Sampled_Bit )    flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
+        if ( usage & UsageMode_Storage_Bit )    flags |= VK_IMAGE_USAGE_STORAGE_BIT;
+        if ( usage & UsageMode_Color_Bit )      flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        if ( usage & UsageMode_DepthStencil )   flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        return flags;
     }
 
     VkImageAspectFlags ConvertTextureAspect( EUsageModeFlags usage )
     {
-        VkImageAspectFlags finalAspect = VK_IMAGE_ASPECT_NONE;
-        if ( usage & UsageMode_Color )      finalAspect |= VK_IMAGE_ASPECT_COLOR_BIT;
-        if ( usage & UsageMode_Depth )      finalAspect |= VK_IMAGE_ASPECT_DEPTH_BIT;
-        if ( usage & UsageMode_Stencil )    finalAspect |= VK_IMAGE_ASPECT_STENCIL_BIT;
-        return finalAspect;
+        VkImageAspectFlags flags = VK_IMAGE_ASPECT_NONE;
+        if ( usage & UsageMode_Color_Bit )      flags |= VK_IMAGE_ASPECT_COLOR_BIT;
+        if ( usage & UsageMode_Depth_Bit )      flags |= VK_IMAGE_ASPECT_DEPTH_BIT;
+        if ( usage & UsageMode_Stencil_Bit )    flags |= VK_IMAGE_ASPECT_STENCIL_BIT;
+        return flags;
     }
 
     VkImageLayout ConvertTextureLayout( ETextureLayout layout )
@@ -204,31 +204,120 @@ namespace EE
 
     VkBufferUsageFlags ConvertBufferUsageFlags( EBufferUsageFlags usages )
     {
-        switch ( usages )
-        {
-        case BufferUsage_SourceCopy:        return VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-        case BufferUsage_StreamOutput:      return VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-        case BufferUsage_Index:             return VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-        case BufferUsage_Vertex:            return VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-        case BufferUsage_Uniform:           return VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-        case BufferUsage_Storage:           return VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-        case BufferUsage_Indirect:          return VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
-        default:
-            return 0;
-        }
+        VkBufferUsageFlags flags = 0;
+        if ( usages & BufferUsage_SourceCopy_Bit )       flags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+        if ( usages & BufferUsage_StreamOutput_Bit )     flags |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+        if ( usages & BufferUsage_Index_Bit )            flags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+        if ( usages & BufferUsage_Vertex_Bit )           flags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        if ( usages & BufferUsage_Uniform_Bit )          flags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+        if ( usages & BufferUsage_Storage_Bit )          flags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+        if ( usages & BufferUsage_Indirect_Bit )         flags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
+        return flags;
+    }
+
+    VkColorComponentFlags ConvertColorComponentFlags( EColorComponentFlags components )
+    {
+        VkColorComponentFlags flags = 0;
+        if ( components & ColorComponent_R_Bit )     flags |= VK_COLOR_COMPONENT_R_BIT;
+        if ( components & ColorComponent_G_Bit )     flags |= VK_COLOR_COMPONENT_G_BIT;
+        if ( components & ColorComponent_B_Bit )     flags |= VK_COLOR_COMPONENT_B_BIT;
+        if ( components & ColorComponent_A_Bit )     flags |= VK_COLOR_COMPONENT_A_BIT;
+        return flags;
     }
 
     VkPipelineStageFlags ConvertPipelineStageFlags( EPipelineStage stage )
     {
         switch ( stage )
         {
-        case PipelineStage_OutputColor:
-            return VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        case PipelineStage_Top:
-            return VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        case PipelineStage_OutputColor: return VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        case PipelineStage_Top:         return VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
         case PipelineStage_None:
         default:
             return VK_PIPELINE_STAGE_NONE;
+        }
+    }
+
+    static VkPrimitiveTopology ConvertDrawMode( ETopologyMode mode )
+    {
+        switch ( mode )
+        {
+        case TopologyMode_PointList:        return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+        case TopologyMode_LineList:         return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+        case TopologyMode_LineStrip:        return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+        case TopologyMode_TriangleList:     return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        case TopologyMode_TriangleStrip:    return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+        case TopologyMode_TriangleFan:      return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
+        default:
+            return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+        }
+    }
+
+    static VkPolygonMode ConvertRasterMode( ERasterMode mode )
+    {
+        switch ( mode )
+        {
+        case RasterMode_Solid:        return VK_POLYGON_MODE_FILL;
+        case RasterMode_Wireframe:    return VK_POLYGON_MODE_LINE;
+        case RasterMode_Point:        return VK_POLYGON_MODE_POINT;
+        default:
+            return VK_POLYGON_MODE_FILL;
+        }
+    }
+
+    static VkFrontFace ConvertFrontFace( EFaceWinding mode )
+    {
+        switch ( mode )
+        {
+        case RasterMode_Solid:        return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        case RasterMode_Wireframe:    return VK_FRONT_FACE_CLOCKWISE;
+        default:
+            return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        }
+    }
+
+    static VkCullModeFlags ConvertCullMode( ECullModeFlags mode )
+    {
+        switch ( mode )
+        {
+            case CullMode_None:         return VK_CULL_MODE_NONE;
+            case CullMode_Back_Bit:     return VK_CULL_MODE_BACK_BIT;
+            case CullMode_Front_Bit:    return VK_CULL_MODE_FRONT_BIT;
+            case CullMode_All:
+            default:
+                return VK_CULL_MODE_FRONT_AND_BACK;
+        }
+    }
+
+    static VkBlendFactor ConvertBlendFactor( EBlendFactor factor )
+    {
+        switch ( factor )
+        {
+        case BlendFactor_Zero:              return VK_BLEND_FACTOR_ZERO;
+        case BlendFactor_One:               return VK_BLEND_FACTOR_ONE;
+        case BlendFactor_SrcColor:          return VK_BLEND_FACTOR_SRC_COLOR;
+        case BlendFactor_SrcAlpha:          return VK_BLEND_FACTOR_SRC_ALPHA;
+        case BlendFactor_DstAlpha:          return VK_BLEND_FACTOR_DST_COLOR;
+        case BlendFactor_DstColor:          return VK_BLEND_FACTOR_DST_ALPHA;
+        case BlendFactor_OneMinusSrcColor:  return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
+        case BlendFactor_OneMinusSrcAlpha:  return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        case BlendFactor_OneMinusDstAlpha:  return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
+        case BlendFactor_OneMinusDstColor:  return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+        default:
+            return VK_BLEND_FACTOR_MAX_ENUM;
+        }
+    }
+
+    static VkBlendOp ConvertBlendOperation( EBlendOperation operation )
+    {
+        switch ( operation )
+        {
+        case BlendOperation_Add:                return VK_BLEND_OP_ADD;
+        case BlendOperation_Substract:          return VK_BLEND_OP_SUBTRACT;
+        case BlendOperation_ReverseSubstract:   return VK_BLEND_OP_REVERSE_SUBTRACT;
+        case BlendOperation_Min:                return VK_BLEND_OP_MIN;
+        case BlendOperation_Max:                return VK_BLEND_OP_MAX;
+        default:
+            return VK_BLEND_OP_MAX_ENUM;
         }
     }
 
@@ -618,14 +707,22 @@ namespace EE
         queueCreateInfo.queueCount = 1;
         queueCreateInfo.pQueuePriorities = &queuePriority;
 
-        VkPhysicalDeviceFeatures deviceFeatures{ };
-        deviceFeatures.geometryShader = VK_TRUE;
-        deviceFeatures.samplerAnisotropy = VK_TRUE;
+        VkPhysicalDeviceVulkan13Features deviceFeatures13
+        {
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+            .dynamicRendering = VK_TRUE
+        };
+
+        VkPhysicalDeviceFeatures deviceFeatures
+        {
+            .geometryShader = VK_TRUE,
+            .samplerAnisotropy = VK_TRUE
+        };
 
         VkDeviceCreateInfo deviceCreateInfo
         {
             .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-            .pNext = NULL,
+            .pNext = &deviceFeatures13,
             .flags = 0,
             .queueCreateInfoCount = static_cast<uint32>(queueCreateInfos.size()),
             .pQueueCreateInfos = queueCreateInfos.data(),
@@ -805,6 +902,11 @@ namespace EE
         return swapChain->GetTexture( swapChain->BackImageIndex() );
     }
 
+    const EPixelFormat& VulkanRHIPresentContext::GetFormat() const
+    {
+        return swapChain->GetTexture( 0 )->GetFormat();
+    }
+
     void VulkanRHIPresentContext::CreateSurface()
     {
         surface = new VulkanRHISurface( window, instance );
@@ -898,7 +1000,7 @@ namespace EE
             const VkSurfaceFormatKHR& surfaceFormat = surfaceDetails.formats[ i ];
             bool colorSpaceHDR = FrameColorSpaceIsHDR( surfaceFormat.colorSpace );
             EColorSpace colorSpace = ConvertColorSpace( surfaceFormat.colorSpace );
-            EPixelFormat format = ConvertPixelFormat( surfaceFormat.format );
+            EPixelFormat format = ConvertImageFormat( surfaceFormat.format );
 
             if ( colorSpace == ColorSpace_Unknown )
                 continue;
@@ -1047,11 +1149,15 @@ namespace EE
     VulkanRHIBuffer::VulkanRHIBuffer( RHIBufferCreateInfo& info, VulkanRHIDevice* device ) :
         device( device ), usages( BufferUsage_None )
     {
-        VkBufferCreateInfo bufferInfo = {};
-        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferInfo.sharingMode = ConvertSharingMode( info.sharing );
-        bufferInfo.usage = ConvertBufferUsageFlags( info.usages );
-        bufferInfo.size = info.size;
+        VkBufferCreateInfo bufferInfo = 
+        {
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0,
+            .size = info.size,
+            .usage = ConvertBufferUsageFlags( info.usages ),
+            .sharingMode = ConvertSharingMode( info.sharing ),
+        };
 
         VmaAllocationCreateInfo allocInfo = {};
         allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
@@ -1073,20 +1179,20 @@ namespace EE
     {
         VkImageViewCreateInfo viewInfo
         {
-            VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-            NULL,
-            0,
-            image,
-            ConvertTextureType( info.type ),
-            format,
-            VkComponentMapping
+            .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+            .pNext = NULL, 
+            .flags = 0,
+            .image = image,
+            .viewType = ConvertTextureType( info.type ),
+            .format = format,
+            .components = VkComponentMapping
             {
                 .r = VK_COMPONENT_SWIZZLE_IDENTITY,
                 .g = VK_COMPONENT_SWIZZLE_IDENTITY,
                 .b = VK_COMPONENT_SWIZZLE_IDENTITY,
                 .a = VK_COMPONENT_SWIZZLE_IDENTITY
             },
-            VkImageSubresourceRange
+            .subresourceRange = VkImageSubresourceRange
             {
                 .aspectMask = ConvertTextureAspect( info.viewUsage ),
                 .baseMipLevel = 0,
@@ -1113,7 +1219,7 @@ namespace EE
         VkImageCreateInfo imageInfo
         {
             .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-            .pNext = VK_NULL_HANDLE,
+            .pNext = NULL,
             .flags = 0,
             .imageType = VK_IMAGE_TYPE_2D,
             .format = format,
@@ -1243,7 +1349,7 @@ namespace EE
         for ( uint32 i = 0; i < surfaceDetails.formatCount; i++ )
         {
             const VkSurfaceFormatKHR& surfaceFormat = surfaceDetails.formats[ i ];
-            if ( ConvertPixelFormat( surfaceFormat.format ) == info.format )
+            if ( ConvertImageFormat( surfaceFormat.format ) == info.format )
             {
                 if ( ConvertColorSpace( surfaceFormat.colorSpace ) == info.colorSpace )
                 {
@@ -1272,7 +1378,7 @@ namespace EE
         VkSwapchainCreateInfoKHR createInfo =
         {
             .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-            .pNext = VK_NULL_HANDLE,
+            .pNext = NULL,
             .flags = 0,
             .surface = surface->GetVulkanSurface(),
             .minImageCount = imageCount,
@@ -1475,7 +1581,7 @@ namespace EE
         VkCommandPoolCreateInfo createInfo
         {
             .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-            .pNext = VK_NULL_HANDLE,
+            .pNext = NULL,
             .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
             .queueFamilyIndex = queueFamilyIndex
         };
@@ -1638,7 +1744,8 @@ namespace EE
     }
 
     VulkanRHIGraphicsPipeline::VulkanRHIGraphicsPipeline( const RHIGraphicsPipelineCreateInfo& info, VulkanRHIDevice* device )
-        : pipeline( VK_NULL_HANDLE )
+        : pipelineLayout( VK_NULL_HANDLE )
+        , pipeline( VK_NULL_HANDLE )
         , device( device )
     {
         TArray<VkPipelineShaderStageCreateInfo> stages;
@@ -1663,6 +1770,206 @@ namespace EE
         AddStage( info.vertexShader );
         AddStage( info.fragmentShader );
         AddStage( info.geometryShader );
+
+        const VkDynamicState dynamicStates[] =
+        {
+            VK_DYNAMIC_STATE_VIEWPORT,
+            VK_DYNAMIC_STATE_SCISSOR,
+            VK_DYNAMIC_STATE_CULL_MODE,
+            VK_DYNAMIC_STATE_FRONT_FACE,
+        };
+
+        VkPipelineDynamicStateCreateInfo dynamicState
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0,
+            .dynamicStateCount = EE_ARRAYSIZE( dynamicStates ),
+            .pDynamicStates = (VkDynamicState*)&dynamicStates
+        };
+        
+        VkPipelineVertexInputStateCreateInfo vertexInputInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0,
+            .vertexBindingDescriptionCount = 0,
+            .pVertexBindingDescriptions = NULL, // Optional
+            .vertexAttributeDescriptionCount = 0,
+            .pVertexAttributeDescriptions = NULL, // Optional
+        };
+        
+        VkPipelineInputAssemblyStateCreateInfo inputAssembly
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0,
+            .topology = ConvertDrawMode( info.primitiveState.topologyMode ),
+            // Normally, the vertices are loaded from the vertex buffer by index in sequential order,
+            // but with an element buffer you can specify the indices to use yourself.
+            // This allows you to perform optimizations like reusing vertices. If you set the primitiveRestartEnable member to VK_TRUE,
+            // then it's possible to break up lines and triangles in the _STRIP topology modes by using a special index of 0xFFFF or 0xFFFFFFFF.
+            .primitiveRestartEnable = VK_FALSE
+        }; 
+        
+        VkPipelineViewportStateCreateInfo viewportState
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0,
+            .viewportCount = 1,
+            .pViewports = NULL, // Dynamic
+            .scissorCount = 1,
+            .pScissors = NULL   // Dynamic
+        }; 
+        
+        VkPipelineRasterizationStateCreateInfo rasterizer
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0,
+            // If depthClampEnable is set to VK_TRUE, then fragments that are beyond the near and far planes are clamped to them as opposed to discarding them.
+            // This is useful in some special cases like shadow maps. Using this requires enabling a GPU feature.
+            .depthClampEnable = VK_FALSE,
+            // If rasterizerDiscardEnable is set to VK_TRUE, then geometry never passes through the rasterizer stage.
+            // This basically disables any output to the framebuffer.
+            .rasterizerDiscardEnable = VK_FALSE,
+            .polygonMode = ConvertRasterMode( info.primitiveState.rasterMode ),
+            .cullMode = ConvertCullMode( info.primitiveState.cullMode ),
+            .frontFace = ConvertFrontFace( info.primitiveState.frontFace ),
+            // The rasterizer can alter the depth values by adding a constant value or biasing them based on a fragment's slope.
+            // This is sometimes used for shadow mapping, but we won't be using it.
+            .depthBiasEnable = VK_FALSE,
+            .depthBiasConstantFactor = 0.0F,    // Optional
+            .depthBiasClamp = 0.0F,             // Optional
+            .depthBiasSlopeFactor = 0.0F,       // Optional
+            // The lineWidth member is straightforward, it describes the thickness of lines in terms of number of fragments.
+            // The maximum line width that is supported depends on the hardware and any line thicker than 1.0f requires you to enable the wideLines GPU feature.
+            .lineWidth = 1.0F
+        }; 
+
+        // Enabling multisampling it requires enabling a GPU feature.
+        VkPipelineMultisampleStateCreateInfo multisampling
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0,
+            .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
+            .sampleShadingEnable = VK_FALSE,
+            .minSampleShading = 1.0F,           // Optional
+            .pSampleMask = NULL,                // Optional
+            .alphaToCoverageEnable = VK_FALSE,  // Optional
+            .alphaToOneEnable = VK_FALSE,       // Optional
+        }; 
+        
+        VkPipelineDepthStencilStateCreateInfo depStencil {};
+        // {
+        //     .sType
+        //     .pNext
+        //     .flags
+        //     .depthTestEnable
+        //     .depthWriteEnable
+        //     .depthCompareOp
+        //     .depthBoundsTestEnable
+        //     .stencilTestEnable
+        //     .front
+        //     .back
+        //     .minDepthBounds
+        //     .maxDepthBounds
+        // };
+
+        uint32 colorAttachmentCount = (uint32)info.colorAttachments.size();
+        TArray<VkPipelineColorBlendAttachmentState> colorAttachments( colorAttachmentCount );
+
+        TArray<VkFormat> pixelFormats( colorAttachmentCount );
+        for ( uint32 i = 0; i < colorAttachmentCount; i++ )
+        {
+            auto format = info.colorAttachments[ i ].format;
+            pixelFormats[ i ] = ConvertPixelFormat( info.colorAttachments[ i ].format, EColorSpace::ColorSpace_sRGB /*info.colorAttachments[ i ].colorSpace */ );
+        }
+
+        for ( uint32 i = 0; i < colorAttachmentCount; ++i )
+        {
+            const RHIColorAttachmentState& state = info.colorAttachments[ i ];
+            VkPipelineColorBlendAttachmentState& colorBlendAttachment = colorAttachments[ i ];
+            colorBlendAttachment.blendEnable = state.blendEnabled ? VK_TRUE : VK_FALSE;
+            colorBlendAttachment.srcColorBlendFactor = ConvertBlendFactor( state.colorBlend.srcFactor );
+            colorBlendAttachment.dstColorBlendFactor = ConvertBlendFactor( state.colorBlend.dstFactor );
+            colorBlendAttachment.colorBlendOp = ConvertBlendOperation( state.colorBlend.operation );
+            colorBlendAttachment.srcAlphaBlendFactor = ConvertBlendFactor( state.alphaBlend.srcFactor );
+            colorBlendAttachment.dstAlphaBlendFactor = ConvertBlendFactor( state.alphaBlend.dstFactor );
+            colorBlendAttachment.alphaBlendOp = ConvertBlendOperation( state.alphaBlend.operation );
+            colorBlendAttachment.colorWriteMask = ConvertColorComponentFlags( state.writeFlags );
+        }
+
+        VkPipelineColorBlendStateCreateInfo colorInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0,
+            .logicOpEnable = VK_FALSE,
+            .logicOp = VK_LOGIC_OP_CLEAR,
+            .attachmentCount = colorAttachmentCount,
+            .pAttachments = colorAttachments.data(),
+            .blendConstants = { 0.0F, 0.0F, 0.0F, 0.0F }
+        }; 
+        
+        VkPipelineLayoutCreateInfo pipelineLayoutInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0,
+            .setLayoutCount = 0,
+            .pSetLayouts = NULL,
+            .pushConstantRangeCount = 0,
+            .pPushConstantRanges = NULL
+        }; 
+        
+        VkResult layoutResult = vkCreatePipelineLayout( device->GetVulkanDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout );
+        if ( layoutResult != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to create pipeline layout {}", (int32)layoutResult );
+        }
+
+        VkPipelineRenderingCreateInfo pipelineRenderingCreateInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
+            .pNext = NULL,
+            .viewMask = 0,
+            .colorAttachmentCount = colorAttachmentCount,
+            .pColorAttachmentFormats = pixelFormats.data(),
+            .depthAttachmentFormat = VK_FORMAT_UNDEFINED,
+            .stencilAttachmentFormat = VK_FORMAT_UNDEFINED
+        };
+
+        VkGraphicsPipelineCreateInfo pipelineCreateInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+            .pNext = &pipelineRenderingCreateInfo,
+            .flags = 0,
+            .stageCount = (uint32)stages.size(),
+            .pStages = stages.data(),
+            .pVertexInputState = &vertexInputInfo,
+            .pInputAssemblyState = &inputAssembly,
+            .pTessellationState = NULL,
+            .pViewportState = &viewportState,
+            .pRasterizationState = &rasterizer,
+            .pMultisampleState = &multisampling,
+            .pDepthStencilState = &depStencil,
+            .pColorBlendState = &colorInfo,
+            .pDynamicState = &dynamicState,
+            .layout = pipelineLayout,
+            .renderPass = VK_NULL_HANDLE,
+            .subpass = 0,
+            .basePipelineHandle = VK_NULL_HANDLE,
+            .basePipelineIndex = 0,
+        };
+
+        VkResult result = vkCreateGraphicsPipelines( device->GetVulkanDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, NULL, &pipeline);
+        if ( result != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to create graphics pipeline {}", (int32)result );
+        }
     }
 
     VulkanRHIGraphicsPipeline::~VulkanRHIGraphicsPipeline()

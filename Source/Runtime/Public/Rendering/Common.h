@@ -12,6 +12,16 @@ namespace EE
 	typedef struct FloatRGB  { typedef float Range; static constexpr unsigned char Channels = 3; Range R; Range G; Range B; } FloatRGB;
     typedef struct FloatRGBA { typedef float Range; static constexpr unsigned char Channels = 4; Range R; Range G; Range B; Range A; } FloatRGBA;
 
+    struct Viewport
+    {
+        float x;
+        float y;
+        float width;
+        float height;
+        float minDepth;
+        float maxDepth;
+    };
+
     enum ETextureType
     {
         TextureType_None,
@@ -50,6 +60,15 @@ namespace EE
         ShaderFormat_GLSL,
     };
 
+    enum EBlendOperation
+    {
+        BlendOperation_Add,
+        BlendOperation_Substract,
+        BlendOperation_ReverseSubstract,
+        BlendOperation_Min,
+        BlendOperation_Max
+    };
+
     enum EBlendFactor
     {
         BlendFactor_None,
@@ -64,6 +83,18 @@ namespace EE
         BlendFactor_OneMinusDstAlpha,
         BlendFactor_OneMinusDstColor,
     };
+
+    enum EColorComponentFlags : uint32
+    {
+        ColorComponent_None =        0,
+        ColorComponent_R_Bit =  1 << 0,
+        ColorComponent_G_Bit =  1 << 1,
+        ColorComponent_B_Bit =  1 << 2,
+        ColorComponent_A_Bit =  1 << 3,
+        ColorComponent_RGB = ColorComponent_R_Bit | ColorComponent_G_Bit | ColorComponent_B_Bit,
+        ColorComponent_RGBA = ColorComponent_RGB | ColorComponent_A_Bit
+    };
+    ENUM_FLAGS_OPERATORS( EColorComponentFlags );
     
     // Specifying the tiling arrangement of texel blocks in an texture
     enum ETilingMode
@@ -75,14 +106,14 @@ namespace EE
 
     enum EUsageModeFlags : uint32
     {
-        UsageMode_None          = 0,
-        UsageMode_Color         = 1 << 0,
-        UsageMode_Stencil       = 1 << 1,
-        UsageMode_Depth         = 1 << 2,
-        UsageMode_Sampled       = 1 << 3,
-        UsageMode_Storage       = 1 << 4,
+        UsageMode_None =            0,
+        UsageMode_Color_Bit =       1 << 0,
+        UsageMode_Stencil_Bit =     1 << 1,
+        UsageMode_Depth_Bit =       1 << 2,
+        UsageMode_Sampled_Bit =     1 << 3,
+        UsageMode_Storage_Bit =     1 << 4,
 
-        UsageMode_DepthStencil = UsageMode_Depth | UsageMode_Stencil,
+        UsageMode_DepthStencil = UsageMode_Depth_Bit | UsageMode_Stencil_Bit,
     };
     ENUM_FLAGS_OPERATORS( EUsageModeFlags );
 
@@ -95,15 +126,15 @@ namespace EE
 
     enum EBufferUsageFlags : uint32
     {
-        BufferUsage_None =              0,
-        BufferUsage_SourceCopy =        1 << 1,
-        BufferUsage_StreamOutput =      1 << 2,
-        BufferUsage_Index =             1 << 3,
-        BufferUsage_Vertex =            1 << 4,
-        BufferUsage_Uniform =           1 << 5,
-        BufferUsage_Storage =           1 << 6,
-        BufferUsage_Indirect =          1 << 7,
-        BufferUsage_ShaderResource =    1 << 8,
+        BufferUsage_None =                  0,
+        BufferUsage_SourceCopy_Bit =        1 << 1,
+        BufferUsage_StreamOutput_Bit =      1 << 2,
+        BufferUsage_Index_Bit =             1 << 3,
+        BufferUsage_Vertex_Bit =            1 << 4,
+        BufferUsage_Uniform_Bit =           1 << 5,
+        BufferUsage_Storage_Bit =           1 << 6,
+        BufferUsage_Indirect_Bit =          1 << 7,
+        BufferUsage_ShaderResource_Bit =    1 << 8,
     };
     ENUM_FLAGS_OPERATORS( EBufferUsageFlags );
 
@@ -156,12 +187,14 @@ namespace EE
         ImageLayout_CopyDest,
     };
 
-    enum ECullMode
+    enum ECullModeFlags : uint8
     {
-        CullMode_None,
-        CullMode_Front,
-        CullMode_Back
+        CullMode_None =         0,
+        CullMode_Front_Bit =    1 << 0,
+        CullMode_Back_Bit =     1 << 1,
+        CullMode_All = CullMode_Front_Bit | CullMode_Back_Bit
     };
+    ENUM_FLAGS_OPERATORS( ECullModeFlags );
 
     enum EColorSpace
     {
@@ -179,23 +212,29 @@ namespace EE
     enum EPixelFormat
     {
         PixelFormat_Unknown,
+        PixelFormat_R8_SINT,
         PixelFormat_R8_UINT,
         PixelFormat_R8_SNORM,
         PixelFormat_R8_UNORM,
+        PixelFormat_R16_SINT,
         PixelFormat_R16_UINT,
         PixelFormat_R16_SNORM,
         PixelFormat_R16_UNORM,
+        PixelFormat_R32_SINT,
         PixelFormat_R32_UINT,
         PixelFormat_R32_SNORM,
         PixelFormat_R32_UNORM,
+        PixelFormat_R8G8_SINT,
         PixelFormat_R8G8_UINT,
         PixelFormat_R8G8_SNORM,
         PixelFormat_R8G8_UNORM,
+        PixelFormat_R16G16_SINT,
         PixelFormat_R16G16_UINT,
         PixelFormat_R16G16_SNORM,
         PixelFormat_R16G16_UNORM,
         PixelFormat_R32G32_UINT,
         PixelFormat_R5G6B5_UINT,
+        PixelFormat_R8G8B8A8_SINT,
         PixelFormat_R8G8B8A8_UINT,
         PixelFormat_R8G8B8A8_SNORM,
         PixelFormat_R8G8B8A8_UNORM,
@@ -225,11 +264,17 @@ namespace EE
         SamplerAdressMode_Border
     };
 
-    enum ERasterizerFillMode
+    enum ERasterMode
     {
-        FillMode_Point,
-        FillMode_Wireframe,
-        FillMode_Solid,
+        RasterMode_Point,
+        RasterMode_Wireframe,
+        RasterMode_Solid,
+    };
+
+    enum EFaceWinding
+    {
+        FaceWinding_Clockwise,
+        FaceWinding_CounterClokwise
     };
 
     enum EFilterMode
@@ -252,19 +297,22 @@ namespace EE
         TextureLayout_Present
     };
 
-    enum EDrawMode
+    enum ETopologyMode
     {
-        DrawMode_Points,
-        DrawMode_Lines,
-        DrawMode_Triangles
+        TopologyMode_PointList,
+        TopologyMode_LineList,
+        TopologyMode_LineStrip,
+        TopologyMode_TriangleList,
+        TopologyMode_TriangleStrip,
+        TopologyMode_TriangleFan,
     };
 
     enum EClearFlags : uint32
     {
-        ClearFlags_None     = 0,
-        ClearFlags_Color    = 1 << 0,
-        ClearFlags_Depth    = 1 << 1,
-        ClearFlags_Stencil  = 1 << 2
+        ClearFlags_None =           0,
+        ClearFlags_Color_Bit =      1 << 0,
+        ClearFlags_Depth_Bit =      1 << 1,
+        ClearFlags_Stencil_Bit =    1 << 2
     };
     ENUM_FLAGS_OPERATORS( EClearFlags );
 
