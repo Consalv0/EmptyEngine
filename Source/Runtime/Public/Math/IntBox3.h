@@ -18,13 +18,13 @@ namespace EE::Math
 			struct { T minX, minY, minZ, maxX, maxY, maxZ; };
 		};
 
-		TIntBox3()
+		constexpr TIntBox3()
 		{
 			minX = minY = minZ = MathConstants<T>::MaxValue;
 			maxX = maxY = maxZ = MathConstants<T>::MinValue;
 		}
 
-		TIntBox3( T minX, T minY, T minZ, T maxX, T maxY, T maxZ )
+		constexpr TIntBox3( T minX, T minY, T minZ, T maxX, T maxY, T maxZ )
 			: minX( minX ), minY( minY ), minZ( minZ ), maxX( maxX ), maxY( maxY ), maxZ( maxZ )
 		{
 		}

@@ -10,7 +10,7 @@
 namespace EE::Math
 {
     template <typename T>
-	FORCEINLINE TMatrix4x4<T>::TMatrix4x4() :
+	FORCEINLINE constexpr TMatrix4x4<T>::TMatrix4x4() :
 		m00(1), m01(0), m02(0), m03(0),
 		m10(0), m11(1), m12(0), m13(0),
 		m20(0), m21(0), m22(1), m23(0),
@@ -19,13 +19,13 @@ namespace EE::Math
 	}
 
     template <typename T>
-	FORCEINLINE TMatrix4x4<T>::TMatrix4x4( const TMatrix4x4& other )
+	FORCEINLINE constexpr TMatrix4x4<T>::TMatrix4x4( const TMatrix4x4& other )
 		: m0( other.m0 ), m1( other.m1 ), m2( other.m2 ), m3( other.m3 )
 	{
 	}
 
     template <typename T>
-	FORCEINLINE TMatrix4x4<T>::TMatrix4x4( const TVector4<T>& row0, const TVector4<T>& row1, const TVector4<T>& row2, const TVector4<T> row3 )
+	FORCEINLINE constexpr TMatrix4x4<T>::TMatrix4x4( const TVector4<T>& row0, const TVector4<T>& row1, const TVector4<T>& row2, const TVector4<T> row3 )
 	{
 		m00 = row0.x; m01 = row0.y; m02 = row0.z; m03 = row0.w;
 		m10 = row1.x; m11 = row1.y; m12 = row1.z; m13 = row1.w;
@@ -34,7 +34,7 @@ namespace EE::Math
 	}
 
     template <typename T>
-	inline TMatrix4x4<T>::TMatrix4x4(
+	inline constexpr TMatrix4x4<T>::TMatrix4x4(
 		T m00, T m01, T m02, T m03,
 		T m10, T m11, T m12, T m13,
 		T m20, T m21, T m22, T m23,

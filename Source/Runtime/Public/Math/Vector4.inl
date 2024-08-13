@@ -8,49 +8,49 @@
 namespace EE::Math
 {
     template <typename T>
-	FORCEINLINE TVector4<T>::TVector4()
+	FORCEINLINE constexpr TVector4<T>::TVector4()
 		: x( 0 ), y( 0 ), z( 0 ), w( 0 )
 	{
 	}
     template <typename T>
 
-	FORCEINLINE TVector4<T>::TVector4( const TVector4<T>& vector )
+	FORCEINLINE constexpr TVector4<T>::TVector4( const TVector4<T>& vector )
 		: x( vector.x ), y( vector.y ), z( vector.z ), w( vector.w )
 	{
 	}
 
     template <typename T>
-	FORCEINLINE TVector4<T>::TVector4( const T& x, const T& y, const T& z )
+	FORCEINLINE constexpr TVector4<T>::TVector4( const T& x, const T& y, const T& z )
 		: x( x ), y( y ), z( z ), w( 0 )
 	{
 	}
 
     template <typename T>
-	FORCEINLINE TVector4<T>::TVector4( const T& x, const T& y, const T& z, const T& w )
+	FORCEINLINE constexpr TVector4<T>::TVector4( const T& x, const T& y, const T& z, const T& w )
 		: x( x ), y( y ), z( z ), w( w )
 	{
 	}
 
     template <typename T>
-	FORCEINLINE TVector4<T>::TVector4( const TVector2<T>& vector )
+	FORCEINLINE constexpr TVector4<T>::TVector4( const TVector2<T>& vector )
 		: x( vector.x ), y( vector.y ), z( 0 ), w( 0 )
 	{
 	}
 
     template <typename T>
-	FORCEINLINE TVector4<T>::TVector4( const TVector3<T>& vector )
+	FORCEINLINE constexpr TVector4<T>::TVector4( const TVector3<T>& vector )
 		: x( vector.x ), y( vector.y ), z( vector.z ), w( 0 )
 	{
 	}
 
     template <typename T>
-	FORCEINLINE TVector4<T>::TVector4( const TVector3<T>& vector, const T& w )
+	FORCEINLINE constexpr TVector4<T>::TVector4( const TVector3<T>& vector, const T& w )
 		: x( vector.x ), y( vector.y ), z( vector.z ), w( w )
 	{
 	}
 
     template <typename T>
-	FORCEINLINE TVector4<T>::TVector4( const T& value )
+	FORCEINLINE constexpr TVector4<T>::TVector4( const T& value )
 		: x( value ), y( value ), z( value ), w( value )
 	{
 	}

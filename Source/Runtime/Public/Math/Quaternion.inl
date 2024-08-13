@@ -12,25 +12,25 @@
 namespace EE::Math
 {
     template <typename T>
-	FORCEINLINE TQuaternion<T>::TQuaternion()
+	FORCEINLINE constexpr TQuaternion<T>::TQuaternion()
 		:w( 1 ), x( 0 ), y( 0 ), z( 0 )
 	{
 	}
 
     template <typename T>
-	FORCEINLINE TQuaternion<T>::TQuaternion( TQuaternion<T> const& other )
+	FORCEINLINE constexpr TQuaternion<T>::TQuaternion( TQuaternion<T> const& other )
 		: w( other.w ), x( other.x ), y( other.y ), z( other.z )
 	{
 	}
 
     template <typename T>
-	FORCEINLINE TQuaternion<T>::TQuaternion( T const& Scale, TVector3<T> const& vector )
+	FORCEINLINE constexpr TQuaternion<T>::TQuaternion( T const& Scale, TVector3<T> const& vector )
 		: w( Scale ), x( vector.x ), y( vector.y ), z( vector.z )
 	{
 	}
 
     template <typename T>
-	FORCEINLINE TQuaternion<T>::TQuaternion( T const& w, T const& x, T const& y, T const& z )
+	FORCEINLINE constexpr TQuaternion<T>::TQuaternion( T const& w, T const& x, T const& y, T const& z )
 		: w( w ), x( x ), y( y ), z( z )
 	{
 	}

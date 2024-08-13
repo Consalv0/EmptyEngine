@@ -18,16 +18,16 @@ namespace EE
                 struct { T u, v; };
             };
 
-            HOST_DEVICE FORCEINLINE TVector2();
-            HOST_DEVICE FORCEINLINE TVector2( const TVector2<T>& vector );
-            HOST_DEVICE FORCEINLINE TVector2( const TVector3<T>& vector );
-            HOST_DEVICE FORCEINLINE TVector2( const TVector4<T>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TVector2();
+            HOST_DEVICE FORCEINLINE constexpr TVector2( const TVector2<T>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TVector2( const TVector3<T>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TVector2( const TVector4<T>& vector );
             template <typename I>
-            HOST_DEVICE FORCEINLINE TVector2( const TIntVector2<I>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TVector2( const TIntVector2<I>& vector );
             template <typename I>
-            HOST_DEVICE FORCEINLINE TVector2( const TIntVector3<I>& vector );
-            HOST_DEVICE FORCEINLINE TVector2( const T& value );
-            HOST_DEVICE FORCEINLINE TVector2( const T& x, const T& y );
+            HOST_DEVICE FORCEINLINE constexpr TVector2( const TIntVector3<I>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TVector2( const T& value );
+            HOST_DEVICE FORCEINLINE constexpr TVector2( const T& x, const T& y );
 
             HOST_DEVICE inline T Magnitude() const;
             HOST_DEVICE inline T MagnitudeSquared() const;

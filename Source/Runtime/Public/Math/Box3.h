@@ -20,13 +20,13 @@ namespace EE
                 struct { T minX, minY, minZ, maxX, maxY, maxZ; };
             };
 
-            TBox3()
+            constexpr TBox3()
             {
                 minX = minY = minZ = MathConstants<T>::MinValue;
                 maxX = maxY = maxZ = MathConstants<T>::MaxValue;
             }
 
-            TBox3( T minX, T minY, T minZ, T maxX, T maxY, T maxZ )
+            constexpr TBox3( T minX, T minY, T minZ, T maxX, T maxY, T maxZ )
                 : minX( minX ), minY( minY ), minZ( minZ ), maxX( maxX ), maxY( maxY ), maxZ( maxZ )
             {
             }

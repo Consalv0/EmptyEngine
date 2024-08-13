@@ -11,70 +11,70 @@
 namespace EE::Math
 {
     template <typename T>
-	FORCEINLINE TIntVector4<T>::TIntVector4()
+	FORCEINLINE constexpr TIntVector4<T>::TIntVector4()
 		: x( 0 ), y( 0 ), z( 0 ), w( 0 )
 	{
 	}
 
     template <typename T>
     template <typename R>
-	FORCEINLINE TIntVector4<T>::TIntVector4( const TVector2<R>& vector )
+	FORCEINLINE constexpr TIntVector4<T>::TIntVector4( const TVector2<R>& vector )
 		: x( (T)vector.x ), y( (T)vector.y ), z( (T)0 ), w( (T)0 )
 	{
 	}
 
     template <typename T>
     template <typename R>
-    FORCEINLINE TIntVector4<T>::TIntVector4( const TVector3<R>& vector )
+    FORCEINLINE constexpr TIntVector4<T>::TIntVector4( const TVector3<R>& vector )
         : x( (T)vector.x ), y( (T)vector.y ), z( (T)vector.z ), w( (T)0 )
     {
     }
 
     template <typename T>
     template <typename R>
-    FORCEINLINE TIntVector4<T>::TIntVector4( const TVector4<R>& vector )
+    FORCEINLINE constexpr TIntVector4<T>::TIntVector4( const TVector4<R>& vector )
         : x( (T)vector.x ), y( (T)vector.y ), z( (T)vector.z ), w( (T)vector.w )
     {
     }
 
     template <typename T>
-    FORCEINLINE TIntVector4<T>::TIntVector4( const TIntVector2<T>& vector )
+    FORCEINLINE constexpr TIntVector4<T>::TIntVector4( const TIntVector2<T>& vector )
         : x( vector.x ), y( vector.y ), z( 0 ), w( 0 )
     {
     }
 
     template <typename T>
-    FORCEINLINE TIntVector4<T>::TIntVector4( const TIntVector3<T>& vector )
+    FORCEINLINE constexpr TIntVector4<T>::TIntVector4( const TIntVector3<T>& vector )
         : x( vector.x ), y( vector.y ), z( vector.z ), w( 0 )
     {
     }
 
     template <typename T>
-    FORCEINLINE TIntVector4<T>::TIntVector4( const TIntVector3<T>& vector, const T& w )
+    FORCEINLINE constexpr TIntVector4<T>::TIntVector4( const TIntVector3<T>& vector, const T& w )
         : x( vector.x ), y( vector.y ), z( vector.z ), w( (T)w )
     {
     }
 
     template <typename T>
-    FORCEINLINE TIntVector4<T>::TIntVector4( const T& x, const T& y, const T& z, const T& w )
+    FORCEINLINE constexpr TIntVector4<T>::TIntVector4( const T& x, const T& y, const T& z, const T& w )
         : x( x ), y( y ), z( z ), w( w )
     {
     }
 
     template <typename T>
-	FORCEINLINE TIntVector4<T>::TIntVector4( const T& x, const T& y, const T& z )
+	FORCEINLINE constexpr TIntVector4<T>::TIntVector4( const T& x, const T& y, const T& z )
 		: x( x ), y( y ), z( z ), w( 0 )
 	{
 	}
 
     template <typename T>
-	FORCEINLINE TIntVector4<T>::TIntVector4( const T& x, const T& y )
+	FORCEINLINE constexpr  TIntVector4<T>::TIntVector4( const T& x, const T& y )
 		: x( x ), y( y ), z( 0 ), w( 0 )
 	{
 	}
 
     template <typename T>
-	FORCEINLINE TIntVector4<T>::TIntVector4( const T& value )
+	FORCEINLINE constexpr TIntVector4<T>::TIntVector4( const T& value )
 		: x( value ), y( value ), z( value ), w( value )
 	{
 	}

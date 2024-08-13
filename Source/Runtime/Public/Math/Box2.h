@@ -19,9 +19,9 @@ namespace EE
                 struct { T minX, minY, maxX, maxY; };
             };
 
-            TBox2() = default;
+            constexpr TBox2() = default;
 
-            TBox2( const T& minX, const T& minY, const T& maxX, const T& maxY )
+            constexpr TBox2( const T& minX, const T& minY, const T& maxX, const T& maxY )
                 : minX( minX ), minY( minY ), maxX( maxX ), maxY( maxY )
             {
             }

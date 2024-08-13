@@ -16,10 +16,10 @@ namespace EE
                 TVector3<T> m0, m1, m2;
             };
 
-            HOST_DEVICE FORCEINLINE TMatrix3x3();
-            HOST_DEVICE FORCEINLINE TMatrix3x3( const TMatrix3x3<T>& matrix );
-            HOST_DEVICE FORCEINLINE TMatrix3x3( const TMatrix4x4<T>& matrix );
-            HOST_DEVICE FORCEINLINE TMatrix3x3( const TVector3<T>&row0, const TVector3<T>& row1, const TVector3<T>& row2 );
+            HOST_DEVICE FORCEINLINE constexpr TMatrix3x3();
+            HOST_DEVICE FORCEINLINE constexpr TMatrix3x3( const TMatrix3x3<T>& matrix );
+            HOST_DEVICE FORCEINLINE constexpr TMatrix3x3( const TMatrix4x4<T>& matrix );
+            HOST_DEVICE FORCEINLINE constexpr TMatrix3x3( const TVector3<T>&row0, const TVector3<T>& row1, const TVector3<T>& row2 );
 
             HOST_DEVICE inline static TMatrix3x3 Identity();
 

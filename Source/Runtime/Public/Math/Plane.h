@@ -30,10 +30,10 @@ namespace EE
                 struct { TVector3<T> normal; T distance; };
             };
 
-            HOST_DEVICE FORCEINLINE TPlane();
-            HOST_DEVICE FORCEINLINE TPlane( const TPlane& other );
-            HOST_DEVICE FORCEINLINE TPlane( const T& x, const T& y, const T& z, const T& d );
-            HOST_DEVICE FORCEINLINE TPlane( const TVector3<T>& normalizedNormal, T distance );
+            HOST_DEVICE FORCEINLINE constexpr TPlane();
+            HOST_DEVICE FORCEINLINE constexpr TPlane( const TPlane& other );
+            HOST_DEVICE FORCEINLINE constexpr TPlane( const T& x, const T& y, const T& z, const T& d );
+            HOST_DEVICE FORCEINLINE constexpr TPlane( const TVector3<T>& normalizedNormal, T distance );
 
             HOST_DEVICE FORCEINLINE static TPlane FromPointNormal( const TPoint3<T>& point, const TVector3<T>& normal );
             HOST_DEVICE FORCEINLINE static TPlane From3Points( const TPoint3<T>& v0, const TPoint3<T>& v1, const TPoint3<T>& v2 );

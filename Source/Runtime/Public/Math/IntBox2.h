@@ -17,9 +17,9 @@ namespace EE::Math
 			struct { T minX, minY, maxX, maxY; };
 		};
 
-		TIntBox2() = default;
+		constexpr TIntBox2() = default;
 
-		TIntBox2( const T& minX, const T& minY, const T& width, const T& height )
+		constexpr TIntBox2( const T& minX, const T& minY, const T& width, const T& height )
 			: minX( minX ), minY( minY ), maxX( minX + width ), maxY( minY + height )
 		{
 		}

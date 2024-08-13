@@ -16,17 +16,17 @@ namespace EE
                 struct { T u, v; };
             };
 
-            HOST_DEVICE FORCEINLINE TIntVector2();
-            HOST_DEVICE FORCEINLINE TIntVector2( const TIntVector2& vector );
-            HOST_DEVICE FORCEINLINE TIntVector2( const TIntVector3<T>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector2();
+            HOST_DEVICE FORCEINLINE constexpr TIntVector2( const TIntVector2& vector );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector2( const TIntVector3<T>& vector );
             template <typename R>
-            HOST_DEVICE FORCEINLINE TIntVector2( const TVector2<R>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector2( const TVector2<R>& vector );
             template <typename R>
-            HOST_DEVICE FORCEINLINE TIntVector2( const TVector3<R>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector2( const TVector3<R>& vector );
             template <typename R>
-            HOST_DEVICE FORCEINLINE TIntVector2( const TVector4<R>& vector );
-            HOST_DEVICE FORCEINLINE TIntVector2( const T& value );
-            HOST_DEVICE FORCEINLINE TIntVector2( const T& x, const T& y );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector2( const TVector4<R>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector2( const T& value );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector2( const T& x, const T& y );
 
             template <typename R>
             HOST_DEVICE FORCEINLINE R Magnitude() const;

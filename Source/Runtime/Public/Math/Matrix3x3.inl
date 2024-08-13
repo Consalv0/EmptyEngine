@@ -9,7 +9,7 @@
 namespace EE::Math
 {
     template <typename T>
-	FORCEINLINE TMatrix3x3<T>::TMatrix3x3()
+	FORCEINLINE constexpr TMatrix3x3<T>::TMatrix3x3()
 	{
 		m00 = 1; m01 = 0; m02 = 0;
 		m10 = 0; m11 = 1; m12 = 0;
@@ -17,19 +17,19 @@ namespace EE::Math
 	}
 
     template <typename T>
-	FORCEINLINE TMatrix3x3<T>::TMatrix3x3( const TMatrix3x3& matrix )
+	FORCEINLINE constexpr TMatrix3x3<T>::TMatrix3x3( const TMatrix3x3& matrix )
 		: m0( matrix.m0 ), m1( matrix.m1 ), m2( matrix.m2 )
 	{
 	}
 
     template <typename T>
-	FORCEINLINE TMatrix3x3<T>::TMatrix3x3( const TMatrix4x4<T>& matrix )
+	FORCEINLINE constexpr TMatrix3x3<T>::TMatrix3x3( const TMatrix4x4<T>& matrix )
 	{
 		TMatrix3x3( matrix.GetRow( 0 ), matrix.GetRow( 1 ), matrix.GetRow( 2 ) );
 	}
 
     template <typename T>
-	FORCEINLINE TMatrix3x3<T>::TMatrix3x3( const TVector3<T>& row0, const TVector3<T>& row1, const TVector3<T>& row2 )
+	FORCEINLINE constexpr TMatrix3x3<T>::TMatrix3x3( const TVector3<T>& row0, const TVector3<T>& row1, const TVector3<T>& row2 )
 	{
 		m00 = row0.x; m01 = row0.y; m02 = row0.z;
 		m10 = row1.x; m11 = row1.y; m12 = row1.z;

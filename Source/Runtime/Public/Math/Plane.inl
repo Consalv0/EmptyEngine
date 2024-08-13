@@ -7,18 +7,18 @@
 namespace EE::Math
 {
     template <typename T>
-    FORCEINLINE TPlane<T>::TPlane() : x(), y(), z(), d() {}
+    FORCEINLINE constexpr TPlane<T>::TPlane() : x(), y(), z(), d() {}
 
     template <typename T>
-    FORCEINLINE TPlane<T>::TPlane( const TPlane<T>& other ) :
+    FORCEINLINE constexpr TPlane<T>::TPlane( const TPlane<T>& other ) :
         x( other.x ), y( other.y ), z( other.z ), d( other.d )
     { }
 
     template <typename T>
-    FORCEINLINE TPlane<T>::TPlane( const T& x, const T& y, const T& z, const T& d ) : x( x ), y( y ), z( z ), d( d ) {}
+    FORCEINLINE constexpr TPlane<T>::TPlane( const T& x, const T& y, const T& z, const T& d ) : x( x ), y( y ), z( z ), d( d ) {}
 
     template <typename T>
-    FORCEINLINE TPlane<T>::TPlane( const TVector3<T>& normalizedNormal, T distance )
+    FORCEINLINE constexpr TPlane<T>::TPlane( const TVector3<T>& normalizedNormal, T distance )
     {
         x = normalizedNormal.x;
         y = normalizedNormal.y;

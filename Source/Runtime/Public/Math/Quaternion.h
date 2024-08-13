@@ -25,10 +25,10 @@ namespace EE
                 struct { T scalar; TVector3<T> vector; };
             };
 
-            HOST_DEVICE FORCEINLINE TQuaternion();
-            HOST_DEVICE FORCEINLINE TQuaternion( TQuaternion const& other );
-            HOST_DEVICE FORCEINLINE TQuaternion( T const& scalar, TVector3<T> const& vector );
-            HOST_DEVICE FORCEINLINE TQuaternion( T const& w, T const& x, T const& y, T const& z );
+            HOST_DEVICE FORCEINLINE constexpr TQuaternion();
+            HOST_DEVICE FORCEINLINE constexpr TQuaternion( TQuaternion const& other );
+            HOST_DEVICE FORCEINLINE constexpr TQuaternion( T const& scalar, TVector3<T> const& vector );
+            HOST_DEVICE FORCEINLINE constexpr TQuaternion( T const& w, T const& x, T const& y, T const& z );
 
             //* Create a quaternion from euler angles (pitch, yaw, roll).
             HOST_DEVICE static FORCEINLINE TQuaternion FromEulerAngles( TVector3<T> const& eulerAngles );

@@ -10,51 +10,51 @@
 namespace EE::Math
 {
     template <typename T>
-    FORCEINLINE TVector2<T>::TVector2()
+    FORCEINLINE constexpr TVector2<T>::TVector2()
         : x( 0 ), y( 0 )
     {
     }
 
     template <typename T>
-    FORCEINLINE TVector2<T>::TVector2( const TVector2<T>& vector )
+    FORCEINLINE constexpr TVector2<T>::TVector2( const TVector2<T>& vector )
         : x( vector.x ), y( vector.y )
     {
     }
 
     template <typename T>
-    FORCEINLINE TVector2<T>::TVector2( const TVector3<T>& vector )
+    FORCEINLINE constexpr TVector2<T>::TVector2( const TVector3<T>& vector )
         : x( vector.x ), y( vector.y )
     {
     }
 
     template <typename T>
-    FORCEINLINE TVector2<T>::TVector2( const TVector4<T>& vector )
+    FORCEINLINE constexpr TVector2<T>::TVector2( const TVector4<T>& vector )
         : x( vector.x ), y( vector.y )
     {
     }
 
     template <typename T>
     template <typename I>
-    FORCEINLINE TVector2<T>::TVector2( const TIntVector2<I>& vector )
+    FORCEINLINE constexpr TVector2<T>::TVector2( const TIntVector2<I>& vector )
         : x( (T)vector.x ), y( (T)vector.y )
     {
     }
 
     template <typename T>
     template <typename I>
-    FORCEINLINE TVector2<T>::TVector2( const TIntVector3<I>& vector )
+    FORCEINLINE constexpr TVector2<T>::TVector2( const TIntVector3<I>& vector )
         : x( (T)vector.x ), y( (T)vector.y )
     {
     }
 
     template <typename T>
-    FORCEINLINE TVector2<T>::TVector2( const T& x, const T& y )
+    FORCEINLINE constexpr TVector2<T>::TVector2( const T& x, const T& y )
         : x( x ), y( y )
     {
     }
 
     template <typename T>
-    FORCEINLINE TVector2<T>::TVector2( const T& value )
+    FORCEINLINE constexpr TVector2<T>::TVector2( const T& value )
         : x( value ), y( value )
     {
     }

@@ -17,10 +17,10 @@ namespace EE
                 struct { TVector4<T> x, y, z, w; };
             };
 
-            HOST_DEVICE FORCEINLINE TMatrix4x4();
-            HOST_DEVICE FORCEINLINE TMatrix4x4( const TMatrix4x4& other );
-            HOST_DEVICE FORCEINLINE TMatrix4x4( const TVector4<T>& row0, const TVector4<T>& row1, const TVector4<T>& row2, const TVector4<T> Row3 );
-            HOST_DEVICE FORCEINLINE TMatrix4x4(
+            HOST_DEVICE FORCEINLINE constexpr TMatrix4x4();
+            HOST_DEVICE FORCEINLINE constexpr TMatrix4x4( const TMatrix4x4& other );
+            HOST_DEVICE FORCEINLINE constexpr TMatrix4x4( const TVector4<T>& row0, const TVector4<T>& row1, const TVector4<T>& row2, const TVector4<T> Row3 );
+            HOST_DEVICE FORCEINLINE constexpr TMatrix4x4(
                 T m00, T m01, T m02, T m03,
                 T m10, T m11, T m12, T m13,
                 T m20, T m21, T m22, T m23,

@@ -8,52 +8,52 @@ namespace EE
     namespace Math
     {
         template <typename T>
-        FORCEINLINE TIntVector2<T>::TIntVector2()
+        FORCEINLINE constexpr TIntVector2<T>::TIntVector2()
             : x( 0 ), y( 0 )
         {
         }
 
         template <typename T>
         template <typename R>
-        FORCEINLINE TIntVector2<T>::TIntVector2( const TVector2<R>& vector )
+        FORCEINLINE constexpr TIntVector2<T>::TIntVector2( const TVector2<R>& vector )
             : x( (T)vector.x ), y( (T)vector.y )
         {
         }
 
         template <typename T>
         template <typename R>
-        FORCEINLINE TIntVector2<T>::TIntVector2( const TVector3<R>& vector )
+        FORCEINLINE constexpr TIntVector2<T>::TIntVector2( const TVector3<R>& vector )
             : x( (T)vector.x ), y( (T)vector.y )
         {
         }
 
         template <typename T>
         template <typename R>
-        FORCEINLINE TIntVector2<T>::TIntVector2( const TVector4<R>& vector )
+        FORCEINLINE constexpr TIntVector2<T>::TIntVector2( const TVector4<R>& vector )
             : x( (T)vector.x ), y( (T)vector.y )
         {
         }
 
         template <typename T>
-        FORCEINLINE TIntVector2<T>::TIntVector2( const TIntVector2& vector )
+        FORCEINLINE constexpr TIntVector2<T>::TIntVector2( const TIntVector2& vector )
             : x( vector.x ), y( vector.y )
         {
         }
 
         template <typename T>
-        FORCEINLINE TIntVector2<T>::TIntVector2( const TIntVector3<T>& vector )
+        FORCEINLINE constexpr TIntVector2<T>::TIntVector2( const TIntVector3<T>& vector )
             : x( vector.x ), y( vector.y )
         {
         }
 
         template <typename T>
-        FORCEINLINE TIntVector2<T>::TIntVector2( const T& x, const T& y )
+        FORCEINLINE constexpr TIntVector2<T>::TIntVector2( const T& x, const T& y )
             : x( x ), y( y )
         {
         }
 
         template <typename T>
-        FORCEINLINE TIntVector2<T>::TIntVector2( const T& value )
+        FORCEINLINE constexpr TIntVector2<T>::TIntVector2( const T& value )
             : x( value ), y( value )
         {
         }

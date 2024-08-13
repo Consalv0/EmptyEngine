@@ -16,22 +16,22 @@ namespace EE
                 struct { T r, g, b, a; };
             };
 
-            HOST_DEVICE FORCEINLINE TIntVector4();
-            HOST_DEVICE FORCEINLINE TIntVector4( const TIntVector2<T>& vector );
-            HOST_DEVICE FORCEINLINE TIntVector4( const TIntVector3<T>& vector );
-            HOST_DEVICE FORCEINLINE TIntVector4( const TIntVector3<T>& vector, const T& w );
-            HOST_DEVICE FORCEINLINE TIntVector4( const TIntVector4<T>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector4();
+            HOST_DEVICE FORCEINLINE constexpr TIntVector4( const TIntVector2<T>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector4( const TIntVector3<T>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector4( const TIntVector3<T>& vector, const T& w );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector4( const TIntVector4<T>& vector );
 
             template <typename R>
-            HOST_DEVICE FORCEINLINE TIntVector4( const TVector2<R>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector4( const TVector2<R>& vector );
             template <typename R>
-            HOST_DEVICE FORCEINLINE TIntVector4( const TVector3<R>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector4( const TVector3<R>& vector );
             template <typename R>
-            HOST_DEVICE FORCEINLINE TIntVector4( const TVector4<R>& vector );
-            HOST_DEVICE FORCEINLINE TIntVector4( const T& value );
-            HOST_DEVICE FORCEINLINE TIntVector4( const T& x, const T& y );
-            HOST_DEVICE FORCEINLINE TIntVector4( const T& x, const T& y, const T& z );
-            HOST_DEVICE FORCEINLINE TIntVector4( const T& x, const T& y, const T& z, const T& w );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector4( const TVector4<R>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector4( const T& value );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector4( const T& x, const T& y );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector4( const T& x, const T& y, const T& z );
+            HOST_DEVICE FORCEINLINE constexpr TIntVector4( const T& x, const T& y, const T& z, const T& w );
 
             template <typename R>
             HOST_DEVICE inline R Magnitude() const;

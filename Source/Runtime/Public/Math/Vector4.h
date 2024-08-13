@@ -18,14 +18,14 @@ namespace EE
                 struct { T r, g, b, a; };
             };
 
-            HOST_DEVICE FORCEINLINE TVector4();
-            HOST_DEVICE FORCEINLINE TVector4( const TVector2<T>& vector );
-            HOST_DEVICE FORCEINLINE TVector4( const TVector3<T>& vector );
-            HOST_DEVICE FORCEINLINE TVector4( const TVector3<T>& vector, const T& w );
-            HOST_DEVICE FORCEINLINE TVector4( const TVector4<T>& vector );
-            HOST_DEVICE FORCEINLINE TVector4( const T& value );
-            HOST_DEVICE FORCEINLINE TVector4( const T& x, const T& y, const T& z );
-            HOST_DEVICE FORCEINLINE TVector4( const T& x, const T& y, const T& z, const T& w );
+            HOST_DEVICE FORCEINLINE constexpr TVector4();
+            HOST_DEVICE FORCEINLINE constexpr TVector4( const TVector2<T>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TVector4( const TVector3<T>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TVector4( const TVector3<T>& vector, const T& w );
+            HOST_DEVICE FORCEINLINE constexpr TVector4( const TVector4<T>& vector );
+            HOST_DEVICE FORCEINLINE constexpr TVector4( const T& value );
+            HOST_DEVICE FORCEINLINE constexpr TVector4( const T& x, const T& y, const T& z );
+            HOST_DEVICE FORCEINLINE constexpr TVector4( const T& x, const T& y, const T& z, const T& w );
 
             HOST_DEVICE inline T Magnitude() const;
             HOST_DEVICE inline T MagnitudeSquared() const;
