@@ -256,6 +256,8 @@ namespace EE
         VkFormat format;
         bool ownership;
 
+        EPixelFormat pixelFormat;
+
     public:
         VulkanRHITexture( const RHITextureCreateInfo& info, VulkanRHIDevice* device, VkImage image );
 
@@ -269,7 +271,7 @@ namespace EE
 
         const UIntVector3& GetExtent() const override { return extent; };
 
-        const EPixelFormat& GetFormat() const override { return ConvertImageFormat( format ); };
+        const EPixelFormat& GetFormat() const override { return pixelFormat; };
 
         bool IsValid() const;
     };

@@ -16,8 +16,6 @@ namespace EE
         { L"PixelFormat_R16_SNORM",              2,      1,        true,     PixelFormat_R16_SNORM          },
         { L"PixelFormat_R16_UNORM",              2,      1,        true,     PixelFormat_R16_UNORM          },
         { L"PixelFormat_R32_UINT",               4,      1,        true,     PixelFormat_R32_UINT           },
-        { L"PixelFormat_R32_SNORM",              4,      1,        true,     PixelFormat_R32_SNORM          },
-        { L"PixelFormat_R32_UNORM",              4,      1,        true,     PixelFormat_R32_UNORM          },
         { L"PixelFormat_R8G8_UINT",              2,      2,        true,     PixelFormat_R8G8_UINT          },
         { L"PixelFormat_R8G8_SNORM",             2,      2,        true,     PixelFormat_R8G8_SNORM         },
         { L"PixelFormat_R8G8_UNORM",             2,      2,        true,     PixelFormat_R8G8_UNORM         },
@@ -25,16 +23,10 @@ namespace EE
         { L"PixelFormat_R16G16_SNORM",           4,      2,        true,     PixelFormat_R16G16_SNORM       },
         { L"PixelFormat_R16G16_UNORM",           4,      2,        true,     PixelFormat_R16G16_UNORM       },
         { L"PixelFormat_R32G32_UINT",            8,      2,        true,     PixelFormat_R32G32_UINT        },
-        { L"PixelFormat_R5G6B5_UINT",            2,      3,        true,     PixelFormat_R5G6B5_UINT        },
         { L"PixelFormat_R8G8B8A8_UINT",          4,      4,        true,     PixelFormat_R8G8B8A8_UINT      },
         { L"PixelFormat_R8G8B8A8_SNORM",         4,      4,        true,     PixelFormat_R8G8B8A8_SNORM     },
         { L"PixelFormat_R8G8B8A8_UNORM",         4,      4,        true,     PixelFormat_R8G8B8A8_UNORM     },
-        { L"PixelFormat_R4G4B4A4_UINT",          2,      4,        true,     PixelFormat_R4G4B4A4_UINT      },
-        { L"PixelFormat_A2R10G10B10_UNORM",      4,      4,        true,     PixelFormat_A2R10G10B10_UNORM  },
         { L"PixelFormat_R16G16B16A16_SNORM",     8,      4,        true,     PixelFormat_R16G16B16A16_SNORM },
-        { L"PixelFormat_DepthComponent24",       4,      2,        true,     PixelFormat_DepthComponent24   },
-        { L"PixelFormat_DepthStencil",           3,      2,        true,     PixelFormat_DepthStencil       },
-        { L"PixelFormat_ShadowDepth",            2,      1,        true,     PixelFormat_ShadowDepth        },
     };
 
     PixelMap::PixelMap()
@@ -124,7 +116,7 @@ namespace EE
         switch ( map.pixelFormat )
         {
         case PixelFormat_R8_UINT:        _FlipVertically< UCharRed>( map.width, map.height, map.depth, map.data ); break;
-        case PixelFormat_R32_UNORM:      _FlipVertically< FloatRed>( map.width, map.height, map.depth, map.data ); break;
+        case PixelFormat_R32_UINT:       _FlipVertically< UCharRed>( map.width, map.height, map.depth, map.data ); break;
         case PixelFormat_R8G8_UINT:      _FlipVertically<  UCharRG>( map.width, map.height, map.depth, map.data ); break;
         case PixelFormat_R16G16_UNORM:   _FlipVertically<  FloatRG>( map.width, map.height, map.depth, map.data ); break;
         case PixelFormat_R8G8B8A8_UINT:  _FlipVertically<UCharRGBA>( map.width, map.height, map.depth, map.data ); break;
@@ -202,19 +194,13 @@ namespace EE
         case PixelFormat_R8_UNORM:
         case PixelFormat_R16_SNORM:
         case PixelFormat_R16_UNORM:
-        case PixelFormat_R32_SNORM:
-        case PixelFormat_R32_UNORM:
         case PixelFormat_R8G8_SNORM:
         case PixelFormat_R8G8_UNORM:
         case PixelFormat_R16G16_SNORM:
         case PixelFormat_R16G16_UNORM:
         case PixelFormat_R8G8B8A8_SNORM:
         case PixelFormat_R8G8B8A8_UNORM:
-        case PixelFormat_A2R10G10B10_UNORM:
         case PixelFormat_R16G16B16A16_SNORM:
-        case PixelFormat_DepthComponent24:
-        case PixelFormat_DepthStencil:
-        case PixelFormat_ShadowDepth:
             return true;
         default:
             return false;

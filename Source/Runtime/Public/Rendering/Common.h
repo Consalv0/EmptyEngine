@@ -261,6 +261,7 @@ namespace EE
     // BLOCK is compressed format
     enum EPixelFormat
     {
+        PixelFormat_Unknown,
         PixelFormat_R4G4_UNORM_PACK8,
         PixelFormat_R4G4B4A4_UNORM_PACK16,
         PixelFormat_B4G4R4A4_UNORM_PACK16, // DXGI_FORMAT_B4G4R4A4_UNORM
@@ -472,7 +473,7 @@ namespace EE
         PixelFormat_R16G16_SFIXED5_NV,
         PixelFormat_A1B5G5R5_UNORM_PACK16_KHR,
         PixelFormat_A8_UNORM_KHR,          // DXGI_FORMAT_A8_UNORM
-        PixelFormat_YUV2                   // Video encoding format
+        PixelFormat_YUV2,                  // Video encoding format
         // Missing DX12 formats
         // DXGI_FORMAT_R10G10B10A2_UNORM,
         // DXGI_FORMAT_R10G10B10A2_UINT,
@@ -483,6 +484,7 @@ namespace EE
         // DXGI_FORMAT_B8G8R8X8_UNORM,
         // DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM,
         // DXGI_FORMAT_B8G8R8X8_UNORM_SRGB,
+        PixelFormat_MAX
     };
 
     struct PixelFormatInfo
