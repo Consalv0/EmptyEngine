@@ -209,42 +209,280 @@ namespace EE
         PresentMode_VSync
     };
 
+    enum EPixelFormatVideo
+    {
+        PixelFormatVideo_G8B8G8R8_422_UNORM,
+        PixelFormatVideo_B8G8R8G8_422_UNORM,
+        PixelFormatVideo_G8_B8_R8_3PLANE_420_UNORM,
+        PixelFormatVideo_G8_B8R8_2PLANE_420_UNORM,
+        PixelFormatVideo_G8_B8_R8_3PLANE_422_UNORM,
+        PixelFormatVideo_G8_B8R8_2PLANE_422_UNORM,
+        PixelFormatVideo_G8_B8_R8_3PLANE_444_UNORM,
+        PixelFormatVideo_R10X6_UNORM_PACK16,
+        PixelFormatVideo_R10X6G10X6_UNORM_2PACK16,
+        PixelFormatVideo_R10X6G10X6B10X6A10X6_UNORM_4PACK16,
+        PixelFormatVideo_G10X6B10X6G10X6R10X6_422_UNORM_4PACK16,
+        PixelFormatVideo_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16,
+        PixelFormatVideo_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16,
+        PixelFormatVideo_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16,
+        PixelFormatVideo_G10X6_B10X6_R10X6_3PLANE_422_UNORM_3PACK16,
+        PixelFormatVideo_G10X6_B10X6R10X6_2PLANE_422_UNORM_3PACK16,
+        PixelFormatVideo_G10X6_B10X6_R10X6_3PLANE_444_UNORM_3PACK16,
+        PixelFormatVideo_R12X4_UNORM_PACK16,
+        PixelFormatVideo_R12X4G12X4_UNORM_2PACK16,
+        PixelFormatVideo_R12X4G12X4B12X4A12X4_UNORM_4PACK16,
+        PixelFormatVideo_G12X4B12X4G12X4R12X4_422_UNORM_4PACK16,
+        PixelFormatVideo_B12X4G12X4R12X4G12X4_422_UNORM_4PACK16,
+        PixelFormatVideo_G12X4_B12X4_R12X4_3PLANE_420_UNORM_3PACK16,
+        PixelFormatVideo_G12X4_B12X4R12X4_2PLANE_420_UNORM_3PACK16,
+        PixelFormatVideo_G12X4_B12X4_R12X4_3PLANE_422_UNORM_3PACK16,
+        PixelFormatVideo_G12X4_B12X4R12X4_2PLANE_422_UNORM_3PACK16,
+        PixelFormatVideo_G12X4_B12X4_R12X4_3PLANE_444_UNORM_3PACK16,
+        PixelFormatVideo_G16B16G16R16_422_UNORM,
+        PixelFormatVideo_B16G16R16G16_422_UNORM,
+        PixelFormatVideo_G16_B16_R16_3PLANE_420_UNORM,
+        PixelFormatVideo_G16_B16R16_2PLANE_420_UNORM,
+        PixelFormatVideo_G16_B16_R16_3PLANE_422_UNORM,
+        PixelFormatVideo_G16_B16R16_2PLANE_422_UNORM,
+        PixelFormatVideo_G16_B16_R16_3PLANE_444_UNORM,
+        PixelFormatVideo_G8_B8R8_2PLANE_444_UNORM,
+        PixelFormatVideo_G10X6_B10X6R10X6_2PLANE_444_UNORM_3PACK16,
+        PixelFormatVideo_G12X4_B12X4R12X4_2PLANE_444_UNORM_3PACK16,
+        PixelFormatVideo_G16_B16R16_2PLANE_444_UNORM,
+    };
+
+    // UNORM is a float in the range of [0, 1].
+    // SNORM is the same but in the range of [-1, 1]
+    // USCALED is the unsigned integer value converted to float
+    // SSCALED is the integer value converted to float
+    // UINT is an unsigned integer
+    // SINT is a signed integer
+    // SRGB is in a non-linear space float
+    // BLOCK is compressed format
     enum EPixelFormat
     {
-        PixelFormat_Unknown,
-        PixelFormat_R8_SINT,
-        PixelFormat_R8_UINT,
-        PixelFormat_R8_SNORM,
-        PixelFormat_R8_UNORM,
-        PixelFormat_R16_SINT,
-        PixelFormat_R16_UINT,
-        PixelFormat_R16_SNORM,
-        PixelFormat_R16_UNORM,
-        PixelFormat_R32_SINT,
-        PixelFormat_R32_UINT,
-        PixelFormat_R32_SNORM,
-        PixelFormat_R32_UNORM,
-        PixelFormat_R8G8_SINT,
-        PixelFormat_R8G8_UINT,
-        PixelFormat_R8G8_SNORM,
-        PixelFormat_R8G8_UNORM,
-        PixelFormat_R16G16_SINT,
-        PixelFormat_R16G16_UINT,
-        PixelFormat_R16G16_SNORM,
-        PixelFormat_R16G16_UNORM,
-        PixelFormat_R32G32_UINT,
-        PixelFormat_R5G6B5_UINT,
-        PixelFormat_R8G8B8A8_SINT,
-        PixelFormat_R8G8B8A8_UINT,
-        PixelFormat_R8G8B8A8_SNORM,
-        PixelFormat_R8G8B8A8_UNORM,
-        PixelFormat_R4G4B4A4_UINT,
-        PixelFormat_A2R10G10B10_UNORM,
-        PixelFormat_R16G16B16A16_SNORM,
-        PixelFormat_DepthComponent24,
-        PixelFormat_DepthStencil,
-        PixelFormat_ShadowDepth,
-        PixelFormat_MAX = PixelFormat_ShadowDepth + 1,
+        PixelFormat_R4G4_UNORM_PACK8,
+        PixelFormat_R4G4B4A4_UNORM_PACK16,
+        PixelFormat_B4G4R4A4_UNORM_PACK16, // DXGI_FORMAT_B4G4R4A4_UNORM
+        PixelFormat_R5G6B5_UNORM_PACK16,
+        PixelFormat_B5G6R5_UNORM_PACK16,   // DXGI_FORMAT_B5G6R5_UNORM
+        PixelFormat_R5G5B5A1_UNORM_PACK16,
+        PixelFormat_B5G5R5A1_UNORM_PACK16, // DXGI_FORMAT_B5G5R5A1_UNORM
+        PixelFormat_A1R5G5B5_UNORM_PACK16,
+        PixelFormat_R8_UNORM,              // DXGI_FORMAT_R8_UNORM
+        PixelFormat_R8_SNORM,              // DXGI_FORMAT_R8_SNORM
+        PixelFormat_R8_USCALED,            
+        PixelFormat_R8_SSCALED,            
+        PixelFormat_R8_UINT,               // DXGI_FORMAT_R8_UINT
+        PixelFormat_R8_SINT,               // DXGI_FORMAT_R8_SINT
+        PixelFormat_R8_SRGB,
+        PixelFormat_R8G8_UNORM,            // DXGI_FORMAT_R8G8_UNORM
+        PixelFormat_R8G8_SNORM,            // DXGI_FORMAT_R8G8_SNORM
+        PixelFormat_R8G8_USCALED,          
+        PixelFormat_R8G8_SSCALED,          
+        PixelFormat_R8G8_UINT,             // DXGI_FORMAT_R8G8_UINT
+        PixelFormat_R8G8_SINT,             // DXGI_FORMAT_R8G8_SINT
+        PixelFormat_R8G8_SRGB,
+        PixelFormat_R8G8B8_UNORM,
+        PixelFormat_R8G8B8_SNORM,
+        PixelFormat_R8G8B8_USCALED,
+        PixelFormat_R8G8B8_SSCALED,
+        PixelFormat_R8G8B8_UINT,
+        PixelFormat_R8G8B8_SINT,
+        PixelFormat_R8G8B8_SRGB,
+        PixelFormat_B8G8R8_UNORM,
+        PixelFormat_B8G8R8_SNORM,
+        PixelFormat_B8G8R8_USCALED,
+        PixelFormat_B8G8R8_SSCALED,
+        PixelFormat_B8G8R8_UINT,
+        PixelFormat_B8G8R8_SINT,
+        PixelFormat_B8G8R8_SRGB,
+        PixelFormat_R8G8B8A8_UNORM,        // DXGI_FORMAT_R8G8B8A8_UNORM
+        PixelFormat_R8G8B8A8_SNORM,        // DXGI_FORMAT_R8G8B8A8_SNORM
+        PixelFormat_R8G8B8A8_USCALED,      
+        PixelFormat_R8G8B8A8_SSCALED,      
+        PixelFormat_R8G8B8A8_UINT,         // DXGI_FORMAT_R8G8B8A8_UINT
+        PixelFormat_R8G8B8A8_SINT,         // DXGI_FORMAT_R8G8B8A8_SINT
+        PixelFormat_R8G8B8A8_SRGB,         // DXGI_FORMAT_R8G8B8A8_UNORM_SRGB
+        PixelFormat_B8G8R8A8_UNORM,        // DXGI_FORMAT_B8G8R8A8_UNORM
+        PixelFormat_B8G8R8A8_SNORM,
+        PixelFormat_B8G8R8A8_USCALED,
+        PixelFormat_B8G8R8A8_SSCALED,
+        PixelFormat_B8G8R8A8_UINT,
+        PixelFormat_B8G8R8A8_SINT,
+        PixelFormat_B8G8R8A8_SRGB,         // DXGI_FORMAT_B8G8R8A8_UNORM_SRGB
+        PixelFormat_A8B8G8R8_UNORM_PACK32,
+        PixelFormat_A8B8G8R8_SNORM_PACK32,
+        PixelFormat_A8B8G8R8_USCALED_PACK32,
+        PixelFormat_A8B8G8R8_SSCALED_PACK32,
+        PixelFormat_A8B8G8R8_UINT_PACK32,
+        PixelFormat_A8B8G8R8_SINT_PACK32,
+        PixelFormat_A8B8G8R8_SRGB_PACK32,
+        PixelFormat_A2R10G10B10_UNORM_PACK32,
+        PixelFormat_A2R10G10B10_SNORM_PACK32,
+        PixelFormat_A2R10G10B10_USCALED_PACK32,
+        PixelFormat_A2R10G10B10_SSCALED_PACK32,
+        PixelFormat_A2R10G10B10_UINT_PACK32,
+        PixelFormat_A2R10G10B10_SINT_PACK32,
+        PixelFormat_A2B10G10R10_UNORM_PACK32,
+        PixelFormat_A2B10G10R10_SNORM_PACK32,
+        PixelFormat_A2B10G10R10_USCALED_PACK32,
+        PixelFormat_A2B10G10R10_SSCALED_PACK32,
+        PixelFormat_A2B10G10R10_UINT_PACK32,
+        PixelFormat_A2B10G10R10_SINT_PACK32,
+        PixelFormat_R16_UNORM,             // DXGI_FORMAT_R16_UNORM
+        PixelFormat_R16_SNORM,             // DXGI_FORMAT_R16_SNORM
+        PixelFormat_R16_USCALED,           
+        PixelFormat_R16_SSCALED,           
+        PixelFormat_R16_UINT,              // DXGI_FORMAT_R16_UINT
+        PixelFormat_R16_SINT,              // DXGI_FORMAT_R16_SINT
+        PixelFormat_R16_SFLOAT,            // DXGI_FORMAT_R16_FLOAT
+        PixelFormat_R16G16_UNORM,          // DXGI_FORMAT_R16G16_UNORM
+        PixelFormat_R16G16_SNORM,          // DXGI_FORMAT_R16G16_SNORM
+        PixelFormat_R16G16_USCALED,        
+        PixelFormat_R16G16_SSCALED,        
+        PixelFormat_R16G16_UINT,           // DXGI_FORMAT_R16G16_UINT
+        PixelFormat_R16G16_SINT,           // DXGI_FORMAT_R16G16_SINT
+        PixelFormat_R16G16_SFLOAT,         // DXGI_FORMAT_R16G16_FLOAT
+        PixelFormat_R16G16B16_UNORM,
+        PixelFormat_R16G16B16_SNORM,
+        PixelFormat_R16G16B16_USCALED,
+        PixelFormat_R16G16B16_SSCALED,
+        PixelFormat_R16G16B16_UINT,
+        PixelFormat_R16G16B16_SINT,
+        PixelFormat_R16G16B16_SFLOAT,
+        PixelFormat_R16G16B16A16_UNORM,    // DXGI_FORMAT_R16G16B16A16_UNORM
+        PixelFormat_R16G16B16A16_SNORM,    // DXGI_FORMAT_R16G16B16A16_SNORM
+        PixelFormat_R16G16B16A16_USCALED, 
+        PixelFormat_R16G16B16A16_SSCALED, 
+        PixelFormat_R16G16B16A16_UINT,     // DXGI_FORMAT_R16G16B16A16_UINT 
+        PixelFormat_R16G16B16A16_SINT,     // DXGI_FORMAT_R16G16B16A16_SINT
+        PixelFormat_R16G16B16A16_SFLOAT,   // DXGI_FORMAT_R16G16B16A16_FLOAT
+        PixelFormat_R32_UINT,              // DXGI_FORMAT_R32_UINT
+        PixelFormat_R32_SINT,              // DXGI_FORMAT_R32_SINT
+        PixelFormat_R32_SFLOAT,            // DXGI_FORMAT_R32_FLOAT
+        PixelFormat_R32G32_UINT,           // DXGI_FORMAT_R32G32_UINT
+        PixelFormat_R32G32_SINT,           // DXGI_FORMAT_R32G32_SINT
+        PixelFormat_R32G32_SFLOAT,         // DXGI_FORMAT_R32G32_SFLOAT
+        PixelFormat_R32G32B32_UINT,        // DXGI_FORMAT_R32G32B32_UINT
+        PixelFormat_R32G32B32_SINT,        // DXGI_FORMAT_R32G32B32_SINT
+        PixelFormat_R32G32B32_SFLOAT,      // DXGI_FORMAT_R32G32B32_FLOAT
+        PixelFormat_R32G32B32A32_UINT,     // DXGI_FORMAT_R32G32B32A32_UINT
+        PixelFormat_R32G32B32A32_SINT,     // DXGI_FORMAT_R32G32B32A32_SINT
+        PixelFormat_R32G32B32A32_SFLOAT,   // DXGI_FORMAT_R32G32B32A32_FLOAT
+        PixelFormat_R64_UINT,
+        PixelFormat_R64_SINT,
+        PixelFormat_R64_SFLOAT,
+        PixelFormat_R64G64_UINT,
+        PixelFormat_R64G64_SINT,
+        PixelFormat_R64G64_SFLOAT,
+        PixelFormat_R64G64B64_UINT,
+        PixelFormat_R64G64B64_SINT,
+        PixelFormat_R64G64B64_SFLOAT,
+        PixelFormat_R64G64B64A64_UINT,
+        PixelFormat_R64G64B64A64_SINT,
+        PixelFormat_R64G64B64A64_SFLOAT,
+        PixelFormat_B10G11R11_UFLOAT_PACK32,
+        PixelFormat_E5B9G9R9_UFLOAT_PACK32,
+        PixelFormat_D16_UNORM,             // DXGI_FORMAT_D16_UNORM
+        PixelFormat_X8_D24_UNORM_PACK32,
+        PixelFormat_D32_SFLOAT,            // DXGI_FORMAT_D32_FLOAT
+        PixelFormat_S8_UINT,
+        PixelFormat_D16_UNORM_S8_UINT,     
+        PixelFormat_D24_UNORM_S8_UINT,     // DXGI_FORMAT_D24_UNORM_S8_UINT
+        PixelFormat_D32_SFLOAT_S8_UINT,    // DXGI_FORMAT_D32_FLOAT_S8X24_UINT
+        PixelFormat_BC1_RGB_UNORM_BLOCK,   
+        PixelFormat_BC1_RGB_SRGB_BLOCK,    
+        PixelFormat_BC1_RGBA_UNORM_BLOCK,  // DXGI_FORMAT_BC1_UNORM
+        PixelFormat_BC1_RGBA_SRGB_BLOCK,   // DXGI_FORMAT_BC1_UNORM_SRGB
+        PixelFormat_BC2_UNORM_BLOCK,       // DXGI_FORMAT_BC2_UNORM
+        PixelFormat_BC2_SRGB_BLOCK,        // DXGI_FORMAT_BC2_UNORM_SRGB
+        PixelFormat_BC3_UNORM_BLOCK,       // DXGI_FORMAT_BC3_UNORM
+        PixelFormat_BC3_SRGB_BLOCK,        // DXGI_FORMAT_BC3_UNORM_SRGB
+        PixelFormat_BC4_UNORM_BLOCK,       // DXGI_FORMAT_BC4_UNORM
+        PixelFormat_BC4_SNORM_BLOCK,       // DXGI_FORMAT_BC4_SNORM
+        PixelFormat_BC5_UNORM_BLOCK,       // DXGI_FORMAT_BC5_UNORM
+        PixelFormat_BC5_SNORM_BLOCK,       // DXGI_FORMAT_BC5_SNORM
+        PixelFormat_BC6H_UFLOAT_BLOCK,     // DXGI_FORMAT_BC6H_UF16
+        PixelFormat_BC6H_SFLOAT_BLOCK,     // DXGI_FORMAT_BC6H_SF16
+        PixelFormat_BC7_UNORM_BLOCK,       // DXGI_FORMAT_BC7_UNORM
+        PixelFormat_BC7_SRGB_BLOCK,        // DXGI_FORMAT_BC7_UNORM_SRGB
+        PixelFormat_ETC2_R8G8B8_UNORM_BLOCK,
+        PixelFormat_ETC2_R8G8B8_SRGB_BLOCK,
+        PixelFormat_ETC2_R8G8B8A1_UNORM_BLOCK,
+        PixelFormat_ETC2_R8G8B8A1_SRGB_BLOCK,
+        PixelFormat_ETC2_R8G8B8A8_UNORM_BLOCK,
+        PixelFormat_ETC2_R8G8B8A8_SRGB_BLOCK,
+        PixelFormat_EAC_R11_UNORM_BLOCK,
+        PixelFormat_EAC_R11_SNORM_BLOCK,
+        PixelFormat_EAC_R11G11_UNORM_BLOCK,
+        PixelFormat_EAC_R11G11_SNORM_BLOCK,
+        PixelFormat_ASTC_4x4_UNORM_BLOCK,
+        PixelFormat_ASTC_4x4_SRGB_BLOCK,
+        PixelFormat_ASTC_5x4_UNORM_BLOCK,
+        PixelFormat_ASTC_5x4_SRGB_BLOCK,
+        PixelFormat_ASTC_5x5_UNORM_BLOCK,
+        PixelFormat_ASTC_5x5_SRGB_BLOCK,
+        PixelFormat_ASTC_6x5_UNORM_BLOCK,
+        PixelFormat_ASTC_6x5_SRGB_BLOCK,
+        PixelFormat_ASTC_6x6_UNORM_BLOCK,
+        PixelFormat_ASTC_6x6_SRGB_BLOCK,
+        PixelFormat_ASTC_8x5_UNORM_BLOCK,
+        PixelFormat_ASTC_8x5_SRGB_BLOCK,
+        PixelFormat_ASTC_8x6_UNORM_BLOCK,
+        PixelFormat_ASTC_8x6_SRGB_BLOCK,
+        PixelFormat_ASTC_8x8_UNORM_BLOCK,
+        PixelFormat_ASTC_8x8_SRGB_BLOCK,
+        PixelFormat_ASTC_10x5_UNORM_BLOCK,
+        PixelFormat_ASTC_10x5_SRGB_BLOCK,
+        PixelFormat_ASTC_10x6_UNORM_BLOCK,
+        PixelFormat_ASTC_10x6_SRGB_BLOCK,
+        PixelFormat_ASTC_10x8_UNORM_BLOCK,
+        PixelFormat_ASTC_10x8_SRGB_BLOCK,
+        PixelFormat_ASTC_10x10_UNORM_BLOCK,
+        PixelFormat_ASTC_10x10_SRGB_BLOCK,
+        PixelFormat_ASTC_12x10_UNORM_BLOCK,
+        PixelFormat_ASTC_12x10_SRGB_BLOCK,
+        PixelFormat_ASTC_12x12_UNORM_BLOCK,
+        PixelFormat_ASTC_12x12_SRGB_BLOCK,
+        PixelFormat_A4R4G4B4_UNORM_PACK16,
+        PixelFormat_A4B4G4R4_UNORM_PACK16,
+        PixelFormat_ASTC_4x4_SFLOAT_BLOCK,
+        PixelFormat_ASTC_5x4_SFLOAT_BLOCK,
+        PixelFormat_ASTC_5x5_SFLOAT_BLOCK,
+        PixelFormat_ASTC_6x5_SFLOAT_BLOCK,
+        PixelFormat_ASTC_6x6_SFLOAT_BLOCK,
+        PixelFormat_ASTC_8x5_SFLOAT_BLOCK,
+        PixelFormat_ASTC_8x6_SFLOAT_BLOCK,
+        PixelFormat_ASTC_8x8_SFLOAT_BLOCK,
+        PixelFormat_ASTC_10x5_SFLOAT_BLOCK,
+        PixelFormat_ASTC_10x6_SFLOAT_BLOCK,
+        PixelFormat_ASTC_10x8_SFLOAT_BLOCK,
+        PixelFormat_ASTC_10x10_SFLOAT_BLOCK,
+        PixelFormat_ASTC_12x10_SFLOAT_BLOCK,
+        PixelFormat_ASTC_12x12_SFLOAT_BLOCK,
+        PixelFormat_PVRTC1_2BPP_UNORM_BLOCK_IMG,
+        PixelFormat_PVRTC1_4BPP_UNORM_BLOCK_IMG,
+        PixelFormat_PVRTC2_2BPP_UNORM_BLOCK_IMG,
+        PixelFormat_PVRTC2_4BPP_UNORM_BLOCK_IMG,
+        PixelFormat_PVRTC1_2BPP_SRGB_BLOCK_IMG,
+        PixelFormat_PVRTC1_4BPP_SRGB_BLOCK_IMG,
+        PixelFormat_PVRTC2_2BPP_SRGB_BLOCK_IMG,
+        PixelFormat_PVRTC2_4BPP_SRGB_BLOCK_IMG,
+        PixelFormat_R16G16_SFIXED5_NV,
+        PixelFormat_A1B5G5R5_UNORM_PACK16_KHR,
+        PixelFormat_A8_UNORM_KHR,          // DXGI_FORMAT_A8_UNORM
+        PixelFormat_YUV2                   // Video encoding format
+        // Missing DX12 formats
+        // DXGI_FORMAT_R10G10B10A2_UNORM,
+        // DXGI_FORMAT_R10G10B10A2_UINT,
+        // DXGI_FORMAT_R11G11B10_FLOAT,
+        // DXGI_FORMAT_R9G9B9E5_SHAREDEXP,
+        // DXGI_FORMAT_R8G8_B8G8_UNORM,
+        // DXGI_FORMAT_G8R8_G8B8_UNORM,
+        // DXGI_FORMAT_B8G8R8X8_UNORM,
+        // DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM,
+        // DXGI_FORMAT_B8G8R8X8_UNORM_SRGB,
     };
 
     struct PixelFormatInfo
