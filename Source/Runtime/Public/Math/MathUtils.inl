@@ -87,9 +87,9 @@ namespace EE
     }
 
     template<typename T>
-    T Math::Map( const T& value, const T& minA, const T& maxA, const T& minB, const T& maxB )
+    T Math::Map( const T& value, const T& sourceMin, const T& sourceMax, const T& destMin, const T& destMax )
     {
-        return minB + (value - minA) * (maxA - minB) / (maxB - minA);
+        return destMin + (value - sourceMin) * (sourceMax - destMin) / (destMax - sourceMin);
     }
 
     template <typename T>

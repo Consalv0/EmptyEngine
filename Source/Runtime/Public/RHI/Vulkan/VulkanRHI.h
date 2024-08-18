@@ -1,6 +1,8 @@
 
 #include "RHI/RHI.h"
 
+#define EE_CORE_VULKAN_VALIDATION_LAYER
+
 namespace EE
 {
     class VulkanRHI : public DynamicRHI
@@ -20,6 +22,7 @@ namespace EE
         RHITexture* CreateRHITexture( const RHITextureCreateInfo& info ) const;
         RHISampler* CreateRHISampler( const RHISamplerCreateInfo& info ) const;
         RHIShaderStage* CreateRHIShaderStage( const RHIShaderStageCreateInfo& info ) const;
+        RHIRenderPass* CreateRHIRenderPass( const RHIRenderPassCreateInfo& info ) const;
         RHIGraphicsPipeline* CreateRHIGraphicsPipeline( const RHIGraphicsPipelineCreateInfo& info ) const;
 
         const RHIDevice* GetRHIDevice() const override;

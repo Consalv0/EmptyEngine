@@ -18,7 +18,10 @@ namespace EE
 
             HOST_DEVICE FORCEINLINE constexpr TIntVector2();
             HOST_DEVICE FORCEINLINE constexpr TIntVector2( const TIntVector2& vector );
-            HOST_DEVICE FORCEINLINE constexpr TIntVector2( const TIntVector3<T>& vector );
+            template <typename R>
+            HOST_DEVICE FORCEINLINE constexpr TIntVector2( const TIntVector2<R>& vector );
+            template <typename R>
+            HOST_DEVICE FORCEINLINE constexpr TIntVector2( const TIntVector3<R>& vector );
             template <typename R>
             HOST_DEVICE FORCEINLINE constexpr TIntVector2( const TVector2<R>& vector );
             template <typename R>

@@ -24,6 +24,28 @@ namespace EE::Math
 		{
 		}
 
+		constexpr TIntBox2( const T& minX, const T& minY, const TIntVector2<T>& max )
+			: minX( minX ), minY( minY ), maxX( max.x ), maxY( max.y )
+		{
+		}
+
+		constexpr TIntBox2( const TIntVector2<T>& min, const TIntVector2<T>& max )
+			: minX( min.x ), minY( min.y ), maxX( max.x ), maxY( max.y )
+		{
+		}
+
+		template<typename U>
+		constexpr TIntBox2( const T& minX, const T& minY, const TIntVector2<U>& max )
+			: minX( minX ), minY( minY ), maxX( U(max.x) ), maxY( U(max.y) )
+		{
+		}
+
+		template<typename U>
+		constexpr TIntBox2( const TIntVector2<U>& min, const TIntVector2<U>& max )
+			: minX( U(min.x) ), minY( U(min.y) ), maxX( U(max.x) ), maxY( U(max.y) )
+		{
+		}
+
 		//* Get the lower point of the bounding box
 		inline TIntPoint2<T> GetMinPoint() const { return { Math::Min( left, right ), Math::Min( top, bottom ) }; }
 

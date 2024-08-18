@@ -173,18 +173,36 @@ namespace EE
         StencilOperation_DecrementLoop,
         StencilOperation_Invert
     };
-
-    enum EImageLayout
+    
+    enum ESampleCountFlagsBit
     {
-        ImageLayout_Undefined,
-        ImageLayout_RenderTarget,
-        ImageLayout_DepthStencil,
-        ImageLayout_DepthStencil_Readonly,
-        ImageLayout_ShaderResource,
-        ImageLayout_ShaderResourceCompute,
-        ImageLayout_UnorderedAccess,
-        ImageLayout_CopySource,
-        ImageLayout_CopyDest,
+        SampleCount_1_Bit = 1 << 0,
+        SampleCount_2_Bit = 1 << 1,
+        SampleCount_4_Bit = 1 << 2,
+        SampleCount_8_Bit = 1 << 3,
+        SampleCount_16_Bit = 1 << 4,
+        SampleCount_32_Bit = 1 << 5,
+        SampleCount_64_Bit = 1 << 6,
+    };
+    typedef uint32 ESampleCountFlags;
+
+    enum ETextureOperation
+    {
+        TextureOperation_DontCare,
+        TextureOperation_Clear,
+        TextureOperation_Store,
+    };
+
+    enum ETextureLayout
+    {
+        TextureLayout_Undefined,
+        TextureLayout_General,
+        TextureLayout_TransferSRC,
+        TextureLayout_TransferDST,
+        TextureLayout_ColorAttachment,
+        TextureLayout_DepthAttachment,
+        TextureLayout_StencilAttachment,
+        TextureLayout_Present
     };
 
     enum ECullModeFlags : uint8
@@ -196,59 +214,22 @@ namespace EE
     };
     ENUM_FLAGS_OPERATORS( ECullModeFlags );
 
-    enum EColorSpace
-    {
-        ColorSpace_Unknown,
-        ColorSpace_Linear,
-        ColorSpace_sRGB,
-    };
-
     enum EPresentMode
     {
         PresentMode_Inmediate,
         PresentMode_VSync
     };
 
-    enum EPixelFormatVideo
+    enum EColorSpace
     {
-        PixelFormatVideo_G8B8G8R8_422_UNORM,
-        PixelFormatVideo_B8G8R8G8_422_UNORM,
-        PixelFormatVideo_G8_B8_R8_3PLANE_420_UNORM,
-        PixelFormatVideo_G8_B8R8_2PLANE_420_UNORM,
-        PixelFormatVideo_G8_B8_R8_3PLANE_422_UNORM,
-        PixelFormatVideo_G8_B8R8_2PLANE_422_UNORM,
-        PixelFormatVideo_G8_B8_R8_3PLANE_444_UNORM,
-        PixelFormatVideo_R10X6_UNORM_PACK16,
-        PixelFormatVideo_R10X6G10X6_UNORM_2PACK16,
-        PixelFormatVideo_R10X6G10X6B10X6A10X6_UNORM_4PACK16,
-        PixelFormatVideo_G10X6B10X6G10X6R10X6_422_UNORM_4PACK16,
-        PixelFormatVideo_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16,
-        PixelFormatVideo_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16,
-        PixelFormatVideo_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16,
-        PixelFormatVideo_G10X6_B10X6_R10X6_3PLANE_422_UNORM_3PACK16,
-        PixelFormatVideo_G10X6_B10X6R10X6_2PLANE_422_UNORM_3PACK16,
-        PixelFormatVideo_G10X6_B10X6_R10X6_3PLANE_444_UNORM_3PACK16,
-        PixelFormatVideo_R12X4_UNORM_PACK16,
-        PixelFormatVideo_R12X4G12X4_UNORM_2PACK16,
-        PixelFormatVideo_R12X4G12X4B12X4A12X4_UNORM_4PACK16,
-        PixelFormatVideo_G12X4B12X4G12X4R12X4_422_UNORM_4PACK16,
-        PixelFormatVideo_B12X4G12X4R12X4G12X4_422_UNORM_4PACK16,
-        PixelFormatVideo_G12X4_B12X4_R12X4_3PLANE_420_UNORM_3PACK16,
-        PixelFormatVideo_G12X4_B12X4R12X4_2PLANE_420_UNORM_3PACK16,
-        PixelFormatVideo_G12X4_B12X4_R12X4_3PLANE_422_UNORM_3PACK16,
-        PixelFormatVideo_G12X4_B12X4R12X4_2PLANE_422_UNORM_3PACK16,
-        PixelFormatVideo_G12X4_B12X4_R12X4_3PLANE_444_UNORM_3PACK16,
-        PixelFormatVideo_G16B16G16R16_422_UNORM,
-        PixelFormatVideo_B16G16R16G16_422_UNORM,
-        PixelFormatVideo_G16_B16_R16_3PLANE_420_UNORM,
-        PixelFormatVideo_G16_B16R16_2PLANE_420_UNORM,
-        PixelFormatVideo_G16_B16_R16_3PLANE_422_UNORM,
-        PixelFormatVideo_G16_B16R16_2PLANE_422_UNORM,
-        PixelFormatVideo_G16_B16_R16_3PLANE_444_UNORM,
-        PixelFormatVideo_G8_B8R8_2PLANE_444_UNORM,
-        PixelFormatVideo_G10X6_B10X6R10X6_2PLANE_444_UNORM_3PACK16,
-        PixelFormatVideo_G12X4_B12X4R12X4_2PLANE_444_UNORM_3PACK16,
-        PixelFormatVideo_G16_B16R16_2PLANE_444_UNORM,
+        ColorSpace_Unknown,
+        ColorSpace_Linear,
+        ColorSpace_sRGB,
+        ColorSpace_HDR,
+        ColorSpace_HDR_SCRGB,
+        ColorSpace_HDR10,
+        ColorSpace_HDR10_SCRGB,
+        ColorSpace_HDR10_2084,
     };
 
     // UNORM is a float in the range of [0, 1].
@@ -319,11 +300,11 @@ namespace EE
         PixelFormat_A8B8G8R8_UINT_PACK32,
         PixelFormat_A8B8G8R8_SINT_PACK32,
         PixelFormat_A8B8G8R8_SRGB_PACK32,
-        PixelFormat_A2R10G10B10_UNORM_PACK32,
+        PixelFormat_A2R10G10B10_UNORM_PACK32,    // DXGI_FORMAT_R10G10B10A2_UNORM ?
         PixelFormat_A2R10G10B10_SNORM_PACK32,
         PixelFormat_A2R10G10B10_USCALED_PACK32,
         PixelFormat_A2R10G10B10_SSCALED_PACK32,
-        PixelFormat_A2R10G10B10_UINT_PACK32,
+        PixelFormat_A2R10G10B10_UINT_PACK32,     // DXGI_FORMAT_R10G10B10A2_UINT ?
         PixelFormat_A2R10G10B10_SINT_PACK32,
         PixelFormat_A2B10G10R10_UNORM_PACK32,
         PixelFormat_A2B10G10R10_SNORM_PACK32,
@@ -473,10 +454,46 @@ namespace EE
         PixelFormat_R16G16_SFIXED5_NV,
         PixelFormat_A1B5G5R5_UNORM_PACK16_KHR,
         PixelFormat_A8_UNORM_KHR,          // DXGI_FORMAT_A8_UNORM
-        PixelFormat_YUV2,                  // Video encoding format
+        // Video encoding formats
+        PixelFormatVideo_G8B8G8R8_422_UNORM,
+        PixelFormatVideo_B8G8R8G8_422_UNORM,
+        PixelFormatVideo_G8_B8_R8_3PLANE_420_UNORM,
+        PixelFormatVideo_G8_B8R8_2PLANE_420_UNORM,
+        PixelFormatVideo_G8_B8_R8_3PLANE_422_UNORM,
+        PixelFormatVideo_G8_B8R8_2PLANE_422_UNORM,
+        PixelFormatVideo_G8_B8_R8_3PLANE_444_UNORM,
+        PixelFormatVideo_R10X6_UNORM_PACK16,
+        PixelFormatVideo_R10X6G10X6_UNORM_2PACK16,
+        PixelFormatVideo_R10X6G10X6B10X6A10X6_UNORM_4PACK16,
+        PixelFormatVideo_G10X6B10X6G10X6R10X6_422_UNORM_4PACK16,
+        PixelFormatVideo_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16,
+        PixelFormatVideo_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16,
+        PixelFormatVideo_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16,
+        PixelFormatVideo_G10X6_B10X6_R10X6_3PLANE_422_UNORM_3PACK16,
+        PixelFormatVideo_G10X6_B10X6R10X6_2PLANE_422_UNORM_3PACK16,
+        PixelFormatVideo_G10X6_B10X6_R10X6_3PLANE_444_UNORM_3PACK16,
+        PixelFormatVideo_R12X4_UNORM_PACK16,
+        PixelFormatVideo_R12X4G12X4_UNORM_2PACK16,
+        PixelFormatVideo_R12X4G12X4B12X4A12X4_UNORM_4PACK16,
+        PixelFormatVideo_G12X4B12X4G12X4R12X4_422_UNORM_4PACK16,
+        PixelFormatVideo_B12X4G12X4R12X4G12X4_422_UNORM_4PACK16,
+        PixelFormatVideo_G12X4_B12X4_R12X4_3PLANE_420_UNORM_3PACK16,
+        PixelFormatVideo_G12X4_B12X4R12X4_2PLANE_420_UNORM_3PACK16,
+        PixelFormatVideo_G12X4_B12X4_R12X4_3PLANE_422_UNORM_3PACK16,
+        PixelFormatVideo_G12X4_B12X4R12X4_2PLANE_422_UNORM_3PACK16,
+        PixelFormatVideo_G12X4_B12X4_R12X4_3PLANE_444_UNORM_3PACK16,
+        PixelFormatVideo_G16B16G16R16_422_UNORM,
+        PixelFormatVideo_B16G16R16G16_422_UNORM,
+        PixelFormatVideo_G16_B16_R16_3PLANE_420_UNORM,
+        PixelFormatVideo_G16_B16R16_2PLANE_420_UNORM,
+        PixelFormatVideo_G16_B16_R16_3PLANE_422_UNORM,
+        PixelFormatVideo_G16_B16R16_2PLANE_422_UNORM,
+        PixelFormatVideo_G16_B16_R16_3PLANE_444_UNORM,
+        PixelFormatVideo_G8_B8R8_2PLANE_444_UNORM,
+        PixelFormatVideo_G10X6_B10X6R10X6_2PLANE_444_UNORM_3PACK16,
+        PixelFormatVideo_G12X4_B12X4R12X4_2PLANE_444_UNORM_3PACK16,
+        PixelFormatVideo_G16_B16R16_2PLANE_444_UNORM,
         // Missing DX12 formats
-        // DXGI_FORMAT_R10G10B10A2_UNORM,
-        // DXGI_FORMAT_R10G10B10A2_UINT,
         // DXGI_FORMAT_R11G11B10_FLOAT,
         // DXGI_FORMAT_R9G9B9E5_SHAREDEXP,
         // DXGI_FORMAT_R8G8_B8G8_UNORM,
@@ -484,6 +501,7 @@ namespace EE
         // DXGI_FORMAT_B8G8R8X8_UNORM,
         // DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM,
         // DXGI_FORMAT_B8G8R8X8_UNORM_SRGB,
+        // DXGI_FORMAT_AYUV -> DXGI_FORMAT_V408
         PixelFormat_MAX
     };
 
@@ -514,7 +532,7 @@ namespace EE
     enum EFaceWinding
     {
         FaceWinding_Clockwise,
-        FaceWinding_CounterClokwise
+        FaceWinding_CounterClockwise
     };
 
     enum EFilterMode
@@ -523,18 +541,6 @@ namespace EE
         FilterMode_MinMagLinear,
         FilterMode_MinLinearMagNearest,
         FilterMode_MinNearestMagLinear,
-    };
-
-    enum ETextureLayout
-    {
-        TextureLayout_Undefined,
-        TextureLayout_General,
-        TextureLayout_TransferSRC,
-        TextureLayout_TransferDST,
-        TextureLayout_ColorAttachment,
-        TextureLayout_DepthAttachment,
-        TextureLayout_StencilAttachment,
-        TextureLayout_Present
     };
 
     enum ETopologyMode

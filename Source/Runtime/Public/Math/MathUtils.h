@@ -100,7 +100,7 @@ namespace EE::Math
 
 	//* Remap the value to another range of values
 	template <typename T>
-	inline T Map( const T& value, const T& minA, const T& maxA, const T& minB, const T& maxB );
+    inline T Map( const T& value, const T& sourceMin, const T& sourceMax, const T& destMin, const T& destMax );
 
 	//* Clamps the number to the interval from 0 to b.
 	template <typename T>

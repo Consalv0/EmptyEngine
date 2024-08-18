@@ -42,6 +42,43 @@ namespace EE
         }
     }
 
+    static VkSampleCountFlagBits ConvertSampleCountBits( ESampleCountFlagsBit samples )
+    {
+        switch ( samples )
+        {
+            case SampleCount_1_Bit:  return VK_SAMPLE_COUNT_1_BIT;
+            case SampleCount_2_Bit:  return VK_SAMPLE_COUNT_2_BIT;
+            case SampleCount_4_Bit:  return VK_SAMPLE_COUNT_4_BIT;
+            case SampleCount_8_Bit:  return VK_SAMPLE_COUNT_8_BIT;
+            case SampleCount_16_Bit: return VK_SAMPLE_COUNT_16_BIT;
+            case SampleCount_32_Bit: return VK_SAMPLE_COUNT_32_BIT;
+            case SampleCount_64_Bit: return VK_SAMPLE_COUNT_64_BIT;
+            default:
+                return VK_SAMPLE_COUNT_1_BIT;
+        }
+    }
+
+    static VkAttachmentLoadOp ConvertLoadAttachmentOperation( ETextureOperation operation )
+    {
+        switch ( operation )
+        {
+        case EE::TextureOperation_Clear:        return VK_ATTACHMENT_LOAD_OP_CLEAR;
+        case EE::TextureOperation_Store:        return VK_ATTACHMENT_LOAD_OP_LOAD;
+        case EE::TextureOperation_DontCare:
+        default:                                return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        }
+    }
+
+    static VkAttachmentStoreOp ConvertStoreAttachmentOperation( ETextureOperation operation )
+    {
+        switch ( operation )
+        {
+        case EE::TextureOperation_Store:        return VK_ATTACHMENT_STORE_OP_STORE;
+        case EE::TextureOperation_DontCare:
+        default:                                return VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        }
+    }
+
     static VkFormat ConvertPixelFormat( EPixelFormat format )
     {
         switch ( format )
@@ -257,7 +294,7 @@ namespace EE
             case PixelFormat_R16G16_SFIXED5_NV:             return VK_FORMAT_R16G16_SFIXED5_NV;
             case PixelFormat_A1B5G5R5_UNORM_PACK16_KHR:     return VK_FORMAT_A1B5G5R5_UNORM_PACK16_KHR;
             case PixelFormat_A8_UNORM_KHR:                  return VK_FORMAT_A8_UNORM_KHR;
-            case PixelFormat_YUV2:                          return VK_FORMAT_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16;
+            case PixelFormatVideo_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16:   return VK_FORMAT_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16;
             default:
                 return VK_FORMAT_UNDEFINED;
         }
@@ -478,7 +515,7 @@ namespace EE
             case VK_FORMAT_R16G16_SFIXED5_NV:             return PixelFormat_R16G16_SFIXED5_NV;
             case VK_FORMAT_A1B5G5R5_UNORM_PACK16_KHR:     return PixelFormat_A1B5G5R5_UNORM_PACK16_KHR;
             case VK_FORMAT_A8_UNORM_KHR:                  return PixelFormat_A8_UNORM_KHR;
-            case VK_FORMAT_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16:  return  PixelFormat_YUV2;
+            case VK_FORMAT_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16:  return  PixelFormatVideo_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16;
             default:
                 return PixelFormat_Unknown;
         }
@@ -496,29 +533,16 @@ namespace EE
         case VK_COLOR_SPACE_BT709_LINEAR_EXT:               return ColorSpace_Linear;
         case VK_COLOR_SPACE_BT709_NONLINEAR_EXT:            return ColorSpace_sRGB;
         case VK_COLOR_SPACE_BT2020_LINEAR_EXT:              return ColorSpace_Linear;
-        case VK_COLOR_SPACE_HDR10_ST2084_EXT:               return ColorSpace_sRGB;
-        case VK_COLOR_SPACE_DOLBYVISION_EXT:                return ColorSpace_sRGB;
-        case VK_COLOR_SPACE_HDR10_HLG_EXT:                  return ColorSpace_sRGB;
+        case VK_COLOR_SPACE_HDR10_ST2084_EXT:               return ColorSpace_HDR10_2084;
+        case VK_COLOR_SPACE_DOLBYVISION_EXT:                return ColorSpace_HDR10_SCRGB;
+        case VK_COLOR_SPACE_HDR10_HLG_EXT:                  return ColorSpace_HDR10;
         case VK_COLOR_SPACE_ADOBERGB_LINEAR_EXT:            return ColorSpace_Linear;
         case VK_COLOR_SPACE_ADOBERGB_NONLINEAR_EXT:         return ColorSpace_sRGB;
-        case VK_COLOR_SPACE_PASS_THROUGH_EXT:               return ColorSpace_sRGB;
+        case VK_COLOR_SPACE_PASS_THROUGH_EXT:               return ColorSpace_Linear;
         case VK_COLOR_SPACE_EXTENDED_SRGB_NONLINEAR_EXT:    return ColorSpace_sRGB;
         case VK_COLOR_SPACE_DISPLAY_NATIVE_AMD:             return ColorSpace_sRGB;
         default:
-            return ColorSpace_sRGB;
-        }
-    }
-
-    static bool FrameColorSpaceIsHDR( VkColorSpaceKHR colorspace )
-    {
-        switch ( colorspace )
-        {
-        case VK_COLOR_SPACE_HDR10_ST2084_EXT:
-        case VK_COLOR_SPACE_DOLBYVISION_EXT:
-        case VK_COLOR_SPACE_HDR10_HLG_EXT:
-            return true;
-        default:
-            return false;
+            return ColorSpace_Linear;
         }
     }
 
@@ -771,6 +795,7 @@ namespace EE
 {
     VulkanRHIDevice* GVulkanDevice;
     VulkanRHIInstance* GVulkanInstance;
+
 #ifdef EMPTYENGINE_CORE_LOG
     VkDebugUtilsMessengerEXT GVulkanDebugMessager = VK_NULL_HANDLE;
 
@@ -1113,11 +1138,11 @@ namespace EE
         queueCreateInfo.queueCount = 1;
         queueCreateInfo.pQueuePriorities = &queuePriority;
 
-        VkPhysicalDeviceVulkan13Features deviceFeatures13
-        {
-            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
-            .dynamicRendering = VK_TRUE
-        };
+        // VkPhysicalDeviceVulkan13Features deviceFeatures13
+        // {
+        //     .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+        //     .dynamicRendering = VK_TRUE
+        // };
 
         VkPhysicalDeviceFeatures deviceFeatures
         {
@@ -1128,7 +1153,7 @@ namespace EE
         VkDeviceCreateInfo deviceCreateInfo
         {
             .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-            .pNext = &deviceFeatures13,
+            .pNext = NULL, // &deviceFeatures13,
             .flags = 0,
             .queueCreateInfoCount = static_cast<uint32>(queueCreateInfos.size()),
             .pQueueCreateInfos = queueCreateInfos.data(),
@@ -1404,7 +1429,6 @@ namespace EE
         for ( uint32 i = 0; i < surfaceDetails.formatCount; i++ )
         {
             const VkSurfaceFormatKHR& surfaceFormat = surfaceDetails.formats[ i ];
-            bool colorSpaceHDR = FrameColorSpaceIsHDR( surfaceFormat.colorSpace );
             EColorSpace colorSpace = ConvertColorSpace( surfaceFormat.colorSpace );
             EPixelFormat format = ConvertImageFormat( surfaceFormat.format );
 
@@ -1415,32 +1439,19 @@ namespace EE
 
             if ( hdr )
             {
-                if ( colorSpaceHDR )
+                if ( colorSpace != ColorSpace_Linear && colorSpace != ColorSpace_sRGB )
                 {
-                    *outFormat = format;
-                    *outColorSpace = colorSpace;
-                    break;
-                }
-
-                if ( colorSpace == ColorSpace_sRGB )
-                {
-                    if ( format == PixelFormat_A2R10G10B10_UNORM_PACK32 || format == PixelFormat_R16G16B16A16_SNORM )
+                    if ( format == PixelFormat_A2R10G10B10_UNORM_PACK32 || format == PixelFormat_A2B10G10R10_UNORM_PACK32 )
                     {
                         *outFormat = format;
                         *outColorSpace = colorSpace;
                         break;
                     }
                 }
-
-                if ( colorSpaceHDR == false )
-                {
-                    *outFormat = format;
-                    *outColorSpace = colorSpace;
-                }
             }
             else
             {
-                if ( colorSpaceHDR == false )
+                if ( colorSpace == ColorSpace_Linear || colorSpace == ColorSpace_sRGB )
                 {
                     *outFormat = format;
                     *outColorSpace = colorSpace;
@@ -1577,8 +1588,9 @@ namespace EE
 
     VulkanRHITexture::VulkanRHITexture( const RHITextureCreateInfo& info, VulkanRHIDevice* device, VkImage image ) :
         device( device ),
-        extent( info.width, info.height, info.depth ),
+        extents( info.width, info.height, info.depth ),
         format( ConvertPixelFormat( info.format ) ),
+        pixelFormat( ConvertImageFormat( format ) ),
         sampler( VK_NULL_HANDLE ), memory( VK_NULL_HANDLE ),
         image( image ),
         ownership( false )
@@ -1619,8 +1631,9 @@ namespace EE
 
     VulkanRHITexture::VulkanRHITexture( const RHITextureCreateInfo& info, VulkanRHIDevice* device ) :
         device( device ),
-        extent( info.width, info.height, info.depth ),
+        extents( info.width, info.height, info.depth ),
         format( ConvertPixelFormat( info.format ) ),
+        pixelFormat( ConvertImageFormat( format ) ),
         ownership( true ),
         sampler( VK_NULL_HANDLE ), memory( VK_NULL_HANDLE ), imageView( VK_NULL_HANDLE )
     {
@@ -1632,9 +1645,9 @@ namespace EE
             .imageType = VK_IMAGE_TYPE_2D,
             .format = format,
             .extent = VkExtent3D {
-                .width = extent.x,
-                .height = extent.y,
-                .depth = extent.z
+                .width = extents.x,
+                .height = extents.y,
+                .depth = extents.z
             },
             . mipLevels = info.mipLevels,
             . arrayLayers = info.arraySize,
@@ -1701,8 +1714,6 @@ namespace EE
             EE_LOG_CORE_CRITICAL( L"Failed to create texture image view!" );
             return;
         }
-
-        pixelFormat = ConvertImageFormat( format );
     }
 
     VulkanRHITexture::~VulkanRHITexture()
@@ -2060,6 +2071,46 @@ namespace EE
         }
     }
 
+    void VulkanRHICommandBuffer::BindGraphicsPipeline( const RHIGraphicsPipeline* pipeline ) const
+    {
+        const VulkanRHIGraphicsPipeline* vulkanPipeline = static_cast<const VulkanRHIGraphicsPipeline*>( pipeline );
+        vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetVulkanPipeline() );
+    }
+
+    void VulkanRHICommandBuffer::SetCullMode( const ECullModeFlags& cull ) const
+    {
+        vkCmdSetCullMode( commandBuffer, ConvertCullMode( cull ) );
+    }
+
+    void VulkanRHICommandBuffer::SetFrontFace( const EFaceWinding& frontFace ) const
+    {
+        vkCmdSetFrontFace( commandBuffer, ConvertFrontFace( frontFace ) );
+    }
+
+    void VulkanRHICommandBuffer::SetViewport( Box2f viewport, float minDepth, float maxDepth ) const
+    {
+        VkViewport vkviewport
+        {
+            .x = viewport.minX,
+            .y = viewport.minY,
+            .width = viewport.maxX,
+            .height = viewport.maxY,
+            .minDepth = minDepth,
+            .maxDepth = maxDepth,
+        };
+        vkCmdSetViewport( commandBuffer, 0, 1, &vkviewport );
+    }
+
+    void VulkanRHICommandBuffer::SetScissor( IntBox2 scissor ) const
+    {
+        VkRect2D vkscissor
+        {
+            .offset = { scissor.minX, scissor.minX },
+            .extent = { (uint32)scissor.maxX, (uint32)scissor.maxY }
+        };
+        vkCmdSetScissor( commandBuffer, 0, 1, &vkscissor );
+    }
+
     void VulkanRHICommandBuffer::TransitionTexture( const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer, const ETextureLayout from, const ETextureLayout to ) const
     {
         auto vulkanTexture = static_cast<const VulkanRHITexture*>(texture);
@@ -2119,6 +2170,11 @@ namespace EE
         vkCmdClearColorImage( commandBuffer, vulkanTexture->GetVulkanImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColor, 1, &imageRange );
     }
 
+    void VulkanRHICommandBuffer::Draw( uint32 vertexCount, uint32 instanceCount, uint32 firstVertex, uint32 firstInstance ) const
+    {
+        vkCmdDraw( commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance );
+    }
+
     VulkanRHIShaderStage::~VulkanRHIShaderStage()
     {
         vkDestroyShaderModule( device->GetVulkanDevice(), shaderModule, nullptr );
@@ -2152,6 +2208,214 @@ namespace EE
     const NChar* VulkanRHIShaderStage::GetEntryPoint() const
     {
         return entryPoint;
+    }
+
+    struct SubpassDescriptionAttachments
+    {
+        TArray<VkAttachmentReference> input;
+        TArray<VkAttachmentReference> color;
+    };
+
+    VulkanRHIRenderPass::VulkanRHIRenderPass( const RHIRenderPassCreateInfo& info, VulkanRHIDevice* device )
+        : renderPass( VK_NULL_HANDLE )
+        , device( device )
+        , framebufferAttachments()
+        , lastAttachment( VK_NULL_HANDLE )
+        , renderArea()
+        , clearColorValue()
+        , clearDepthStencilValue()
+    {
+        uint32 subpassesSize = (uint32)info.subpasses.size();
+        TArray<SubpassDescriptionAttachments> subpassAttachments;
+        TArray<VkSubpassDescription> subpasses;
+        subpassAttachments.resize( subpassesSize );
+        subpasses.resize( subpassesSize );
+        for ( uint32 i = 0; i < subpassesSize; i++ )
+        {
+            const RHIRenderSubpassDescription& subpass = info.subpasses[ i ];
+            SubpassDescriptionAttachments& attachments = subpassAttachments[ i ];
+
+            uint32 inputAttachmentSize = (uint32)subpass.inputAttachmentReferences.size();
+            attachments.input.resize( inputAttachmentSize );
+            for ( uint32 j = 0; j < inputAttachmentSize; j++ )
+            {
+                attachments.input[ j ] = VkAttachmentReference
+                {
+                    .attachment = subpass.inputAttachmentReferences[ j ].atachmentIndex,
+                    .layout = ConvertTextureLayout( subpass.inputAttachmentReferences[ j ].textureLayout ),
+                };
+            }
+
+            uint32 colorAttachmentSize = (uint32)subpass.colorAttachmentReferences.size();
+            attachments.color.resize( colorAttachmentSize );
+            for ( uint32 j = 0; j < colorAttachmentSize; j++ )
+            {
+                attachments.color[ j ] = VkAttachmentReference
+                {
+                    .attachment = subpass.colorAttachmentReferences[ j ].atachmentIndex,
+                    .layout = ConvertTextureLayout( subpass.colorAttachmentReferences[ j ].textureLayout ),
+                };
+            }
+
+            VkAttachmentReference depthStencilAttachment = VkAttachmentReference
+            {
+                .attachment = subpass.depthAttachment.atachmentIndex,
+                .layout = ConvertTextureLayout( subpass.depthAttachment.textureLayout ),
+            };
+
+            subpasses[ i ] = VkSubpassDescription
+            {
+                .flags = 0,
+                .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+                .inputAttachmentCount = inputAttachmentSize,
+                .pInputAttachments = attachments.input.data(),
+                .colorAttachmentCount = colorAttachmentSize,
+                .pColorAttachments = attachments.color.data(),
+                .pResolveAttachments = NULL,
+                .pDepthStencilAttachment = subpass.usingDepth ? &depthStencilAttachment : NULL,
+                .preserveAttachmentCount = 0,
+                .pPreserveAttachments = NULL
+            };
+        }
+
+        uint32 attachmentSize = (uint32)info.attachments.size();
+        TArray<VkAttachmentDescription> attachments;
+        attachments.resize( attachmentSize );
+        for ( uint32 i = 0; i < attachmentSize; i++ )
+        {
+            const RHIColorAttachmentDescription& attachment = info.attachments[ i ];
+
+            attachments[ i ] = VkAttachmentDescription
+            {
+                .flags = 0,
+                .format = ConvertPixelFormat( attachment.format ),
+                .samples = ConvertSampleCountBits( attachment.sampleCount ),
+                .loadOp = ConvertLoadAttachmentOperation( attachment.colorLoadOperation ),
+                .storeOp = ConvertStoreAttachmentOperation( attachment.colorStoreOperation ),
+                .stencilLoadOp = ConvertLoadAttachmentOperation( attachment.stencilLoadOperation ),
+                .stencilStoreOp = ConvertStoreAttachmentOperation( attachment.stencilStoreOperation ),
+                .initialLayout = ConvertTextureLayout( attachment.initialLayout ),
+                .finalLayout = ConvertTextureLayout( attachment.finalLayout )
+            };
+        }
+        
+        VkSubpassDependency dependency{};
+        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        dependency.dstSubpass = 0;
+        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependency.srcAccessMask = 0;
+        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+        VkRenderPassCreateInfo renderPassInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0,
+            .attachmentCount = attachmentSize,
+            .pAttachments = attachments.data(),
+            .subpassCount = subpassesSize,
+            .pSubpasses = subpasses.data(),
+            .dependencyCount = 1,
+            .pDependencies = &dependency
+        };
+
+        VkResult result = vkCreateRenderPass( device->GetVulkanDevice(), &renderPassInfo, NULL, &renderPass );
+        if ( result != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to create render pass {}", (int32)result );
+        }
+    }
+
+    VulkanRHIRenderPass::~VulkanRHIRenderPass()
+    {
+        vkDestroyRenderPass( device->GetVulkanDevice(), renderPass, nullptr );
+
+        for ( auto& pair : framebufferAttachments )
+        {
+            vkDestroyFramebuffer( device->GetVulkanDevice(), pair.second, NULL );
+        }
+        framebufferAttachments.clear();
+    }
+
+    void VulkanRHIRenderPass::SetAttachment( const RHITexture* texture )
+    {
+        const VulkanRHITexture* vulkanTexture = static_cast<const VulkanRHITexture*>(texture);
+
+        if ( framebufferAttachments.contains( vulkanTexture->GetVulkanImageView() ) == false )
+        {
+            VkFramebufferCreateInfo framebufferInfo
+            {
+                .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+                .pNext = NULL,
+                .flags = 0,
+                .renderPass = renderPass,
+                .attachmentCount = 1,
+                .pAttachments = &vulkanTexture->GetVulkanImageView(),
+                .width = vulkanTexture->GetExtents().x,
+                .height = vulkanTexture->GetExtents().y,
+                .layers = 1
+            };
+
+            VkFramebuffer framebuffer;
+            VkResult result = vkCreateFramebuffer( device->GetVulkanDevice(), &framebufferInfo, nullptr, &framebuffer );
+            if ( result != VK_SUCCESS )
+            {
+                EE_LOG_CORE_CRITICAL( L"Failed to create frame buffer! {}", (int32)result );
+                return;
+            }
+
+            framebufferAttachments.emplace( vulkanTexture->GetVulkanImageView(), framebuffer );
+            lastAttachment = framebuffer;
+        }
+        else
+        {
+            lastAttachment = framebufferAttachments[ vulkanTexture->GetVulkanImageView() ];
+        }
+    }
+
+    void VulkanRHIRenderPass::SetDrawArea( const IntBox2& extent )
+    {
+        renderArea =
+        {
+            .offset = { extent.minX, extent.minY },
+            .extent = { (uint32)extent.maxX, (uint32)extent.maxY }
+        };
+    }
+
+    void VulkanRHIRenderPass::SetClearValues( const Vector4f& color, const float& depth, const uint32& stencil )
+    {
+        clearColorValue.color = { color.r, color.g, color.b, color.a };
+        clearDepthStencilValue.depthStencil.depth = depth;
+        clearDepthStencilValue.depthStencil.stencil = stencil;
+    }
+
+    void VulkanRHIRenderPass::BeginRenderPass( const RHICommandBuffer* cmd )
+    {
+        VkRenderPassBeginInfo info
+        {
+            .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+            .pNext = NULL,
+            .renderPass = renderPass,
+            .framebuffer = lastAttachment,
+            .renderArea = renderArea,
+            .clearValueCount = 2,
+            .pClearValues = &clearColorValue // clearDepthStencilValue
+        };
+
+        const VulkanRHICommandBuffer* commandBuffer = static_cast<const VulkanRHICommandBuffer*>(cmd);
+        vkCmdBeginRenderPass( commandBuffer->GetVulkanCommandBuffer(), &info, VK_SUBPASS_CONTENTS_INLINE );
+    }
+
+    void VulkanRHIRenderPass::EndRenderPass( const RHICommandBuffer* cmd )
+    {
+        const VulkanRHICommandBuffer* commandBuffer = static_cast<const VulkanRHICommandBuffer*>( cmd );
+        vkCmdEndRenderPass( commandBuffer->GetVulkanCommandBuffer() );
+    }
+
+    bool VulkanRHIRenderPass::IsValid() const
+    {
+        return renderPass != VK_NULL_HANDLE;
     }
 
     VulkanRHIGraphicsPipeline::VulkanRHIGraphicsPipeline( const RHIGraphicsPipelineCreateInfo& info, VulkanRHIDevice* device )
@@ -2331,7 +2595,7 @@ namespace EE
             .pNext = NULL,
             .flags = 0,
             .setLayoutCount = 0,
-            .pSetLayouts = NULL,
+            .pSetLayouts = NULL, // VkDescriptorSetLayoutCreateInfo
             .pushConstantRangeCount = 0,
             .pPushConstantRanges = NULL
         }; 
@@ -2353,6 +2617,8 @@ namespace EE
             .stencilAttachmentFormat = VK_FORMAT_UNDEFINED
         };
 
+        const VulkanRHIRenderPass* vulkanRenderPass = static_cast<const VulkanRHIRenderPass*>( info.renderpass );
+
         VkGraphicsPipelineCreateInfo pipelineCreateInfo
         {
             .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -2370,10 +2636,10 @@ namespace EE
             .pColorBlendState = &colorInfo,
             .pDynamicState = &dynamicState,
             .layout = pipelineLayout,
-            .renderPass = VK_NULL_HANDLE,
-            .subpass = 0,
+            .renderPass = vulkanRenderPass->GetVulkanRenderPass(),
+            .subpass = info.subpassIndex,
             .basePipelineHandle = VK_NULL_HANDLE,
-            .basePipelineIndex = 0,
+            .basePipelineIndex = -1,
         };
 
         VkResult result = vkCreateGraphicsPipelines( device->GetVulkanDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, NULL, &pipeline);
@@ -2440,7 +2706,7 @@ namespace EE
         }
 
         TArray<const NChar*> layers;
-#ifdef EMPTYENGINE_CORE_LOG
+#if defined(EMPTYENGINE_CORE_LOG) && defined(EE_CORE_VULKAN_VALIDATION_LAYER)
         layers.emplace_back( "VK_LAYER_KHRONOS_validation" );
 #endif
 
@@ -2471,7 +2737,7 @@ namespace EE
 
         GVulkanInstance = new VulkanRHIInstance( createInfo );
 
-#ifdef EMPTYENGINE_CORE_LOG
+#if defined(EMPTYENGINE_CORE_LOG) && defined(EE_CORE_VULKAN_VALIDATION_LAYER)
         PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessenger = VK_NULL_HANDLE;
         vkCreateDebugUtilsMessenger = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr( GVulkanInstance->GetVulkanInstance(), "vkCreateDebugUtilsMessengerEXT");
         if ( vkCreateDebugUtilsMessenger == VK_NULL_HANDLE )
@@ -2479,7 +2745,7 @@ namespace EE
             EE_LOG_CORE_CRITICAL( L"Failed to find function vkCreateDebugUtilsMessengerEXT" );
             return;
         }
-
+        
         VkDebugUtilsMessengerCreateInfoEXT messageCreateInfo
         {
             .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
@@ -2495,7 +2761,7 @@ namespace EE
             .pfnUserCallback = VulkanDebugCallback,
             .pUserData = NULL
         };
-
+        
         VkResult result = vkCreateDebugUtilsMessenger( GVulkanInstance->GetVulkanInstance(), &messageCreateInfo, NULL, &GVulkanDebugMessager );
         if ( result != VK_SUCCESS )
         {
@@ -2555,6 +2821,11 @@ namespace EE
     RHIShaderStage* VulkanRHI::CreateRHIShaderStage( const RHIShaderStageCreateInfo& info ) const
     {
         return new VulkanRHIShaderStage( info, GVulkanDevice );
+    }
+
+    RHIRenderPass* VulkanRHI::CreateRHIRenderPass( const RHIRenderPassCreateInfo& info ) const
+    {
+        return new VulkanRHIRenderPass( info, GVulkanDevice );
     }
     
     RHIGraphicsPipeline* VulkanRHI::CreateRHIGraphicsPipeline( const RHIGraphicsPipelineCreateInfo& info ) const

@@ -41,8 +41,16 @@ namespace EE
         }
 
         template <typename T>
-        FORCEINLINE constexpr TIntVector2<T>::TIntVector2( const TIntVector3<T>& vector )
+        template <typename R>
+        FORCEINLINE constexpr TIntVector2<T>::TIntVector2( const TIntVector3<R>& vector )
             : x( vector.x ), y( vector.y )
+        {
+        }
+
+        template <typename T>
+        template <typename R>
+        FORCEINLINE constexpr TIntVector2<T>::TIntVector2( const TIntVector2<R>& vector )
+            : x( R(vector.x) ), y( R(vector.y) )
         {
         }
 

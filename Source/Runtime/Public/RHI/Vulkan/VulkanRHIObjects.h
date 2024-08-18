@@ -252,7 +252,7 @@ namespace EE
         VkImage image;
         VkImageView imageView;
         VmaAllocation memory;
-        UIntVector3 extent;
+        UIntVector3 extents;
         VkFormat format;
         bool ownership;
 
@@ -267,9 +267,11 @@ namespace EE
 
         void CleanImageView() const;
 
-        VkImage GetVulkanImage() const { return image; }
+        const VkImage& GetVulkanImage() const { return image; }
 
-        const UIntVector3& GetExtent() const override { return extent; };
+        const VkImageView& GetVulkanImageView() const { return imageView; }
+
+        const UIntVector3& GetExtents() const override { return extents; };
 
         const EPixelFormat& GetFormat() const override { return pixelFormat; };
 
@@ -403,9 +405,21 @@ namespace EE
 
         void End() const override;
 
+        void BindGraphicsPipeline( const RHIGraphicsPipeline* pipeline ) const override;
+
+        void SetCullMode( const ECullModeFlags& cull ) const override;
+
+        void SetFrontFace( const EFaceWinding& frontFace ) const override;
+
+        void SetViewport( Box2f viewport, float minDepth, float maxDepth ) const override;
+
+        void SetScissor( IntBox2 scissor ) const override;
+
         void TransitionTexture( const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer, const ETextureLayout from, const ETextureLayout to ) const override;
 
         void ClearColor( Vector3f color, const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer ) const override;
+
+        void Draw( uint32 vertexCount, uint32 instanceCount, uint32 firstVertex, uint32 firstInstance ) const override;
     };
 
     class VulkanRHIShaderStage : public RHIShaderStage
@@ -427,6 +441,41 @@ namespace EE
         FORCEINLINE const VkShaderModule GetVulkanShaderModule() const { return shaderModule; }
 
         const NChar* GetEntryPoint() const override;
+    };
+
+    class VulkanRHIRenderPass : public RHIRenderPass
+    {
+    private:
+        VkRenderPass renderPass;
+
+        VulkanRHIDevice* device;
+
+        VkFramebuffer lastAttachment;
+
+        VkRect2D renderArea;
+        VkClearValue clearColorValue;
+        VkClearValue clearDepthStencilValue;
+        
+        TMap<VkImageView, VkFramebuffer> framebufferAttachments;
+
+    public:
+        VulkanRHIRenderPass( const RHIRenderPassCreateInfo& info, VulkanRHIDevice* device );
+
+        ~VulkanRHIRenderPass();
+
+        void SetAttachment( const RHITexture* texture ) override;
+
+        void SetDrawArea( const IntBox2& extent ) override;
+
+        void SetClearValues( const Vector4f& clearColor, const float& clearDepth, const uint32& clearStencil ) override;
+
+        void BeginRenderPass( const RHICommandBuffer* cmd ) override;
+
+        void EndRenderPass( const RHICommandBuffer* cmd ) override;
+
+        bool IsValid() const;
+
+        FORCEINLINE VkRenderPass GetVulkanRenderPass() const { return renderPass; }
     };
 
     class VulkanRHIGraphicsPipeline : public RHIGraphicsPipeline

@@ -26,6 +26,16 @@ namespace EE
             {
             }
 
+            constexpr TBox2( const T& minX, const T& minY, const TVector2<T>& max )
+                : minX( minX ), minY( minY ), maxX( max.x ), maxY( max.y )
+            {
+            }
+
+            constexpr TBox2( const TVector2<T>& min, const TVector2<T>& max )
+                : minX( min.x ), minY( min.y ), maxX( max.x ), maxY( max.y )
+            {
+            }
+
             //* Get the lower point of the bounding box
             FORCEINLINE TVector2<T> GetMinPoint() const { return { Math::Min( left, right ), Math::Min( top, bottom ) }; }
 

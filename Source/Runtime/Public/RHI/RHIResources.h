@@ -20,13 +20,6 @@ namespace EE
     protected:
         RHIResource() {}
         ~RHIResource() {}
-
-    public:
-        // FORCEINLINE bool IsTexture()   const { return type == RenderingResourceType_Texture; }
-        // FORCEINLINE bool IsBuffer()    const { return type == RenderingResourceType_Buffer; }
-        // FORCEINLINE bool IsSwapChain() const { return type == RenderingResourceType_Swapchain; }
-        // FORCEINLINE bool IsSurface()   const { return type == RenderingResourceType_Surface; }
-        // FORCEINLINE bool IsShader()    const { return type == RenderingResourceType_Shader; }
     };
 
     class RHISurface : public RHIResource
@@ -56,7 +49,6 @@ namespace EE
         uint32 accessFlags = 0;
         uint32 miscFlags = 0;
         Vector4 clear = {};
-        EImageLayout layout = ImageLayout_ShaderResource;
     };
 
     class RHITexture : public RHIResource
@@ -67,7 +59,7 @@ namespace EE
     public:
         virtual ~RHITexture() {};
 
-        virtual const UIntVector3& GetExtent() const = 0;
+        virtual const UIntVector3& GetExtents() const = 0;
 
         virtual const EPixelFormat& GetFormat() const = 0;
     };
@@ -133,13 +125,13 @@ namespace EE
         EShaderStage stage = ShaderStage_Unknown;
 
     protected:
-        RHIShaderStage( EShaderStage stage ) : stage( stage ) { }
+        RHIShaderStage( EShaderStage stage ) : stage( stage ) {}
 
     public:
         virtual ~RHIShaderStage() {};
 
         FORCEINLINE const EShaderStage& GetStage() const { return stage; }
-        
+
         virtual const NChar* GetEntryPoint() const = 0;
     };
 
@@ -158,9 +150,21 @@ namespace EE
 
         virtual void End() const = 0;
 
+        virtual void BindGraphicsPipeline( const class RHIGraphicsPipeline* pipeline ) const = 0;
+
+        virtual void SetCullMode( const ECullModeFlags& cull ) const = 0;
+
+        virtual void SetFrontFace( const EFaceWinding& frontFace ) const = 0;
+
+        virtual void SetViewport( Box2f viewport, float minDepth, float maxDepth ) const = 0;
+
+        virtual void SetScissor( IntBox2 scissor ) const = 0;
+
         virtual void TransitionTexture( const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer, const ETextureLayout from, const ETextureLayout to ) const = 0;
 
         virtual void ClearColor( Vector3f color, const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer ) const = 0;
+
+        virtual void Draw( uint32 vertexCount, uint32 instanceCount, uint32 firstVertex, uint32 firstInstance ) const = 0;
     };
 
     class RHIPresentContext : public RHIObject
@@ -260,6 +264,80 @@ namespace EE
         virtual ~RHISampler() {};
     };
 
+    class RHIRenderPass : public RHIObject
+    {
+    protected:
+        RHIRenderPass() {}
+    public:
+        virtual ~RHIRenderPass() {};
+
+        virtual void SetAttachment( const RHITexture* texture ) = 0;
+
+        virtual void SetDrawArea( const IntBox2& extent ) = 0;
+
+        virtual void SetClearValues( const Vector4f& clearColor, const float& clearDepth, const uint32& clearStencil ) = 0;
+
+        virtual void BeginRenderPass( const RHICommandBuffer* cmd ) = 0;
+
+        virtual void EndRenderPass( const RHICommandBuffer* cmd ) = 0;
+    };
+
+    struct RHIColorAttachmentDescription
+    {
+        EPixelFormat format = PixelFormat_Unknown;
+        ESampleCountFlagsBit sampleCount = SampleCount_1_Bit;
+        ETextureOperation colorLoadOperation = TextureOperation_DontCare;
+        ETextureOperation colorStoreOperation = TextureOperation_DontCare;
+        ETextureOperation depthLoadOperation = TextureOperation_DontCare;
+        ETextureOperation depthStoreOperation = TextureOperation_DontCare;
+        ETextureOperation stencilLoadOperation = TextureOperation_DontCare;
+        ETextureOperation stencilStoreOperation = TextureOperation_DontCare;
+        ETextureLayout initialLayout = TextureLayout_Undefined;
+        ETextureLayout finalLayout = TextureLayout_Undefined;
+    };
+
+    struct RHIAttachmentReference
+    {
+        uint32 atachmentIndex = 0;
+        ETextureLayout textureLayout = TextureLayout_Undefined;
+    };
+
+    class RHIRenderSubpassDescription
+    {
+    public:
+        TArray<RHIAttachmentReference> colorAttachmentReferences;
+        TArray<RHIAttachmentReference> inputAttachmentReferences;
+        RHIAttachmentReference depthAttachment;
+        bool usingDepth;
+
+    public:
+        RHIRenderSubpassDescription();
+
+        ~RHIRenderSubpassDescription();
+
+        void AddInputAttachment( uint32 atachmentIndex );
+
+        void AddColorAttachment( uint32 atachmentIndex, ETextureLayout layout );
+
+        void AddDepthAttachment( uint32 atachmentIndex, ETextureLayout layout );
+    };
+
+    class RHIRenderPassCreateInfo
+    {
+    public:
+        TArray<RHIRenderSubpassDescription> subpasses;
+        TArray<RHIColorAttachmentDescription> attachments;
+
+    public:
+        RHIRenderPassCreateInfo();
+
+        ~RHIRenderPassCreateInfo();
+
+        void AddRenderSubpass( const RHIRenderSubpassDescription& subpass );
+
+        void AddColorAttachment( const RHIColorAttachmentDescription& attachment );
+    };
+
     struct RHIShaderStageAttachment
     {
         const RHIShaderStage* shaderStage;
@@ -270,7 +348,7 @@ namespace EE
         ETopologyMode topologyMode = TopologyMode_TriangleList;
         ERasterMode rasterMode = RasterMode_Solid;
         ECullModeFlags cullMode = CullMode_Back_Bit;
-        EFaceWinding frontFace = FaceWinding_CounterClokwise;
+        EFaceWinding frontFace = FaceWinding_CounterClockwise;
         // Clip or clamp depth
         bool depthClip = false;
     };
@@ -324,6 +402,8 @@ namespace EE
         RHIShaderStageAttachment hullShader;
 
         TArray<RHIColorAttachmentState> colorAttachments;
+        RHIRenderPass* renderpass;
+        uint32 subpassIndex;
         RHIPrimitiveState primitiveState;
         
     public:
