@@ -76,17 +76,17 @@ namespace EE
     {
         union
         {
-            struct { uint64 indx0, indx1, indx2; };
-            struct { uint64 indices[ 3 ]; };
+            struct { uint32 indx0, indx1, indx2; };
+            struct { uint32 indices[ 3 ]; };
         };
     };
 
-    typedef TArray<MeshFace>          MeshFaces;
-    typedef TArray<Vector3f>           MeshVector3D;
-    typedef TArray<Vector2f>           MeshUVs;
-    typedef TArray<Vector4f>           MeshColors;
-    typedef TArray<StaticVertex>      MeshVertices;
-    typedef TMap<int32, NString> MeshMaterials;
+    typedef TArray<MeshFace>        MeshFaces;
+    typedef TArray<Vector3f>        MeshVector3D;
+    typedef TArray<Vector2f>        MeshUVs;
+    typedef TArray<Vector4f>        MeshColors;
+    typedef TArray<StaticVertex>    MeshVertices;
+    typedef TMap<int32, NString>    MeshMaterials;
 
     struct MeshData
     {
@@ -134,12 +134,6 @@ namespace EE
 
         //* Clear the mesh entirely
         void Clear();
-
-        //* Clear the GL's objects
-        void ClearBuffers();
-
-        //* Give Vertices to OpenGL **This must be done once per render**
-        bool SetUpBuffers();
 
     private:
         // VertexArrayPtr vertexArrayPointer;

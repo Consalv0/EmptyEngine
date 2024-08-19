@@ -546,7 +546,58 @@ namespace EE
         }
     }
 
-    VkPresentModeKHR ConvertPresentMode( EPresentMode type )
+    static VkFormat ConvertVertexFormat( EVertexFormat format )
+    {
+        switch ( format )
+        {
+        case VertexFormat_UINT_8X2:     return VK_FORMAT_R8G8_UINT;
+        case VertexFormat_UINT_8X4:     return VK_FORMAT_R8G8B8A8_UINT;
+        case VertexFormat_SINT_8X2:     return VK_FORMAT_R8G8_SINT;
+        case VertexFormat_SINT_8X4:     return VK_FORMAT_R8G8B8A8_SINT;
+        case VertexFormat_UNORM_8X2:    return VK_FORMAT_R8G8_UNORM;
+        case VertexFormat_UNORM_8X4:    return VK_FORMAT_R8G8B8A8_UNORM;
+        case VertexFormat_SNORM_8X2:    return VK_FORMAT_R8G8_SNORM;
+        case VertexFormat_SNORM_8X4:    return VK_FORMAT_R8G8B8A8_SNORM;
+        case VertexFormat_UINT_16X2:    return VK_FORMAT_R16G16_UINT;
+        case VertexFormat_UINT_16X4:    return VK_FORMAT_R16G16B16A16_UINT;
+        case VertexFormat_SINT_16X2:    return VK_FORMAT_R16G16_SINT;
+        case VertexFormat_SINT_16X4:    return VK_FORMAT_R16G16B16A16_SINT;
+        case VertexFormat_UNORM_16X2:   return VK_FORMAT_R16G16_UNORM;
+        case VertexFormat_UNORM_16X4:   return VK_FORMAT_R16G16B16A16_UNORM;
+        case VertexFormat_SNORM_16X2:   return VK_FORMAT_R16G16_SNORM;
+        case VertexFormat_SNORM_16X4:   return VK_FORMAT_R16G16B16A16_SNORM;
+        case VertexFormat_FLOAT_16X2:   return VK_FORMAT_R16G16_SFLOAT;
+        case VertexFormat_FLOAT_16X4:   return VK_FORMAT_R16G16B16A16_SFLOAT;
+        case VertexFormat_FLOAT_32X1:   return VK_FORMAT_R32_SFLOAT;
+        case VertexFormat_FLOAT_32X2:   return VK_FORMAT_R32G32_SFLOAT;
+        case VertexFormat_FLOAT_32X3:   return VK_FORMAT_R32G32B32_SFLOAT;
+        case VertexFormat_FLOAT_32X4:   return VK_FORMAT_R32G32B32A32_SFLOAT;
+        case VertexFormat_UINT_32X1:    return VK_FORMAT_R32_UINT;
+        case VertexFormat_UINT_32X2:    return VK_FORMAT_R32G32_UINT;
+        case VertexFormat_UINT_32X3:    return VK_FORMAT_R32G32B32_UINT;
+        case VertexFormat_UINT_32X4:    return VK_FORMAT_R32G32B32A32_UINT;
+        case VertexFormat_SINT_32X1:    return VK_FORMAT_R32_SINT;
+        case VertexFormat_SINT_32X2:    return VK_FORMAT_R32G32_SINT;
+        case VertexFormat_SINT_32X3:    return VK_FORMAT_R32G32B32_SINT;
+        case VertexFormat_SINT_32X4:    return VK_FORMAT_R32G32B32A32_SINT;
+        case VertexFormat_Unknown:
+        default:
+            return VK_FORMAT_UNDEFINED;
+        }
+    }
+
+    static VkVertexInputRate ConvertVertexStepMode( EVertexStepMode mode )
+    {
+        switch ( mode )
+        {
+        case VertexStepMode_Vertex:     return VK_VERTEX_INPUT_RATE_VERTEX;
+        case VertexStepMode_Instance:   return VK_VERTEX_INPUT_RATE_INSTANCE;
+        default:
+            return VK_VERTEX_INPUT_RATE_VERTEX;
+        }
+    }
+
+    static VkPresentModeKHR ConvertPresentMode( EPresentMode type )
     {
         switch ( type )
         {
@@ -557,7 +608,7 @@ namespace EE
         }
     }
 
-    VkImageTiling ConvertTextureTiling( ETilingMode tiling )
+    static VkImageTiling ConvertTextureTiling( ETilingMode tiling )
     {
         switch ( tiling )
         {
@@ -571,7 +622,7 @@ namespace EE
         return VK_IMAGE_TILING_OPTIMAL;
     }
 
-    VkImageViewType ConvertTextureType( ETextureType type )
+    static VkImageViewType ConvertTextureType( ETextureType type )
     {
         switch ( type )
         {
@@ -584,7 +635,7 @@ namespace EE
         }
     }
 
-    VkImageUsageFlags ConvertTextureUsage( EUsageModeFlags usage )
+    static VkImageUsageFlags ConvertTextureUsage( EUsageModeFlags usage )
     {
         VkImageUsageFlags flags = VkImageUsageFlags( 0 );
         if ( usage & UsageMode_Sampled_Bit )    flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -594,7 +645,7 @@ namespace EE
         return flags;
     }
 
-    VkImageAspectFlags ConvertTextureAspect( EUsageModeFlags usage )
+    static VkImageAspectFlags ConvertTextureAspect( EUsageModeFlags usage )
     {
         VkImageAspectFlags flags = VK_IMAGE_ASPECT_NONE;
         if ( usage & UsageMode_Color_Bit )      flags |= VK_IMAGE_ASPECT_COLOR_BIT;
@@ -603,7 +654,7 @@ namespace EE
         return flags;
     }
 
-    VkImageLayout ConvertTextureLayout( ETextureLayout layout )
+    static VkImageLayout ConvertTextureLayout( ETextureLayout layout )
     {
         switch ( layout )
         {
@@ -620,7 +671,7 @@ namespace EE
         }
     }
 
-    VkSharingMode ConvertSharingMode( ESharingMode sharing )
+    static VkSharingMode ConvertSharingMode( ESharingMode sharing )
     {
         switch ( sharing )
         {
@@ -632,7 +683,7 @@ namespace EE
         }
     }
 
-    VkBufferUsageFlags ConvertBufferUsageFlags( EBufferUsageFlags usages )
+    static VkBufferUsageFlags ConvertBufferUsageFlags( EBufferUsageFlags usages )
     {
         VkBufferUsageFlags flags = 0;
         if ( usages & BufferUsage_SourceCopy_Bit )       flags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
@@ -645,7 +696,7 @@ namespace EE
         return flags;
     }
 
-    VkColorComponentFlags ConvertColorComponentFlags( EColorComponentFlags components )
+    static VkColorComponentFlags ConvertColorComponentFlags( EColorComponentFlags components )
     {
         VkColorComponentFlags flags = 0;
         if ( components & ColorComponent_R_Bit )     flags |= VK_COLOR_COMPONENT_R_BIT;
@@ -655,7 +706,7 @@ namespace EE
         return flags;
     }
 
-    VkPipelineStageFlags ConvertPipelineStageFlags( EPipelineStage stage )
+    static VkPipelineStageFlags ConvertPipelineStageFlags( EPipelineStage stage )
     {
         switch ( stage )
         {
@@ -751,7 +802,7 @@ namespace EE
         }
     }
 
-    bool CreateNativeVmaAllocator( VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VmaAllocator* outAllocator )
+    static bool CreateNativeVmaAllocator( VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VmaAllocator* outAllocator )
     {
         VmaVulkanFunctions vulkanFunctions = {};
         vulkanFunctions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
@@ -1023,13 +1074,17 @@ namespace EE
         for ( uint32 i = 0; i < physicalDeviceCount; i++ )
         {
             VkPhysicalDevice& vulkanPhysicalDevice = vulkanPhysicalDevices[ i ];
-            VulkanRHIPhysicalDevice& physicalDevice = physicalDevices.emplace_back( instance, vulkanPhysicalDevice );
+            physicalDevices.push_back( new VulkanRHIPhysicalDevice( instance, vulkanPhysicalDevice ) );
         }
     }
 
     VulkanRHIInstance::~VulkanRHIInstance()
     {
         vkDestroyInstance( instance, VK_NULL_HANDLE );
+        for ( uint32 i = 0; i < physicalDeviceCount; i++ )
+        {
+            delete physicalDevices[ i ];
+        }
     }
 
     int32 VulkanRHIInstance::PickPhysicalDeviceForSurface( VulkanRHISurface* surface ) const
@@ -1039,7 +1094,7 @@ namespace EE
 
         for ( uint32 i = 0; i < physicalDeviceCount; i++ )
         {
-            int score = physicalDevices[ i ].RateDeviceSuitabilityForSurface( surface );
+            int score = physicalDevices[ i ]->RateDeviceSuitabilityForSurface( surface );
             candidates.insert( std::make_pair( score, i ) );
         }
 
@@ -1071,12 +1126,12 @@ namespace EE
 
     const VulkanRHIPhysicalDevice* VulkanRHIInstance::GetSelectedPhysicalDevice() const
     {
-        return &physicalDevices[ selectedDeviceIndex ];
+        return physicalDevices[ selectedDeviceIndex ];
     };
 
     VulkanRHIPhysicalDevice* VulkanRHIInstance::GetSelectedPhysicalDevice()
     {
-        return &physicalDevices[ selectedDeviceIndex ];
+        return physicalDevices[ selectedDeviceIndex ];
     };
 
     bool VulkanRHIInstance::AddSurfaceSupportDetails( VulkanRHISurface* surface )
@@ -1084,7 +1139,7 @@ namespace EE
         for ( uint32 i = 0; i < physicalDeviceCount; i++ )
         {
             auto& internalPhysicalDevice = physicalDevices[ i ];
-            internalPhysicalDevice.AddSurfaceSupportDetails( surface->GetVulkanSurface(), internalPhysicalDevice.GetQueueFamilies().graphicsFamily.value() );
+            internalPhysicalDevice->AddSurfaceSupportDetails( surface->GetVulkanSurface(), internalPhysicalDevice->GetQueueFamilies().graphicsFamily.value() );
         }
         return true;
     }
@@ -1559,31 +1614,81 @@ namespace EE
     {
         if ( buffer != NULL )
         {
-            vkDestroyBuffer( device->GetVulkanDevice(), buffer, NULL );
+            vmaDestroyBuffer( device->GetVulkanAllocator(), buffer, NULL );
         }
     }
 
-    VulkanRHIBuffer::VulkanRHIBuffer( RHIBufferCreateInfo& info, VulkanRHIDevice* device ) :
-        device( device ), usages( BufferUsage_None )
+    VulkanRHIBuffer::VulkanRHIBuffer( const RHIBufferCreateInfo& info, VulkanRHIDevice* device ) : RHIBuffer()
+        , device( device )
+        , usage( info.usage )
+        , sharing( info.sharing )
+        , buffer( VK_NULL_HANDLE )
+        , size( info.size )
     {
         VkBufferCreateInfo bufferInfo = 
         {
             .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
             .pNext = NULL,
             .flags = 0,
-            .size = info.size,
-            .usage = ConvertBufferUsageFlags( info.usages ),
-            .sharingMode = ConvertSharingMode( info.sharing ),
+            .size = size,
+            .usage = ConvertBufferUsageFlags( usage ),
+            .sharingMode = ConvertSharingMode( sharing ),
         };
-
-        VmaAllocationCreateInfo allocInfo = {};
-        allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
-
-        if ( vmaCreateBuffer( device->GetVulkanAllocator(), &bufferInfo, &allocInfo, &buffer, &nativeAllocation, VK_NULL_HANDLE ) != VK_SUCCESS )
+        
+        VkResult createResult = vkCreateBuffer( device->GetVulkanDevice(), &bufferInfo, nullptr, &buffer );
+        if ( createResult != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to allocate buffer memory!" );
+            EE_LOG_CORE_CRITICAL( L"Failed to create buffer {}!", (int32)createResult );
         }
 
+        VmaAllocationCreateInfo allocInfo
+        {
+            .usage = VMA_MEMORY_USAGE_AUTO
+        };
+        if ( (usage & BufferUsage_MapWite_Bit) > 0 )
+        {
+            allocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+        }
+        
+        VkResult memoryResult = vmaCreateBuffer( device->GetVulkanAllocator(), &bufferInfo, &allocInfo, &buffer, &nativeAllocation, VK_NULL_HANDLE );
+        if ( memoryResult != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to allocate buffer memory {}!", (int32)memoryResult );
+        }
+    }
+
+    bool VulkanRHIBuffer::IsValid() const
+    {
+        return buffer != VK_NULL_HANDLE;
+    }
+
+    uint64 VulkanRHIBuffer::GetSize() const
+    {
+        return size;
+    }
+
+    void VulkanRHIBuffer::UploadData( void* data, size_t offset, size_t size ) const
+    {
+        void* gpuData = NULL;
+        VkResult result = vmaMapMemory( device->GetVulkanAllocator(), nativeAllocation, &gpuData);
+        if ( result != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to open memory map for buffer {}!", (int32)result );
+            return;
+        }
+
+        memcpy( static_cast<char*>( gpuData ) + offset, data, size );
+
+        vmaUnmapMemory( device->GetVulkanAllocator(), nativeAllocation );
+    }
+
+    void VulkanRHIBuffer::BindBuffer() const
+    {
+        VkResult result = vmaBindBufferMemory( device->GetVulkanAllocator(), nativeAllocation, buffer );
+        if ( result != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to bind buffer memory {}!", (int32)result );
+        }
     }
 
     VulkanRHITexture::VulkanRHITexture( const RHITextureCreateInfo& info, VulkanRHIDevice* device, VkImage image ) :
@@ -1996,6 +2101,11 @@ namespace EE
         }
     }
 
+    bool VulkanRHICommandPool::IsValid() const
+    {
+        return commandPool != VK_NULL_HANDLE;
+    }
+
     VulkanRHICommandPool::VulkanRHICommandPool( VulkanRHIDevice* device, uint32 queueFamilyIndex ) :
         device( device ),
         queueFamilyIndex( queueFamilyIndex )
@@ -2075,6 +2185,19 @@ namespace EE
     {
         const VulkanRHIGraphicsPipeline* vulkanPipeline = static_cast<const VulkanRHIGraphicsPipeline*>( pipeline );
         vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetVulkanPipeline() );
+    }
+
+    void VulkanRHICommandBuffer::BindVertexBuffer( const RHIBuffer* buffer ) const
+    {
+        const VulkanRHIBuffer* vulkanBuffer = static_cast<const VulkanRHIBuffer*>( buffer );
+        VkDeviceSize offsets[] = { 0 };
+        vkCmdBindVertexBuffers( commandBuffer, 0, 1, &vulkanBuffer->GetVulkanBuffer(), offsets );
+    }
+
+    void VulkanRHICommandBuffer::BindIndexBuffer( const RHIBuffer* buffer ) const
+    {
+        const VulkanRHIBuffer* vulkanBuffer = static_cast<const VulkanRHIBuffer*>(buffer);
+        vkCmdBindIndexBuffer( commandBuffer, vulkanBuffer->GetVulkanBuffer(), 0, VK_INDEX_TYPE_UINT32 );
     }
 
     void VulkanRHICommandBuffer::SetCullMode( const ECullModeFlags& cull ) const
@@ -2168,6 +2291,11 @@ namespace EE
         auto vulkanTexture = static_cast<const VulkanRHITexture*>( texture );
 
         vkCmdClearColorImage( commandBuffer, vulkanTexture->GetVulkanImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColor, 1, &imageRange );
+    }
+
+    void VulkanRHICommandBuffer::DrawIndexed( uint32 indexCount, uint32 instanceCount, uint32 firstIndex, uint32 vertexOffset, uint32 firstInstance ) const
+    {
+        vkCmdDrawIndexed( commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance );
     }
 
     void VulkanRHICommandBuffer::Draw( uint32 vertexCount, uint32 instanceCount, uint32 firstVertex, uint32 firstInstance ) const
@@ -2462,16 +2590,40 @@ namespace EE
             .dynamicStateCount = EE_ARRAYSIZE( dynamicStates ),
             .pDynamicStates = (VkDynamicState*)&dynamicStates
         };
-        
+
+        uint32 bindingsSize = (uint32)info.vertexState.bufferLayouts.size();
+        TArray<VkVertexInputAttributeDescription> attributes;
+        TArray<VkVertexInputBindingDescription> bindings;
+        bindings.resize( bindingsSize );
+
+        for ( uint32 i = 0; i < bindingsSize; ++i )
+        {
+            const auto& binding = info.vertexState.bufferLayouts[ i ];
+            bindings[ i ].binding = i;
+            bindings[ i ].inputRate = ConvertVertexStepMode( binding.stepMode );
+            bindings[ i ].stride = binding.stride;
+
+            for ( size_t j = 0; j < binding.attributes.size(); ++j )
+            {
+                VkVertexInputAttributeDescription desc = {};
+                desc.binding = i;
+                desc.location = binding.attributes[ j ].semanticIndex;
+                desc.offset = binding.attributes[ j ].offset;
+                desc.format = ConvertVertexFormat( binding.attributes[ j ].format );
+                attributes.emplace_back( desc );
+            }
+        }
+        uint32 attributesSize = (uint32)attributes.size();
+
         VkPipelineVertexInputStateCreateInfo vertexInputInfo
         {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
             .pNext = NULL,
             .flags = 0,
-            .vertexBindingDescriptionCount = 0,
-            .pVertexBindingDescriptions = NULL, // Optional
-            .vertexAttributeDescriptionCount = 0,
-            .pVertexAttributeDescriptions = NULL, // Optional
+            .vertexBindingDescriptionCount = bindingsSize,
+            .pVertexBindingDescriptions = bindings.data(),
+            .vertexAttributeDescriptionCount = attributesSize,
+            .pVertexAttributeDescriptions = attributes.data(),
         };
         
         VkPipelineInputAssemblyStateCreateInfo inputAssembly
@@ -2805,7 +2957,7 @@ namespace EE
     
     RHIBuffer* VulkanRHI::CreateRHIBuffer( const RHIBufferCreateInfo& info ) const
     {
-        return NULL;
+        return new VulkanRHIBuffer( info, GVulkanDevice );
     }
     
     RHITexture* VulkanRHI::CreateRHITexture( const RHITextureCreateInfo& info ) const

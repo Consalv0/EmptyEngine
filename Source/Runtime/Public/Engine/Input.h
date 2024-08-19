@@ -16,7 +16,7 @@ namespace EE
 		int instanceID = -1;
 		bool hasHaptics = false;
 
-        EName name = GEmptyName;
+        Name name = GEmptyName;
 		void* hapticDevice = NULL;
 	};
 

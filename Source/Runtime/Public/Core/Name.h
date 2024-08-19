@@ -2,46 +2,55 @@
 
 namespace EE
 {
-	class EName {
+	class Name
+	{
+	private:
+		size_t number;
+		size_t id;
+
+	private:
+		Name() = delete;
+
 	public:
-		EName(const WString & Text);
+		Name( const WString& text );
 
-		EName(const WChar * Text);
+		Name( const WChar* text );
 
-		EName(size_t number);
+		Name( const NString& text );
 
-		EName(const WString & Text, size_t number);
+		Name( const NChar* text );
 
-		~EName();
+		Name( size_t number );
 
-		WString GetDisplayName() const;
+		Name( const WString& text, size_t number );
 
-		NString GetNarrowDisplayName() const;
+		~Name();
+
+		const WString& GetName() const;
+
+		const NString& GetNarrowName() const;
 
 		WString GetInstanceName() const;
 
 		NString GetNarrowInstanceName() const;
-		
-		size_t GetNumber() const;
+
+		const size_t& GetNumber() const;
 
 		size_t GetInstanceID() const;
-		
-		size_t GetID() const;
 
-		bool operator<(const EName& Other) const;
+		const size_t& GetID() const;
 
-		bool operator==(const EName& Other) const;
+		bool operator<( const Name& other ) const;
 
-		bool operator!=(const EName& Other) const;
+		bool operator==( const Name& other ) const;
+
+		bool operator!=( const Name& other ) const;
 
 	private:
-		size_t number;
-		WString entryName;
-		size_t id;
-
-		static TMap<size_t, WString> GNamesTable;
+		static TMap<size_t, WString> GWideNamesTable;
+		static TMap<size_t, NString> GNarrowNamesTable;
 		static TMap<size_t, size_t> GNameCountTable;
 	};
 
-    extern EE::EName GEmptyName;
+	extern EE::Name GEmptyName;
 }

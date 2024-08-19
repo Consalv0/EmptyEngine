@@ -129,12 +129,14 @@ namespace EE
         BufferUsage_None =                  0,
         BufferUsage_SourceCopy_Bit =        1 << 1,
         BufferUsage_StreamOutput_Bit =      1 << 2,
-        BufferUsage_Index_Bit =             1 << 3,
-        BufferUsage_Vertex_Bit =            1 << 4,
-        BufferUsage_Uniform_Bit =           1 << 5,
-        BufferUsage_Storage_Bit =           1 << 6,
-        BufferUsage_Indirect_Bit =          1 << 7,
-        BufferUsage_ShaderResource_Bit =    1 << 8,
+        BufferUsage_MapWite_Bit =          1 << 3,
+        BufferUsage_MapRead_Bit =          1 << 4,
+        BufferUsage_Index_Bit =             1 << 5,
+        BufferUsage_Vertex_Bit =            1 << 6,
+        BufferUsage_Uniform_Bit =           1 << 7,
+        BufferUsage_Storage_Bit =           1 << 8,
+        BufferUsage_Indirect_Bit =          1 << 9,
+        BufferUsage_ShaderResource_Bit =    1 << 10,
     };
     ENUM_FLAGS_OPERATORS( EBufferUsageFlags );
 
@@ -203,6 +205,12 @@ namespace EE
         TextureLayout_DepthAttachment,
         TextureLayout_StencilAttachment,
         TextureLayout_Present
+    };
+
+    enum EVertexStepMode
+    {
+        VertexStepMode_Vertex,
+        VertexStepMode_Instance
     };
 
     enum ECullModeFlags : uint8
@@ -503,6 +511,41 @@ namespace EE
         // DXGI_FORMAT_B8G8R8X8_UNORM_SRGB,
         // DXGI_FORMAT_AYUV -> DXGI_FORMAT_V408
         PixelFormat_MAX
+    };
+
+    enum EVertexFormat
+    {
+        VertexFormat_Unknown,
+        VertexFormat_UINT_8X2,
+        VertexFormat_UINT_8X4,
+        VertexFormat_SINT_8X2,
+        VertexFormat_SINT_8X4,
+        VertexFormat_UNORM_8X2,
+        VertexFormat_UNORM_8X4,
+        VertexFormat_SNORM_8X2,
+        VertexFormat_SNORM_8X4,
+        VertexFormat_UINT_16X2,
+        VertexFormat_UINT_16X4,
+        VertexFormat_SINT_16X2,
+        VertexFormat_SINT_16X4,
+        VertexFormat_UNORM_16X2,
+        VertexFormat_UNORM_16X4,
+        VertexFormat_SNORM_16X2,
+        VertexFormat_SNORM_16X4,
+        VertexFormat_FLOAT_16X2,
+        VertexFormat_FLOAT_16X4,
+        VertexFormat_FLOAT_32X1,
+        VertexFormat_FLOAT_32X2,
+        VertexFormat_FLOAT_32X3,
+        VertexFormat_FLOAT_32X4,
+        VertexFormat_UINT_32X1,
+        VertexFormat_UINT_32X2,
+        VertexFormat_UINT_32X3,
+        VertexFormat_UINT_32X4,
+        VertexFormat_SINT_32X1,
+        VertexFormat_SINT_32X2,
+        VertexFormat_SINT_32X3,
+        VertexFormat_SINT_32X4
     };
 
     struct PixelFormatInfo

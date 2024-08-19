@@ -27,11 +27,11 @@ namespace EE
 		virtual void SetRenderScale( float scale ) = 0;
 
 		template <typename T>
-		bool CreateStage( const EName& stageName );
+		bool CreateStage( const Name& stageName );
 
-		virtual void RemoveStage( const EName& stageName ) = 0;
+		virtual void RemoveStage( const Name& stageName ) = 0;
 
-		virtual class RenderStage* GetStage( const EName& stageName ) const = 0;
+		virtual class RenderStage* GetStage( const Name& stageName ) const = 0;
 
 		virtual void BeginFrame() = 0;
 
@@ -42,11 +42,11 @@ namespace EE
 	};
 
 	template<typename T>
-	bool RenderPipeline::CreateStage( const EName& stageName )
+	bool RenderPipeline::CreateStage( const Name& stageName )
 	{
 		if ( renderStages.find( stageName.GetID() ) == renderStages.end() )
 		{
-			renderStages.insert( std::pair<size_t, RenderStage*>( stageName.GetID(), new T( stageName, this ) ) );
+			renderStages.insert( TMap<size_t, class RenderStage*>::value_type( stageName.GetID(), new T( stageName, this ) ) );
 			return true;
 		}
 		return false;

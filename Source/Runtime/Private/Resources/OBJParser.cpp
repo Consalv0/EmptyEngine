@@ -406,7 +406,7 @@ namespace EE
             );
         }
 
-        uint64* indices = new uint64[ modelData.vertexIndices.size() ];
+        uint32* indices = new uint32[ modelData.vertexIndices.size() ];
         size_t count = 0;
 
         size_t totalAllocatedSize = 0;

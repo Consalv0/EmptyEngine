@@ -6,95 +6,137 @@
 
 namespace EE
 {
-	TMap<size_t, WString> EName::GNamesTable = TMap<size_t, WString>();
-	TMap<size_t, size_t> EName::GNameCountTable = TMap<size_t, size_t>();
+    TMap<size_t, WString> Name::GWideNamesTable = TMap<size_t, WString>();
+    TMap<size_t, NString> Name::GNarrowNamesTable = TMap<size_t, NString>();
+    TMap<size_t, size_t> Name::GNameCountTable = TMap<size_t, size_t>();
     
-    EName GEmptyName = { L"", 0 };
+    Name GEmptyName = { L"", 0 };
 
-	EName::EName(const WString & Text) : entryName(Text) {
-		id = WStringToHash(Text);
-		if (GNamesTable.try_emplace(id, Text).second) {
-			GNameCountTable.emplace(id, 0);
+    Name::Name( const WString & text ) 
+        : id( WStringToHash( text ) )
+        , number()
+    {
+        if ( GWideNamesTable.try_emplace(id, text).second )
+        {
+			GNarrowNamesTable.emplace( id, Text::WideToNarrow( text ) );
+            GNameCountTable.emplace( id, 0 );
+            number = 0;
+        }
+        else 
+        {
+            number = ++GNameCountTable[ id ];
+        }
+    }
+
+	Name::Name( const WChar * text )
+		: id( WStringToHash( text ) )
+		, number()
+	{
+		if ( GWideNamesTable.try_emplace(id, text).second )
+		{
+			GNarrowNamesTable.emplace( id, Text::WideToNarrow( text ) );
+			GNameCountTable.emplace( id, 0 );
 			number = 0;
 		}
-		else {
+		else
+		{
 			number = ++GNameCountTable[id];
 		}
 	}
 
-	EName::EName(const WChar * Text) : entryName(Text) {
-		id = WStringToHash(Text);
-		if (GNamesTable.try_emplace(id, Text).second) {
-			GNameCountTable.emplace(id, 0);
-			number = 0;
+	Name::Name( const NString& text )
+		: Name( Text::NarrowToWide( text ) )
+	{
+	}
+
+	Name::Name( const NChar* text )
+		: Name( Text::NarrowToWide( text ) )
+	{
+	}
+
+	Name::Name( size_t id )
+		: id()
+		, number()
+	{
+		if ( GNameCountTable.find( id ) == GNameCountTable.end() ) {
+			number = ++GNameCountTable[ GEmptyName.GetID() ];
+			id = GEmptyName.GetID();
 		}
 		else {
-			number = ++GNameCountTable[id];
+			number = ++GNameCountTable[ id ];
 		}
 	}
 
-	EName::EName(size_t InNumber) {
-		if (GNamesTable.find(InNumber) == GNamesTable.end()) {
-			entryName = L"";
-			number = 0;
-		}
-		else {
-			entryName = GNamesTable[InNumber];
-			number = ++GNameCountTable[InNumber];
-		}
+	Name::Name( const WString& text, size_t number )
+		: id ( WStringToHash( text ) )
+		, number( number )
+	{
 	}
 
-	EName::EName(const WString & Text, size_t number) : entryName(Text), number(number) {
-		id = WStringToHash(Text);
-		GNamesTable.try_emplace(id, Text);
+	Name::~Name() { }
+
+	const WString& Name::GetName() const
+	{
+		return GWideNamesTable[ id ];
 	}
 
-	EName::~EName() { }
-
-	WString EName::GetDisplayName() const {
-		return entryName;
+	const NString& Name::GetNarrowName() const
+	{
+		return GNarrowNamesTable[ id ];
 	}
 
-	NString EName::GetNarrowDisplayName() const {
-		return Text::WideToNarrow(entryName);
+	WString Name::GetInstanceName() const
+	{
+		return GWideNamesTable[ id ] + L"_" + Text::ToWide(  number);
 	}
 
-	WString EName::GetInstanceName() const {
-		return entryName + L"_" + Text::ToWide(number);
+	NString Name::GetNarrowInstanceName() const
+	{
+		return GNarrowNamesTable[ id ] + "_" + Text::ToNarrow( number );
 	}
 
-	NString EName::GetNarrowInstanceName() const {
-		return Text::WideToNarrow(entryName) + "_" + Text::ToNarrow(number);
-	}
-
-	size_t EName::GetNumber() const {
+	const size_t& Name::GetNumber() const
+	{
 		return number;
 	}
 
-	size_t EName::GetInstanceID() const {
-		return WStringToHash(entryName + L"_" + Text::ToWide(number));
+	size_t Name::GetInstanceID() const
+	{
+		size_t ret = 0;
+		EE::HashCombine( ret, id, number );
+		return ret;
 	}
 
-	size_t EName::GetID() const {
+	const size_t& Name::GetID() const
+	{
 		return id;
 	}
 
-	bool EName::operator<(const EName & Other) const {
+	bool Name::operator<(const Name & other) const
+	{
 		uint32 i = 0;
-		while ((i < entryName.length()) && (i < Other.entryName.length())) {
-			if (tolower(entryName[i]) < tolower(Other.entryName[i])) return true;
-			else if (tolower(entryName[i]) > tolower(Other.entryName[i])) return false;
+		const WString& entryName = GetName();
+		const WString& otherName = other.GetName();
+		const size_t& length = entryName.length();
+		const size_t& otherLength = otherName.length();
+		
+		while ((i < length) && (i < otherLength))
+		{
+			if (entryName[i] < otherName[i]) return true;
+			else if (entryName[i] > otherName[i]) return false;
 			++i;
 		}
-		return (entryName.length() + number < Other.entryName.length() + Other.number);
+		return (length + number < otherLength + other.number);
 	}
 
-	bool EName::operator!=(const EName & Other) const {
-		return id != Other.id || number != number;
+	bool Name::operator!=(const Name & other) const
+	{
+		return id != other.id || number != number;
 	}
 
-	bool EName::operator==(const EName & Other) const {
-		return id == Other.id && number == number;
+	bool Name::operator==(const Name & other) const
+	{
+		return id == other.id && number == number;
 	}
 
 }

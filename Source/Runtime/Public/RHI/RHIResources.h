@@ -8,8 +8,8 @@ namespace EE
         EE_CLASSNOCOPY( RHIObject )
 
     protected:
-        RHIObject() {}
-        ~RHIObject() {}
+        RHIObject() {};
+        virtual ~RHIObject() = default;
 
     public:
         virtual bool IsValid() const = 0;
@@ -17,17 +17,22 @@ namespace EE
 
     class RHIResource : public RHIObject
     {
+    public:
+        EE_CLASSNOCOPY( RHIResource )
+
     protected:
-        RHIResource() {}
-        ~RHIResource() {}
+        RHIResource() {};
+        virtual ~RHIResource() = default;
     };
 
     class RHISurface : public RHIResource
     {
-    protected:
-        RHISurface() {}
     public:
-        virtual ~RHISurface() {};
+        EE_CLASSNOCOPY( RHISurface )
+
+    protected:
+        RHISurface() {};
+        virtual ~RHISurface() = default;
     };
 
     struct RHITextureCreateInfo
@@ -53,12 +58,14 @@ namespace EE
 
     class RHITexture : public RHIResource
     {
+    public:
+        EE_CLASSNOCOPY( RHITexture )
+
     protected:
         RHITexture() {}
+        virtual ~RHITexture() = default;
 
     public:
-        virtual ~RHITexture() {};
-
         virtual const UIntVector3& GetExtents() const = 0;
 
         virtual const EPixelFormat& GetFormat() const = 0;
@@ -66,11 +73,14 @@ namespace EE
 
     class RHIFence : public RHIResource
     {
-    protected:
-        RHIFence() {}
     public:
-        virtual ~RHIFence() {};
+        EE_CLASSNOCOPY( RHIFence )
 
+    protected:
+        RHIFence() {};
+        virtual ~RHIFence() = default;
+
+    public:
         virtual bool IsSignaled() const = 0;
         virtual void Reset() const = 0;
         virtual void Wait( uint64 timeout ) const = 0;
@@ -78,10 +88,12 @@ namespace EE
 
     class RHISemaphore : public RHIResource
     {
+    public:
+        EE_CLASSNOCOPY( RHISemaphore )
+
     protected:
         RHISemaphore() {}
-    public:
-        virtual ~RHISemaphore() {};
+        virtual ~RHISemaphore() = default;
     };
 
     struct RHISwapChainCreateInfo
@@ -97,18 +109,22 @@ namespace EE
 
     class RHISwapChain : public RHIResource
     {
-    protected:
-        RHISwapChain() {}
     public:
-        virtual ~RHISwapChain() {};
+        EE_CLASSNOCOPY( RHISwapChain )
+
+    protected:
+        RHISwapChain() {};
+        virtual ~RHISwapChain() = default;
     };
 
     class RHIInstance : public RHIObject
     {
+    public:
+        EE_CLASSNOCOPY( RHIInstance )
+
     protected:
         RHIInstance() {}
-    public:
-        virtual ~RHIInstance() {};
+        virtual ~RHIInstance() = default;
     };
 
     struct RHIShaderStageCreateInfo
@@ -122,14 +138,17 @@ namespace EE
 
     class RHIShaderStage : public RHIResource
     {
+    public:
+        EE_CLASSNOCOPY( RHIShaderStage )
+    
+    public:
         EShaderStage stage = ShaderStage_Unknown;
 
     protected:
         RHIShaderStage( EShaderStage stage ) : stage( stage ) {}
+        virtual ~RHIShaderStage() = default;
 
     public:
-        virtual ~RHIShaderStage() {};
-
         FORCEINLINE const EShaderStage& GetStage() const { return stage; }
 
         virtual const NChar* GetEntryPoint() const = 0;
@@ -141,16 +160,23 @@ namespace EE
 
     class RHICommandBuffer : public RHIResource
     {
-    protected:
-        RHICommandBuffer() {}
     public:
-        virtual ~RHICommandBuffer() {};
+        EE_CLASSNOCOPY( RHICommandBuffer )
 
+    protected:
+        RHICommandBuffer() {};
+        virtual ~RHICommandBuffer() = default;
+
+    public:
         virtual void Begin() const = 0;
 
         virtual void End() const = 0;
 
         virtual void BindGraphicsPipeline( const class RHIGraphicsPipeline* pipeline ) const = 0;
+
+        virtual void BindVertexBuffer( const class RHIBuffer* buffer ) const = 0;
+
+        virtual void BindIndexBuffer( const class RHIBuffer* buffer ) const = 0;
 
         virtual void SetCullMode( const ECullModeFlags& cull ) const = 0;
 
@@ -164,20 +190,24 @@ namespace EE
 
         virtual void ClearColor( Vector3f color, const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer ) const = 0;
 
+        virtual void DrawIndexed( uint32 indexCount, uint32 instanceCount, uint32 firstIndex, uint32 vertexOffset, uint32 firstInstance ) const = 0;
+
         virtual void Draw( uint32 vertexCount, uint32 instanceCount, uint32 firstVertex, uint32 firstInstance ) const = 0;
     };
 
     class RHIPresentContext : public RHIObject
     {
+    public:
+        EE_CLASSNOCOPY( RHIPresentContext )
+
     protected:
         uint32 currentFrameIndex;
 
     protected:
-        RHIPresentContext() : currentFrameIndex( 0 ) {}
+        RHIPresentContext() : currentFrameIndex( 0 ) {};
+        virtual ~RHIPresentContext() = default;
 
     public:
-        virtual ~RHIPresentContext() {};
-
         virtual const RHITexture* GetBackbuffer() const = 0;
 
         virtual void SubmitRenderCommandBuffer( EPipelineStage stage ) const = 0;
@@ -193,6 +223,9 @@ namespace EE
         virtual const EPixelFormat& GetFormat() const = 0;
 
         virtual void Present() = 0;
+
+    protected:
+        friend class DynamicRHI;
     };
 
     struct RHIQueueSubmitInfo
@@ -207,21 +240,27 @@ namespace EE
 
     class RHIQueue : public RHIResource
     {
-    protected:
-        RHIQueue() {}
     public:
-        virtual ~RHIQueue() {};
+        EE_CLASSNOCOPY( RHIQueue )
 
+    protected:
+        RHIQueue() {};
+        virtual ~RHIQueue() = default;
+
+    public:
         virtual void SubmitCommandBuffer( const RHICommandBuffer* commandBuffer, const RHIQueueSubmitInfo& info ) = 0;
     };
 
     class RHIDevice : public RHIObject
     {
+    public:
+        EE_CLASSNOCOPY( RHIDevice )
+
     protected:
         RHIDevice() {}
-    public:
-        virtual ~RHIDevice() {};
+        virtual ~RHIDevice() = default;
 
+    public:
         virtual RHIQueue* GetGraphicsQueue() const = 0;
 
         virtual RHIQueue* GetPresentQueue() const = 0;
@@ -230,16 +269,33 @@ namespace EE
     struct RHIBufferCreateInfo
     {
         uint64 size = 0;
-        EBufferUsageFlags usages = BufferUsage_None;
+        EBufferUsageFlags usage = BufferUsage_None;
         ESharingMode sharing = SharingMode_Default;
     };
 
     class RHIBuffer : public RHIResource
     {
+    public:
+        EE_CLASSNOCOPY( RHIBuffer )
+
     protected:
         RHIBuffer() {}
+        virtual ~RHIBuffer() = default;
+
     public:
-        virtual ~RHIBuffer() {};
+        virtual uint64 GetSize() const = 0;
+
+        virtual void UploadData( void* data, size_t offset, size_t size ) const = 0;
+    };
+
+    class RHIVertexBuffer : public RHIResource
+    {
+    public:
+        EE_CLASSNOCOPY( RHIVertexBuffer )
+
+    protected:
+        RHIVertexBuffer() {}
+        virtual ~RHIVertexBuffer() = 0;
     };
 
     struct RHISamplerCreateInfo
@@ -258,19 +314,24 @@ namespace EE
 
     class RHISampler : public RHIObject
     {
+    public:
+        EE_CLASSNOCOPY( RHISampler )
+
     protected:
         RHISampler() {}
-    public:
-        virtual ~RHISampler() {};
+        virtual ~RHISampler() = default;
     };
 
     class RHIRenderPass : public RHIObject
     {
+    public:
+        EE_CLASSNOCOPY( RHIRenderPass )
+
     protected:
         RHIRenderPass() {}
+        virtual ~RHIRenderPass() = default;
+    
     public:
-        virtual ~RHIRenderPass() {};
-
         virtual void SetAttachment( const RHITexture* texture ) = 0;
 
         virtual void SetDrawArea( const IntBox2& extent ) = 0;
@@ -302,19 +363,14 @@ namespace EE
         ETextureLayout textureLayout = TextureLayout_Undefined;
     };
 
-    class RHIRenderSubpassDescription
+    struct RHIRenderSubpassDescription
     {
-    public:
         TArray<RHIAttachmentReference> colorAttachmentReferences;
         TArray<RHIAttachmentReference> inputAttachmentReferences;
         RHIAttachmentReference depthAttachment;
         bool usingDepth;
 
     public:
-        RHIRenderSubpassDescription();
-
-        ~RHIRenderSubpassDescription();
-
         void AddInputAttachment( uint32 atachmentIndex );
 
         void AddColorAttachment( uint32 atachmentIndex, ETextureLayout layout );
@@ -322,20 +378,36 @@ namespace EE
         void AddDepthAttachment( uint32 atachmentIndex, ETextureLayout layout );
     };
 
-    class RHIRenderPassCreateInfo
+    struct RHIRenderPassCreateInfo
     {
     public:
         TArray<RHIRenderSubpassDescription> subpasses;
         TArray<RHIColorAttachmentDescription> attachments;
 
     public:
-        RHIRenderPassCreateInfo();
-
-        ~RHIRenderPassCreateInfo();
-
         void AddRenderSubpass( const RHIRenderSubpassDescription& subpass );
 
         void AddColorAttachment( const RHIColorAttachmentDescription& attachment );
+    };
+
+    struct RHIVertexAttribute
+    {
+        EVertexFormat format = VertexFormat_Unknown;
+        uint32 offset = 0;
+        Name semanticName;
+        uint8 semanticIndex;
+    };
+
+    struct RHIVertexBufferLayout
+    {
+        EVertexStepMode stepMode = VertexStepMode_Vertex;
+        uint32 stride = 0;
+        std::vector<RHIVertexAttribute> attributes;
+    };
+
+    struct RHIVertexState
+    {
+        TArray<RHIVertexBufferLayout> bufferLayouts;
     };
 
     struct RHIShaderStageAttachment
@@ -392,9 +464,8 @@ namespace EE
         RHIBlendComponent alphaBlend = RHIBlendComponent();
     };
 
-    class RHIGraphicsPipelineCreateInfo
+    struct RHIGraphicsPipelineCreateInfo
     {
-    public:
         RHIShaderStageAttachment vertexShader;
         RHIShaderStageAttachment fragmentShader;
         RHIShaderStageAttachment geometryShader;
@@ -404,13 +475,10 @@ namespace EE
         TArray<RHIColorAttachmentState> colorAttachments;
         RHIRenderPass* renderpass;
         uint32 subpassIndex;
+        RHIVertexState vertexState;
         RHIPrimitiveState primitiveState;
         
     public:
-        RHIGraphicsPipelineCreateInfo();
-
-        ~RHIGraphicsPipelineCreateInfo();
-
         void AddShaderStage( const RHIShaderStage* shaderStage );
 
         void AddColorAttachment( const RHIColorAttachmentState& state );
@@ -418,9 +486,11 @@ namespace EE
 
     class RHIGraphicsPipeline : public RHIObject
     {
+    public:
+        EE_CLASSNOCOPY( RHIGraphicsPipeline )
+
     protected:
         RHIGraphicsPipeline() {}
-    public:
-        virtual ~RHIGraphicsPipeline() {};
+        virtual ~RHIGraphicsPipeline() = default;
     };
 }

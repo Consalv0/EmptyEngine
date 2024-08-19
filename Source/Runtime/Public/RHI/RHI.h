@@ -12,8 +12,6 @@ namespace EE
     //* Base Render Hardware Interface
     class DynamicRHI
     {
-    protected:
-
     public:
         DynamicRHI();
         virtual ~DynamicRHI() = default;

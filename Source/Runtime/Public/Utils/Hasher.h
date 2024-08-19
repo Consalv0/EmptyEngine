@@ -8,8 +8,8 @@ namespace EE
 
 	template <typename T, typename... Rest>
 	inline void HashCombine(std::size_t& seed, const T& v, Rest... rest) {
-		std::hash<T> Hasher;
-		seed ^= Hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		std::hash<T> hasher;
+		seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 		HashCombine(seed, rest...);
 	}
 

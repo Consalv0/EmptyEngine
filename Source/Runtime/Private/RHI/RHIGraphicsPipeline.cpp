@@ -5,18 +5,6 @@
 
 namespace EE
 {
-    RHIRenderSubpassDescription::RHIRenderSubpassDescription()
-        : colorAttachmentReferences()
-        , inputAttachmentReferences()
-        , depthAttachment()
-        , usingDepth( false )
-    {
-    }
-
-    RHIRenderSubpassDescription::~RHIRenderSubpassDescription()
-    {
-    }
-    
     void RHIRenderSubpassDescription::AddInputAttachment( uint32 atachmentIndex )
     {
         inputAttachmentReferences.emplace_back( atachmentIndex, TextureLayout_Undefined );
@@ -33,16 +21,6 @@ namespace EE
         usingDepth = true;
     }
 
-    RHIRenderPassCreateInfo::RHIRenderPassCreateInfo()
-        : subpasses()
-        , attachments()
-    {
-    }
-
-    RHIRenderPassCreateInfo::~RHIRenderPassCreateInfo()
-    {
-    }
-
     void RHIRenderPassCreateInfo::AddRenderSubpass( const RHIRenderSubpassDescription& subpass )
     {
         subpasses.emplace_back( subpass );
@@ -51,23 +29,6 @@ namespace EE
     void RHIRenderPassCreateInfo::AddColorAttachment( const RHIColorAttachmentDescription& attachment )
     {
         attachments.emplace_back( attachment );
-    }
-
-    RHIGraphicsPipelineCreateInfo::RHIGraphicsPipelineCreateInfo()
-        : vertexShader()
-        , fragmentShader()
-        , geometryShader()
-        , domainShader()
-        , hullShader()
-        , primitiveState()
-        , colorAttachments()
-        , renderpass( NULL )
-        , subpassIndex( 0 )
-    {
-    }
-
-    RHIGraphicsPipelineCreateInfo::~RHIGraphicsPipelineCreateInfo()
-    {
     }
 
     void RHIGraphicsPipelineCreateInfo::AddShaderStage( const RHIShaderStage* shaderStage )

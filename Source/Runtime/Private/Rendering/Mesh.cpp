@@ -69,8 +69,8 @@ namespace EE
         Clear(); data = newData;
     }
 
-    bool Mesh::SetUpBuffers()
-    {
+    // bool Mesh::SetUpBuffers()
+    // {
         // if ( data.staticVertices.size() <= 0 || data.faces.size() <= 0 ) return false;
         // 
         // static BufferLayout DafultLayout = {
@@ -96,18 +96,17 @@ namespace EE
         // vertexArrayPointer->AddIndexBuffer( IndexBufferPointer );
         // vertexArrayPointer->Unbind();
         // 
-        return true;
-    }
+    //     return true;
+    // }
 
-    void Mesh::ClearBuffers()
-    {
-        // vertexArrayPointer = NULL;
-    }
+    // void Mesh::ClearBuffers()
+    // {
+    //     // vertexArrayPointer = NULL;
+    // }
 
     void Mesh::Clear()
     {
         data.Clear();
-        ClearBuffers();
     }
 
     void MeshData::Transfer( MeshData& other )

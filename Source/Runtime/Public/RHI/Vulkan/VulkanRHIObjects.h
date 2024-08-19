@@ -18,6 +18,9 @@ namespace EE
 
     class VulkanRHIPhysicalDevice
     {
+    public:
+        EE_CLASSNOCOPY( VulkanRHIPhysicalDevice )
+
     private:
         VkInstance instance;
         VkPhysicalDevice physicalDevice;
@@ -60,17 +63,20 @@ namespace EE
 
     class VulkanRHIInstance : RHIInstance
     {
+    public:
+        EE_CLASSNOCOPY( VulkanRHIInstance )
+
     private:
         VkInstance instance;
 
         uint32 physicalDeviceCount;
-        TArray<VulkanRHIPhysicalDevice> physicalDevices;
+        TArray<VulkanRHIPhysicalDevice*> physicalDevices;
         uint32 selectedDeviceIndex;
 
     public:
         VulkanRHIInstance( VkInstanceCreateInfo& createInfo );
 
-        ~VulkanRHIInstance();
+        ~VulkanRHIInstance() override;
 
         int32 PickPhysicalDeviceForSurface( VulkanRHISurface* surface ) const;
 
@@ -84,18 +90,21 @@ namespace EE
         bool IsValid() const;
 
         FORCEINLINE const uint32& GetPhysicalDeviceCount() const { return physicalDeviceCount; }
-        FORCEINLINE const VulkanRHIPhysicalDevice& GetPhysicalDevice( uint32& index ) const { return physicalDevices[ index ]; }
+        FORCEINLINE const VulkanRHIPhysicalDevice& GetPhysicalDevice( uint32& index ) const { return *physicalDevices[ index ]; }
         FORCEINLINE const VkInstance& GetVulkanInstance() const { return instance; };
     };
 
     class VulkanRHIQueue : public RHIQueue
     {
+    public:
+        EE_CLASSNOCOPY( VulkanRHIQueue )
+
     private:
         VkQueue queue;
         const VulkanRHIDevice* device;
 
     public:
-        ~VulkanRHIQueue();
+        ~VulkanRHIQueue() override;
 
         VulkanRHIQueue( const VulkanRHIDevice* device, const uint32& familyIndex, const uint32& queueIndex );
 
@@ -110,6 +119,9 @@ namespace EE
 
     class VulkanRHIDevice : public RHIDevice
     {
+    public:
+        EE_CLASSNOCOPY( VulkanRHIDevice )
+
     private:
         uint32 physicalDeviceIndex;
         VulkanRHIPhysicalDevice* physicalDevice;
@@ -153,7 +165,7 @@ namespace EE
 
         const VulkanRHICommandPool* GetCommandPool( uint32 familyIndex ) const;
 
-        ~VulkanRHIDevice();
+        ~VulkanRHIDevice() override;
 
         VulkanRHIDevice( VulkanRHIInstance* instance );
 
@@ -166,6 +178,9 @@ namespace EE
 
     class VulkanRHIPresentContext : public RHIPresentContext
     {
+    public:
+        EE_CLASSNOCOPY( VulkanRHIPresentContext )
+
     private:
         VulkanRHIInstance* instance;
         //* The window this context is for
@@ -191,15 +206,14 @@ namespace EE
         void CreateSyncObjects();
 
     public:
+        VulkanRHIPresentContext( Window* window, VulkanRHIInstance* instance );
+        ~VulkanRHIPresentContext() override;
+
         FORCEINLINE VulkanRHISurface* GetRHISurface() { return surface; }
         FORCEINLINE const VulkanRHISurface* GetRHISurface() const { return surface; }
         FORCEINLINE VulkanRHISwapChain* GetRHISwapChain() { return swapChain; }
         FORCEINLINE const VulkanRHISwapChain* GetRHISwapChain() const { return swapChain; }
         FORCEINLINE const Window* GetWindow() const { return window; }
-
-        ~VulkanRHIPresentContext();
-
-        VulkanRHIPresentContext( Window* window, VulkanRHIInstance* instance );
 
         void GetSurfaceColorFormat( bool hdr, EPixelFormat* outFormat, EColorSpace* outColorSpace ) const;
 
@@ -232,20 +246,42 @@ namespace EE
 
     class VulkanRHIBuffer : public RHIBuffer
     {
+    public:
+        EE_CLASSNOCOPY( VulkanRHIBuffer )
+
     private:
         VulkanRHIDevice* device;
         VkBuffer buffer;
         VmaAllocation nativeAllocation;
-        EBufferUsageFlags usages;
+        EBufferUsageFlags usage;
+        ESharingMode sharing;
+        uint64 size;
 
     public:
-        ~VulkanRHIBuffer();
+        VulkanRHIBuffer( const RHIBufferCreateInfo& info, VulkanRHIDevice* device );
+        ~VulkanRHIBuffer() override;
 
-        VulkanRHIBuffer( RHIBufferCreateInfo& info, VulkanRHIDevice* device );
+        bool IsValid() const override;
+
+        uint64 GetSize() const override;
+
+        void UploadData( void* data, size_t offset, size_t size ) const override;
+
+        void BindBuffer() const;
+
+        const VkBuffer& GetVulkanBuffer() const { return buffer; };
+    };
+
+    class VulkanRHIVertexBuffer : public VulkanRHIBuffer
+    {
+
     };
 
     class VulkanRHITexture : public RHITexture
     {
+    public:
+        EE_CLASSNOCOPY( VulkanRHITexture )
+
     private:
         VulkanRHIDevice* device;
         VkSampler sampler;
@@ -263,7 +299,7 @@ namespace EE
 
         VulkanRHITexture( const RHITextureCreateInfo& info, VulkanRHIDevice* device );
 
-        ~VulkanRHITexture();
+        ~VulkanRHITexture() override;
 
         void CleanImageView() const;
 
@@ -280,6 +316,9 @@ namespace EE
 
     class VulkanRHISwapChain : public RHISwapChain
     {
+    public:
+        EE_CLASSNOCOPY( VulkanRHISwapChain )
+
     private:
         VulkanRHIDevice* device;
         const VulkanRHIPresentContext* presentContext;
@@ -295,7 +334,7 @@ namespace EE
 
         VulkanRHISwapChain( const RHISwapChainCreateInfo& info, const VulkanRHIPresentContext* presentContext, VulkanRHIDevice* device );
 
-        ~VulkanRHISwapChain();
+        ~VulkanRHISwapChain() override;
 
         void Cleanup();
 
@@ -316,14 +355,16 @@ namespace EE
 
     class VulkanRHISurface : public RHISurface
     {
+    public:
+        EE_CLASSNOCOPY( VulkanRHISurface )
+
     private:
         VulkanRHIInstance* instance;
         VkSurfaceKHR surface;
 
     public:
-        ~VulkanRHISurface();
-
         VulkanRHISurface( Window* window, VulkanRHIInstance* instance );
+        ~VulkanRHISurface() override;
 
     public:
         FORCEINLINE const VkSurfaceKHR GetVulkanSurface() const { return surface; }
@@ -333,6 +374,9 @@ namespace EE
 
     class VulkanRHIFence : public RHIFence
     {
+    public:
+        EE_CLASSNOCOPY( VulkanRHIFence )
+
     private:
         VulkanRHIDevice* device;
         VkFence fence;
@@ -352,6 +396,9 @@ namespace EE
 
     class VulkanRHISemaphore : public RHISemaphore
     {
+    public:
+        EE_CLASSNOCOPY( VulkanRHISemaphore )
+
     private:
         VulkanRHIDevice* device;
         VkSemaphore semaphore;
@@ -369,17 +416,21 @@ namespace EE
     // You can allocate as many VkCommandBuffer as you want from a given pool,
     // but you can only record commands from one thread at a time.
     // If you want multithreaded command recording, you need more VkCommandPool objects.
-    class VulkanRHICommandPool
+    class VulkanRHICommandPool : public RHIResource
     {
+    public:
+        EE_CLASSNOCOPY( VulkanRHICommandPool )
+
     private:
         VulkanRHIDevice* device;
         uint32 queueFamilyIndex;
         VkCommandPool commandPool;
 
     public:
-        ~VulkanRHICommandPool();
-
         VulkanRHICommandPool( VulkanRHIDevice* device, uint32 queueFamilyIndex );
+        ~VulkanRHICommandPool() override;
+
+        bool IsValid() const override;
 
         FORCEINLINE const VkCommandPool& GetVulkanCommandPool() const { return commandPool; }
 
@@ -387,13 +438,16 @@ namespace EE
 
     class VulkanRHICommandBuffer : public RHICommandBuffer
     {
+    public:
+        EE_CLASSNOCOPY( VulkanRHICommandBuffer )
+
     private:
         VulkanRHIDevice* device;
         uint32 queueFamilyIndex;
         VkCommandBuffer commandBuffer;
 
     public:
-        ~VulkanRHICommandBuffer();
+        ~VulkanRHICommandBuffer() override;
 
         VulkanRHICommandBuffer( const RHICommandBufferCreateInfo& info, VulkanRHIDevice* device, uint32 queueFamilyIndex );
 
@@ -407,6 +461,10 @@ namespace EE
 
         void BindGraphicsPipeline( const RHIGraphicsPipeline* pipeline ) const override;
 
+        void BindVertexBuffer( const class RHIBuffer* buffer ) const override;
+
+        void BindIndexBuffer( const class RHIBuffer* buffer ) const override;
+
         void SetCullMode( const ECullModeFlags& cull ) const override;
 
         void SetFrontFace( const EFaceWinding& frontFace ) const override;
@@ -418,12 +476,17 @@ namespace EE
         void TransitionTexture( const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer, const ETextureLayout from, const ETextureLayout to ) const override;
 
         void ClearColor( Vector3f color, const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer ) const override;
+        
+        void DrawIndexed( uint32 indexCount, uint32 instanceCount, uint32 firstIndex, uint32 vertexOffset, uint32 firstInstance ) const override;
 
         void Draw( uint32 vertexCount, uint32 instanceCount, uint32 firstVertex, uint32 firstInstance ) const override;
     };
 
     class VulkanRHIShaderStage : public RHIShaderStage
     {
+    public:
+        EE_CLASSNOCOPY( VulkanRHIShaderStage )
+
     private:
         VulkanRHIDevice* device;
 
@@ -432,7 +495,7 @@ namespace EE
         VkShaderModule shaderModule;
 
     public:
-        ~VulkanRHIShaderStage();
+        ~VulkanRHIShaderStage() override;
 
         VulkanRHIShaderStage( const RHIShaderStageCreateInfo& info, VulkanRHIDevice* device );
 
@@ -445,6 +508,9 @@ namespace EE
 
     class VulkanRHIRenderPass : public RHIRenderPass
     {
+    public:
+        EE_CLASSNOCOPY( VulkanRHIRenderPass )
+
     private:
         VkRenderPass renderPass;
 
@@ -461,7 +527,7 @@ namespace EE
     public:
         VulkanRHIRenderPass( const RHIRenderPassCreateInfo& info, VulkanRHIDevice* device );
 
-        ~VulkanRHIRenderPass();
+        ~VulkanRHIRenderPass() override;
 
         void SetAttachment( const RHITexture* texture ) override;
 
@@ -480,6 +546,9 @@ namespace EE
 
     class VulkanRHIGraphicsPipeline : public RHIGraphicsPipeline
     {
+    public:
+        EE_CLASSNOCOPY( VulkanRHIGraphicsPipeline )
+
     private:
         VkPipelineLayout pipelineLayout;
 
@@ -490,7 +559,7 @@ namespace EE
     public:
         VulkanRHIGraphicsPipeline( const RHIGraphicsPipelineCreateInfo& info, VulkanRHIDevice* device );
 
-        ~VulkanRHIGraphicsPipeline();
+        ~VulkanRHIGraphicsPipeline() override;
 
         bool IsValid() const;
 
