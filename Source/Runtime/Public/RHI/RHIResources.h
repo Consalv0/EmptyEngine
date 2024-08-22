@@ -32,6 +32,8 @@ namespace EE
 
     protected:
         RHISurface() {};
+
+    public:
         virtual ~RHISurface() = default;
     };
 
@@ -63,9 +65,10 @@ namespace EE
 
     protected:
         RHITexture() {}
-        virtual ~RHITexture() = default;
 
     public:
+        virtual ~RHITexture() = default;
+
         virtual const UIntVector3& GetExtents() const = 0;
 
         virtual const EPixelFormat& GetFormat() const = 0;
@@ -78,11 +81,14 @@ namespace EE
 
     protected:
         RHIFence() {};
-        virtual ~RHIFence() = default;
 
     public:
+        virtual ~RHIFence() = default;
+
         virtual bool IsSignaled() const = 0;
+
         virtual void Reset() const = 0;
+
         virtual void Wait( uint64 timeout ) const = 0;
     };
 
@@ -93,6 +99,8 @@ namespace EE
 
     protected:
         RHISemaphore() {}
+
+    public:
         virtual ~RHISemaphore() = default;
     };
 
@@ -114,6 +122,8 @@ namespace EE
 
     protected:
         RHISwapChain() {};
+
+    public:
         virtual ~RHISwapChain() = default;
     };
 
@@ -124,12 +134,14 @@ namespace EE
 
     protected:
         RHIInstance() {}
+
+    public:
         virtual ~RHIInstance() = default;
     };
 
     struct RHIShaderStageCreateInfo
     {
-        EShaderStage stage;
+        EShaderStageFlagsBit stage;
         EShaderFormat format;
         size_t codeLength;
         const void* code;
@@ -142,14 +154,15 @@ namespace EE
         EE_CLASSNOCOPY( RHIShaderStage )
     
     public:
-        EShaderStage stage = ShaderStage_Unknown;
+        EShaderStageFlagsBit stage = ShaderStage_Unknown;
 
     protected:
-        RHIShaderStage( EShaderStage stage ) : stage( stage ) {}
-        virtual ~RHIShaderStage() = default;
+        RHIShaderStage( EShaderStageFlagsBit stage ) : stage( stage ) {}
 
     public:
-        FORCEINLINE const EShaderStage& GetStage() const { return stage; }
+        virtual ~RHIShaderStage() = default;
+
+        FORCEINLINE const EShaderStageFlagsBit& GetStage() const { return stage; }
 
         virtual const NChar* GetEntryPoint() const = 0;
     };
@@ -165,14 +178,17 @@ namespace EE
 
     protected:
         RHICommandBuffer() {};
-        virtual ~RHICommandBuffer() = default;
 
     public:
+        virtual ~RHICommandBuffer() = default;
+
         virtual void Begin() const = 0;
 
         virtual void End() const = 0;
 
         virtual void BindGraphicsPipeline( const class RHIGraphicsPipeline* pipeline ) const = 0;
+
+        virtual void BindBindGroup( const RHIGraphicsPipeline* pipeline, const class RHIBindGroup* bindGroup ) const = 0;
 
         virtual void BindVertexBuffer( const class RHIBuffer* buffer ) const = 0;
 
@@ -205,9 +221,10 @@ namespace EE
 
     protected:
         RHIPresentContext() : currentFrameIndex( 0 ) {};
-        virtual ~RHIPresentContext() = default;
 
     public:
+        virtual ~RHIPresentContext() = default;
+
         virtual const RHITexture* GetBackbuffer() const = 0;
 
         virtual void SubmitRenderCommandBuffer( EPipelineStage stage ) const = 0;
@@ -245,9 +262,10 @@ namespace EE
 
     protected:
         RHIQueue() {};
-        virtual ~RHIQueue() = default;
 
     public:
+        virtual ~RHIQueue() = default;
+
         virtual void SubmitCommandBuffer( const RHICommandBuffer* commandBuffer, const RHIQueueSubmitInfo& info ) = 0;
     };
 
@@ -258,9 +276,10 @@ namespace EE
 
     protected:
         RHIDevice() {}
-        virtual ~RHIDevice() = default;
 
     public:
+        virtual ~RHIDevice() = default;
+
         virtual RHIQueue* GetGraphicsQueue() const = 0;
 
         virtual RHIQueue* GetPresentQueue() const = 0;
@@ -269,6 +288,7 @@ namespace EE
     struct RHIBufferCreateInfo
     {
         uint64 size = 0;
+        uint64 offset = 0;
         EBufferUsageFlags usage = BufferUsage_None;
         ESharingMode sharing = SharingMode_Default;
     };
@@ -280,10 +300,13 @@ namespace EE
 
     protected:
         RHIBuffer() {}
-        virtual ~RHIBuffer() = default;
 
     public:
+        virtual ~RHIBuffer() = default;
+
         virtual uint64 GetSize() const = 0;
+        
+        virtual uint64 GetOffset() const = 0;
 
         virtual void UploadData( void* data, size_t offset, size_t size ) const = 0;
     };
@@ -295,6 +318,8 @@ namespace EE
 
     protected:
         RHIVertexBuffer() {}
+
+    public:
         virtual ~RHIVertexBuffer() = 0;
     };
 
@@ -312,26 +337,29 @@ namespace EE
         float maxLOD = FLT_MAX;
     };
 
-    class RHISampler : public RHIObject
+    class RHISampler : public RHIResource
     {
     public:
         EE_CLASSNOCOPY( RHISampler )
 
     protected:
         RHISampler() {}
+
+    public:
         virtual ~RHISampler() = default;
     };
 
-    class RHIRenderPass : public RHIObject
+    class RHIRenderPass : public RHIResource
     {
     public:
         EE_CLASSNOCOPY( RHIRenderPass )
 
     protected:
         RHIRenderPass() {}
-        virtual ~RHIRenderPass() = default;
     
     public:
+        virtual ~RHIRenderPass() = default;
+
         virtual void SetAttachment( const RHITexture* texture ) = 0;
 
         virtual void SetDrawArea( const IntBox2& extent ) = 0;
@@ -341,6 +369,49 @@ namespace EE
         virtual void BeginRenderPass( const RHICommandBuffer* cmd ) = 0;
 
         virtual void EndRenderPass( const RHICommandBuffer* cmd ) = 0;
+    };
+
+    struct RHIResourceBinding
+    {
+        uint8 index;
+        EBindingType type;
+        const RHIResource* resource;
+        EShaderStageFlags shaderVisibility;
+    };
+
+    struct RHIBindGroupCreateInfo
+    {
+        uint8 layoutIndex;
+        TArray<RHIResourceBinding> bindings;
+
+    public:
+        void AddResourceBinding( uint8 index, EBindingType binding, const RHIResource* resource, EShaderStageFlags shaderVisibility );
+    };
+
+    class RHIBindLayout : public RHIObject
+    {
+    public:
+        EE_CLASSNOCOPY( RHIBindLayout )
+
+    protected:
+        RHIBindLayout() {}
+
+    public:
+        virtual ~RHIBindLayout() = default;
+    };
+
+    class RHIBindGroup : public RHIResource
+    {
+    public:
+        EE_CLASSNOCOPY( RHIBindGroup )
+
+    protected:
+        RHIBindGroup() {}
+
+    public:
+        virtual ~RHIBindGroup() = default;
+
+        virtual const RHIBindLayout* GetBindLayout() const = 0;
     };
 
     struct RHIColorAttachmentDescription
@@ -402,7 +473,7 @@ namespace EE
     {
         EVertexStepMode stepMode = VertexStepMode_Vertex;
         uint32 stride = 0;
-        std::vector<RHIVertexAttribute> attributes;
+        TArray<RHIVertexAttribute> attributes;
     };
 
     struct RHIVertexState
@@ -473,6 +544,7 @@ namespace EE
         RHIShaderStageAttachment hullShader;
 
         TArray<RHIColorAttachmentState> colorAttachments;
+        TArray<const RHIBindLayout*> bindLayouts;
         RHIRenderPass* renderpass;
         uint32 subpassIndex;
         RHIVertexState vertexState;
@@ -482,6 +554,8 @@ namespace EE
         void AddShaderStage( const RHIShaderStage* shaderStage );
 
         void AddColorAttachment( const RHIColorAttachmentState& state );
+        
+        void AddBindLayout( const RHIBindLayout* bindLayout );
     };
 
     class RHIGraphicsPipeline : public RHIObject
@@ -491,6 +565,8 @@ namespace EE
 
     protected:
         RHIGraphicsPipeline() {}
+
+    public:
         virtual ~RHIGraphicsPipeline() = default;
     };
 }

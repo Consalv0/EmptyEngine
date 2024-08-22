@@ -12,6 +12,7 @@ namespace EE
     struct MathConstants<float>
     {
         static constexpr float Pi = 3.1415926535897932F;
+        static constexpr float Tau = 6.2831853071795864F;
         static constexpr float TendencyZero = 1e-6F;
         static constexpr float Epsilon = FLT_EPSILON;
         static constexpr float MaxValue = FLT_MAX;
@@ -29,6 +30,7 @@ namespace EE
     struct MathConstants<double>
     {
         static constexpr double Pi = 3.1415926535897932384626433832795;
+        static constexpr double Tau = 6.2831853071795864769252867665590;
         static constexpr double TendencyZero = 1e-08;
         static constexpr double Epsilon = DBL_EPSILON;
         static constexpr double MaxValue = DBL_MAX;

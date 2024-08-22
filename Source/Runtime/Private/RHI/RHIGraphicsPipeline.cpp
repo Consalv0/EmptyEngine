@@ -5,6 +5,11 @@
 
 namespace EE
 {
+    void RHIBindGroupCreateInfo::AddResourceBinding( uint8 index, EBindingType binding, const RHIResource* resource, EShaderStageFlags shaderVisibility )
+    {
+        bindings.emplace_back( index, binding, resource, shaderVisibility );
+    }
+
     void RHIRenderSubpassDescription::AddInputAttachment( uint32 atachmentIndex )
     {
         inputAttachmentReferences.emplace_back( atachmentIndex, TextureLayout_Undefined );
@@ -35,9 +40,9 @@ namespace EE
     {
         switch ( shaderStage->GetStage() )
         {
-        case ShaderStage_Vertex:      vertexShader.shaderStage = shaderStage; break;
-        case ShaderStage_Fragment:  fragmentShader.shaderStage = shaderStage; break;
-        case ShaderStage_Geometry:  geometryShader.shaderStage = shaderStage; break;
+        case ShaderStage_Vertex_Bit:      vertexShader.shaderStage = shaderStage; break;
+        case ShaderStage_Fragment_Bit:  fragmentShader.shaderStage = shaderStage; break;
+        case ShaderStage_Geometry_Bit:  geometryShader.shaderStage = shaderStage; break;
         default:
             break;
         }
@@ -46,5 +51,10 @@ namespace EE
     void RHIGraphicsPipelineCreateInfo::AddColorAttachment( const RHIColorAttachmentState& state )
     {
         colorAttachments.emplace_back( state );
+    }
+
+    void RHIGraphicsPipelineCreateInfo::AddBindLayout( const RHIBindLayout* bindLayout )
+    {
+        bindLayouts.emplace_back( bindLayout );
     }
 }

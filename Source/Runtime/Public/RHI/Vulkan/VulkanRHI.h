@@ -22,6 +22,7 @@ namespace EE
         RHITexture* CreateRHITexture( const RHITextureCreateInfo& info ) const;
         RHISampler* CreateRHISampler( const RHISamplerCreateInfo& info ) const;
         RHIShaderStage* CreateRHIShaderStage( const RHIShaderStageCreateInfo& info ) const;
+        RHIBindGroup* CreateRHIBindGroup( const RHIBindGroupCreateInfo& info ) const;
         RHIRenderPass* CreateRHIRenderPass( const RHIRenderPassCreateInfo& info ) const;
         RHIGraphicsPipeline* CreateRHIGraphicsPipeline( const RHIGraphicsPipelineCreateInfo& info ) const;
 

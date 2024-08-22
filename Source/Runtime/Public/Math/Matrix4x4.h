@@ -68,7 +68,11 @@ namespace EE
             HOST_DEVICE FORCEINLINE TMatrix4x4 operator/( const T& value ) const;
 
             template<typename R>
-            explicit TMatrix4x4<T>( const TMatrix4x4<R>& other ) : TMatrix4x4<T>( m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33 ) {}
+            explicit TMatrix4x4<T>( const TMatrix4x4<R>& other ) : TMatrix4x4<T>( 
+                T( other.m00 ), T( other.m01 ), T( other.m02 ), T( other.m03 ),
+                T( other.m10 ), T( other.m11 ), T( other.m12 ), T( other.m13 ),
+                T( other.m20 ), T( other.m21 ), T( other.m22 ), T( other.m23 ),
+                T( other.m30 ), T( other.m31 ), T( other.m32 ), T( other.m33 ) ) {}
         };
     }
 }

@@ -49,9 +49,9 @@ namespace EE::Math
     template <typename T>
 	TMatrix4x4<T> TTransform<T>::GetViewMatrix() const
 	{
-		TVector3<T> const forward( rotation * TVector3<T>( T(0), T(0), T(1) ) );
-		TVector3<T> const side( forward.Cross( rotation * TVector3<T>( T(0), T(1) ) ) );
-		TVector3<T> const upper( side.Cross( forward ) );
+		const TVector3<T> forward( rotation * TVector3<T>( T(0), T(0), T(1) ) );
+		const TVector3<T> side( forward.Cross( rotation * TVector3<T>( T(0), T(1) ) ) );
+		const TVector3<T> upper( side.Cross( forward ) );
 		
 		return TMatrix4x4<T>
 		(

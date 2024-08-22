@@ -63,14 +63,15 @@ namespace EE
 
     void GameEngine::Terminate()
     {
-        delete GPlatformDevice;
-        delete GInput;
-        delete GMainApplication;
         for ( uint64 i = 0; i < windowCount; i++ )
         {
             delete windows[ i ];
         }
         windowCount = 0;
+
+        delete GPlatformDevice;
+        delete GInput;
+        delete GMainApplication;
 
         SDL_Quit();
     }

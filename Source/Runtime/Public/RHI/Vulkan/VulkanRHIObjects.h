@@ -15,6 +15,7 @@ namespace EE
     class VulkanRHICommandPool;
     class VulkanRHICommandBuffer;
     class VulkanRHIShaderStage;
+    class VulkanRHIBindGroup;
 
     class VulkanRHIPhysicalDevice
     {
@@ -256,6 +257,7 @@ namespace EE
         EBufferUsageFlags usage;
         ESharingMode sharing;
         uint64 size;
+        uint64 offset;
 
     public:
         VulkanRHIBuffer( const RHIBufferCreateInfo& info, VulkanRHIDevice* device );
@@ -264,6 +266,8 @@ namespace EE
         bool IsValid() const override;
 
         uint64 GetSize() const override;
+
+        uint64 GetOffset() const override;
 
         void UploadData( void* data, size_t offset, size_t size ) const override;
 
@@ -461,6 +465,8 @@ namespace EE
 
         void BindGraphicsPipeline( const RHIGraphicsPipeline* pipeline ) const override;
 
+        void BindBindGroup( const RHIGraphicsPipeline* pipeline, const class RHIBindGroup* bindGroup ) const override;
+
         void BindVertexBuffer( const class RHIBuffer* buffer ) const override;
 
         void BindIndexBuffer( const class RHIBuffer* buffer ) const override;
@@ -544,12 +550,63 @@ namespace EE
         FORCEINLINE VkRenderPass GetVulkanRenderPass() const { return renderPass; }
     };
 
+    class VulkanRHIBindLayout : public RHIBindLayout
+    {
+    public:
+        EE_CLASSNOCOPY( VulkanRHIBindLayout )
+
+    private:
+        VulkanRHIDevice* device;
+
+        VkDescriptorSetLayout descriptorSetLayout;
+
+    public:
+        VulkanRHIBindLayout( const RHIBindGroupCreateInfo& info, VulkanRHIDevice* device );
+
+        ~VulkanRHIBindLayout() override;
+
+        bool IsValid() const override;
+
+        FORCEINLINE const VkDescriptorSetLayout& GetVulkanDescriptorSetLayout() const { return descriptorSetLayout; }
+    };
+
+    class VulkanRHIBindGroup : public RHIBindGroup
+    {
+    public:
+        EE_CLASSNOCOPY( VulkanRHIBindGroup )
+
+    private:
+        VulkanRHIDevice* device;
+
+        VulkanRHIBindLayout bindLayout;
+
+        VkDescriptorSet descriptorSet;
+
+        VkDescriptorPool pool;
+
+    private:
+        const void CreateDescriptorPool( const RHIBindGroupCreateInfo& info );
+
+    public:
+        VulkanRHIBindGroup( const RHIBindGroupCreateInfo& info, VulkanRHIDevice* device );
+
+        ~VulkanRHIBindGroup() override;
+
+        bool IsValid() const override;
+
+        const RHIBindLayout* GetBindLayout() const override;
+
+        FORCEINLINE const VkDescriptorSet& GetVulkanDescriptorSet() const { return descriptorSet; }
+    };
+
     class VulkanRHIGraphicsPipeline : public RHIGraphicsPipeline
     {
     public:
         EE_CLASSNOCOPY( VulkanRHIGraphicsPipeline )
 
     private:
+        TArray<VkDescriptorSetLayout> descriptorSetLayouts;
+
         VkPipelineLayout pipelineLayout;
 
         VkPipeline pipeline;
@@ -564,5 +621,6 @@ namespace EE
         bool IsValid() const;
 
         FORCEINLINE VkPipeline GetVulkanPipeline() const { return pipeline; }
+        FORCEINLINE VkPipelineLayout GetVulkanPipelineLayout() const { return pipelineLayout; }
     };
 }

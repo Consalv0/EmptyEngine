@@ -41,16 +41,25 @@ namespace EE
         Cubemap_Down
     };
 
-    enum EShaderStage
+    enum EBindingType
     {
-        ShaderStage_Unknown,
-        ShaderStage_Vertex,
-        ShaderStage_Fragment,
-        ShaderStage_Geometry,
-        ShaderStage_Compute,
-        ShaderStage_Tesselation,
-        ShaderStage_TesselationEval,
+        BindingType_Uniform,
+        BindingType_Storage,
+        BindingType_Sampler,
+        BindingType_Texture,
+        BindingType_TextureStorage
     };
+
+    enum EShaderStageFlagsBit
+    {
+        ShaderStage_Unknown =           0,
+        ShaderStage_Vertex_Bit =        1 << 0,
+        ShaderStage_Fragment_Bit =      1 << 1,
+        ShaderStage_Geometry_Bit =      1 << 2,
+        ShaderStage_Compute_Bit =       1 << 3,
+        ShaderStage_Tesselation_Bit =   1 << 4,
+    };
+    typedef uint32 EShaderStageFlags;
 
     enum EShaderFormat
     {
@@ -129,8 +138,8 @@ namespace EE
         BufferUsage_None =                  0,
         BufferUsage_SourceCopy_Bit =        1 << 1,
         BufferUsage_StreamOutput_Bit =      1 << 2,
-        BufferUsage_MapWite_Bit =          1 << 3,
-        BufferUsage_MapRead_Bit =          1 << 4,
+        BufferUsage_MapWite_Bit =           1 << 3,
+        BufferUsage_MapRead_Bit =           1 << 4,
         BufferUsage_Index_Bit =             1 << 5,
         BufferUsage_Vertex_Bit =            1 << 6,
         BufferUsage_Uniform_Bit =           1 << 7,
@@ -178,10 +187,10 @@ namespace EE
     
     enum ESampleCountFlagsBit
     {
-        SampleCount_1_Bit = 1 << 0,
-        SampleCount_2_Bit = 1 << 1,
-        SampleCount_4_Bit = 1 << 2,
-        SampleCount_8_Bit = 1 << 3,
+        SampleCount_1_Bit =  1 << 0,
+        SampleCount_2_Bit =  1 << 1,
+        SampleCount_4_Bit =  1 << 2,
+        SampleCount_8_Bit =  1 << 3,
         SampleCount_16_Bit = 1 << 4,
         SampleCount_32_Bit = 1 << 5,
         SampleCount_64_Bit = 1 << 6,

@@ -27,19 +27,29 @@ extern "C" {
 
 namespace EE
 {
-    static VkShaderStageFlagBits ConvertShaderStage( EShaderStage shaderStage )
+    static VkShaderStageFlagBits ConvertShaderStage( EShaderStageFlagsBit shaderStage )
     {
         switch ( shaderStage )
         {
-        case ShaderStage_Tesselation:       return VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
-        case ShaderStage_TesselationEval:   return VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
-        case ShaderStage_Vertex:            return VK_SHADER_STAGE_VERTEX_BIT;
-        case ShaderStage_Geometry:          return VK_SHADER_STAGE_GEOMETRY_BIT;
-        case ShaderStage_Fragment:          return VK_SHADER_STAGE_FRAGMENT_BIT;
-        case ShaderStage_Compute:           return VK_SHADER_STAGE_COMPUTE_BIT;
+        case ShaderStage_Tesselation_Bit:       return VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+        case ShaderStage_Vertex_Bit:            return VK_SHADER_STAGE_VERTEX_BIT;
+        case ShaderStage_Geometry_Bit:          return VK_SHADER_STAGE_GEOMETRY_BIT;
+        case ShaderStage_Fragment_Bit:          return VK_SHADER_STAGE_FRAGMENT_BIT;
+        case ShaderStage_Compute_Bit:           return VK_SHADER_STAGE_COMPUTE_BIT;
         default:
             return VK_SHADER_STAGE_ALL;
         }
+    }
+
+    static VkShaderStageFlags ConvertShaderStageFlags( EShaderStageFlags shaderStages )
+    {
+        VkShaderStageFlags flags = 0;
+        if ( shaderStages & ShaderStage_Tesselation_Bit )       flags |= VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+        if ( shaderStages & ShaderStage_Vertex_Bit )            flags |= VK_SHADER_STAGE_VERTEX_BIT;
+        if ( shaderStages & ShaderStage_Geometry_Bit )          flags |= VK_SHADER_STAGE_GEOMETRY_BIT;
+        if ( shaderStages & ShaderStage_Fragment_Bit )          flags |= VK_SHADER_STAGE_FRAGMENT_BIT;
+        if ( shaderStages & ShaderStage_Compute_Bit )           flags |= VK_SHADER_STAGE_COMPUTE_BIT;
+        return flags;
     }
 
     static VkSampleCountFlagBits ConvertSampleCountBits( ESampleCountFlagsBit samples )
@@ -799,6 +809,20 @@ namespace EE
         case BlendOperation_Max:                return VK_BLEND_OP_MAX;
         default:
             return VK_BLEND_OP_MAX_ENUM;
+        }
+    }
+
+    static VkDescriptorType ConvertDescriptorType( EBindingType type )
+    {
+        switch ( type )
+        {
+        case BindingType_Uniform:           return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        case BindingType_Storage:           return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        case BindingType_Sampler:           return VK_DESCRIPTOR_TYPE_SAMPLER;
+        case BindingType_Texture:           return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        case BindingType_TextureStorage:    return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        default:
+            return VK_DESCRIPTOR_TYPE_MAX_ENUM;
         }
     }
 
@@ -1624,6 +1648,7 @@ namespace EE
         , sharing( info.sharing )
         , buffer( VK_NULL_HANDLE )
         , size( info.size )
+        , offset( info.offset )
     {
         VkBufferCreateInfo bufferInfo = 
         {
@@ -1633,6 +1658,8 @@ namespace EE
             .size = size,
             .usage = ConvertBufferUsageFlags( usage ),
             .sharingMode = ConvertSharingMode( sharing ),
+            .queueFamilyIndexCount = 0,
+            .pQueueFamilyIndices = NULL,
         };
         
         VkResult createResult = vkCreateBuffer( device->GetVulkanDevice(), &bufferInfo, nullptr, &buffer );
@@ -1665,6 +1692,11 @@ namespace EE
     uint64 VulkanRHIBuffer::GetSize() const
     {
         return size;
+    }
+
+    uint64 VulkanRHIBuffer::GetOffset() const
+    {
+        return offset;
     }
 
     void VulkanRHIBuffer::UploadData( void* data, size_t offset, size_t size ) const
@@ -2187,6 +2219,13 @@ namespace EE
         vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetVulkanPipeline() );
     }
 
+    void VulkanRHICommandBuffer::BindBindGroup( const RHIGraphicsPipeline* pipeline, const RHIBindGroup* bindGroup ) const
+    {
+        const VulkanRHIBindGroup* vulkanBindGroup = static_cast<const VulkanRHIBindGroup*>( bindGroup );
+        const VulkanRHIGraphicsPipeline* vulkanPipeline = static_cast<const VulkanRHIGraphicsPipeline*>(pipeline);
+        vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetVulkanPipelineLayout(), 0, 1, &vulkanBindGroup->GetVulkanDescriptorSet(), 0, nullptr);
+    }
+
     void VulkanRHICommandBuffer::BindVertexBuffer( const RHIBuffer* buffer ) const
     {
         const VulkanRHIBuffer* vulkanBuffer = static_cast<const VulkanRHIBuffer*>( buffer );
@@ -2546,13 +2585,220 @@ namespace EE
         return renderPass != VK_NULL_HANDLE;
     }
 
+    VulkanRHIBindLayout::~VulkanRHIBindLayout()
+    {
+        vkDestroyDescriptorSetLayout( device->GetVulkanDevice(), descriptorSetLayout, NULL );
+    }
+
+    VulkanRHIBindLayout::VulkanRHIBindLayout( const RHIBindGroupCreateInfo& info, VulkanRHIDevice* device )
+        : device( device )
+        , descriptorSetLayout( VK_NULL_HANDLE )
+    {
+        uint32 bindingsCount = (uint32)info.bindings.size();
+        TArray<VkDescriptorSetLayoutBinding> bindings( bindingsCount );
+
+        for ( uint32 j = 0; j < bindingsCount; j++ )
+        {
+            const RHIResourceBinding& binding = info.bindings[ j ];
+
+            bindings[ j ] =
+                VkDescriptorSetLayoutBinding
+                {
+                    .binding = binding.index,
+                    .descriptorType = ConvertDescriptorType( binding.type ),
+                    .descriptorCount = 1,
+                    .stageFlags = ConvertShaderStageFlags( binding.shaderVisibility ),
+                    .pImmutableSamplers = NULL,
+                };
+        }
+
+        VkDescriptorSetLayoutCreateInfo descriptorInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0,
+            .bindingCount = bindingsCount,
+            .pBindings = bindings.data()
+        };
+
+        VkResult descriptorResult = vkCreateDescriptorSetLayout( device->GetVulkanDevice(), &descriptorInfo, NULL, &descriptorSetLayout );
+        if ( descriptorResult != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to create descriptor set layout {}", (int32)descriptorResult );
+        }
+    }
+
+    bool VulkanRHIBindLayout::IsValid() const
+    {
+        return descriptorSetLayout != VK_NULL_HANDLE;
+    }
+
+    VulkanRHIBindGroup::~VulkanRHIBindGroup()
+    {
+        // vkFreeDescriptorSets( device->GetVulkanDevice(), pool, 1, &descriptorSet );
+        vkDestroyDescriptorPool( device->GetVulkanDevice(), pool, NULL );
+    }
+
+    const void VulkanRHIBindGroup::CreateDescriptorPool( const RHIBindGroupCreateInfo& info )
+    {
+        const uint32 bindingCount = (uint32)info.bindings.size();
+
+        TArray<VkDescriptorPoolSize> poolSizes( bindingCount );
+        for ( uint32 i = 0; i < bindingCount; i++ )
+        {
+            const RHIResourceBinding& binding = info.bindings[ i ];
+
+            poolSizes[ i ].type = ConvertDescriptorType( binding.type );
+            poolSizes[ i ].descriptorCount = 1;
+        }
+
+        VkDescriptorPoolCreateInfo poolInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0,
+            .maxSets = 1,
+            .poolSizeCount = bindingCount,
+            .pPoolSizes = poolSizes.data()
+        };
+
+        VkResult result = vkCreateDescriptorPool( device->GetVulkanDevice(), &poolInfo, NULL, &pool );
+        if ( result != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to create descriptor set pool {}", (int32)result );
+        }
+    }
+
+    VulkanRHIBindGroup::VulkanRHIBindGroup( const RHIBindGroupCreateInfo& info, VulkanRHIDevice* device )
+        : bindLayout( info, device )
+        , device( device )
+        , descriptorSet( VK_NULL_HANDLE )
+        , pool ( VK_NULL_HANDLE )
+    {
+        CreateDescriptorPool( info );
+
+        VkDescriptorSetAllocateInfo allocInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+            .pNext = NULL,
+            .descriptorPool = pool,
+            .descriptorSetCount = 1,
+            .pSetLayouts = &bindLayout.GetVulkanDescriptorSetLayout()
+        };
+
+        VkResult allocateResult = vkAllocateDescriptorSets( device->GetVulkanDevice(), &allocInfo, &descriptorSet );
+        if ( allocateResult != VK_SUCCESS )
+        {
+            EE_LOG_CORE_CRITICAL( L"Failed to allocate descriptor set {}", (int32)allocateResult );
+        }
+
+        const uint32 bindingCount = (uint32)info.bindings.size();
+
+        TArray<VkWriteDescriptorSet> descriptorWrites( bindingCount );
+        TArray<VkDescriptorImageInfo> imageInfos;
+        TArray<VkDescriptorBufferInfo> bufferInfos;
+
+        uint32 imageInfosNum = 0;
+        uint32 bufferInfosNum = 0;
+        for ( uint32 i = 0; i < bindingCount; i++ )
+        {
+            const auto& binding = info.bindings[ i ];
+            if ( binding.type == BindingType_Uniform || binding.type == BindingType_Storage )
+            {
+                bufferInfosNum++;
+            }
+            else if ( binding.type == BindingType_Sampler || binding.type == BindingType_Texture || binding.type == BindingType_TextureStorage )
+            {
+                imageInfosNum++;
+            }
+        }
+        imageInfos.reserve( imageInfosNum );
+        bufferInfos.reserve( bufferInfosNum );
+
+        for ( uint32 i = 0; i < bindingCount; i++ )
+        {
+            const auto& binding = info.bindings[ i ];
+
+            VkWriteDescriptorSet writeDescriptorSet
+            {
+                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                .pNext = NULL,
+                .dstSet = descriptorSet,
+                .dstBinding = binding.index,
+                .dstArrayElement = 0,
+                .descriptorCount = 1,
+                .descriptorType = ConvertDescriptorType( binding.type )
+            };
+
+            if ( binding.type == BindingType_Uniform || binding.type == BindingType_Storage )
+            {
+                const VulkanRHIBuffer* vulkanBuffer = static_cast<const VulkanRHIBuffer*>( binding.resource );
+
+                VkDescriptorBufferInfo bufferInfo
+                {
+                    .buffer = vulkanBuffer->GetVulkanBuffer(),
+                    .offset = vulkanBuffer->GetOffset(),
+                    .range = vulkanBuffer->GetSize()
+                };
+                bufferInfos.emplace_back( bufferInfo );
+
+                writeDescriptorSet.pBufferInfo = &bufferInfos.back();
+            }
+            else if ( binding.type == BindingType_Sampler )
+            {
+            //     const auto* sampler = static_cast<VulkanSampler*>(std::get<Sampler*>( entry.entity ));
+            // 
+            //     imageInfos.emplace_back();
+            //     imageInfos.back().sampler = sampler->GetNative();
+            // 
+            //     writeDescriptorSet.pImageInfo = &imageInfos.back();
+            }
+            else if ( binding.type == BindingType_Texture || binding.type == BindingType_TextureStorage )
+            {
+            //    const auto* textureView = static_cast<VulkanTextureView*>(std::get<TextureView*>( entry.entity ));
+            //
+            //    imageInfos.emplace_back();
+            //    imageInfos.back().imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            //    imageInfos.back().imageView = textureView->GetNative();
+            //
+            //    writeDescriptorSet.pImageInfo = &imageInfos.back();
+            }
+
+            descriptorWrites[ i ] = writeDescriptorSet;
+        }
+
+        vkUpdateDescriptorSets( device->GetVulkanDevice(), bindingCount, descriptorWrites.data(), 0, NULL );
+    }
+
+    bool VulkanRHIBindGroup::IsValid() const
+    {
+        return descriptorSet != VK_NULL_HANDLE;
+    }
+
+    const RHIBindLayout* VulkanRHIBindGroup::GetBindLayout() const
+    {
+        return &bindLayout;
+    }
+
+    VulkanRHIGraphicsPipeline::~VulkanRHIGraphicsPipeline()
+    {
+        vkDestroyPipelineLayout( device->GetVulkanDevice(), pipelineLayout, NULL );
+        vkDestroyPipeline( device->GetVulkanDevice(), pipeline, NULL );
+
+        for ( size_t i = 0; i < descriptorSetLayouts.size(); i++ )
+        {
+            vkDestroyDescriptorSetLayout( device->GetVulkanDevice(), descriptorSetLayouts[ i ], NULL );
+        }
+    }
+
     VulkanRHIGraphicsPipeline::VulkanRHIGraphicsPipeline( const RHIGraphicsPipelineCreateInfo& info, VulkanRHIDevice* device )
-        : pipelineLayout( VK_NULL_HANDLE )
+        : descriptorSetLayouts()
+        , pipelineLayout( VK_NULL_HANDLE )
         , pipeline( VK_NULL_HANDLE )
         , device( device )
     {
         TArray<VkPipelineShaderStageCreateInfo> stages;
-        auto AddStage = [&stages]( const RHIShaderStageAttachment& shaderAttachment )
+        const auto AddStage = [&stages]( const RHIShaderStageAttachment& shaderAttachment )
             {
                 if ( shaderAttachment.shaderStage == NULL ) return;
 
@@ -2705,7 +2951,16 @@ namespace EE
         //     .maxDepthBounds
         // };
 
-        uint32 colorAttachmentCount = (uint32)info.colorAttachments.size();
+        const uint32 setLayoutsCount = (uint32)info.bindLayouts.size();
+        descriptorSetLayouts.resize( setLayoutsCount );
+
+        for ( uint32 i = 0; i < setLayoutsCount; i++ )
+        {
+            const VulkanRHIBindLayout* vulkanBindLayout = static_cast<const VulkanRHIBindLayout*>(info.bindLayouts[ i ]);
+            descriptorSetLayouts[ i ] = vulkanBindLayout->GetVulkanDescriptorSetLayout();
+        }
+
+        const uint32 colorAttachmentCount = (uint32)info.colorAttachments.size();
         TArray<VkPipelineColorBlendAttachmentState> colorAttachments( colorAttachmentCount );
 
         TArray<VkFormat> pixelFormats( colorAttachmentCount );
@@ -2746,8 +3001,8 @@ namespace EE
             .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
             .pNext = NULL,
             .flags = 0,
-            .setLayoutCount = 0,
-            .pSetLayouts = NULL, // VkDescriptorSetLayoutCreateInfo
+            .setLayoutCount = setLayoutsCount,
+            .pSetLayouts = descriptorSetLayouts.data(),
             .pushConstantRangeCount = 0,
             .pPushConstantRanges = NULL
         }; 
@@ -2799,10 +3054,6 @@ namespace EE
         {
             EE_LOG_CORE_CRITICAL( L"Failed to create graphics pipeline {}", (int32)result );
         }
-    }
-
-    VulkanRHIGraphicsPipeline::~VulkanRHIGraphicsPipeline()
-    {
     }
     
     bool VulkanRHIGraphicsPipeline::IsValid() const
@@ -2973,6 +3224,11 @@ namespace EE
     RHIShaderStage* VulkanRHI::CreateRHIShaderStage( const RHIShaderStageCreateInfo& info ) const
     {
         return new VulkanRHIShaderStage( info, GVulkanDevice );
+    }
+
+    RHIBindGroup* VulkanRHI::CreateRHIBindGroup( const RHIBindGroupCreateInfo& info ) const
+    {
+        return new VulkanRHIBindGroup( info, GVulkanDevice );
     }
 
     RHIRenderPass* VulkanRHI::CreateRHIRenderPass( const RHIRenderPassCreateInfo& info ) const
