@@ -2784,11 +2784,6 @@ namespace EE
     {
         vkDestroyPipelineLayout( device->GetVulkanDevice(), pipelineLayout, NULL );
         vkDestroyPipeline( device->GetVulkanDevice(), pipeline, NULL );
-
-        for ( size_t i = 0; i < descriptorSetLayouts.size(); i++ )
-        {
-            vkDestroyDescriptorSetLayout( device->GetVulkanDevice(), descriptorSetLayouts[ i ], NULL );
-        }
     }
 
     VulkanRHIGraphicsPipeline::VulkanRHIGraphicsPipeline( const RHIGraphicsPipelineCreateInfo& info, VulkanRHIDevice* device )
