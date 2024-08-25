@@ -21,13 +21,13 @@ namespace EE
         GMainApplication = CreateApplication( argc, argv );
         if ( GMainApplication->CanInitialize() == false )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to application!\n" );
+            EE_LOG_CRITICAL( L"Failed to application!\n" );
             return false;
         }
 
         if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK ) != 0 )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to initialize SDL3: {}\n", Text::NarrowToWide( SDL_GetError() ) );
+            EE_LOG_CRITICAL( L"Failed to initialize SDL3: {}\n", Text::NarrowToWide( SDL_GetError() ) );
             return false;
         }
 
@@ -91,7 +91,7 @@ namespace EE
         windows.erase( std::remove( windows.begin(), windows.end(), window ) );
         windowCount--;
 
-        EE_LOG_CORE_INFO( L"Window '{}' destroying!", window->GetName() );
+        EE_LOG_INFO( L"Window '{}' destroying!", window->GetName() );
         delete window;
     }
 
@@ -99,7 +99,7 @@ namespace EE
     {
         Window* window = PlatformCreateWindow( description );
 
-        EE_LOG_CORE_INFO( L"Window '{}' created!", description.name );
+        EE_LOG_INFO( L"Window '{}' created!", description.name );
 
         windows.push_back( window );
         windowCount++;

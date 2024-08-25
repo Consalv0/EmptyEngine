@@ -13,6 +13,7 @@ project "EmptyEngine"
     pchheader "CoreMinimal.h"
 
     defines {
+        "EMPTYENGINE_CORE",
         --"FIXMATH_NO_ROUNDING",
         --"FIXMATH_NO_OVERFLOW",
     }

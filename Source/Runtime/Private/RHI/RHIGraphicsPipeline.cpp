@@ -31,7 +31,7 @@ namespace EE
         subpasses.emplace_back( subpass );
     }
 
-    void RHIRenderPassCreateInfo::AddColorAttachment( const RHIColorAttachmentDescription& attachment )
+    void RHIRenderPassCreateInfo::AddAttachment( const RHIAttachmentDescription& attachment )
     {
         attachments.emplace_back( attachment );
     }

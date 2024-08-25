@@ -122,7 +122,7 @@ namespace EE
         }
         else
         {
-            EE_LOG_CORE_ERROR( L"File '{}' is not valid or do not exist", path );
+            EE_LOG_ERROR( L"File '{}' is not valid or do not exist", path );
             return false;
         }
     }
@@ -146,7 +146,7 @@ namespace EE
         }
         else
         {
-            EE_LOG_CORE_ERROR( L"File '{}' is not valid or do not exist", path );
+            EE_LOG_ERROR( L"File '{}' is not valid or do not exist", path );
             return false;
         }
     }

@@ -22,3 +22,7 @@
 #include "Math/IntBox3.h"
 
 #include "Math/Plane.h"
+
+EE_MAKE_HASHABLE( EE::Vector2f, t.x, t.y )
+EE_MAKE_HASHABLE( EE::Vector3f, t.x, t.y, t.z )
+EE_MAKE_HASHABLE( EE::Vector4f, t.x, t.y, t.z, t.w )

@@ -119,14 +119,14 @@ namespace EE
         template <typename T>
         inline T& TIntVector2<T>::operator[]( unsigned char i )
         {
-            EE_CORE_ASSERT( i <= 1, "TIntVector2 index out of bounds" );
+            EE_ASSERT( i <= 1, "TIntVector2 index out of bounds" );
             return ((T*)this)[ i ];
         }
 
         template <typename T>
         inline T const& TIntVector2<T>::operator[]( unsigned char i ) const
         {
-            EE_CORE_ASSERT( i <= 1, "TIntVector2 index out of bounds" );
+            EE_ASSERT( i <= 1, "TIntVector2 index out of bounds" );
             return ((T*)this)[ i ];
         }
 

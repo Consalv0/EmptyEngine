@@ -246,7 +246,7 @@ namespace EE
                 if ( vertexCount > 4 && !warned )
                 {
                     warned = true;
-                    EE_LOG_CORE_WARN( L"The model has n-gons, this may lead to unwanted geometry" );
+                    EE_LOG_WARN( L"The model has n-gons, this may lead to unwanted geometry" );
                 }
             }
         }
@@ -398,7 +398,7 @@ namespace EE
             modelData.lineVertexIndices.clear();
 
             timer.Stop();
-            EE_LOG_CORE_INFO(
+            EE_LOG_INFO(
                 L"\u250C> Parsed {0} vertices and {1} triangles in {2:.3f}ms",
                 Text::FormatUnit( modelData.vertexIndices.size(), 2 ),
                 Text::FormatUnit( modelData.vertexIndices.size() / 3, 2 ),
@@ -490,7 +490,7 @@ namespace EE
             outMesh->hasBoundingBox = true;
 
 #ifdef EE_DEBUG
-            EE_LOG_CORE_DEBUG(
+            EE_LOG_DEBUG(
                 L"\u251C> Parsed {0}	vertices in {1}	at [{2:d}]'{3}'",
                 Text::FormatUnit( data.vertexIndicesCount, 2 ),
                 Text::FormatData( sizeof( MeshFaces ) * outMesh->faces.size() + sizeof( StaticVertex ) * outMesh->staticVertices.size(), 2 ),
@@ -510,7 +510,7 @@ namespace EE
         delete[] indices;
 
         timer.Stop();
-        EE_LOG_CORE_INFO( L"\u2514> Allocated {0} in {1:.2f}ms", Text::FormatData( totalAllocatedSize, 2 ), timer.GetDeltaTime<Ticker::Mili>() );
+        EE_LOG_INFO( L"\u2514> Allocated {0} in {1:.2f}ms", Text::FormatData( totalAllocatedSize, 2 ), timer.GetDeltaTime<Ticker::Mili>() );
         
         info.isValid = true;
         return true;

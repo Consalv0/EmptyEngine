@@ -149,28 +149,16 @@ namespace EE
     };
     ENUM_FLAGS_OPERATORS( EBufferUsageFlags );
 
-    enum EComparisonFunction
+    enum ECompareOperation
     {
-        ComparisonFuntion_Never,
-        ComparisonFuntion_Less,
-        ComparisonFuntion_Equal,
-        ComparisonFuntion_LessEqual,
-        ComparisonFuntion_Greater,
-        ComparisonFuntion_NotEqual,
-        ComparisonFuntion_GreaterEqual,
-        ComparisonFuntion_Always
-    };
-
-    enum EStencilFunction
-    {
-        StencilFunction_Never,
-        StencilFunction_Less,
-        StencilFunction_Equal,
-        StencilFunction_LessEqual,
-        StencilFunction_Greater,
-        StencilFunction_NotEqual,
-        StencilFunction_GreaterEqual,
-        StencilFunction_Always
+        CompareOperation_Never,
+        CompareOperation_Less,
+        CompareOperation_Equal,
+        CompareOperation_LessEqual,
+        CompareOperation_Greater,
+        CompareOperation_NotEqual,
+        CompareOperation_GreaterEqual,
+        CompareOperation_Always
     };
 
     enum EStencilOperation
@@ -178,10 +166,10 @@ namespace EE
         StencilOperation_Keep,
         StencilOperation_Zero,
         StencilOperation_Replace,
-        StencilOperation_Increment,
-        StencilOperation_IncrementLoop,
-        StencilOperation_Decrement,
-        StencilOperation_DecrementLoop,
+        StencilOperation_IncrementClamp,
+        StencilOperation_IncrementWrap,
+        StencilOperation_DecrementClamp,
+        StencilOperation_DecrementWrap,
         StencilOperation_Invert
     };
     

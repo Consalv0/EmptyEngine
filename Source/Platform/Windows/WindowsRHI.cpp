@@ -26,7 +26,7 @@ namespace EE
         switch ( windowsRHI )
         {
         case EDynamicRHI::Vulkan: return new VulkanRHI();
-        default: EE_CORE_ASSERT( false, L"Failed to create Dynamic RHI!" );
+        default: EE_ASSERT( false, L"Failed to create Dynamic RHI!" );
         }
 
         return NULL;

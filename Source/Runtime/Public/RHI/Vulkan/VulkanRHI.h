@@ -1,7 +1,7 @@
 
 #include "RHI/RHI.h"
 
-#define EE_CORE_VULKAN_VALIDATION_LAYER
+// #define EE_CORE_VULKAN_VALIDATION_LAYER
 
 namespace EE
 {

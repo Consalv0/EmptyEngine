@@ -3,6 +3,7 @@
 #include "Utils/TextFormatting.h"
 
 #include "Engine/Engine.h"
+#include "Utils/Hasher.h"
 
 #include "RHI/Vulkan/VulkanRHI.h"
 
@@ -916,22 +917,22 @@ namespace EE
     {
         if ( messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT )
         {
-            EE_LOG_CORE_ERROR( L"Vulkan: {}", Text::NarrowToWide( callbackData->pMessage ) );
+            EE_LOG_ERROR( L"Vulkan: {}", Text::NarrowToWide( callbackData->pMessage ) );
             return VK_FALSE;
         }
         if ( messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT )
         {
-            EE_LOG_CORE_WARN( L"Vulkan: {}", Text::NarrowToWide( callbackData->pMessage ) );
+            EE_LOG_WARN( L"Vulkan: {}", Text::NarrowToWide( callbackData->pMessage ) );
             return VK_FALSE;
         }
         if ( messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT )
         {
-            EE_LOG_CORE_INFO( L"Vulkan: {}", Text::NarrowToWide( callbackData->pMessage ) );
+            EE_LOG_INFO( L"Vulkan: {}", Text::NarrowToWide( callbackData->pMessage ) );
             return VK_FALSE;
         }
         if ( messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT )
         {
-            EE_LOG_CORE_INFO( L"Vulkan: {}", Text::NarrowToWide( callbackData->pMessage ) );
+            EE_LOG_INFO( L"Vulkan: {}", Text::NarrowToWide( callbackData->pMessage ) );
             return VK_FALSE;
         }
         return VK_FALSE;
@@ -1046,7 +1047,7 @@ namespace EE
             return 0;
         }
 
-        EE_LOG_CORE_INFO(
+        EE_LOG_INFO(
             L"\u2570\u2500> {0} : {1}",
             Text::NarrowToWide( deviceProperties.deviceName ),
             score
@@ -1111,7 +1112,7 @@ namespace EE
         VkResult createResult;
         if ( (createResult = vkCreateInstance( &createInfo, VK_NULL_HANDLE, &instance )) != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"vkCreateInstance failed : {}", (int32)createResult );
+            EE_LOG_CRITICAL( L"vkCreateInstance failed : {}", (int32)createResult );
             return;
         }
 
@@ -1119,11 +1120,11 @@ namespace EE
         vkEnumeratePhysicalDevices( instance, &physicalDeviceCount, VK_NULL_HANDLE );
         if ( physicalDeviceCount == 0 )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to find GPUs with Vulkan support!" );
+            EE_LOG_CRITICAL( L"Failed to find GPUs with Vulkan support!" );
             return;
         }
 
-        EE_LOG_CORE_INFO( L"\u250C> Available devices : {}", physicalDeviceCount );
+        EE_LOG_INFO( L"\u250C> Available devices : {}", physicalDeviceCount );
 
         // Get physical device info
         TArray<VkPhysicalDevice> vulkanPhysicalDevices( physicalDeviceCount );
@@ -1173,7 +1174,7 @@ namespace EE
 
         if ( selection < 0 )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to find a suitable device!" );
+            EE_LOG_CRITICAL( L"Failed to find a suitable device!" );
             return false;
         }
 
@@ -1222,7 +1223,7 @@ namespace EE
         : physicalDevice( instance->GetSelectedPhysicalDevice() ),
         presentQueue( NULL ), graphicsQueue( NULL )
     {
-        EE_CORE_ASSERT( GVulkanDevice == NULL, L"Creating a second device!, Aborting..." );
+        EE_ASSERT( GVulkanDevice == NULL, L"Creating a second device!, Aborting..." );
 
         // Specifying the queues to be created
         QueueFamilyIndices indices = physicalDevice->GetQueueFamilies();
@@ -1277,13 +1278,13 @@ namespace EE
             .pEnabledFeatures = &deviceFeatures
         };
 
-        EE_CORE_ASSERT
+        EE_ASSERT
         (
             vkCreateDevice( physicalDevice->GetPhysicalDevice(), &deviceCreateInfo, nullptr, &device ) == VK_SUCCESS,
             L"Failed to create logical device!"
         );
 
-        EE_CORE_ASSERT
+        EE_ASSERT
         (
             CreateNativeVmaAllocator( instance->GetVulkanInstance(), physicalDevice->GetPhysicalDevice(), device, &allocator ) == VK_SUCCESS,
             L"Failed to create VMA Allocator!"
@@ -1397,7 +1398,7 @@ namespace EE
         }
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to present image: {}! {}", swapChain->BackImageIndex(), (int32)result );
+            EE_LOG_CRITICAL( L"Failed to present image: {}! {}", swapChain->BackImageIndex(), (int32)result );
         }
         return true;
     }
@@ -1664,7 +1665,7 @@ namespace EE
         auto result = vkQueueSubmit( queue, 1, &vkSubmitInfo, nativeFence );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed command vkQueueSubmit! {}", (uint32)result );
+            EE_LOG_CRITICAL( L"Failed command vkQueueSubmit! {}", (uint32)result );
         }
     }
 
@@ -1724,7 +1725,7 @@ namespace EE
         VkResult memoryResult = vmaCreateBuffer( device->GetVulkanAllocator(), &bufferInfo, &allocInfo, &buffer, &nativeAllocation, VK_NULL_HANDLE );
         if ( memoryResult != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to allocate buffer memory {}!", (int32)memoryResult );
+            EE_LOG_CRITICAL( L"Failed to allocate buffer memory {}!", (int32)memoryResult );
         }
     }
 
@@ -1749,7 +1750,7 @@ namespace EE
         VkResult result = vmaMapMemory( device->GetVulkanAllocator(), nativeAllocation, &gpuData);
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to open memory map for buffer {}!", (int32)result );
+            EE_LOG_CRITICAL( L"Failed to open memory map for buffer {}!", (int32)result );
             return;
         }
 
@@ -1843,7 +1844,7 @@ namespace EE
 
         if ( vkCreateImage( device->GetVulkanDevice(), &imageInfo, VK_NULL_HANDLE, &image ) != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to create image!" );
+            EE_LOG_CRITICAL( L"Failed to create image!" );
             return;
         }
 
@@ -1861,7 +1862,7 @@ namespace EE
 
         if ( vmaCreateImage( device->GetVulkanAllocator(), &imageInfo, &allocInfo, &image, &memory, NULL ) != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to allocate image memory!" );
+            EE_LOG_CRITICAL( L"Failed to allocate image memory!" );
             return;
         }
 
@@ -1892,7 +1893,7 @@ namespace EE
 
         if ( vkCreateImageView( device->GetVulkanDevice(), &viewInfo, nullptr, &imageView ) != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to create texture image view!" );
+            EE_LOG_CRITICAL( L"Failed to create texture image view!" );
             return;
         }
     }
@@ -1964,7 +1965,7 @@ namespace EE
 
         if ( contains == false )
         {
-            EE_LOG_CORE_CRITICAL( L"Surface format {}, {} is not supported!", (uint32)info.format, (uint32)info.colorSpace );
+            EE_LOG_CRITICAL( L"Surface format {}, {} is not supported!", (uint32)info.format, (uint32)info.colorSpace );
             return;
         }
 
@@ -2015,7 +2016,7 @@ namespace EE
         auto result = vkCreateSwapchainKHR( device->GetVulkanDevice(), &createInfo, NULL, &swapChain );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed vkCreateSwapchainKHR! {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed vkCreateSwapchainKHR! {}", (int32)result );
         }
 
         vkGetSwapchainImagesKHR( device->GetVulkanDevice(), swapChain, &imageCount, NULL );
@@ -2062,12 +2063,12 @@ namespace EE
         auto result = vkAcquireNextImageKHR( device->GetVulkanDevice(), swapChain, timeout, vulkanSemaphore, VK_NULL_HANDLE, &backImageIndex );
         if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR )
         {
-            EE_LOG_CORE_INFO( L"Swap chain out of date!" );
+            EE_LOG_INFO( L"Swap chain out of date!" );
             return false;
         }
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed vkAcquireNextImageKHR! {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed vkAcquireNextImageKHR! {}", (int32)result );
         }
 
         return true;
@@ -2084,7 +2085,7 @@ namespace EE
     {
         if ( SDL_Vulkan_CreateSurface( (SDL_Window*)window->GetWindowHandle(), instance->GetVulkanInstance(), VK_NULL_HANDLE, &surface ) != 0 )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed SDL_Vulkan_CreateSurface! {}", Text::NarrowToWide( SDL_GetError() ) );
+            EE_LOG_CRITICAL( L"Failed SDL_Vulkan_CreateSurface! {}", Text::NarrowToWide( SDL_GetError() ) );
             return;
         }
     }
@@ -2113,7 +2114,7 @@ namespace EE
         auto createResult = vkCreateFence( device->GetVulkanDevice(), &fenceCreateInfo, nullptr, &fence);
         if ( createResult != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to fence: {}", (int32)createResult );
+            EE_LOG_CRITICAL( L"Failed to fence: {}", (int32)createResult );
         }
     }
 
@@ -2127,7 +2128,7 @@ namespace EE
         auto result = vkResetFences( device->GetVulkanDevice(), 1, &fence );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed reset fence: {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed reset fence: {}", (int32)result );
         }
     }
 
@@ -2136,7 +2137,7 @@ namespace EE
         auto result = vkWaitForFences( device->GetVulkanDevice(), 1, &fence, VK_TRUE, timeout );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed wait fence: {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed wait fence: {}", (int32)result );
         }
     }
 
@@ -2164,7 +2165,7 @@ namespace EE
         auto createResult = vkCreateSemaphore( device->GetVulkanDevice(), &createInfo, nullptr, &semaphore );
         if ( createResult != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to create semaphore: {}", (int32)createResult );
+            EE_LOG_CRITICAL( L"Failed to create semaphore: {}", (int32)createResult );
         }
     }
 
@@ -2201,7 +2202,7 @@ namespace EE
         auto createResult = vkCreateCommandPool( device->GetVulkanDevice(), &createInfo, NULL, &commandPool );
         if ( createResult != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to create command pool: {}", (int32)createResult );
+            EE_LOG_CRITICAL( L"Failed to create command pool: {}", (int32)createResult );
         }
     }
 
@@ -2226,7 +2227,7 @@ namespace EE
         VkResult result = vkAllocateCommandBuffers( device->GetVulkanDevice(), &allocateInfo, &commandBuffer );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Unable to allocate command buffer {}", (int32)result );
+            EE_LOG_CRITICAL( L"Unable to allocate command buffer {}", (int32)result );
         }
     }
 
@@ -2248,7 +2249,7 @@ namespace EE
         auto result = vkBeginCommandBuffer( commandBuffer, &beginInfo );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to end command buffer {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed to end command buffer {}", (int32)result );
         }
     }
 
@@ -2257,7 +2258,7 @@ namespace EE
         auto result = vkEndCommandBuffer( commandBuffer );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to end command buffer {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed to end command buffer {}", (int32)result );
         }
     }
 
@@ -2410,7 +2411,7 @@ namespace EE
 
         if ( vkCreateShaderModule( device->GetVulkanDevice(), &createInfo, nullptr, &shaderModule ) != VK_SUCCESS )
         {
-            EE_LOG_CORE_ERROR( "Failed to create shader module!" );
+            EE_LOG_ERROR( "Failed to create shader module!" );
             return;
         }
     }
@@ -2509,7 +2510,7 @@ namespace EE
         attachments.resize( attachmentSize );
         for ( uint32 i = 0; i < attachmentSize; i++ )
         {
-            const RHIColorAttachmentDescription& attachment = info.attachments[ i ];
+            const RHIAttachmentDescription& attachment = info.attachments[ i ];
 
             attachments[ i ] = VkAttachmentDescription
             {
@@ -2681,7 +2682,7 @@ namespace EE
         VkResult descriptorResult = vkCreateDescriptorSetLayout( device->GetVulkanDevice(), &descriptorInfo, NULL, &descriptorSetLayout );
         if ( descriptorResult != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to create descriptor set layout {}", (int32)descriptorResult );
+            EE_LOG_CRITICAL( L"Failed to create descriptor set layout {}", (int32)descriptorResult );
         }
     }
 
@@ -2722,7 +2723,7 @@ namespace EE
         VkResult result = vkCreateDescriptorPool( device->GetVulkanDevice(), &poolInfo, NULL, &pool );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to create descriptor set pool {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed to create descriptor set pool {}", (int32)result );
         }
     }
 
@@ -2746,7 +2747,7 @@ namespace EE
         VkResult allocateResult = vkAllocateDescriptorSets( device->GetVulkanDevice(), &allocInfo, &descriptorSet );
         if ( allocateResult != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to allocate descriptor set {}", (int32)allocateResult );
+            EE_LOG_CRITICAL( L"Failed to allocate descriptor set {}", (int32)allocateResult );
         }
 
         const uint32 bindingCount = (uint32)info.bindings.size();
@@ -3080,7 +3081,7 @@ namespace EE
         VkResult layoutResult = vkCreatePipelineLayout( device->GetVulkanDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout );
         if ( layoutResult != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to create pipeline layout {}", (int32)layoutResult );
+            EE_LOG_CRITICAL( L"Failed to create pipeline layout {}", (int32)layoutResult );
         }
 
         VkPipelineRenderingCreateInfo pipelineRenderingCreateInfo
@@ -3122,7 +3123,7 @@ namespace EE
         VkResult result = vkCreateGraphicsPipelines( device->GetVulkanDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, NULL, &pipeline);
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to create graphics pipeline {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed to create graphics pipeline {}", (int32)result );
         }
     }
     
@@ -3156,7 +3157,7 @@ namespace EE
             }
         }
 
-        EE_LOG_CORE_CRITICAL( L"Failed to find suitable memory type!" );
+        EE_LOG_CRITICAL( L"Failed to find suitable memory type!" );
         return -1;
     }
 
@@ -3175,7 +3176,7 @@ namespace EE
 
         if ( SDL_Vulkan_LoadLibrary( nullptr ) != 0 )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to load SDL Vulkan Library! {}", Text::NarrowToWide( SDL_GetError() ) );
+            EE_LOG_CRITICAL( L"Failed to load SDL Vulkan Library! {}", Text::NarrowToWide( SDL_GetError() ) );
         }
 
         TArray<const NChar*> layers;
@@ -3215,7 +3216,7 @@ namespace EE
         vkCreateDebugUtilsMessenger = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr( GVulkanInstance->GetVulkanInstance(), "vkCreateDebugUtilsMessengerEXT");
         if ( vkCreateDebugUtilsMessenger == VK_NULL_HANDLE )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to find function vkCreateDebugUtilsMessengerEXT" );
+            EE_LOG_CRITICAL( L"Failed to find function vkCreateDebugUtilsMessengerEXT" );
             return;
         }
         
@@ -3238,7 +3239,7 @@ namespace EE
         VkResult result = vkCreateDebugUtilsMessenger( GVulkanInstance->GetVulkanInstance(), &messageCreateInfo, NULL, &GVulkanDebugMessager );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to create vulkan messenger {}", (uint32)result );
+            EE_LOG_CRITICAL( L"Failed to create vulkan messenger {}", (uint32)result );
         }
 #endif
     }

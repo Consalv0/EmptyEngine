@@ -25,30 +25,30 @@ namespace EE
 
             Matrix4x4f transform = (Matrix4x4f)( Matrix4x4::Translation( position ) * Matrix4x4::Scaling( Size ) );
             data.staticVertices = {
-                { transform.MultiplyPoint( { 0.5, -0.5,  0.5} ), { 0, -1,  0}, { 0,  0, 1}, {1, 0}, {1, 0}, {1} },
-                { transform.MultiplyPoint( {-0.5, -0.5, -0.5} ), { 0, -1,  0}, { 0,  0, 1}, {0, 1}, {0, 1}, {1} },
-                { transform.MultiplyPoint( { 0.5, -0.5, -0.5} ), { 0, -1,  0}, {-0,  0, 1}, {0, 0}, {0, 0}, {1} },
-                { transform.MultiplyPoint( {-0.5,  0.5, -0.5} ), { 0,  1,  0}, {-1,  0, 0}, {1, 0}, {1, 0}, {1} },
-                { transform.MultiplyPoint( { 0.5,  0.5,  0.5} ), { 0,  1,  0}, {-1,  0, 0}, {0, 1}, {0, 1}, {1} },
-                { transform.MultiplyPoint( { 0.5,  0.5, -0.5} ), { 0,  1,  0}, {-1,  0, 0}, {0, 0}, {0, 0}, {1} },
-                { transform.MultiplyPoint( { 0.5,  0.5, -0.5} ), { 1, -0,  0}, { 0,  1, 0}, {1, 0}, {1, 0}, {1} },
-                { transform.MultiplyPoint( { 0.5, -0.5,  0.5} ), { 1, -0,  0}, { 0,  1, 0}, {0, 1}, {0, 1}, {1} },
-                { transform.MultiplyPoint( { 0.5, -0.5, -0.5} ), { 1, -0,  0}, { 0,  1, 0}, {0, 0}, {0, 0}, {1} },
-                { transform.MultiplyPoint( { 0.5,  0.5,  0.5} ), { 0, -0,  1}, { 0,  1, 0}, {1, 0}, {1, 0}, {1} },
-                { transform.MultiplyPoint( {-0.5, -0.5,  0.5} ), { 0, -0,  1}, { 0,  1, 0}, {0, 1}, {0, 1}, {1} },
-                { transform.MultiplyPoint( { 0.5, -0.5,  0.5} ), { 0, -0,  1}, {-0,  1, 0}, {0, 0}, {0, 0}, {1} },
-                { transform.MultiplyPoint( {-0.5, -0.5,  0.5} ), {-1, -0, -0}, { 0,  1, 0}, {0, 0}, {0, 0}, {1} },
-                { transform.MultiplyPoint( {-0.5,  0.5, -0.5} ), {-1, -0, -0}, { 0,  1, 0}, {1, 1}, {1, 1}, {1} },
-                { transform.MultiplyPoint( {-0.5, -0.5, -0.5} ), {-1, -0, -0}, { 0,  1, 0}, {0, 1}, {0, 1}, {1} },
-                { transform.MultiplyPoint( { 0.5, -0.5, -0.5} ), { 0,  0, -1}, { 0, -1, 0}, {1, 0}, {1, 0}, {1} },
-                { transform.MultiplyPoint( {-0.5,  0.5, -0.5} ), { 0,  0, -1}, { 0, -1, 0}, {0, 1}, {0, 1}, {1} },
-                { transform.MultiplyPoint( { 0.5,  0.5, -0.5} ), { 0,  0, -1}, {-0, -1, 0}, {0, 0}, {0, 0}, {1} },
-                { transform.MultiplyPoint( {-0.5, -0.5,  0.5} ), { 0, -1,  0}, { 0,  0, 1}, {1, 1}, {1, 1}, {1} },
-                { transform.MultiplyPoint( {-0.5,  0.5,  0.5} ), { 0,  1,  0}, {-1,  0, 0}, {1, 1}, {1, 1}, {1} },
-                { transform.MultiplyPoint( { 0.5,  0.5,  0.5} ), { 1, -0,  0}, { 0,  1, 0}, {1, 1}, {1, 1}, {1} },
-                { transform.MultiplyPoint( {-0.5,  0.5,  0.5} ), { 0, -0,  1}, { 0,  1, 0}, {1, 1}, {1, 1}, {1} },
-                { transform.MultiplyPoint( {-0.5,  0.5,  0.5} ), {-1, -0, -0}, { 0,  1, 0}, {1, 0}, {1, 0}, {1} },
-                { transform.MultiplyPoint( {-0.5, -0.5, -0.5} ), { 0,  0, -1}, { 0, -1, 0}, {1, 1}, {1, 1}, {1} }
+                { transform.MultiplyPoint( { 0.5, -0.5,  0.5, 1} ), { 0, -1,  0}, { 0,  0, 1}, {1, 0}, {1, 0}, {1} },
+                { transform.MultiplyPoint( {-0.5, -0.5, -0.5, 1} ), { 0, -1,  0}, { 0,  0, 1}, {0, 1}, {0, 1}, {1} },
+                { transform.MultiplyPoint( { 0.5, -0.5, -0.5, 1} ), { 0, -1,  0}, {-0,  0, 1}, {0, 0}, {0, 0}, {1} },
+                { transform.MultiplyPoint( {-0.5,  0.5, -0.5, 1} ), { 0,  1,  0}, {-1,  0, 0}, {1, 0}, {1, 0}, {1} },
+                { transform.MultiplyPoint( { 0.5,  0.5,  0.5, 1} ), { 0,  1,  0}, {-1,  0, 0}, {0, 1}, {0, 1}, {1} },
+                { transform.MultiplyPoint( { 0.5,  0.5, -0.5, 1} ), { 0,  1,  0}, {-1,  0, 0}, {0, 0}, {0, 0}, {1} },
+                { transform.MultiplyPoint( { 0.5,  0.5, -0.5, 1} ), { 1, -0,  0}, { 0,  1, 0}, {1, 0}, {1, 0}, {1} },
+                { transform.MultiplyPoint( { 0.5, -0.5,  0.5, 1} ), { 1, -0,  0}, { 0,  1, 0}, {0, 1}, {0, 1}, {1} },
+                { transform.MultiplyPoint( { 0.5, -0.5, -0.5, 1} ), { 1, -0,  0}, { 0,  1, 0}, {0, 0}, {0, 0}, {1} },
+                { transform.MultiplyPoint( { 0.5,  0.5,  0.5, 1} ), { 0, -0,  1}, { 0,  1, 0}, {1, 0}, {1, 0}, {1} },
+                { transform.MultiplyPoint( {-0.5, -0.5,  0.5, 1} ), { 0, -0,  1}, { 0,  1, 0}, {0, 1}, {0, 1}, {1} },
+                { transform.MultiplyPoint( { 0.5, -0.5,  0.5, 1} ), { 0, -0,  1}, {-0,  1, 0}, {0, 0}, {0, 0}, {1} },
+                { transform.MultiplyPoint( {-0.5, -0.5,  0.5, 1} ), {-1, -0, -0}, { 0,  1, 0}, {0, 0}, {0, 0}, {1} },
+                { transform.MultiplyPoint( {-0.5,  0.5, -0.5, 1} ), {-1, -0, -0}, { 0,  1, 0}, {1, 1}, {1, 1}, {1} },
+                { transform.MultiplyPoint( {-0.5, -0.5, -0.5, 1} ), {-1, -0, -0}, { 0,  1, 0}, {0, 1}, {0, 1}, {1} },
+                { transform.MultiplyPoint( { 0.5, -0.5, -0.5, 1} ), { 0,  0, -1}, { 0, -1, 0}, {1, 0}, {1, 0}, {1} },
+                { transform.MultiplyPoint( {-0.5,  0.5, -0.5, 1} ), { 0,  0, -1}, { 0, -1, 0}, {0, 1}, {0, 1}, {1} },
+                { transform.MultiplyPoint( { 0.5,  0.5, -0.5, 1} ), { 0,  0, -1}, {-0, -1, 0}, {0, 0}, {0, 0}, {1} },
+                { transform.MultiplyPoint( {-0.5, -0.5,  0.5, 1} ), { 0, -1,  0}, { 0,  0, 1}, {1, 1}, {1, 1}, {1} },
+                { transform.MultiplyPoint( {-0.5,  0.5,  0.5, 1} ), { 0,  1,  0}, {-1,  0, 0}, {1, 1}, {1, 1}, {1} },
+                { transform.MultiplyPoint( { 0.5,  0.5,  0.5, 1} ), { 1, -0,  0}, { 0,  1, 0}, {1, 1}, {1, 1}, {1} },
+                { transform.MultiplyPoint( {-0.5,  0.5,  0.5, 1} ), { 0, -0,  1}, { 0,  1, 0}, {1, 1}, {1, 1}, {1} },
+                { transform.MultiplyPoint( {-0.5,  0.5,  0.5, 1} ), {-1, -0, -0}, { 0,  1, 0}, {1, 0}, {1, 0}, {1} },
+                { transform.MultiplyPoint( {-0.5, -0.5, -0.5, 1} ), { 0,  0, -1}, { 0, -1, 0}, {1, 1}, {1, 1}, {1} }
             };
 
             data.hasBoundingBox = false;
@@ -73,10 +73,10 @@ namespace EE
 
             Matrix4x4 transform = Matrix4x4::Translation( position ) * Matrix4x4::Scaling( Size );
             data.staticVertices = {
-                { Vector4f( transform.MultiplyPoint( { 1, -1, -0} ) ), {0, 0, 1}, {1, -0, -0}, {1, 0}, {1, 0}, {1} },
-                { Vector4f( transform.MultiplyPoint( {-1,  1,  0} ) ), {0, 0, 1}, {1, -0, -0}, {0, 1}, {0, 1}, {1} },
-                { Vector4f( transform.MultiplyPoint( { 1,  1,  0} ) ), {0, 0, 1}, {1, -0, -0}, {1, 1}, {1, 1}, {1} },
-                { Vector4f( transform.MultiplyPoint( {-1, -1, -0} ) ), {0, 0, 1}, {1, -0, -0}, {0, 0}, {0, 0}, {1} }
+                { Vector4f( transform.MultiplyPoint( { 1, -1, -0, 1} ) ), {0, 0, 1}, {1, -0, -0}, {1, 0}, {1, 0}, {1} },
+                { Vector4f( transform.MultiplyPoint( {-1,  1,  0, 1} ) ), {0, 0, 1}, {1, -0, -0}, {0, 1}, {0, 1}, {1} },
+                { Vector4f( transform.MultiplyPoint( { 1,  1,  0, 1} ) ), {0, 0, 1}, {1, -0, -0}, {1, 1}, {1, 1}, {1} },
+                { Vector4f( transform.MultiplyPoint( {-1, -1, -0, 1} ) ), {0, 0, 1}, {1, -0, -0}, {0, 0}, {0, 0}, {1} }
             };
 
             data.hasBoundingBox = false;

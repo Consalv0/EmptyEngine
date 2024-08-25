@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "Core.h"
+#include "Utils/Hasher.h"
 #include "Core/Name.h"
 
 // Core basic log functions

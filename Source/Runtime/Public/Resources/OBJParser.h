@@ -73,7 +73,4 @@ namespace EE
     };
 }
 
-EE_MAKE_HASHABLE(EE::Vector2f, t.x, t.y)
-EE_MAKE_HASHABLE(EE::Vector3f, t.x, t.y, t.z)
-EE_MAKE_HASHABLE(EE::Vector4f, t.x, t.y, t.z, t.w)
 EE_MAKE_HASHABLE(EE::StaticVertex, t.position, t.normal, t.tangent, t.uv0, t.uv1, t.color)

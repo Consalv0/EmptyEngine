@@ -26,7 +26,7 @@ namespace EE
             if ( sdlEvent->window.windowID != windowID )
                 return 0;
 
-            // EE_LOG_CORE_INFO( L"SDL: Window Event: WindowID({}), Event({})", windowID, sdlEvent->type );
+            // EE_LOG_INFO( L"SDL: Window Event: WindowID({}), Event({})", windowID, sdlEvent->type );
 
             switch ( sdlEvent->type )
             {
@@ -99,7 +99,7 @@ namespace EE
             windowFlags | mode
         )) == NULL )
         {
-            EE_LOG_CORE_CRITICAL( L"Window: \"{0}\" could not be initialized: {1}", name, Text::NarrowToWide( SDL_GetError() ) );
+            EE_LOG_CRITICAL( L"Window: \"{0}\" could not be initialized: {1}", name, Text::NarrowToWide( SDL_GetError() ) );
             return false;
         }
 
@@ -181,7 +181,7 @@ namespace EE
     void Window::Terminate()
     {
 #ifdef EE_DEBUG
-        EE_LOG_CORE_DEBUG( L"Window: \"{}\" closed!", GetName() );
+        EE_LOG_DEBUG( L"Window: \"{}\" closed!", GetName() );
 #endif // EE_DEBUG
 
         SDL_DelEventWatch( WindowEventsHandler, (void*)this );

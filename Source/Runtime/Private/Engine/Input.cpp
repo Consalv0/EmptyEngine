@@ -258,7 +258,7 @@ namespace EE
                 addedJoystickState->name = deviceName;
                 addedJoystickState->isConnected = true;
 
-                EE_LOG_CORE_INFO( L"Device {} Opened", addedJoystickState->name.GetInstanceName() );
+                EE_LOG_INFO( L"Device {} Opened", addedJoystickState->name.GetInstanceName() );
 
             }
             break;
@@ -286,7 +286,7 @@ namespace EE
                 if ( joystickState == NULL ) break;
                 joystickState->isConnected = false;
 
-                EE_LOG_CORE_INFO( L"Device {} Closed", joystickState->name.GetInstanceName() );
+                EE_LOG_INFO( L"Device {} Closed", joystickState->name.GetInstanceName() );
 
                 JoystickConnectionEvent inEvent(
                     joystickState->instanceID, 0
@@ -333,7 +333,7 @@ namespace EE
 
         case SDL_EVENT_JOYSTICK_HAT_MOTION:
         {
-            EE_LOG_CORE_INFO( "Hat motion {}, {}", sdlEvent->jhat.hat, sdlEvent->jhat.value );
+            EE_LOG_INFO( "Hat motion {}, {}", sdlEvent->jhat.hat, sdlEvent->jhat.value );
             break;
         }
 
@@ -360,7 +360,7 @@ namespace EE
                 auto& JoyButtonState = GGamepadButtonStates[ index ][ (EGamepadButton)sdlEvent->gbutton.button ];
                 JoyButtonState.state = ButtonState_Pressed;
 
-                EE_LOG_CORE_INFO( "{} Button pressed {}", sdlEvent->gbutton.which, sdlEvent->gbutton.button );
+                EE_LOG_INFO( "{} Button pressed {}", sdlEvent->gbutton.which, sdlEvent->gbutton.button );
 
                 JoystickButtonPressedEvent inEvent
                 (

@@ -68,7 +68,7 @@ namespace EE
     {
         if ( std::thread::hardware_concurrency() <= 1 )
         {
-            EE_LOG_CORE_WARN( L"The aviable cores ({:d}) are insuficient for asyncronus loaders", std::thread::hardware_concurrency() );
+            EE_LOG_WARN( L"The aviable cores ({:d}) are insuficient for asyncronus loaders", std::thread::hardware_concurrency() );
             return false;
         }
 
@@ -131,7 +131,7 @@ namespace EE
         }
 
         TaskRunning = true;
-        EE_LOG_CORE_INFO( L"Reading File Model '{}'", options.file.GetShortPath() );
+        EE_LOG_INFO( L"Reading File Model '{}'", options.file.GetShortPath() );
         RecognizeFileExtensionAndLoad( info, options );
         TaskRunning = false;
         return info.isValid;

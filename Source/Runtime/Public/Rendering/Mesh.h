@@ -45,7 +45,7 @@ namespace EE
                     return;
                 }
             }
-            EE_LOG_CORE_WARN( "Vertex has more than four bones/weights affecting it, extra data will be discarded (boneID={0}, weight={1})", boneID, weight );
+            EE_LOG_WARN( "Vertex has more than four bones/weights affecting it, extra data will be discarded (boneID={0}, weight={1})", boneID, weight );
         }
 
         SkinVertex() = default;

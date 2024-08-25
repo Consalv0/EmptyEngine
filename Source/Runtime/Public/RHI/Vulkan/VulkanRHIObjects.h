@@ -528,14 +528,14 @@ namespace EE
         VkClearValue clearColorValue;
         VkClearValue clearDepthStencilValue;
         
-        TMap<VkImageView, VkFramebuffer> framebufferAttachments;
+        TMap<size_t, VkFramebuffer> framebufferAttachments;
 
     public:
         VulkanRHIRenderPass( const RHIRenderPassCreateInfo& info, VulkanRHIDevice* device );
 
         ~VulkanRHIRenderPass() override;
 
-        void SetAttachment( const RHITexture* texture ) override;
+        void SetAttachments( uint32 attachmentCount, const RHITexture** texture ) override;
 
         void SetDrawArea( const IntBox2& extent ) override;
 
