@@ -49,35 +49,35 @@ namespace EE::Math
     template <typename T>
 	TMatrix4x4<T> TTransform<T>::GetViewMatrix() const
 	{
-		const TVector3<T> forward( rotation * TVector3<T>( T(0), T(0), T(1) ) );
-		const TVector3<T> side( forward.Cross( rotation * TVector3<T>( T(0), T(1) ) ) );
+		const TVector3<T> forward( rotation * TVector3<T>::Back() );
+		const TVector3<T> side( rotation * TVector3<T>::Right() );
 		const TVector3<T> upper( side.Cross( forward ) );
 		
 		return TMatrix4x4<T>
 		(
-		    side.x, upper.x, forward.x, T(0),
-		    side.y, upper.y, forward.y, T(0),
-		    side.z, upper.z, forward.z, T(0),
-		    -side.Dot( position ), -upper.Dot( position ), -forward.Dot( position ), T(1)
+		    side.x, upper.x, -forward.x, T(0),
+		    side.y, upper.y, -forward.y, T(0),
+		    side.z, upper.z, -forward.z, T(0),
+		    -side.Dot( position ), -upper.Dot( position ), forward.Dot( position ), T(1)
 		);
 	}
 
     template <typename T>
 	TVector3<T> TTransform<T>::Forward() const
 	{
-		return rotation * TVector3<T>( T(0), T(0), T(1) );
+		return rotation.Forward();
 	}
 
     template <typename T>
 	TVector3<T> TTransform<T>::Up() const
 	{
-		return rotation * TVector3<T>( T(0), T(1) );
+		return rotation.Up();
 	}
 
     template <typename T>
 	TVector3<T> TTransform<T>::Right() const
 	{
-		return rotation * TVector3<T>( T(1), T(0) );
+		return rotation.Right();
 	}
 
     template <typename T>

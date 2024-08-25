@@ -59,6 +59,7 @@ namespace EE
             HOST_DEVICE inline const T* PointerToValue( void ) const;
 
             HOST_DEVICE inline TVector4<T> MultiplyPoint( const TVector3<T>& vector ) const;
+            HOST_DEVICE inline TVector4<T> MultiplyPoint( const TVector4<T>& vector ) const;
             HOST_DEVICE inline TVector3<T> MultiplyVector( const TVector3<T>& vector ) const;
 
             HOST_DEVICE FORCEINLINE TMatrix4x4 operator*( const TMatrix4x4& other ) const;

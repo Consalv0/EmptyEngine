@@ -37,7 +37,7 @@ namespace EE::Math
 	}
 
     template <typename T>
-	inline TMatrix3x3<T> TMatrix3x3<T>::Identity()
+	constexpr TMatrix3x3<T> TMatrix3x3<T>::Identity()
 	{
 		return TMatrix3x3();
 	}
@@ -77,14 +77,14 @@ namespace EE::Math
     template <typename T>
 	inline TVector3<T>& TMatrix3x3<T>::operator[]( unsigned char i )
 	{
-		EE_CORE_ASSERT( i <= 2, "TMatrix3x3 index out of bounds" );
+		EE_ASSERT( i <= 2, "TMatrix3x3 index out of bounds" );
 		return ((TVector3<T>*)this)[ i ];
 	}
 
     template <typename T>
 	inline TVector3<T> const& TMatrix3x3<T>::operator[]( unsigned char i ) const
 	{
-		EE_CORE_ASSERT( i <= 2, "TMatrix3x3 index out of bounds" );
+		EE_ASSERT( i <= 2, "TMatrix3x3 index out of bounds" );
 		return ((TVector3<T>*)this)[ i ];
 	}
 
@@ -92,19 +92,19 @@ namespace EE::Math
 	FORCEINLINE TMatrix3x3<T> TMatrix3x3<T>::operator*( const TMatrix3x3<T>& other ) const
 	{
 		TMatrix3x3 result = TMatrix3x3();
-		const TVector3<T> Col0 = GetColumn( 0 ), Col1 = GetColumn( 1 ), Col2 = GetColumn( 2 );
+		const TVector3<T>& col0 = GetColumn( 0 ), col1 = GetColumn( 1 ), col2 = GetColumn( 2 );
 
-		result.m00 = other.m0.Dot( Col0 );
-		result.m10 = other.m1.Dot( Col0 );
-		result.m20 = other.m2.Dot( Col0 );
+		result.m00 = other.m0.Dot( col0 );
+		result.m10 = other.m1.Dot( col0 );
+		result.m20 = other.m2.Dot( col0 );
 
-		result.m01 = other.m0.Dot( Col1 );
-		result.m11 = other.m1.Dot( Col1 );
-		result.m21 = other.m2.Dot( Col1 );
+		result.m01 = other.m0.Dot( col1 );
+		result.m11 = other.m1.Dot( col1 );
+		result.m21 = other.m2.Dot( col1 );
 
-		result.m02 = other.m0.Dot( Col2 );
-		result.m12 = other.m1.Dot( Col2 );
-		result.m22 = other.m2.Dot( Col2 );
+		result.m02 = other.m0.Dot( col2 );
+		result.m12 = other.m1.Dot( col2 );
+		result.m22 = other.m2.Dot( col2 );
 
 		return result;
 	}

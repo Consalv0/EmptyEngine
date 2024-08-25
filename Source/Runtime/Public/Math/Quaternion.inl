@@ -36,52 +36,52 @@ namespace EE::Math
 	}
 
     template <typename T>
-	inline TQuaternion<T> TQuaternion<T>::FromEulerAngles( TVector3<T> const& EulerAngles )
+	inline TQuaternion<T> TQuaternion<T>::FromEulerAngles( TVector3<T> const& degrees )
 	{
-		const T Scale = MathConstants<T>::DegToRad * T(0.5);
-		T HalfRoll = EulerAngles[ Roll ] * Scale;
-		T HalfPitch = EulerAngles[ Pitch ] * Scale;
-		T HalfYaw = EulerAngles[ Yaw ] * Scale;
+        const T scale = MathConstants<T>::DegToRad * T(0.5);
+        T halfYaw = degrees[ Yaw ] * scale;
+        T halfPitch = degrees[ Pitch ] * scale;
+        T halfRoll = degrees[ Roll ] * scale;
 
-		T SR = Math::Sin( HalfRoll );
-		T CR = Math::Cos( HalfRoll );
-		T SP = Math::Sin( HalfPitch );
-		T CP = Math::Cos( HalfPitch );
-		T SY = Math::Sin( HalfYaw );
-		T CY = Math::Cos( HalfYaw );
+        T cy = Math::Cos( halfYaw );
+        T sy = Math::Sin( halfYaw );
+        T cx = Math::Cos( halfPitch );
+        T sx = Math::Sin( halfPitch );
+        T cz = Math::Cos( halfRoll );
+        T sz = Math::Sin( halfRoll );
 
-		TQuaternion EulerToQuat;
-		EulerToQuat.x = (CY * SP * CR) + (SY * CP * SR);
-		EulerToQuat.y = (SY * CP * CR) - (CY * SP * SR);
-		EulerToQuat.z = (CY * CP * SR) - (SY * SP * CR);
-		EulerToQuat.w = (CY * CP * CR) + (SY * SP * SR);
-		return EulerToQuat;
+        return TQuaternion(
+            (cy * cx * cz) + (sy * sx * sz),
+            (cy * sx * cz) + (sy * cx * sz),
+           -(cy * sx * sz) + (sy * cx * cz),
+            (cy * cx * sz) - (sy * sx * cz)
+        );
 	}
 
     template <typename T>
 	FORCEINLINE TQuaternion<T> TQuaternion<T>::FromToRotation( TVector3<T> const& from, TVector3<T> const& to )
 	{
-		TVector3 Half = from + to;
-		Half.Normalize();
+		TVector3 half = from + to;
+		half.Normalize();
 
 		return TQuaternion(
-			from.Dot( Half ),
-			from.y * Half.z - from.z * Half.y,
-			from.z * Half.x - from.x * Half.z,
-			from.x * Half.y - from.y * Half.x
+			from.Dot( half ),
+			from.y * half.z - from.z * half.y,
+			from.z * half.x - from.x * half.z,
+			from.x * half.y - from.y * half.x
 		).Normalized();
 	}
 
     template <typename T>
-	inline TQuaternion<T> TQuaternion<T>::FromAxisAngle( TVector3<T> const& Axis, T const& Radians )
+	inline TQuaternion<T> TQuaternion<T>::FromAxisAngle( TVector3<T> const& axis, T const& radians )
 	{
-		T Sine = Math::Sin( Radians * T(.5) );
+		T sine = Math::Sin( radians * T(.5) );
 
 		return TQuaternion(
-			Math::Cos( Radians * T(.5) ),
-			Axis.x * Sine,
-			Axis.y * Sine,
-			Axis.z * Sine
+			Math::Cos( radians * T(.5) ),
+			axis.x * sine,
+			axis.y * sine,
+			axis.z * sine
 		);
 	}
 
@@ -90,13 +90,13 @@ namespace EE::Math
 	{
 		const TVector3<T> normal = forward.Normalized();
 		const TVector3<T> tangent = TVector3::Cross( up == normal ? up + T(0.001F) : up, normal ).Normalized();
-		const TVector3<T> Bitangent = TVector3::Cross( normal, tangent );
+		const TVector3<T> bitangent = TVector3::Cross( normal, tangent );
 
-		TMatrix3x3 LookSpace(
-			tangent, Bitangent, normal
+		TMatrix3x3 lookSpace(
+			tangent, bitangent, normal
 		);
 
-		return TQuaternion::FromMatrix( LookSpace );
+		return TQuaternion::FromMatrix( lookSpace );
 	}
 
     template <typename T>
@@ -149,7 +149,7 @@ namespace EE::Math
 	}
 
     template <typename T>
-	inline void TQuaternion<T>::Interpolate( TQuaternion<T>& out, const TQuaternion<T>& start, const TQuaternion<T>& end, T factor )
+	inline void TQuaternion<T>::Interpolate( const TQuaternion<T>& start, const TQuaternion<T>& end, T factor, TQuaternion<T>& out )
 	{
 		T cosTheta = start.x * end.x + start.y * end.y + start.z * end.z + start.w * end.w;
 
@@ -216,8 +216,8 @@ namespace EE::Math
 	inline TQuaternion<T> TQuaternion<T>::Normalized() const
 	{
 		if ( MagnitudeSquared() == T(0) ) return TQuaternion();
-		TQuaternion Result = TQuaternion( *this );
-		return Result /= Magnitude();
+		TQuaternion result = TQuaternion( *this );
+		return result /= Magnitude();
 	}
 
     template <typename T>
@@ -233,12 +233,12 @@ namespace EE::Math
 		absoluteValue *= absoluteValue;
 		absoluteValue = T(1) / absoluteValue;
 
-		TQuaternion ConjugateVal = Conjugated();
+		TQuaternion conjugateVal = Conjugated();
 
-		T Scalar = ConjugateVal.GetScalar() * absoluteValue;
-		TVector3<T> Imaginary = ConjugateVal.GetVector() * absoluteValue;
+		T scalar = conjugateVal.GetScalar() * absoluteValue;
+		TVector3<T> imaginary = conjugateVal.GetVector() * absoluteValue;
 
-		return TQuaternion( Scalar, Imaginary );
+		return TQuaternion( scalar, imaginary );
 	}
 
     template <typename T>
@@ -328,6 +328,33 @@ namespace EE::Math
 	}
 
     template <typename T>
+    inline TVector3<T> TQuaternion<T>::Right() const
+    {
+        TVector3<T> const QV( T(0), vector.z, -vector.y );
+        TVector3<T> const QQV( vector.y * QV.z - vector.z * QV.y, -vector.x * QV.z, vector.x * QV.y );
+
+        return TVector3<T>::Right() + ((QV * w) + QQV) * T(2);
+    }
+
+    template <typename T>
+    inline TVector3<T> TQuaternion<T>::Up() const
+    {
+        TVector3<T> const QV( -vector.z, T(0), vector.x );
+        TVector3<T> const QQV( vector.y * QV.z, vector.z * QV.x - vector.x * QV.z, -vector.y * QV.x );
+
+        return TVector3<T>::Up() + ((QV * w) + QQV) * T( 2 );
+    }
+
+    template <typename T>
+    inline TVector3<T> TQuaternion<T>::Forward() const
+    {
+        TVector3<T> const QV( -vector.y, vector.x, T(0) );
+        TVector3<T> const QQV( -vector.z * QV.y, vector.z * QV.x, vector.x * QV.y - vector.y * QV.x );
+
+        return TVector3<T>::Forward() + ((QV * w) + QQV) * T( 2 );
+    }
+
+    template <typename T>
 	inline T TQuaternion<T>::GetScalar() const
 	{
 		return scalar;
@@ -344,8 +371,8 @@ namespace EE::Math
 	{
 		TVector3<T> eulerFromQuat;
 
-		T PitchY = std::asin( T(2) * (x * w - y * z) );
-		T Test = std::cos( PitchY );
+		T PitchY = Math::Asin( T(2) * (x * w - y * z) );
+		T Test = Math::Cos( PitchY );
 		if ( Test > MathConstants<T>::TendencyZero )
 		{
 			eulerFromQuat[ Roll ] = Math::Atan2( T(2) * (x * y + z * w), T(1) - (T(2) * (Math::Square( z ) + Math::Square( x ))) ) * MathConstants<T>::RadToDegree;
@@ -435,24 +462,22 @@ namespace EE::Math
     template <typename T>
 	FORCEINLINE TQuaternion<T> TQuaternion<T>::operator*( const TQuaternion& other ) const
 	{
-		TQuaternion result;
-
-		result.x = w * other.x + x * other.w + y * other.z - z * other.y;
-		result.y = w * other.y + y * other.w + z * other.x - x * other.z;
-		result.z = w * other.z + z * other.w + x * other.y - y * other.x;
-		result.w = w * other.w - x * other.x - y * other.y - z * other.z;
-
-		return result;
+        return TQuaternion
+        (
+		    w * other.w - x * other.x - y * other.y - z * other.z,
+		    w * other.x + x * other.w + y * other.z - z * other.y,
+		    w * other.y + y * other.w + z * other.x - x * other.z,
+		    w * other.z + z * other.w + x * other.y - y * other.x
+        );
 	}
 
     template <typename T>
-	inline TVector3<T> TQuaternion<T>::operator*( const TVector3<T>& vector ) const
+	inline TVector3<T> TQuaternion<T>::operator*( const TVector3<T>& inVector ) const
 	{
-		TVector3<T> const quatVector( GetVector() );
-		TVector3<T> const QV( TVector3<T>::Cross( quatVector, vector ) );
-		TVector3<T> const QQV( TVector3<T>::Cross( quatVector, QV ) );
+		TVector3<T> const QV( TVector3<T>::Cross( vector, inVector ) );
+		TVector3<T> const QQV( TVector3<T>::Cross( vector, QV ) );
 
-		return vector + ((QV * w) + QQV) * T(2);
+		return inVector + ((QV * w) + QQV) * T(2);
 	}
 
     template <typename T>

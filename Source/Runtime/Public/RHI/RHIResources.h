@@ -40,9 +40,7 @@ namespace EE
     struct RHITextureCreateInfo
     {
         ETextureType type = TextureType_Texture2D;
-        uint32 width = 0;
-        uint32 height = 0;
-        uint32 depth = 0;
+        UIntVector3 extents = { 0, 0, 0 };
         uint32 arraySize = 1;
         uint32 mipLevels = 1;
         EPixelFormat format = PixelFormat_Unknown;
@@ -55,7 +53,6 @@ namespace EE
         uint32 bindFlags = 0;
         uint32 accessFlags = 0;
         uint32 miscFlags = 0;
-        Vector4 clear = {};
     };
 
     class RHITexture : public RHIResource
@@ -331,7 +328,7 @@ namespace EE
         ESamplerAddressMode addressW = SamplerAdressMode_Clamp;
         float mipLODBias = 0.0F;
         uint32 maxAnisotropy = 0;
-        EComparisonFunction comparison = ComparisonFuntion_Always;
+        ECompareOperation compareOperation = CompareOperation_Always;
         ESamplerBorder border = SamplerBorder_BlackTransparent;
         float minLOD = 0.0F;
         float maxLOD = FLT_MAX;
@@ -360,7 +357,7 @@ namespace EE
     public:
         virtual ~RHIRenderPass() = default;
 
-        virtual void SetAttachment( const RHITexture* texture ) = 0;
+        virtual void SetAttachments( uint32 attachmentCount, const RHITexture** texture ) = 0;
 
         virtual void SetDrawArea( const IntBox2& extent ) = 0;
 
@@ -414,7 +411,7 @@ namespace EE
         virtual const RHIBindLayout* GetBindLayout() const = 0;
     };
 
-    struct RHIColorAttachmentDescription
+    struct RHIAttachmentDescription
     {
         EPixelFormat format = PixelFormat_Unknown;
         ESampleCountFlagsBit sampleCount = SampleCount_1_Bit;
@@ -453,12 +450,12 @@ namespace EE
     {
     public:
         TArray<RHIRenderSubpassDescription> subpasses;
-        TArray<RHIColorAttachmentDescription> attachments;
+        TArray<RHIAttachmentDescription> attachments;
 
     public:
         void AddRenderSubpass( const RHIRenderSubpassDescription& subpass );
 
-        void AddColorAttachment( const RHIColorAttachmentDescription& attachment );
+        void AddAttachment( const RHIAttachmentDescription& attachment );
     };
 
     struct RHIVertexAttribute
@@ -498,25 +495,27 @@ namespace EE
 
     struct RHIStencilFaceState
     {
-        EStencilFunction compareFunction = StencilFunction_Always;
+        ECompareOperation compareOperation = CompareOperation_Always;
         EStencilOperation failOperation = StencilOperation_Keep;
         EStencilOperation depthFailOperation = StencilOperation_Keep;
         EStencilOperation passOperation = StencilOperation_Keep;
+        uint32 compareMask = 0u;
+        uint32 writeMask = 0u;
+        uint32 reference = UINT32_MAX;
     };
 
     struct RHIDepthStencilState
     {
         bool depthEnabled = false;
+        bool depthWriteEnabled = false;
         bool stencilEnabled = false;
         EPixelFormat format = PixelFormat_MAX;
-        EComparisonFunction depthCompareFunction = ComparisonFuntion_Always;
+        ECompareOperation depthCompareOperation = CompareOperation_Always;
         int32 depthBias = 0;
         float depthBiasSlopeScale = 0.0F;
         float depthBiasClamp = 0.0F;
         RHIStencilFaceState stencilFront = RHIStencilFaceState();
         RHIStencilFaceState stencilBack = RHIStencilFaceState();
-        uint8 stencilReadMask = 0u;
-        uint8 stencilWriteMask = 0u;
     };
 
     struct RHIBlendComponent
@@ -544,6 +543,7 @@ namespace EE
         RHIShaderStageAttachment hullShader;
 
         TArray<RHIColorAttachmentState> colorAttachments;
+        RHIDepthStencilState depthStencilState;
         TArray<const RHIBindLayout*> bindLayouts;
         RHIRenderPass* renderpass;
         uint32 subpassIndex;

@@ -67,12 +67,32 @@ namespace EE::Math
     template <typename T>
     inline TMatrix4x4<T> TMatrix4x4<T>::Perspective( const T& fov, const T& aspect, const T& near, const T& far )
     {
-        float const tanHalfFOV = Math::Tan( fov * T( 0.5 ) );
+        // float fov_rad = vertical_fov * 2.0f * M_PI / 360.0f;
+        // float focal_length = 1.0f / std::tan( fov_rad / 2.0f );
+        // 
+        // float x = focal_length / aspect_ratio;
+        // float y = -focal_length;
+        // float A = n / (f - n);
+        // float B = f * A;
+        // 
+        // float4x4 projection( {
+        //     x,    0.0f,  0.0f, 0.0f,
+        //     0.0f,    y,  0.0f, 0.0f,
+        //     0.0f, 0.0f,     A,    B,
+        //     0.0f, 0.0f, -1.0f, 0.0f,
+        //     } );
+
+        T const focalLength = Math::Tan( fov * T( 0.5 ) );
+        T const width = T( 1 ) / (focalLength * aspect);
+        T const height = T( 1 ) / (focalLength);
+        T const farRange = ((near == far) ? T( 1 ) : far / (far - near));
+        T const nearRange = ((near == far) ? -near : -near * far / (far - near));
+
         TMatrix4x4 result(
-            T(1) / (tanHalfFOV * aspect), T(0), T(0), T(0),
-            T(0), T(1) / (tanHalfFOV), T(0), T(0),
-            T(0), T(0), ((near == far) ? T(1) : far / (far - near)), T(1),
-            T(0), T(0), -near * ((near == far) ? T(1) : far / (far - near)), T(0)
+            width, T(0), T(0), T(0),
+            T(0), height, T(0), T(0),
+            T(0), T(0), farRange, T(1),
+            T(0), T(0), nearRange, T(0)
         );
         return result;
     }
@@ -80,12 +100,17 @@ namespace EE::Math
     template <typename T>
     inline TMatrix4x4<T> TMatrix4x4<T>::PerspectiveReversed( const T& fov, const T& aspect, const T& near, const T& far )
     {
-        T const tanHalfFOV = Math::Tan( fov * T(0.5) );
+        T const focalLength = Math::Tan( fov * T( 0.5 ) );
+        T const width = T( 1 ) / (focalLength * aspect);
+        T const height = T( 1 ) / (focalLength);
+        T const farRange = ((near == far) ? T( 0 ) : near / (near - far));
+        T const nearRange = ((near == far) ? near : -far * near / (near - far));
+
         TMatrix4x4 result(
-            T(1) / (tanHalfFOV * aspect),T(0), T(0), T(0),
-            T(0), T(1) / (tanHalfFOV), T(0), T(0),
-            T(0), T(0), ((near == far) ? T(0) : near / (near - far)), T(1),
-            T(0), T(0), ((near == far) ? near : -far * near / (near - far)), T(0)
+            width, T(0), T(0), T(0),
+            T(0), height, T(0), T(0),
+            T(0), T(0), farRange, T(1),
+            T(0), T(0), nearRange, T(0)
         );
         return result;
     }
@@ -182,12 +207,12 @@ namespace EE::Math
 		TMatrix4x4 result;
 		T sinR, sinP, sinY, cosR, cosP, cosY;
 
-		sinY = std::sin( euler[ Yaw ] * MathConstants<T>::DegToRad );
-		cosY = std::cos( euler[ Yaw ] * MathConstants<T>::DegToRad );
-		sinP = std::sin( euler[ Pitch ] * MathConstants<T>::DegToRad );
-		cosP = std::cos( euler[ Pitch ] * MathConstants<T>::DegToRad );
-		sinR = std::sin( euler[ Roll ] * MathConstants<T>::DegToRad );
-		cosR = std::cos( euler[ Roll ] * MathConstants<T>::DegToRad );
+		sinY = Math::Sin( euler[ Yaw ] * MathConstants<T>::DegToRad );
+		cosY = Math::Cos( euler[ Yaw ] * MathConstants<T>::DegToRad );
+		sinP = Math::Sin( euler[ Pitch ] * MathConstants<T>::DegToRad );
+		cosP = Math::Cos( euler[ Pitch ] * MathConstants<T>::DegToRad );
+		sinR = Math::Sin( euler[ Roll ] * MathConstants<T>::DegToRad );
+		cosR = Math::Cos( euler[ Roll ] * MathConstants<T>::DegToRad );
 
 		result.m00 = cosP * cosY;
 		result.m01 = cosP * sinY;
@@ -334,14 +359,14 @@ namespace EE::Math
     template <typename T>
 	inline TVector4<T>& TMatrix4x4<T>::operator[]( unsigned char i )
 	{
-		EE_CORE_ASSERT( i <= 3, "TMatrix4x4 index out of bounds" );
+		EE_ASSERT( i <= 3, "TMatrix4x4 index out of bounds" );
 		return ((TVector4<T>*)this)[ i ];
 	}
 
     template <typename T>
 	inline TVector4<T> const& TMatrix4x4<T>::operator[]( unsigned char i ) const
 	{
-		EE_CORE_ASSERT( i <= 3, "TMatrix4x4 index out of bounds" );
+		EE_ASSERT( i <= 3, "TMatrix4x4 index out of bounds" );
 		return ((TVector4<T>*)this)[ i ];
 	}
 
@@ -350,6 +375,12 @@ namespace EE::Math
 	{
 		return *this * TVector4<T>( vector, T(1) );
 	}
+
+    template <typename T>
+    inline HOST_DEVICE TVector4<T> TMatrix4x4<T>::MultiplyPoint( const TVector4<T>& vector ) const
+    {
+        return *this * vector;
+    }
 
     template <typename T>
 	inline TVector3<T> TMatrix4x4<T>::MultiplyVector( const TVector3<T>& vector ) const
@@ -403,6 +434,8 @@ namespace EE::Math
     template <typename T>
 	FORCEINLINE TVector3<T> TMatrix4x4<T>::operator*( const TVector3<T>& vector ) const
 	{
+        // m00 * v0 + m10 * v1 + m20 * v2 + m30,
+        // v0 * m00 + v1 * m10 + v2 * m30
 		TVector4<T> const vect = TVector4<T>( vector, T(0) );
 		TVector3<T> result(
 			GetColumn( 0 ).Dot( vect ),
@@ -417,10 +450,10 @@ namespace EE::Math
 	{
 		TMatrix4x4 result( *this );
 
-		result.m0 *= value;
-		result.m1 *= value;
-		result.m2 *= value;
-		result.m3 *= value;
+		result.r0 *= value;
+		result.r1 *= value;
+		result.r2 *= value;
+		result.r3 *= value;
 
 		return result;
 	}
@@ -430,10 +463,10 @@ namespace EE::Math
 	{
 		TMatrix4x4 result( *this );
 
-		result.m0 /= value;
-		result.m1 /= value;
-		result.m2 /= value;
-		result.m3 /= value;
+		result.r0 /= value;
+		result.r1 /= value;
+		result.r2 /= value;
+		result.r3 /= value;
 
 		return result;
 	}

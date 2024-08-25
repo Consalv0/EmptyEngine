@@ -168,6 +168,12 @@ namespace EE
     }
 
     template <typename T>
+    T Math::Asin( const T& radians )
+    {
+        return std::asin( radians );
+    }
+
+    template <typename T>
     T Math::Sin( const T& radians )
     {
         return std::sin( radians );

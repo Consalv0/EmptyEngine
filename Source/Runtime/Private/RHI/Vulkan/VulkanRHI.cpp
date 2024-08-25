@@ -812,6 +812,40 @@ namespace EE
         }
     }
 
+    static VkCompareOp ConvertCompareOperation( ECompareOperation operation )
+    {
+        switch ( operation )
+        {
+        case CompareOperation_Never:        return VK_COMPARE_OP_NEVER;
+        case CompareOperation_Less:         return VK_COMPARE_OP_LESS;
+        case CompareOperation_Equal:        return VK_COMPARE_OP_EQUAL;
+        case CompareOperation_LessEqual:    return VK_COMPARE_OP_LESS_OR_EQUAL;
+        case CompareOperation_Greater:      return VK_COMPARE_OP_GREATER;
+        case CompareOperation_NotEqual:     return VK_COMPARE_OP_NOT_EQUAL;
+        case CompareOperation_GreaterEqual: return VK_COMPARE_OP_GREATER_OR_EQUAL;
+        case CompareOperation_Always:       return VK_COMPARE_OP_ALWAYS;
+        default:
+            return VK_COMPARE_OP_LESS_OR_EQUAL;
+        }
+    }
+
+    static VkStencilOp ConvertStencilOperation( EStencilOperation operation )
+    {
+        switch ( operation )
+        {
+        case StencilOperation_Keep:             return VK_STENCIL_OP_KEEP;
+        case StencilOperation_Zero:             return VK_STENCIL_OP_ZERO;
+        case StencilOperation_Replace:          return VK_STENCIL_OP_REPLACE;
+        case StencilOperation_IncrementClamp:   return VK_STENCIL_OP_INCREMENT_AND_CLAMP;
+        case StencilOperation_DecrementClamp:   return VK_STENCIL_OP_DECREMENT_AND_CLAMP;
+        case StencilOperation_Invert:           return VK_STENCIL_OP_INVERT;
+        case StencilOperation_IncrementWrap:    return VK_STENCIL_OP_INCREMENT_AND_WRAP;
+        case StencilOperation_DecrementWrap:    return VK_STENCIL_OP_DECREMENT_AND_WRAP;
+        default:
+            return VK_STENCIL_OP_MAX_ENUM;
+        }
+    }
+
     static VkDescriptorType ConvertDescriptorType( EBindingType type )
     {
         switch ( type )
@@ -1657,15 +1691,25 @@ namespace EE
             .flags = 0,
             .size = size,
             .usage = ConvertBufferUsageFlags( usage ),
-            .sharingMode = ConvertSharingMode( sharing ),
-            .queueFamilyIndexCount = 0,
-            .pQueueFamilyIndices = NULL,
         };
+
+        if ( device->GetGraphicsFamilyIndex() != device->GetPresentFamilyIndex() && sharing == SharingMode_Dynamic )
+        {
+            bufferInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
+            bufferInfo.queueFamilyIndexCount = 2;
+            bufferInfo.pQueueFamilyIndices = device->GetFamilyIndices();
+        }
+        else
+        {
+            bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+            bufferInfo.queueFamilyIndexCount = 1;
+            bufferInfo.pQueueFamilyIndices = device->GetFamilyIndices();
+        }
         
         VkResult createResult = vkCreateBuffer( device->GetVulkanDevice(), &bufferInfo, nullptr, &buffer );
         if ( createResult != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to create buffer {}!", (int32)createResult );
+            EE_LOG_CRITICAL( L"Failed to create buffer {}!", (int32)createResult );
         }
 
         VmaAllocationCreateInfo allocInfo
@@ -1719,13 +1763,13 @@ namespace EE
         VkResult result = vmaBindBufferMemory( device->GetVulkanAllocator(), nativeAllocation, buffer );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to bind buffer memory {}!", (int32)result );
+            EE_LOG_CRITICAL( L"Failed to bind buffer memory {}!", (int32)result );
         }
     }
 
     VulkanRHITexture::VulkanRHITexture( const RHITextureCreateInfo& info, VulkanRHIDevice* device, VkImage image ) :
         device( device ),
-        extents( info.width, info.height, info.depth ),
+        extents( info.extents ),
         format( ConvertPixelFormat( info.format ) ),
         pixelFormat( ConvertImageFormat( format ) ),
         sampler( VK_NULL_HANDLE ), memory( VK_NULL_HANDLE ),
@@ -1759,7 +1803,7 @@ namespace EE
 
         if ( vkCreateImageView( device->GetVulkanDevice(), &viewInfo, nullptr, &imageView ) != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to create texture image view!" );
+            EE_LOG_CRITICAL( L"Failed to create texture image view!" );
             return;
         }
 
@@ -1768,7 +1812,7 @@ namespace EE
 
     VulkanRHITexture::VulkanRHITexture( const RHITextureCreateInfo& info, VulkanRHIDevice* device ) :
         device( device ),
-        extents( info.width, info.height, info.depth ),
+        extents( info.extents ),
         format( ConvertPixelFormat( info.format ) ),
         pixelFormat( ConvertImageFormat( format ) ),
         ownership( true ),
@@ -1946,6 +1990,7 @@ namespace EE
             .imageExtent = size,
             .imageArrayLayers = 1,
             .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+            .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE
         };
 
         if ( device->GetGraphicsFamilyIndex() != device->GetPresentFamilyIndex() )
@@ -1982,9 +2027,12 @@ namespace EE
             RHITextureCreateInfo textureCreateInfo
             {
                 .type = TextureType_Texture2D,
-                .width = width,
-                .height = height,
-                .depth = 0,
+                .extents = 
+                {
+                    width,
+                    height,
+                    1
+                },
                 .arraySize = 1,
                 .mipLevels = 1,
                 .format = info.format,
@@ -2383,6 +2431,17 @@ namespace EE
         TArray<VkAttachmentReference> color;
     };
 
+    VulkanRHIRenderPass::~VulkanRHIRenderPass()
+    {
+        vkDestroyRenderPass( device->GetVulkanDevice(), renderPass, nullptr );
+
+        for ( auto& pair : framebufferAttachments )
+        {
+            vkDestroyFramebuffer( device->GetVulkanDevice(), pair.second, NULL );
+        }
+        framebufferAttachments.clear();
+    }
+
     VulkanRHIRenderPass::VulkanRHIRenderPass( const RHIRenderPassCreateInfo& info, VulkanRHIDevice* device )
         : renderPass( VK_NULL_HANDLE )
         , device( device )
@@ -2424,7 +2483,7 @@ namespace EE
                 };
             }
 
-            VkAttachmentReference depthStencilAttachment = VkAttachmentReference
+            VkAttachmentReference depthStencilAttachment
             {
                 .attachment = subpass.depthAttachment.atachmentIndex,
                 .layout = ConvertTextureLayout( subpass.depthAttachment.textureLayout ),
@@ -2466,13 +2525,16 @@ namespace EE
             };
         }
         
-        VkSubpassDependency dependency{};
-        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        dependency.dstSubpass = 0;
-        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.srcAccessMask = 0;
-        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        VkSubpassDependency dependency
+        {
+            .srcSubpass = VK_SUBPASS_EXTERNAL,
+            .dstSubpass = 0,
+            .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+            .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+            .srcAccessMask = 0,
+            .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+            .dependencyFlags = 0
+        };
 
         VkRenderPassCreateInfo renderPassInfo
         {
@@ -2490,26 +2552,21 @@ namespace EE
         VkResult result = vkCreateRenderPass( device->GetVulkanDevice(), &renderPassInfo, NULL, &renderPass );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CORE_CRITICAL( L"Failed to create render pass {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed to create render pass {}", (int32)result );
         }
     }
 
-    VulkanRHIRenderPass::~VulkanRHIRenderPass()
+    void VulkanRHIRenderPass::SetAttachments( uint32 attachmentCount, const RHITexture** textures )
     {
-        vkDestroyRenderPass( device->GetVulkanDevice(), renderPass, nullptr );
-
-        for ( auto& pair : framebufferAttachments )
+        size_t hash = 0;
+        TArray<VkImageView> imageViews( attachmentCount );
+        for ( uint32 i = 0; i < attachmentCount; i++ )
         {
-            vkDestroyFramebuffer( device->GetVulkanDevice(), pair.second, NULL );
+            imageViews[ i ] = static_cast<const VulkanRHITexture*>(textures[ i ])->GetVulkanImageView();
+            HashCombine( hash, imageViews[ i ] );
         }
-        framebufferAttachments.clear();
-    }
 
-    void VulkanRHIRenderPass::SetAttachment( const RHITexture* texture )
-    {
-        const VulkanRHITexture* vulkanTexture = static_cast<const VulkanRHITexture*>(texture);
-
-        if ( framebufferAttachments.contains( vulkanTexture->GetVulkanImageView() ) == false )
+        if ( framebufferAttachments.contains( hash ) == false )
         {
             VkFramebufferCreateInfo framebufferInfo
             {
@@ -2517,10 +2574,10 @@ namespace EE
                 .pNext = NULL,
                 .flags = 0,
                 .renderPass = renderPass,
-                .attachmentCount = 1,
-                .pAttachments = &vulkanTexture->GetVulkanImageView(),
-                .width = vulkanTexture->GetExtents().x,
-                .height = vulkanTexture->GetExtents().y,
+                .attachmentCount = attachmentCount,
+                .pAttachments = imageViews.data(),
+                .width = textures[ 0 ]->GetExtents().x,
+                .height = textures[ 0 ]->GetExtents().y,
                 .layers = 1
             };
 
@@ -2528,16 +2585,16 @@ namespace EE
             VkResult result = vkCreateFramebuffer( device->GetVulkanDevice(), &framebufferInfo, nullptr, &framebuffer );
             if ( result != VK_SUCCESS )
             {
-                EE_LOG_CORE_CRITICAL( L"Failed to create frame buffer! {}", (int32)result );
+                EE_LOG_CRITICAL( L"Failed to create frame buffer! {}", (int32)result );
                 return;
             }
 
-            framebufferAttachments.emplace( vulkanTexture->GetVulkanImageView(), framebuffer );
+            framebufferAttachments.emplace( hash, framebuffer );
             lastAttachment = framebuffer;
         }
         else
         {
-            lastAttachment = framebufferAttachments[ vulkanTexture->GetVulkanImageView() ];
+            lastAttachment = framebufferAttachments[ hash ];
         }
     }
 
@@ -2930,21 +2987,39 @@ namespace EE
             .alphaToOneEnable = VK_FALSE,       // Optional
         }; 
         
-        VkPipelineDepthStencilStateCreateInfo depStencil {};
-        // {
-        //     .sType
-        //     .pNext
-        //     .flags
-        //     .depthTestEnable
-        //     .depthWriteEnable
-        //     .depthCompareOp
-        //     .depthBoundsTestEnable
-        //     .stencilTestEnable
-        //     .front
-        //     .back
-        //     .minDepthBounds
-        //     .maxDepthBounds
-        // };
+        VkPipelineDepthStencilStateCreateInfo depStencilInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0,
+            .depthTestEnable = info.depthStencilState.depthEnabled,
+            .depthWriteEnable = info.depthStencilState.depthWriteEnabled,
+            .depthCompareOp = ConvertCompareOperation( info.depthStencilState.depthCompareOperation ),
+            .depthBoundsTestEnable = VK_FALSE,
+            .stencilTestEnable = info.depthStencilState.stencilEnabled,
+            .front =
+            {
+                .failOp = ConvertStencilOperation( info.depthStencilState.stencilFront.failOperation ),
+                .passOp = ConvertStencilOperation( info.depthStencilState.stencilFront.passOperation ),
+                .depthFailOp = ConvertStencilOperation( info.depthStencilState.stencilFront.depthFailOperation ),
+                .compareOp = ConvertCompareOperation( info.depthStencilState.stencilFront.compareOperation ),
+                .compareMask = info.depthStencilState.stencilFront.compareMask,
+                .writeMask = info.depthStencilState.stencilFront.writeMask,
+                .reference = info.depthStencilState.stencilFront.reference
+            },
+            .back =
+            {
+                .failOp = ConvertStencilOperation( info.depthStencilState.stencilBack.failOperation ),
+                .passOp = ConvertStencilOperation( info.depthStencilState.stencilBack.passOperation ),
+                .depthFailOp = ConvertStencilOperation( info.depthStencilState.stencilBack.depthFailOperation ),
+                .compareOp = ConvertCompareOperation( info.depthStencilState.stencilBack.compareOperation ),
+                .compareMask = info.depthStencilState.stencilBack.compareMask,
+                .writeMask = info.depthStencilState.stencilBack.writeMask,
+                .reference = info.depthStencilState.stencilBack.reference,
+            },
+            .minDepthBounds = 0.0F,
+            .maxDepthBounds = 1.0F,
+        };
 
         const uint32 setLayoutsCount = (uint32)info.bindLayouts.size();
         descriptorSetLayouts.resize( setLayoutsCount );
@@ -3034,7 +3109,7 @@ namespace EE
             .pViewportState = &viewportState,
             .pRasterizationState = &rasterizer,
             .pMultisampleState = &multisampling,
-            .pDepthStencilState = &depStencil,
+            .pDepthStencilState = &depStencilInfo,
             .pColorBlendState = &colorInfo,
             .pDynamicState = &dynamicState,
             .layout = pipelineLayout,

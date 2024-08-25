@@ -28,6 +28,13 @@ namespace EE
             HOST_DEVICE FORCEINLINE constexpr TVector3( const T& x, const T& y, const T& z );
             HOST_DEVICE FORCEINLINE constexpr TVector3( const T& x, const T& y );
 
+            HOST_DEVICE static constexpr TVector3<T> Right() { return TVector3<T>( T( 1 ), T( 0 ), T( 0 ) ); };
+            HOST_DEVICE static constexpr TVector3<T> Left() { return TVector3<T>( T( -1 ), T( 0 ), T( 0 ) ); };
+            HOST_DEVICE static constexpr TVector3<T> Up() { return TVector3<T>( T( 0 ), T( 1 ), T( 0 ) ); };
+            HOST_DEVICE static constexpr TVector3<T> Down() { return TVector3<T>( T( 0 ), T( -1 ), T( 0 ) ); };
+            HOST_DEVICE static constexpr TVector3<T> Forward() { return TVector3<T>( T( 0 ), T( 0 ), T( -1 ) ); };
+            HOST_DEVICE static constexpr TVector3<T> Back() { return TVector3<T>( T( 0 ), T( 0 ), T( 1 ) ); };
+
             HOST_DEVICE inline T Magnitude() const;
             HOST_DEVICE inline T MagnitudeSquared() const;
             HOST_DEVICE inline void Normalize();
@@ -75,11 +82,11 @@ namespace EE
 
         //* Get the angles in degrees in the range of (-180, 180) 
         template <typename T>
-        inline TVector3<T> NormalizeAngleComponents( TVector3<T> eulerAngle );
+        inline TVector3<T> NormalizeAngleComponents( TVector3<T> degrees );
 
         //* Get the angles in degrees in the range of [0, 360)
         template <typename T>
-        inline TVector3<T> ClampAngleComponents( TVector3<T> eulerAngle );
+        inline TVector3<T> ClampAngleComponents( TVector3<T> degrees );
 
     }
 }

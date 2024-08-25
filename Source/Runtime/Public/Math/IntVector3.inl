@@ -150,13 +150,13 @@ namespace EE::Math
 	}
 
     template <typename T>
-	FORCEINLINE bool TIntVector3<T>::operator==( const TIntVector3& other )
+	FORCEINLINE bool TIntVector3<T>::operator==( const TIntVector3& other ) const
 	{
 		return (x == other.x && y == other.y && z == other.z);
 	}
 
     template <typename T>
-	FORCEINLINE bool TIntVector3<T>::operator!=( const TIntVector3& other )
+	FORCEINLINE bool TIntVector3<T>::operator!=( const TIntVector3& other ) const
 	{
 		return (x != other.x || y != other.y || z != other.z);
 	}

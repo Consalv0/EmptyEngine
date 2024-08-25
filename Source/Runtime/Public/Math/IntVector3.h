@@ -43,8 +43,8 @@ namespace EE
             HOST_DEVICE inline T const& operator[]( unsigned char i ) const;
             HOST_DEVICE inline const T* PointerToValue() const;
 
-            HOST_DEVICE FORCEINLINE bool operator==( const TIntVector3& other );
-            HOST_DEVICE FORCEINLINE bool operator!=( const TIntVector3& other );
+            HOST_DEVICE FORCEINLINE bool operator==( const TIntVector3& other ) const;
+            HOST_DEVICE FORCEINLINE bool operator!=( const TIntVector3& other ) const;
 
             HOST_DEVICE FORCEINLINE TIntVector3 operator+( const TIntVector3& other ) const;
             HOST_DEVICE FORCEINLINE TIntVector3 operator-( const TIntVector3& other ) const;

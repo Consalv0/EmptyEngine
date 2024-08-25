@@ -122,14 +122,14 @@ namespace EE::Math
     template <typename T>
 	inline T& TVector4<T>::operator[]( unsigned char i )
 	{
-		EE_CORE_ASSERT( i <= 3, L"TVector4 index out of bounds" );
+		EE_ASSERT( i <= 3, L"TVector4 index out of bounds" );
 		return ((float*)this)[ i ];
 	}
 
     template <typename T>
 	inline T const& TVector4<T>::operator[]( unsigned char i ) const
 	{
-		EE_CORE_ASSERT( i <= 3, L"TVector4 index out of bounds" );
+		EE_ASSERT( i <= 3, L"TVector4 index out of bounds" );
 		return ((float*)this)[ i ];
 	}
 

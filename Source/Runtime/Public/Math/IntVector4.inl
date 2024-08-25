@@ -114,14 +114,14 @@ namespace EE::Math
     template <typename T>
 	inline T& TIntVector4<T>::operator[]( unsigned char i )
 	{
-		EE_CORE_ASSERT( i <= 3, "TIntVector4 index out of bounds" );
+		EE_ASSERT( i <= 3, "TIntVector4 index out of bounds" );
 		return ((T*)this)[ i ];
 	}
 
     template <typename T>
 	inline T const& TIntVector4<T>::operator[]( unsigned char i ) const
 	{
-		EE_CORE_ASSERT( i <= 3, "TIntVector4 index out of bounds" );
+		EE_ASSERT( i <= 3, "TIntVector4 index out of bounds" );
 		return ((T*)this)[ i ];
 	}
 

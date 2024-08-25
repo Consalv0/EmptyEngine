@@ -25,6 +25,7 @@ namespace EE
         static constexpr float DegToRad = Pi / 180.0F;
         static constexpr float SquareRoot2 = 1.41421356237F;
     };
+    typedef MathConstants<float> FMathConstants;
 
     template<>
     struct MathConstants<double>
@@ -43,6 +44,7 @@ namespace EE
         static constexpr double DegToRad = Pi / 180.0;
         static constexpr double SquareRoot2 = 1.4142135623730950488016887242097;
     };
+    typedef MathConstants<double> DMathConstants;
 
     template<>
     struct MathConstants<int32>
@@ -56,6 +58,20 @@ namespace EE
     {
         static constexpr int64 MaxValue = INT64_MAX;
         static constexpr int64 MinValue = INT64_MIN;
+    };
+
+    template<>
+    struct MathConstants<uint32>
+    {
+        static constexpr int64 MaxValue = UINT32_MAX;
+        static constexpr int64 MinValue = 0;
+    };
+
+    template<>
+    struct MathConstants<uint64>
+    {
+        static constexpr int64 MaxValue = UINT64_MAX;
+        static constexpr int64 MinValue = 0;
     };
 }
 
@@ -131,6 +147,10 @@ namespace EE::Math
 	// Error consideration
     template <typename T>
 	inline T Atan2( const T& y, const T& x );
+
+    // Arc sine function
+    template <typename T>
+    inline T Asin( const T& value );
 
     // Sine function
     template <typename T>

@@ -31,15 +31,15 @@ namespace EE
             HOST_DEVICE FORCEINLINE constexpr TQuaternion( T const& w, T const& x, T const& y, T const& z );
 
             //* Create a quaternion from euler angles (pitch, yaw, roll).
-            HOST_DEVICE static FORCEINLINE TQuaternion FromEulerAngles( TVector3<T> const& eulerAngles );
+            HOST_DEVICE static FORCEINLINE TQuaternion FromEulerAngles( TVector3<T> const& degrees );
             //* Create a quaternion from two normalized axis
             HOST_DEVICE static FORCEINLINE TQuaternion FromToRotation( TVector3<T> const& from, TVector3<T> const& To );
-            HOST_DEVICE static FORCEINLINE TQuaternion FromAxisAngle( TVector3<T> const& axis, T const& degrees );
+            HOST_DEVICE static FORCEINLINE TQuaternion FromAxisAngle( TVector3<T> const& axis, T const& radians );
             //* Ctreate quaternion from two basis vectors
             HOST_DEVICE static FORCEINLINE TQuaternion FromLookRotation( TVector3<T> const& forward, TVector3<T> const& up );
             HOST_DEVICE static FORCEINLINE TQuaternion FromMatrix( TMatrix3x3<T> const& matrix );
 
-            HOST_DEVICE static void Interpolate( TQuaternion& Out, const TQuaternion& start, const TQuaternion& end, T factor );
+            HOST_DEVICE static void Interpolate( const TQuaternion& start, const TQuaternion& end, T factor, TQuaternion& out );
 
             HOST_DEVICE inline T Magnitude() const;
             HOST_DEVICE inline T MagnitudeSquared() const;
@@ -49,12 +49,20 @@ namespace EE
             HOST_DEVICE inline TQuaternion Inversed() const;
 
             HOST_DEVICE inline TMatrix4x4<T> ToMatrix4x4() const;
+            
             //* Deconstruct quaternion to euler angles pitch (degrees)
             HOST_DEVICE inline T GetPitch() const;
             //* Deconstruct quaternion to euler angles yaw (degrees)
             HOST_DEVICE inline T GetYaw() const;
             //* Deconstruct quaternion to euler angles roll (degrees)
             HOST_DEVICE inline T GetRoll() const;
+            //* Same as TQuaternion * TVector3::Right()
+            HOST_DEVICE inline TVector3<T> Right() const;
+            //* Same as TQuaternion * TVector3::Up()
+            HOST_DEVICE inline TVector3<T> Up() const;
+            //* Same as TQuaternion * TVector3::Forward()
+            HOST_DEVICE inline TVector3<T> Forward() const;
+
             HOST_DEVICE inline T GetScalar() const;
             HOST_DEVICE inline TVector3<T> GetVector() const;
             //* Deconstruct quaternion to euler angles (degrees)
