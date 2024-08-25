@@ -488,7 +488,7 @@ namespace EE
         ETopologyMode topologyMode = TopologyMode_TriangleList;
         ERasterMode rasterMode = RasterMode_Solid;
         ECullModeFlags cullMode = CullMode_Back_Bit;
-        EFaceWinding frontFace = FaceWinding_CounterClockwise;
+        EFaceWinding frontFace = FaceWinding_Clockwise;
         // Clip or clamp depth
         bool depthClip = false;
     };
@@ -510,7 +510,7 @@ namespace EE
         bool depthWriteEnabled = false;
         bool stencilEnabled = false;
         EPixelFormat format = PixelFormat_MAX;
-        ECompareOperation depthCompareOperation = CompareOperation_Always;
+        ECompareOperation depthCompareOperation = CompareOperation_GreaterEqual;
         int32 depthBias = 0;
         float depthBiasSlopeScale = 0.0F;
         float depthBiasClamp = 0.0F;

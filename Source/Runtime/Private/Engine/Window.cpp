@@ -105,7 +105,7 @@ namespace EE
 
         GDynamicRHI->CreateRHIPresentContextOfWindow( this );
 
-        // SDL_SetWindowKeyboardGrab( (SDL_Window*)windowHandle, SDL_bool( false ) );
+        SDL_SetWindowKeyboardGrab( (SDL_Window*)windowHandle, SDL_bool( false ) );
         SDL_AddEventWatch( WindowEventsHandler, (void*)this );
         return true;
     }
