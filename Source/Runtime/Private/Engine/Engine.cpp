@@ -91,15 +91,12 @@ namespace EE
         windows.erase( std::remove( windows.begin(), windows.end(), window ) );
         windowCount--;
 
-        EE_LOG_INFO( L"Window '{}' destroying!", window->GetName() );
         delete window;
     }
 
     Window* GameEngine::CreateWindow( const WindowCreateDescription& description )
     {
         Window* window = PlatformCreateWindow( description );
-
-        EE_LOG_INFO( L"Window '{}' created!", description.name );
 
         windows.push_back( window );
         windowCount++;
