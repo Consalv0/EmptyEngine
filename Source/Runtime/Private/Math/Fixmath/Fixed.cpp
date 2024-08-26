@@ -7,7 +7,7 @@ namespace EE
 //     /* Subtraction and addition with overflow detection.
 //      * The versions without overflow detection are inlined in the header.
 //      */
-// #ifndef FIXMATH_NO_OVERFLOW
+// #ifndef EE_FIXMATH_NO_OVERFLOW
 // 
 //     fixed fixed::Add( const fixed& a, const fixed& b ) noexcept
 //     {
@@ -76,33 +76,33 @@ namespace EE
 //      * detection.
 //      */
 // 
-// #if !defined(FIXMATH_NO_64BIT) && !defined(FIXMATH_OPTIMIZE_8BIT)
+// #if !defined(EE_FIXMATH_NO_64BIT) && !defined(EE_FIXMATH_OPTIMIZE_8BIT)
 //     fixed fixed::Multiply( const fixed& a, const fixed& b ) noexcept
 //     {
 //         int64 product = (int64)a.value * b.value;
 // 
-// #ifndef FIXMATH_NO_OVERFLOW
+// #ifndef EE_FIXMATH_NO_OVERFLOW
 //         // The upper 17 bits should all be the same (the sign).
 //         uint32 upper = (product >> 47);
 // #endif
 // 
 //         if ( product < 0 )
 //         {
-// #ifndef FIXMATH_NO_OVERFLOW
+// #ifndef EE_FIXMATH_NO_OVERFLOW
 //             if ( ~upper )
 //             {
 //                 return fix16_t( FIX16_OVERFLOW );
 //             }
 // #endif
 // 
-// #ifndef FIXMATH_NO_ROUNDING
+// #ifndef EE_FIXMATH_NO_ROUNDING
 //             // This adjustment is required in order to round -1/2 correctly
 //             product--;
 // #endif
 //         }
 //         else
 //         {
-// #ifndef FIXMATH_NO_OVERFLOW
+// #ifndef EE_FIXMATH_NO_OVERFLOW
 //             if ( upper )
 //             {
 //                 return fix16_t( FIX16_OVERFLOW );
@@ -110,7 +110,7 @@ namespace EE
 // #endif
 //         }
 // 
-// #ifdef FIXMATH_NO_ROUNDING
+// #ifdef EE_FIXMATH_NO_ROUNDING
 // #pragma warning( suppress : 4244 )
 //         fix16_t result = product >> 16;
 //         return result;
@@ -128,7 +128,7 @@ namespace EE
 //      * and this is a relatively good compromise for compilers that do not support
 //      * uint64_t. Uses 16*16->32bit multiplications.
 //      */
-// #if defined(FIXMATH_NO_64BIT) && !defined(FIXMATH_OPTIMIZE_8BIT)
+// #if defined(EE_FIXMATH_NO_64BIT) && !defined(EE_FIXMATH_OPTIMIZE_8BIT)
 //     fixed fixed::Muliply( const fixed& a, const fixed& b ) noexcept
 //     {
 //         // Each argument is divided to 16-bit parts.
@@ -155,13 +155,13 @@ namespace EE
 //         if ( product_lo < BD )
 //             product_hi++;
 // 
-// #ifndef FIXMATH_NO_OVERFLOW
+// #ifndef EE_FIXMATH_NO_OVERFLOW
 //         // The upper 17 bits should all be the same (the sign).
 //         if ( product_hi >> 31 != product_hi >> 15 )
 //             return fix16_t( FIX16_OVERFLOW );
 // #endif
 // 
-// #ifdef FIXMATH_NO_ROUNDING
+// #ifdef EE_FIXMATH_NO_ROUNDING
 //         return (product_hi << 16) | (product_lo >> 16);
 // #else
 //         // Subtracting 0x8000 (= 0.5) and then using signed right shift
@@ -189,7 +189,7 @@ namespace EE
 //      * Uses 8*8->16bit multiplications, and also skips any bytes that
 //      * are zero.
 //      */
-// #if defined(FIXMATH_OPTIMIZE_8BIT)
+// #if defined(EE_FIXMATH_OPTIMIZE_8BIT)
 //     fixed Multiply( const fixed& a, const fixed& b ) noexcept
 //     {
 //         uint32 _a = (a.value >= 0) ? a.value : (-a.value);
@@ -203,7 +203,7 @@ namespace EE
 // 
 //         // Result column i depends on va[0..i] and vb[i..0]
 // 
-// #ifndef FIXMATH_NO_OVERFLOW
+// #ifndef EE_FIXMATH_NO_OVERFLOW
 // // i = 6
 //         if ( va[ 3 ] && vb[ 3 ] )
 //         {
@@ -221,7 +221,7 @@ namespace EE
 //         if ( va[ 2 ] && vb[ 2 ] ) mid += (uint16)va[ 2 ] * vb[ 2 ];
 //         if ( va[ 3 ] && vb[ 1 ] ) mid += (uint16)va[ 3 ] * vb[ 1 ];
 // 
-// #ifndef FIXMATH_NO_OVERFLOW
+// #ifndef EE_FIXMATH_NO_OVERFLOW
 //         if ( mid & 0xFF000000 )
 //         {
 //             return fix16_t( FIX16_OVERFLOW );
@@ -235,7 +235,7 @@ namespace EE
 //         if ( va[ 2 ] && vb[ 1 ] ) mid += (uint16)va[ 2 ] * vb[ 1 ];
 //         if ( va[ 3 ] && vb[ 0 ] ) mid += (uint16)va[ 3 ] * vb[ 0 ];
 // 
-// #ifndef FIXMATH_NO_OVERFLOW
+// #ifndef EE_FIXMATH_NO_OVERFLOW
 //         if ( mid & 0xFF000000 )
 //         {
 //              return fix16_t( FIX16_OVERFLOW );
@@ -256,12 +256,12 @@ namespace EE
 //         // i = 0
 //         if ( va[ 0 ] && vb[ 0 ] ) low += (uint16)va[ 0 ] * vb[ 0 ];
 // 
-// #ifndef FIXMATH_NO_ROUNDING
+// #ifndef EE_FIXMATH_NO_ROUNDING
 //         low += 0x8000;
 // #endif
 //         mid += (low >> 16);
 // 
-// #ifndef FIXMATH_NO_OVERFLOW
+// #ifndef EE_FIXMATH_NO_OVERFLOW
 //         if ( mid & 0x80000000 )
 //         {
 //             return fix16_t( FIX16_OVERFLOW );
@@ -280,7 +280,7 @@ namespace EE
 //     }
 // #endif
 // 
-// #ifndef FIXMATH_NO_OVERFLOW
+// #ifndef EE_FIXMATH_NO_OVERFLOW
 //     /* Wrapper around fix16_mul to add saturating arithmetic. */
 //     fixed fixed::SaturateMultiply( const fixed& a, const fixed& b ) noexcept
 //     {
@@ -302,7 +302,7 @@ namespace EE
 //      * Performs 32-bit divisions repeatedly to reduce the remainder. For this to
 //      * be efficient, the processor has to have 32-bit hardware division.
 //      */
-// #if !defined(FIXMATH_OPTIMIZE_8BIT)
+// #if !defined(EE_FIXMATH_OPTIMIZE_8BIT)
 // #ifdef __GNUC__
 //      // Count leading zeros, using processor-specific instruction if available.
 // #define clz(x) __builtin_clzl(x)
@@ -361,7 +361,7 @@ namespace EE
 //             remainder = remainder % divider;
 //             quotient += div << bit_pos;
 // 
-// #ifndef FIXMATH_NO_OVERFLOW
+// #ifndef EE_FIXMATH_NO_OVERFLOW
 //             if ( div & ~(0xFFFFFFFF >> bit_pos) )
 //             {
 //                 return fix16_t( FIX16_OVERFLOW );
@@ -372,7 +372,7 @@ namespace EE
 //             bit_pos--;
 //         }
 // 
-// #ifndef FIXMATH_NO_ROUNDING
+// #ifndef EE_FIXMATH_NO_ROUNDING
 //         // Quotient is always positive so rounding is easy
 //         quotient++;
 // #endif
@@ -382,7 +382,7 @@ namespace EE
 //         // Figure out the sign of the result
 //         if ( (a.value ^ b.value) & 0x80000000 )
 //         {
-// #ifndef FIXMATH_NO_OVERFLOW
+// #ifndef EE_FIXMATH_NO_OVERFLOW
 //             if ( result == FIXED_MIN )
 //             {
 //                 return fix16_t( FIX16_OVERFLOW );
@@ -400,7 +400,7 @@ namespace EE
 //      * This does the division manually, and is therefore good for processors that
 //      * do not have hardware division.
 //      */
-// #if defined(FIXMATH_OPTIMIZE_8BIT)
+// #if defined(EE_FIXMATH_OPTIMIZE_8BIT)
 //     fixed fixed::Divide( const fixed& a, const fixed& b ) noexcept
 //     {
 //         // This uses the basic binary restoring division algorithm.
@@ -427,7 +427,7 @@ namespace EE
 //             bit <<= 1;
 //         }
 // 
-// #ifndef FIXMATH_NO_OVERFLOW
+// #ifndef EE_FIXMATH_NO_OVERFLOW
 //         if ( !bit )
 //         {
 //             return fix16_t( FIX16_OVERFLOW );
@@ -460,7 +460,7 @@ namespace EE
 //             bit >>= 1;
 //         }
 // 
-// #ifndef FIXMATH_NO_ROUNDING
+// #ifndef EE_FIXMATH_NO_ROUNDING
 //         if ( remainder >= divider )
 //         {
 //             quotient++;
@@ -472,7 +472,7 @@ namespace EE
 //         /* Figure out the sign of result */
 //         if ( (a.value ^ b.value) & 0x80000000 )
 //         {
-// #ifndef FIXMATH_NO_OVERFLOW
+// #ifndef EE_FIXMATH_NO_OVERFLOW
 //             if ( result == FIXED_MIN )
 //             {
 //                 return fix16_t( FIX16_OVERFLOW );
@@ -486,7 +486,7 @@ namespace EE
 //     }
 // #endif
 // 
-// #ifndef FIXMATH_NO_OVERFLOW
+// #ifndef EE_FIXMATH_NO_OVERFLOW
 //     /* Wrapper around fix16_div to add saturating arithmetic. */
 //     fixed fixed::SaturateDivide( const fixed& a, const fixed& b ) noexcept
 //     {
@@ -520,7 +520,7 @@ namespace EE
 //         return fix16_t( (int32)(tempOut & ((1ULL << 32) - 1)) );
 //     }
 // 
-// #ifndef FIXMATH_NO_64BIT
+// #ifndef EE_FIXMATH_NO_64BIT
 //     fixed fixed::Lerp32( const fixed& a, const fixed& b, const uint32& inFract ) noexcept
 //     {
 //         int64 tempOut;
@@ -531,14 +531,14 @@ namespace EE
 //     }
 // #endif
 // 
-// #if defined(FIXMATH_SIN_LUT)
+// #if defined(EE_FIXMATH_SIN_LUT)
 // #include "Math/Fixmath/Fix16_SinLut.h"
-// #elif !defined(FIXMATH_NO_CACHE)
+// #elif !defined(EE_FIXMATH_NO_CACHE)
 //     static int32 _fix16_sin_cache_index[ 4096 ] = { 0 };
 //     static int32 _fix16_sin_cache_value[ 4096 ] = { 0 };
 // #endif
 // 
-// #ifndef FIXMATH_NO_CACHE
+// #ifndef EE_FIXMATH_NO_CACHE
 //     static int32 _fix16_atan_cache_index[ 2 ][ 4096 ] = { { 0 }, { 0 } };
 //     static int32 _fix16_atan_cache_value[ 4096 ] = { 0 };
 // #endif
@@ -568,7 +568,7 @@ namespace EE
 //         /* At this point, retval equals sin(inAngle) on important points ( -PI, -PI/2, 0, PI/2, PI),
 //            but is not very precise between these points
 //          */
-// #ifndef FIXMATH_FAST_SIN
+// #ifndef EE_FIXMATH_FAST_SIN
 //          /* Absolute value of retval */
 //         mask = (retval >> (sizeof( int32 ) * CHAR_BIT - 1));
 //         abs_retval = (retval + mask) ^ mask;
@@ -584,7 +584,7 @@ namespace EE
 //     {
 //         int32 tempAngle = inAngle.value % (FIX16_PI << 1);
 // 
-// #ifdef FIXMATH_SIN_LUT
+// #ifdef EE_FIXMATH_SIN_LUT
 //         if ( tempAngle < 0 )
 //             tempAngle += (FIX16_PI << 1);
 // 
@@ -608,7 +608,7 @@ namespace EE
 //         else if ( tempAngle < -FIX16_PI )
 //             tempAngle += (FIX16_PI << 1);
 // 
-// #ifndef FIXMATH_NO_CACHE
+// #ifndef EE_FIXMATH_NO_CACHE
 //         int32 tempIndex = ((inAngle.value >> 5) & 0x00000FFF);
 //         if ( _fix16_sin_cache_index[ tempIndex ] == inAngle.value )
 //             return (fix16_t)_fix16_sin_cache_value[ tempIndex ];
@@ -616,7 +616,7 @@ namespace EE
 // 
 //         fixed tempAngleSq = Multiply( fix16_t( tempAngle ), fix16_t( tempAngle ) );
 // 
-// #ifndef FIXMATH_FAST_SIN // Most accurate version, accurate to ~2.1%
+// #ifndef EE_FIXMATH_FAST_SIN // Most accurate version, accurate to ~2.1%
 //         fixed tempAngle2 = (fix16_t)tempAngle;
 //         fixed tempOut = tempAngle2;
 // 
@@ -642,7 +642,7 @@ namespace EE
 //         tempOut *= (fix16_t)tempAngle;
 // #endif
 // 
-// #ifndef FIXMATH_NO_CACHE
+// #ifndef EE_FIXMATH_NO_CACHE
 //         _fix16_sin_cache_index[ tempIndex ] = inAngle.value;
 //         _fix16_sin_cache_value[ tempIndex ] = tempOut.value;
 // #endif
@@ -658,7 +658,7 @@ namespace EE
 // 
 //     fixed fixed::Tan( const fixed& inAngle ) noexcept
 //     {
-// #ifndef FIXMATH_NO_OVERFLOW
+// #ifndef EE_FIXMATH_NO_OVERFLOW
 //         return SaturateDivide( Sin( inAngle ), Cos( inAngle ) );
 // #else
 //         return Divide( Sin( inAngle ), Cos( inAngle ) );
@@ -688,7 +688,7 @@ namespace EE
 //         int32 abs_inY, mask, angle;
 //         fixed r, r_3;
 // 
-// #ifndef FIXMATH_NO_CACHE
+// #ifndef EE_FIXMATH_NO_CACHE
 //         uintptr_t hash = (inX.value ^ inY.value);
 //         hash ^= hash >> 20;
 //         hash &= 0x0FFF;
@@ -717,7 +717,7 @@ namespace EE
 //             angle = -angle;
 //         }
 // 
-// #ifndef FIXMATH_NO_CACHE
+// #ifndef EE_FIXMATH_NO_CACHE
 //         _fix16_atan_cache_index[ 0 ][ hash ] = inX.value;
 //         _fix16_atan_cache_index[ 1 ][ hash ] = inY.value;
 //         _fix16_atan_cache_value[ hash ] = angle;
@@ -803,7 +803,7 @@ namespace EE
 //             }
 //         }
 // 
-// #ifndef FIXMATH_NO_ROUNDING
+// #ifndef EE_FIXMATH_NO_ROUNDING
 //         // Finally, if next bit would have been 1, round the result upwards.
 //         if ( num > result )
 //         {
@@ -815,7 +815,7 @@ namespace EE
 //         return (fix16_t)(neg ? -result : result);
 //     }
 // 
-// #ifndef FIXMATH_NO_CACHE
+// #ifndef EE_FIXMATH_NO_CACHE
 //     static int32 _fix16_exp_cache_index[ 4096 ] = { 0 };
 //     static int32 _fix16_exp_cache_value[ 4096 ] = { 0 };
 // #endif
@@ -831,7 +831,7 @@ namespace EE
 //         if ( inValue.value < -726817 )
 //             return (fix16_t)0;
 // 
-// #ifndef FIXMATH_NO_CACHE
+// #ifndef EE_FIXMATH_NO_CACHE
 //         int32 tempIndex = (inValue.value ^ (inValue.value >> 16));
 //         tempIndex = (inValue.value ^ (inValue.value >> 4)) & 0x0FFF;
 //         if ( _fix16_exp_cache_index[ tempIndex ] == inValue.value )
@@ -844,7 +844,7 @@ namespace EE
 //         for ( i = 3, n = 2; i < 13; n *= i, i++ )
 //         {
 //             tempValue = ( tempValue * inValue.value );
-// #ifndef FIXMATH_NO_ROUNDING
+// #ifndef EE_FIXMATH_NO_ROUNDING
 //             tempValue = ( tempValue + int64( FIX16_ONE >> 1 ) );
 // #endif
 // #pragma warning( suppress : 4293 )
@@ -852,7 +852,7 @@ namespace EE
 //             tempOut = ( tempOut + ( tempValue / n ) );
 //         }
 // 
-// #ifndef FIXMATH_NO_CACHE
+// #ifndef EE_FIXMATH_NO_CACHE
 //         _fix16_exp_cache_index[ tempIndex ] = inValue.value;
 //         _fix16_exp_cache_value[ tempIndex ] = (tempOut & ((1ULL << 32) - 1));
 // #endif

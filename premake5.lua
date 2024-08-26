@@ -14,8 +14,8 @@ project "EmptyEngine"
 
     defines {
         "EMPTYENGINE_CORE",
-        --"FIXMATH_NO_ROUNDING",
-        --"FIXMATH_NO_OVERFLOW",
+        --"EE_FIXMATH_NO_ROUNDING",
+        --"EE_FIXMATH_NO_OVERFLOW",
     }
 
     files {

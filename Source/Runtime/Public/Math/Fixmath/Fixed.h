@@ -4,7 +4,7 @@
 #define FIXED_MAX 0x7FFFFFFF
 // The minimum value of fixed
 #define FIXED_MIN 0x80000000 
-// The value used to indicate overflows when FIXMATH_NO_OVERFLOW is not specified
+// The value used to indicate overflows when EE_FIXMATH_NO_OVERFLOW is not specified
 #define FIXED_OVERFLOW 0x80000000
 
 //         I N T E G R A L           F R A C T I O N A L ( F = 8 )
@@ -96,7 +96,7 @@ namespace EE
 
         // Single precision float to fixed-point conversion.
         explicit FORCEINLINE constexpr fixed( const float& value ) : xValue( (int32)((float)(value) * (float)FIXED_ONE( Frac )
-#ifndef FIXMATH_NO_ROUNDING
+#ifndef EE_FIXMATH_NO_ROUNDING
             + ((float)(value) > 0 ? 0.5F : -0.5F))
 #endif
         ) { }
@@ -109,7 +109,7 @@ namespace EE
 
         // Double precision float to fixed-point conversion.
         explicit FORCEINLINE constexpr fixed( const double& value ) : xValue( (int32)((double)(value) * (double)FIXED_ONE( Frac )
-#ifndef FIXMATH_NO_ROUNDING
+#ifndef EE_FIXMATH_NO_ROUNDING
             + ((double)(value) > 0 ? 0.5 : -0.5))
 #endif
         ) { }
@@ -227,7 +227,7 @@ namespace EE
         {
             int64 product = (int64)(a.xValue) * (int64)(b.xValue);
 
-#ifdef FIXMATH_NO_ROUNDING
+#ifdef EE_FIXMATH_NO_ROUNDING
 #pragma warning( suppress : 4244 )
             fixed result; result.xValue = product >> (Frac - 1);
             return result;
@@ -271,7 +271,7 @@ namespace EE
                 }
             }
 
-#ifdef FIXMATH_NO_ROUNDING
+#ifdef EE_FIXMATH_NO_ROUNDING
 #pragma warning( suppress : 4244 )
             fixed result; result.xValue = product >> (Frac - 1);
             return result;
@@ -333,7 +333,7 @@ namespace EE
         //         // Returns the linear interpolation: (inArg0 * (1 - inFract)) + (inArg1 * inFract)
         //         static EE_DLLEXPORT fixed Lerp16( const fixed& a, const fixed& b, const uint16& inFract ) noexcept;
         // 
-        // #ifndef FIXMATH_NO_64BIT
+        // #ifndef EE_FIXMATH_NO_64BIT
         //         // Returns the linear interpolation: (inArg0 * (1 - inFract)) + (inArg1 * inFract)
         //         static EE_DLLEXPORT fixed Lerp32( const fixed& a, const fixed& b, const uint32& inFract ) noexcept;
         // #endif
