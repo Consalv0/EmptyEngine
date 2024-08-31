@@ -7,7 +7,6 @@
 #include "Engine/Input.h"
 
 #include "Math/CoreMath.h"
-#include "Rendering/RenderPipeline.h"
 
 #if defined(ES_PLATFORM_WINDOWS) & defined(ES_PLATFORM_CUDA)
 #include "CUDA/CoreCUDA.h"
@@ -15,7 +14,7 @@
 
 namespace EE
 {
-    Application::Application() : initialized( false ), canInitialize( false )
+    Application::Application() : initialized( false ), initializationError( false )
     {
     }
 
@@ -33,7 +32,7 @@ namespace EE
 
     void Application::OnTerminate()
     {
-        canInitialize = false;
+        initializationError = false;
     }
 
     bool Application::Initialize()
@@ -57,7 +56,7 @@ namespace EE
         GEngine->PollEvents();
         OnProcessInput();
 
-        OnTick( Ticker::GetTimeStamp() );
+        OnTick();
 
         for ( uint64 i = 0; i < GEngine->windowCount; i++ )
         {

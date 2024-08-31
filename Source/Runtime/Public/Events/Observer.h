@@ -1,6 +1,8 @@
 #pragma once
 
 #include "CoreTypes.h"
+
+#include "Core/Collections.h"
 #include <functional>
 
 namespace ESource {

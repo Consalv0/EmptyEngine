@@ -1,9 +1,7 @@
 #pragma once
 
+#include "Core/Name.h"
 #include "Core/KeyCodes.h"
-
-#include "Math/MathUtils.h"
-#include "Math/Vector2.h"
 
 namespace EE
 {
@@ -46,7 +44,7 @@ namespace EE
         virtual void UpdateMouseState();
 
 		//* Get mouse position in screen coordinates relative to the upper left position of the window
-		virtual const Point2f& GetMousePosition( bool realtive ) const;
+		virtual void GetMousePosition( float* x, float* y, bool realtive ) const;
 
         virtual void InputEventsHandler( const InputEvent& inputEvent );
 

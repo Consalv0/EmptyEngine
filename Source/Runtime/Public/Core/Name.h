@@ -45,11 +45,6 @@ namespace EE
 		bool operator==( const Name& other ) const;
 
 		bool operator!=( const Name& other ) const;
-
-	private:
-		static TMap<size_t, WString> GWideNamesTable;
-		static TMap<size_t, NString> GNarrowNamesTable;
-		static TMap<size_t, size_t> GNameCountTable;
 	};
 
 	extern EE::Name GEmptyName;

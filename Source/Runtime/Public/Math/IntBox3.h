@@ -1,9 +1,5 @@
 #pragma once
 
-#include "Math/MathUtils.h"
-#include "Math/Matrix4x4.h"
-#include "Math/IntVector3.h"
-
 namespace EE::Math
 {
     template<typename T>

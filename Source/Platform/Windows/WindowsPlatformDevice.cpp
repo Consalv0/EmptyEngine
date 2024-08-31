@@ -77,7 +77,8 @@ namespace EE
 
     PlatformDevice* GPlatformDevice = NULL;
 
-    PlatformDevice* PlatformCreatePlatformDevice() {
+    PlatformDevice* PlatformCreatePlatformDevice()
+    {
 		return new WindowsPlatformDevice();
 	}
 

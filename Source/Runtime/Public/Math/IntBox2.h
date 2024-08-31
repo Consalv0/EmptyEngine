@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Math/MathUtils.h"
-#include "Math/IntVector2.h"
-
 namespace EE::Math
 {
     template<typename T>

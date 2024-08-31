@@ -1,5 +1,3 @@
-#include "CoreMinimal.h"
-#include "Math/Transform.h"
 
 namespace EE::Math
 {
@@ -33,6 +31,14 @@ namespace EE::Math
 		rotation = matrix.ExtractRotation();
 		scale = matrix.ExtractScale();
 	}
+
+    template <typename T>
+    TTransform<T>::TTransform( const TTransform<T>& other ) :
+        position( other.position ),
+        rotation( other.rotation ),
+        scale( other.scale )
+    {
+    }
 
     template <typename T>
 	TMatrix4x4<T> TTransform<T>::GetWorldToLocalMatrix() const

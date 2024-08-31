@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CoreTypes.h"
 #include "Files/FileStream.h"
+#include "Core/Collections.h"
 
 namespace EE
 {

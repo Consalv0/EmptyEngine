@@ -1,14 +1,17 @@
 
 #include "CoreMinimal.h"
+
+#include "Core/Name.h"
+
 #include "Utils/Hasher.h"
 #include "Utils/TextFormatting.h"
-#include "Core/Name.h"
+#include "Core/Collections.h"
 
 namespace EE
 {
-    TMap<size_t, WString> Name::GWideNamesTable = TMap<size_t, WString>();
-    TMap<size_t, NString> Name::GNarrowNamesTable = TMap<size_t, NString>();
-    TMap<size_t, size_t> Name::GNameCountTable = TMap<size_t, size_t>();
+    static TMap<size_t, WString> GWideNamesTable = TMap<size_t, WString>();
+    static TMap<size_t, NString> GNarrowNamesTable = TMap<size_t, NString>();
+    static TMap<size_t, size_t> GNameCountTable = TMap<size_t, size_t>();
     
     Name GEmptyName = { L"", 0 };
 

@@ -1,12 +1,4 @@
 
-#include <math.h>
-#include <stdexcept>
-
-#include "Math/Vector3.h"
-#include "Math/Vector4.h"
-#include "Math/Quaternion.h"
-#include "Math/Matrix4x4.h"
-
 namespace EE::Math
 {
     template <typename T>
@@ -391,29 +383,30 @@ namespace EE::Math
     template <typename T>
 	FORCEINLINE TMatrix4x4<T> TMatrix4x4<T>::operator*( const TMatrix4x4& other ) const
 	{
-		TMatrix4x4 result = TMatrix4x4();
+        const TVector4<T> col0 = GetColumn( 0 ), col1 = GetColumn( 1 ), col2 = GetColumn( 2 ), col3 = GetColumn( 3 );
 
-		const TVector4<T> col0 = GetColumn( 0 ), col1 = GetColumn( 1 ), col2 = GetColumn( 2 ), col3 = GetColumn( 3 );
+        TMatrix4x4<T> result
+        (
+            other.m0.Dot( col0 ),   // m00
+            other.m0.Dot( col1 ),   // m01
+            other.m0.Dot( col2 ),   // m02
+            other.m0.Dot( col3 ),   // m03
 
-		result.m00 = other.m0.Dot( col0 );
-		result.m10 = other.m1.Dot( col0 );
-		result.m20 = other.m2.Dot( col0 );
-		result.m30 = other.m3.Dot( col0 );
+            other.m1.Dot( col0 ),   // m10
+            other.m1.Dot( col1 ),   // m11
+            other.m1.Dot( col2 ),   // m12
+            other.m1.Dot( col3 ),   // m13
 
-		result.m01 = other.m0.Dot( col1 );
-		result.m11 = other.m1.Dot( col1 );
-		result.m21 = other.m2.Dot( col1 );
-		result.m31 = other.m3.Dot( col1 );
+            other.m2.Dot( col0 ),   // m20
+            other.m2.Dot( col1 ),   // m21
+            other.m2.Dot( col2 ),   // m22
+            other.m2.Dot( col3 ),   // m23
 
-		result.m02 = other.m0.Dot( col2 );
-		result.m12 = other.m1.Dot( col2 );
-		result.m22 = other.m2.Dot( col2 );
-		result.m32 = other.m3.Dot( col2 );
-
-		result.m03 = other.m0.Dot( col3 );
-		result.m13 = other.m1.Dot( col3 );
-		result.m23 = other.m2.Dot( col3 );
-		result.m33 = other.m3.Dot( col3 );
+            other.m3.Dot( col0 ),   // m30
+            other.m3.Dot( col1 ),   // m31
+            other.m3.Dot( col2 ),   // m32
+            other.m3.Dot( col3 )    // m33
+        );
 
 		return result;
 	}

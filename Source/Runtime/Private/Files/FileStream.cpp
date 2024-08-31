@@ -1,5 +1,7 @@
 
 #include "CoreMinimal.h"
+
+#include "Core/Collections.h"
 #include "Files/FileStream.h"
 #include "Files/FileManager.h"
 

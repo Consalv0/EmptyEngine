@@ -1,7 +1,3 @@
-#pragma once
-
-#include <math.h>
-#include <stdexcept>
 
 namespace EE
 {

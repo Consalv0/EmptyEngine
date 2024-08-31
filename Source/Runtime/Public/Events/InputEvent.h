@@ -2,7 +2,6 @@
 
 #include "Events/Event.h"
 #include "Core/KeyCodes.h"
-#include "Math/CoreMath.h"
 
 namespace EE
 {
@@ -118,8 +117,8 @@ namespace EE
         const float mouseX, mouseY;
         const float mouseRelativeX, mouseRelativeY;
 
-        FORCEINLINE Point2 GetMousePosition() const { return { mouseX, mouseY }; }
-        FORCEINLINE Point2 GetMouseRelativeMotion() const { return { mouseRelativeX, mouseRelativeY }; }
+        FORCEINLINE void GetMousePosition( float* x, float* y ) const { *x = mouseX; *y = mouseY; }
+        FORCEINLINE void GetMouseRelativeMotion( float* x, float* y ) const { *x = mouseRelativeX; *y = mouseRelativeY; }
 
         EE_IMPLEMENT_EVENT_ENUMTYPE( EInputEvent, InputEvent_MouseMoved )
     };

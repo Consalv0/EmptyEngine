@@ -5,7 +5,7 @@ namespace EE
     class Application
     {
     protected:
-        bool canInitialize;
+        bool initializationError;
 
     public:
         //* Entry point of the application
@@ -18,7 +18,7 @@ namespace EE
 
         virtual enum class EDynamicRHI GetPreferedRHI() const = 0;
 
-        bool CanInitialize() { return canInitialize; };
+        bool HasErrors() { return initializationError; };
 
     protected:
         Application();
@@ -32,7 +32,7 @@ namespace EE
         virtual void OnProcessInput() = 0;
 
         //* This is called after pulling all events
-        virtual void OnTick( Timestamp stamp ) = 0;
+        virtual void OnTick() = 0;
 
         //* Called when app is asked to terminate
         virtual void OnTerminate() = 0;

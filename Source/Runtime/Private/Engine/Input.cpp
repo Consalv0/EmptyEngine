@@ -3,6 +3,7 @@
 #include "Utils/TextFormatting.h"
 
 #include "Engine/Engine.h"
+#include "Engine/Ticker.h"
 #include "Engine/Input.h"
 
 #include <SDL3/SDL_events.h>
@@ -18,7 +19,7 @@ namespace EE
 
     MouseButtonState GMouseButtonStates[ EMouseButton::Mouse_Button_NUM ];
 
-    Point2f GMousePosition, GRelativeMousePosition;
+    float GMousePositionX, GMousePositionY, GRelativeMousePositionX, GRelativeMousePositionY;
 
     int InputEventsHandler_Internal( void* userData, SDL_Event* sdlEvent );
 
@@ -110,27 +111,31 @@ namespace EE
 
     void Input::UpdateMouseState()
     {
-        SDL_GetMouseState( &GMousePosition.x, &GMousePosition.y );
+        SDL_GetMouseState( &GMousePositionX, &GMousePositionY );
         if ( GEngine->GetWindowCount() > 0 )
         {
             int windowX, windowY;
             SDL_GetWindowPosition( (SDL_Window*)GEngine->GetWindow( 0 )->GetWindowHandle(), &windowX, &windowY );
-            GRelativeMousePosition.x = GMousePosition.x - windowX;
-            GRelativeMousePosition.y = GMousePosition.y - windowY;
+            GRelativeMousePositionX = GMousePositionX - windowX;
+            GRelativeMousePositionY = GMousePositionY - windowY;
         }
         else
         {
-            GRelativeMousePosition.x = GMousePosition.x;
-            GRelativeMousePosition.y = GMousePosition.y;
+            GRelativeMousePositionX = GMousePositionX;
+            GRelativeMousePositionY = GMousePositionY;
         }
     }
 
-    const Point2f& Input::GetMousePosition( bool realtive ) const
+    void Input::GetMousePosition( float* x, float* y, bool realtive ) const
     {
         if ( realtive )
-            return GMousePosition;
+        {
+            *x = GMousePositionX; *y = GMousePositionY;
+        }
         else
-            return GRelativeMousePosition;
+        {
+            *x = GRelativeMousePositionX; *y = GRelativeMousePositionY;
+        }
     }
 
     void Input::Update()

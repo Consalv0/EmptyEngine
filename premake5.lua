@@ -72,20 +72,20 @@ project "EmptyEngine"
         }
         runtime "Debug"
         optimize "Debug"
-        symbols "on"
+        symbols "On"
 
     filter "configurations:Release"
         defines "EE_RELEASE"
         runtime "Release"
-        optimize "on"
+        optimize "Speed"
 
 project "VMA"
     location "%{IncludeDir.VMA}"
     kind "StaticLib"
     language "C++"
     cppdialect "C++20"
-    staticruntime "on"
-    pic "on"
+    staticruntime "On"
+    pic "On"
 
     targetdir ("%{prj.location}/Build/" .. outputdir)
     objdir ("%{prj.location}/BinObjs/" .. outputdir)
@@ -112,25 +112,29 @@ project "VMA"
     links {
         "vulkan-1.lib",
     }
+    
+    flags { 
+        "MultiProcessorCompile"
+    }
 
     filter "system:windows"
         systemversion "latest"
 
     filter "configurations:Debug"
         runtime "Debug"
-        symbols "on"
+        symbols "On"
 
     filter "configurations:Release"
         runtime "Release"
-        optimize "on"
+        optimize "Speed"
 
 project "spdlog"
     location "%{IncludeDir.spdlog}"
     kind "StaticLib"
     language "C++"
     cppdialect "C++20"
-    staticruntime "on"
-    pic "on"
+    staticruntime "On"
+    pic "On"
 
     targetdir ("%{prj.location}/Build/" .. outputdir)
     objdir ("%{prj.location}/BinObjs/" .. outputdir)

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "CoreTypes.h"
-
 namespace EE
 {
     namespace Math

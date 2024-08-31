@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CoreTypes.h"
+#include "Core/Collections.h"
 #include "Audio/AudioSample.h"
 
 namespace EE

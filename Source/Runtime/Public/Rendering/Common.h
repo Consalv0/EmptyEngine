@@ -45,6 +45,8 @@ namespace EE
     {
         BindingType_Uniform,
         BindingType_Storage,
+        BindingType_UniformDynamic,
+        BindingType_StorageDynamic,
         BindingType_Sampler,
         BindingType_Texture,
         BindingType_TextureStorage

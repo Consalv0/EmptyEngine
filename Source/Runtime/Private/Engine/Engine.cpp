@@ -1,10 +1,13 @@
 
 #include "CoreMinimal.h"
+
 #include "Engine/Engine.h"
-#include "Platform/PlatformDevice.h"
+#include "Engine/Input.h"
 #include "RHI/RHI.h"
 
-#include "Resources/MeshParser.h"
+#include "Platform/PlatformDevice.h"
+
+#include "Utils/TextFormatting.h"
 
 #define SDL_MAIN_HANDLED
 #include <SDL3/SDL_main.h>
@@ -19,9 +22,9 @@ namespace EE
     bool GameEngine::Initialize( int argc, NChar* argv[] )
     {
         GMainApplication = CreateApplication( argc, argv );
-        if ( GMainApplication->CanInitialize() == false )
+        if ( GMainApplication->HasErrors() == false )
         {
-            EE_LOG_CRITICAL( L"Failed to application!\n" );
+            EE_LOG_CRITICAL( L"Failed to initialize application!\n" );
             return false;
         }
 
@@ -34,8 +37,6 @@ namespace EE
         GDynamicRHI = PlatformCreateDynamicRHI( GMainApplication->GetPreferedRHI() );
         GInput = PlatformCreateInput();
         GPlatformDevice = PlatformCreatePlatformDevice();
-
-        ModelParser::Initialize();
 
 #ifdef EE_PLATFORM_CUDA
         CUDA::FindCudaDevice();

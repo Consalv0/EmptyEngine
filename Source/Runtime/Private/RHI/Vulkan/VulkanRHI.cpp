@@ -853,6 +853,8 @@ namespace EE
         {
         case BindingType_Uniform:           return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         case BindingType_Storage:           return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        case BindingType_UniformDynamic:    return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+        case BindingType_StorageDynamic:    return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
         case BindingType_Sampler:           return VK_DESCRIPTOR_TYPE_SAMPLER;
         case BindingType_Texture:           return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
         case BindingType_TextureStorage:    return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
@@ -1221,14 +1223,17 @@ namespace EE
 
     VulkanRHIDevice::VulkanRHIDevice( VulkanRHIInstance* instance )
         : physicalDevice( instance->GetSelectedPhysicalDevice() ),
-        presentQueue( NULL ), graphicsQueue( NULL )
+        presentQueue( NULL ), graphicsQueue( NULL ), deviceLimits()
     {
         EE_ASSERT( GVulkanDevice == NULL, L"Creating a second device!, Aborting..." );
+
+        auto properties = physicalDevice->GetProperties();
+        deviceLimits.minUniformBufferOffsetAlignment = properties.limits.minUniformBufferOffsetAlignment;
 
         // Specifying the queues to be created
         QueueFamilyIndices indices = physicalDevice->GetQueueFamilies();
 
-        std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+        TArray<VkDeviceQueueCreateInfo> queueCreateInfos;
         std::set<uint32> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
         float queuePriority = QueuePriorities[ 0 ];
@@ -1317,6 +1322,8 @@ namespace EE
 
     VulkanRHIPresentContext::~VulkanRHIPresentContext()
     {
+        vkDeviceWaitIdle( GVulkanDevice->GetVulkanDevice() );
+
         // Wait for all commands of this context
         for ( auto& fence : renderFences )
         {
@@ -1683,6 +1690,7 @@ namespace EE
         , sharing( info.sharing )
         , buffer( VK_NULL_HANDLE )
         , size( info.size )
+        , aligment( info.aligment == 0 ? info.size : info.aligment )
         , offset( info.offset )
     {
         VkBufferCreateInfo bufferInfo = 
@@ -1742,6 +1750,11 @@ namespace EE
     uint64 VulkanRHIBuffer::GetOffset() const
     {
         return offset;
+    }
+
+    uint64 VulkanRHIBuffer::GetAligment() const
+    {
+        return aligment;
     }
 
     void VulkanRHIBuffer::UploadData( void* data, size_t offset, size_t size ) const
@@ -2268,11 +2281,11 @@ namespace EE
         vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetVulkanPipeline() );
     }
 
-    void VulkanRHICommandBuffer::BindBindGroup( const RHIGraphicsPipeline* pipeline, const RHIBindGroup* bindGroup ) const
+    void VulkanRHICommandBuffer::BindBindGroup( const RHIGraphicsPipeline* pipeline, const RHIBindGroup* bindGroup, const uint32& dynamicOffsetsCount, const uint32* dynamicOffsets ) const
     {
         const VulkanRHIBindGroup* vulkanBindGroup = static_cast<const VulkanRHIBindGroup*>( bindGroup );
         const VulkanRHIGraphicsPipeline* vulkanPipeline = static_cast<const VulkanRHIGraphicsPipeline*>(pipeline);
-        vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetVulkanPipelineLayout(), 0, 1, &vulkanBindGroup->GetVulkanDescriptorSet(), 0, nullptr);
+        vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetVulkanPipelineLayout(), 0, 1, &vulkanBindGroup->GetVulkanDescriptorSet(), dynamicOffsetsCount, dynamicOffsets );
     }
 
     void VulkanRHICommandBuffer::BindVertexBuffer( const RHIBuffer* buffer ) const
@@ -2453,17 +2466,16 @@ namespace EE
         , clearDepthStencilValue()
     {
         uint32 subpassesSize = (uint32)info.subpasses.size();
-        TArray<SubpassDescriptionAttachments> subpassAttachments;
-        TArray<VkSubpassDescription> subpasses;
-        subpassAttachments.resize( subpassesSize );
-        subpasses.resize( subpassesSize );
+        TArray<SubpassDescriptionAttachments> subpassAttachments(subpassesSize);
+        TArray<VkSubpassDescription> subpasses(subpassesSize);
         for ( uint32 i = 0; i < subpassesSize; i++ )
         {
             const RHIRenderSubpassDescription& subpass = info.subpasses[ i ];
             SubpassDescriptionAttachments& attachments = subpassAttachments[ i ];
 
             uint32 inputAttachmentSize = (uint32)subpass.inputAttachmentReferences.size();
-            attachments.input.resize( inputAttachmentSize );
+            // Use last input to store depth attachemnt
+            attachments.input.resize( inputAttachmentSize + (subpass.usingDepth ? 1 : 0) );
             for ( uint32 j = 0; j < inputAttachmentSize; j++ )
             {
                 attachments.input[ j ] = VkAttachmentReference
@@ -2484,11 +2496,15 @@ namespace EE
                 };
             }
 
-            VkAttachmentReference depthStencilAttachment
+            if ( subpass.usingDepth )
             {
-                .attachment = subpass.depthAttachment.atachmentIndex,
-                .layout = ConvertTextureLayout( subpass.depthAttachment.textureLayout ),
-            };
+                VkAttachmentReference depthStencilAttachment
+                {
+                    .attachment = subpass.depthAttachment.atachmentIndex,
+                    .layout = ConvertTextureLayout( subpass.depthAttachment.textureLayout ),
+                };
+                attachments.input[ inputAttachmentSize ] = depthStencilAttachment;
+            }
 
             subpasses[ i ] = VkSubpassDescription
             {
@@ -2499,15 +2515,14 @@ namespace EE
                 .colorAttachmentCount = colorAttachmentSize,
                 .pColorAttachments = attachments.color.data(),
                 .pResolveAttachments = NULL,
-                .pDepthStencilAttachment = subpass.usingDepth ? &depthStencilAttachment : NULL,
+                .pDepthStencilAttachment = subpass.usingDepth ? &attachments.input.back() : NULL,
                 .preserveAttachmentCount = 0,
                 .pPreserveAttachments = NULL
             };
         }
 
         uint32 attachmentSize = (uint32)info.attachments.size();
-        TArray<VkAttachmentDescription> attachments;
-        attachments.resize( attachmentSize );
+        TArray<VkAttachmentDescription> attachments( attachmentSize );
         for ( uint32 i = 0; i < attachmentSize; i++ )
         {
             const RHIAttachmentDescription& attachment = info.attachments[ i ];
@@ -2624,8 +2639,8 @@ namespace EE
             .renderPass = renderPass,
             .framebuffer = lastAttachment,
             .renderArea = renderArea,
-            .clearValueCount = 2,
-            .pClearValues = &clearColorValue // clearDepthStencilValue
+            .clearValueCount = EE_ARRAYSIZE( clearValues ),
+            .pClearValues = clearValues
         };
 
         const VulkanRHICommandBuffer* commandBuffer = static_cast<const VulkanRHICommandBuffer*>(cmd);
@@ -2761,13 +2776,26 @@ namespace EE
         for ( uint32 i = 0; i < bindingCount; i++ )
         {
             const auto& binding = info.bindings[ i ];
-            if ( binding.type == BindingType_Uniform || binding.type == BindingType_Storage )
+
+            switch ( binding.type )
+            {
+            case BindingType_Uniform:
+            case BindingType_Storage:
+            case BindingType_UniformDynamic:
+            case BindingType_StorageDynamic:
             {
                 bufferInfosNum++;
-            }
-            else if ( binding.type == BindingType_Sampler || binding.type == BindingType_Texture || binding.type == BindingType_TextureStorage )
+            } break;
+            case BindingType_Sampler:
+            {
+            } break;
+            case BindingType_Texture:
+            case BindingType_TextureStorage:
             {
                 imageInfosNum++;
+            } break;
+            default:
+                break;
             }
         }
         imageInfos.reserve( imageInfosNum );
@@ -2775,7 +2803,7 @@ namespace EE
 
         for ( uint32 i = 0; i < bindingCount; i++ )
         {
-            const auto& binding = info.bindings[ i ];
+            const RHIResourceBinding& binding = info.bindings[ i ];
 
             VkWriteDescriptorSet writeDescriptorSet
             {
@@ -2788,38 +2816,48 @@ namespace EE
                 .descriptorType = ConvertDescriptorType( binding.type )
             };
 
-            if ( binding.type == BindingType_Uniform || binding.type == BindingType_Storage )
+            switch ( binding.type )
             {
-                const VulkanRHIBuffer* vulkanBuffer = static_cast<const VulkanRHIBuffer*>( binding.resource );
+            case BindingType_Uniform:
+            case BindingType_Storage:
+            case BindingType_UniformDynamic:
+            case BindingType_StorageDynamic:
+            {
+                const VulkanRHIBuffer* vulkanBuffer = static_cast<const VulkanRHIBuffer*>(binding.resource);
 
                 VkDescriptorBufferInfo bufferInfo
                 {
                     .buffer = vulkanBuffer->GetVulkanBuffer(),
                     .offset = vulkanBuffer->GetOffset(),
-                    .range = vulkanBuffer->GetSize()
+                    .range = vulkanBuffer->GetAligment(),
                 };
                 bufferInfos.emplace_back( bufferInfo );
 
                 writeDescriptorSet.pBufferInfo = &bufferInfos.back();
-            }
-            else if ( binding.type == BindingType_Sampler )
+            } break;
+            case BindingType_Sampler:
             {
-            //     const auto* sampler = static_cast<VulkanSampler*>(std::get<Sampler*>( entry.entity ));
-            // 
-            //     imageInfos.emplace_back();
-            //     imageInfos.back().sampler = sampler->GetNative();
-            // 
-            //     writeDescriptorSet.pImageInfo = &imageInfos.back();
-            }
-            else if ( binding.type == BindingType_Texture || binding.type == BindingType_TextureStorage )
+                //     const auto* sampler = static_cast<VulkanSampler*>(std::get<Sampler*>( entry.entity ));
+                // 
+                //     imageInfos.emplace_back();
+                //     imageInfos.back().sampler = sampler->GetNative();
+                // 
+                //     writeDescriptorSet.pImageInfo = &imageInfos.back();
+            } break;
+            case BindingType_Texture:
+            case BindingType_TextureStorage:
             {
-            //    const auto* textureView = static_cast<VulkanTextureView*>(std::get<TextureView*>( entry.entity ));
-            //
-            //    imageInfos.emplace_back();
-            //    imageInfos.back().imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            //    imageInfos.back().imageView = textureView->GetNative();
-            //
-            //    writeDescriptorSet.pImageInfo = &imageInfos.back();
+
+                //    const auto* textureView = static_cast<VulkanTextureView*>(std::get<TextureView*>( entry.entity ));
+                //
+                //    imageInfos.emplace_back();
+                //    imageInfos.back().imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                //    imageInfos.back().imageView = textureView->GetNative();
+                //
+                //    writeDescriptorSet.pImageInfo = &imageInfos.back();
+            } break;
+            default:
+                break;
             }
 
             descriptorWrites[ i ] = writeDescriptorSet;
@@ -2833,9 +2871,9 @@ namespace EE
         return descriptorSet != VK_NULL_HANDLE;
     }
 
-    const RHIBindLayout* VulkanRHIBindGroup::GetBindLayout() const
+    const RHIBindLayout& VulkanRHIBindGroup::GetBindLayout() const
     {
-        return &bindLayout;
+        return bindLayout;
     }
 
     VulkanRHIGraphicsPipeline::~VulkanRHIGraphicsPipeline()

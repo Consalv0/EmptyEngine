@@ -1,12 +1,3 @@
-#pragma once
-
-#include <math.h>
-#include <stdexcept>
-#include <string>
-
-#include "Math/Vector2.h"
-#include "Math/IntVector3.h"
-#include "Math/Vector4.h"
 
 namespace EE::Math
 {

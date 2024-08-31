@@ -1,8 +1,5 @@
 #pragma once
 
-#include <math.h>
-#include <algorithm>
-
 namespace EE
 {
     template<typename T>

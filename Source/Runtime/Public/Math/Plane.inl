@@ -1,8 +1,3 @@
-#pragma once
-
-#include <math.h>
-
-#include "Math/Plane.h"
 
 namespace EE::Math
 {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Events/WindowEvent.h"
 #include "Events/InputEvent.h"
 #include "Rendering/Common.h"
@@ -78,7 +79,7 @@ namespace EE
         ~Window();
 
         //* Set the window display mode
-        virtual void SetWindowMode(EWindowMode mode);
+        virtual void SetWindowMode( const EWindowMode& mode );
 
         //* Initialize window (window creation)
         bool Initialize();
@@ -90,31 +91,31 @@ namespace EE
         void SetName( const WString& newName );
 
         //* Get the window display mode
-        virtual EWindowMode GetWindowMode() const;
+        virtual const EWindowMode& GetWindowMode() const;
 
         //* Get the window title name
-        virtual WString GetName() const;
+        virtual const WString& GetName() const;
 
         //* Get the width in pixels of the window
-        virtual int32 GetWidth() const;
+        virtual const int32& GetWidth() const;
 
         //* Get the height in pixels of the window
-        virtual int32 GetHeight() const;
+        virtual const int32& GetHeight() const;
 
         //* Get present mode
-        virtual EPresentMode GetPresentMode() const;
+        virtual const EPresentMode& GetPresentMode() const;
 
         //* Get SDR white level option
-        virtual float GetWhiteLevel() const;
+        virtual const float& GetWhiteLevel() const;
 
         //* Get hdr option
-        virtual bool GetAllowHDR() const;
+        virtual const bool& GetAllowHDR() const;
 
         //* Get the size of the window in pixels
-        virtual IntVector2 GetSize() const;
+        virtual void GetSize( int& width, int& height ) const;
 
-        //* Get the size of the window in pixels
-        virtual IntBox2 GetViewport() const;
+        //* Get the viewportt of the window in pixels
+        virtual void GetViewport( int& x, int& y, int& width, int& height ) const;
 
         //* Get the aspect of width divided by height in pixels of the window
         virtual float GetAspectRatio() const;

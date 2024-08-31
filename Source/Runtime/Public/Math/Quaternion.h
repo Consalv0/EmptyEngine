@@ -1,7 +1,5 @@
 #pragma once
 
-#include "CoreTypes.h"
-
 namespace EE
 {
     namespace Math
@@ -21,8 +19,8 @@ namespace EE
         public:
             union
             {
-                struct { T w, x, y, z; };
-                struct { T scalar; TVector3<T> vector; };
+                struct { T x, y, z, w; };
+                struct { TVector3<T> vector; T scalar; };
             };
 
             HOST_DEVICE FORCEINLINE constexpr TQuaternion();

@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 
 #include "Rendering/Mesh.h"
-#include "Utils/Hasher.h"
 
 namespace EE
 {
@@ -73,4 +72,6 @@ namespace EE
     };
 }
 
+#ifdef EE_MAKE_HASHABLE
 EE_MAKE_HASHABLE(EE::StaticVertex, t.position, t.normal, t.tangent, t.uv0, t.uv1, t.color)
+#endif // EE_MAKE_HASHABLE

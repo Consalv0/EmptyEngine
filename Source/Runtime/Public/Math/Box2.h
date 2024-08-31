@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Math/MathUtils.h"
-#include "Math/Vector2.h"
-
 namespace EE
 {
     namespace Math

@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Core/Collections.h"
+#include "Math/CoreMath.h"
+#include "Core/Name.h"
+
 namespace EE
 {
     class RHIObject
@@ -185,7 +189,7 @@ namespace EE
 
         virtual void BindGraphicsPipeline( const class RHIGraphicsPipeline* pipeline ) const = 0;
 
-        virtual void BindBindGroup( const RHIGraphicsPipeline* pipeline, const class RHIBindGroup* bindGroup ) const = 0;
+        virtual void BindBindGroup( const RHIGraphicsPipeline* pipeline, const class RHIBindGroup* bindGroup, const uint32& dynamicOffsetsCount, const uint32* dynamicOffests ) const = 0;
 
         virtual void BindVertexBuffer( const class RHIBuffer* buffer ) const = 0;
 
@@ -266,6 +270,12 @@ namespace EE
         virtual void SubmitCommandBuffer( const RHICommandBuffer* commandBuffer, const RHIQueueSubmitInfo& info ) = 0;
     };
 
+    struct RHIDeviceLimits
+    {
+    public:
+        uint64 minUniformBufferOffsetAlignment;
+    };
+
     class RHIDevice : public RHIObject
     {
     public:
@@ -280,11 +290,14 @@ namespace EE
         virtual RHIQueue* GetGraphicsQueue() const = 0;
 
         virtual RHIQueue* GetPresentQueue() const = 0;
+
+        virtual const RHIDeviceLimits& GetLimits() const = 0;
     };
 
     struct RHIBufferCreateInfo
     {
         uint64 size = 0;
+        uint64 aligment = 0;
         uint64 offset = 0;
         EBufferUsageFlags usage = BufferUsage_None;
         ESharingMode sharing = SharingMode_Default;
@@ -304,6 +317,8 @@ namespace EE
         virtual uint64 GetSize() const = 0;
         
         virtual uint64 GetOffset() const = 0;
+
+        virtual uint64 GetAligment() const = 0;
 
         virtual void UploadData( void* data, size_t offset, size_t size ) const = 0;
     };
@@ -371,8 +386,8 @@ namespace EE
     struct RHIResourceBinding
     {
         uint8 index;
-        EBindingType type;
         const RHIResource* resource;
+        EBindingType type;
         EShaderStageFlags shaderVisibility;
     };
 
@@ -408,7 +423,7 @@ namespace EE
     public:
         virtual ~RHIBindGroup() = default;
 
-        virtual const RHIBindLayout* GetBindLayout() const = 0;
+        virtual const RHIBindLayout& GetBindLayout() const = 0;
     };
 
     struct RHIAttachmentDescription
@@ -555,7 +570,7 @@ namespace EE
 
         void AddColorAttachment( const RHIColorAttachmentState& state );
         
-        void AddBindLayout( const RHIBindLayout* bindLayout );
+        void AddBindLayout( const RHIBindLayout& bindLayout );
     };
 
     class RHIGraphicsPipeline : public RHIObject

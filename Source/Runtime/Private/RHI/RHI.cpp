@@ -1,6 +1,8 @@
 
 #include "CoreMinimal.h"
 
+#include <Core/Collections.h>
+#include <Math/CoreMath.h>
 #include "RHI/RHI.h"
 
 namespace EE

@@ -1,6 +1,4 @@
 
-#include "Math/MathUtils.h"
-
 namespace EE::Math
 {
 	//* The number is power of 2

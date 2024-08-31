@@ -23,19 +23,25 @@
 #endif
 
 #if defined(_MSC_VER)
-#	define FORCENOINLINE	__declspec(noinline)
-#	define FORCEINLINE		__forceinline
+#   define FORCENOINLINE	__declspec(noinline)
+#   define FORCEINLINE		__forceinline
 #else
-#	define FORCENOINLINE	inline __attribute__((noinline))
-#	define FORCEINLINE		inline __attribute__((always_inline))
+#   define FORCENOINLINE	inline __attribute__((noinline))
+#   define FORCEINLINE		inline __attribute__((always_inline))
 #endif
 
 #if defined(_MSC_VER)
-#define EE_DLLEXPORT __declspec(dllexport)
-#define EE_DLLIMPORT __declspec(dllimport)
+#   define EE_DLLEXPORT __declspec(dllexport)
+#   define EE_DLLIMPORT __declspec(dllimport)
 #else
-#define EE_DLLEXPORT __attribute__((visibility("default")))
-#define EE_DLLIMPORT __attribute__((visibility("default")))
+#   define EE_DLLEXPORT __attribute__((visibility("default")))
+#   define EE_DLLIMPORT __attribute__((visibility("default")))
+#endif
+
+#if defined(EE_PLATFORM_WINDOWS)
+#   define EE_BREAKPOINT __debugbreak()
+#else
+#   define EE_BREAKPOINT __builtin_trap()
 #endif
 
 #define EE_ARRAYSIZE( array ) (sizeof( array ) / sizeof( array[ 0 ] ))

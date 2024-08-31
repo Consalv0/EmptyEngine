@@ -1,11 +1,5 @@
 #pragma once
 
-#include "Math/MathUtils.h"
-#include "Math/Vector3.h"
-#include "Math/Vector4.h"
-#include "Math/Quaternion.h"
-#include "Math/Matrix4x4.h"
-
 namespace EE
 {
     namespace Math
@@ -25,6 +19,7 @@ namespace EE
             TTransform( const TPoint3<T>& position, const TQuaternion<T>& rotation );
             TTransform( const TPoint3<T>& position );
             TTransform( const TMatrix4x4<T>& matrix );
+            TTransform( const TTransform<T>& other );
 
             TVector3<T> Forward() const;
             TVector3<T> Up() const;

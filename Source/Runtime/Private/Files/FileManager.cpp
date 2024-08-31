@@ -1,10 +1,10 @@
 ﻿
-#ifdef __APPLE__
-#include <unistd.h>
-#import <Foundation/Foundation.h>
-#endif
-
 #include "CoreMinimal.h"
+
+#include "Platform/Platform.h"
+
+#include "Utils/TextFormatting.h"
+#include "Files/FileManager.h"
 
 #include <sstream>
 #include <fstream>
@@ -12,10 +12,10 @@
 #include <algorithm>
 #include <stdlib.h>
 
-#include "Platform/Platform.h"
-
-#include "Utils/TextFormatting.h"
-#include "Files/FileManager.h"
+#ifdef __APPLE__
+#include <unistd.h>
+#import <Foundation/Foundation.h>
+#endif
 
 namespace EE
 {

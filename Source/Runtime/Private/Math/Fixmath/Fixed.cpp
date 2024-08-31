@@ -1,5 +1,7 @@
 
 #include "CoreMinimal.h"
+
+#include "Math/CoreMath.h"
 #include "Math/Fixmath/Fixed.h"
 
 namespace EE

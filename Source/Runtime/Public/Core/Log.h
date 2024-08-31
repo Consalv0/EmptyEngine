@@ -13,6 +13,9 @@
 #define SPDLOG_NO_DATETIME
 #define SPDLOG_COMPILED_LIB
 
+#ifdef EE_ENABLE_ASSERTS
+#include <assert.h>
+#endif
 #include <spdlog/spdlog.h>
 
 namespace EE
@@ -89,8 +92,8 @@ namespace EE
 #endif
 
 #ifdef EE_ENABLE_ASSERTS
-#define EE_ASSERT(X, ...) { if(!(X)) { EE_LOG_CRITICAL(L"Assertion Failed: " __VA_ARGS__); __debugbreak(); } }
-#define EE_ASSERT(X, ...) { if(!(X)) { EE_LOG_CRITICAL(L"Assertion Failed: " __VA_ARGS__); __debugbreak(); } }
+#define EE_ASSERT(X, ...) { if(!(X)) { EE_LOG_CRITICAL(L"Assertion Failed: " __VA_ARGS__); EE_BREAKPOINT; } }
+#define EE_ASSERT(X, ...) { if(!(X)) { EE_LOG_CRITICAL(L"Assertion Failed: " __VA_ARGS__); EE_BREAKPOINT; } }
 #else
 #define EE_ASSERT(X, ...) (X)
 #define EE_ASSERT(X, ...) (X)

@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 
 #include "Engine/Engine.h"
+#include "Engine/Ticker.h"
 #include "Engine/Window.h"
 
 #include "RHI/RHI.h"
@@ -144,23 +145,23 @@ namespace EE
         SDL_SetWindowTitle( (SDL_Window*)(windowHandle), Text::WideToNarrow( name ).c_str() );
     }
 
-    void Window::SetWindowMode( EWindowMode mode )
+    void Window::SetWindowMode( const EWindowMode& mode )
     {
         this->mode = mode;
         SDL_SetWindowFullscreen( (SDL_Window*)(windowHandle), (SDL_bool)mode );
     }
 
-    EWindowMode Window::GetWindowMode() const
+    const EWindowMode& Window::GetWindowMode() const
     {
         return mode;
     }
 
-    float Window::GetWhiteLevel() const
+    const float& Window::GetWhiteLevel() const
     {
         return whiteLevel;
     }
 
-    bool Window::GetAllowHDR() const
+    const bool& Window::GetAllowHDR() const
     {
         return allowHDR;
     }
@@ -190,7 +191,7 @@ namespace EE
         windowHandle = NULL;
     }
 
-    WString Window::GetName() const
+    const WString& Window::GetName() const
     {
         return name;
     }
@@ -200,29 +201,29 @@ namespace EE
         return (float)width / (float)height;
     }
 
-    int32 Window::GetWidth() const
+    const int32& Window::GetWidth() const
     {
         return width;
     }
 
-    int32 Window::GetHeight() const
+    const int32& Window::GetHeight() const
     {
         return height;
     }
 
-    EPresentMode Window::GetPresentMode() const
+    const EPresentMode& Window::GetPresentMode() const
     {
         return presentMode;
     }
 
-    IntVector2 Window::GetSize() const
+    void Window::GetSize( int& w, int& h ) const
     {
-        return IntVector2( width, height );
+        w = width; h = height;
     }
 
-    IntBox2 Window::GetViewport() const
+    void Window::GetViewport( int& x, int& y, int& w, int& h ) const
     {
-        return IntBox2( 0, 0, width, height );
+        x = 0; y = 0; w = width; h = height;
     }
 
     bool Window::MakeTransparent( const uint8& r, const uint8& g, const uint8& b, const uint8& a )

@@ -1,10 +1,10 @@
 
 #include "CoreMinimal.h"
 
-#include "WindowsMinimal.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "Platform/Windows/WindowsRHI.h"
 
+#include "WindowsMinimal.h"
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_win32.h>
 

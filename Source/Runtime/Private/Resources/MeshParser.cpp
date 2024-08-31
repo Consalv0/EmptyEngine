@@ -1,17 +1,17 @@
 
 #include "CoreMinimal.h"
 
-#include <future>
-#include <thread>
-
-#include "Utils/TextFormatting.h"
-
-#include "Math/Transform.h"
-
+#include "Utils/Hasher.h"
 #include "Rendering/Mesh.h"
 #include "Files/FileManager.h"
 #include "Resources/MeshParser.h"
 #include "Resources/OBJParser.h"
+#include "Resources/OBJImporter.h"
+
+#include "Utils/TextFormatting.h"
+
+#include <future>
+#include <thread>
 
 namespace EE
 {
@@ -59,7 +59,7 @@ namespace EE
         const WString extension = options.file.GetExtension();
         if ( Text::CompareIgnoreCase( extension, WString( L"OBJ" ) ) )
         {
-            return OBJLoader::LoadModel( info, options );
+            return OBJImporter::LoadModel( info, options );
         }
         return false;
     }

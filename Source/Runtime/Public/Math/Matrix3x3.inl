@@ -1,11 +1,4 @@
 
-#include <math.h>
-#include <stdexcept>
-
-#include "Math/Vector3.h"
-#include "Math/Matrix4x4.h"
-#include "Math/Matrix3x3.h"
-
 namespace EE::Math
 {
     template <typename T>

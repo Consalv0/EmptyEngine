@@ -1,7 +1,5 @@
 #pragma once
 
-#include "CoreTypes.h"
-
 namespace EE
 {
 	inline void HashCombine(std::size_t& seed) { }

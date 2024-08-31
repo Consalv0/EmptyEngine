@@ -1,6 +1,9 @@
 
 #include "CoreMinimal.h"
+
 #include "Engine/Ticker.h"
+
+#include "Math/MathUtils.h"
 #include <chrono>
 #include <ctime>
 

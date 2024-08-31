@@ -1,7 +1,5 @@
 #pragma once
 
-#include "CoreTypes.h"
-
 #define EE_IMPLEMENT_EVENT_ENUMTYPE(EnumType, Type) FORCEINLINE static EnumType GetStaticType() { return EnumType::##Type; }\
                                                     FORCEINLINE virtual EnumType GetEventType() const override { return GetStaticType(); }\
                                                     FORCEINLINE virtual const WChar* GetName() const override { return L#EnumType ## "::" ## #Type; }

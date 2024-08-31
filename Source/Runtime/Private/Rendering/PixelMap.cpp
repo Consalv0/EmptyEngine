@@ -1,5 +1,7 @@
 
 #include "CoreMinimal.h"
+
+#include "Math/CoreMath.h"
 #include "Rendering/Common.h"
 #include "Rendering/PixelMap.h"
 

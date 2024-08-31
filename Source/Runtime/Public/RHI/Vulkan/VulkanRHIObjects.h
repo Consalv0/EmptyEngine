@@ -49,13 +49,15 @@ namespace EE
 
         void AddSurfaceSupportDetails( VkSurfaceKHR surface, uint32 queueFamilyIndex );
 
-        FORCEINLINE const VkPhysicalDevice GetPhysicalDevice() const { return physicalDevice; };
+        FORCEINLINE const VkPhysicalDevice GetPhysicalDevice() const { return physicalDevice; }
 
-        FORCEINLINE VkPhysicalDevice GetPhysicalDevice() { return physicalDevice; };
+        FORCEINLINE VkPhysicalDevice GetPhysicalDevice() { return physicalDevice; }
 
         const VulkanSurfaceSupportDetails* GetSurfaceSupportDetails( VkSurfaceKHR surface ) const;
 
         void UpdateSurfaceSupportDetails( VkSurfaceKHR surface );
+
+        FORCEINLINE const VkPhysicalDeviceProperties& GetProperties() const { return deviceProperties; }
 
         FORCEINLINE const bool HasSurfaceAnyFormat( VkSurfaceKHR surface ) const { return surfaceSupportDetails.at( surface ).formatCount > 0; }
         FORCEINLINE const VulkanSurfaceSupportDetails& GetSurfaceDetails( VkSurfaceKHR surface ) const { return surfaceSupportDetails.at( surface ); }
@@ -124,7 +126,6 @@ namespace EE
         EE_CLASSNOCOPY( VulkanRHIDevice )
 
     private:
-        uint32 physicalDeviceIndex;
         VulkanRHIPhysicalDevice* physicalDevice;
         VkDevice device;
         VmaAllocator allocator;
@@ -141,7 +142,13 @@ namespace EE
         VulkanRHIQueue* graphicsQueue;
         VulkanRHIQueue* presentQueue;
 
+        RHIDeviceLimits deviceLimits;
+
     public:
+        VulkanRHIDevice( VulkanRHIInstance* instance );
+
+        ~VulkanRHIDevice() override;
+
         FORCEINLINE const VkDevice GetVulkanDevice() const { return device; }
 
         FORCEINLINE const VulkanRHIPhysicalDevice* GetVulkanPhysicalDevice() const { return physicalDevice; }
@@ -151,6 +158,8 @@ namespace EE
         FORCEINLINE const VmaAllocator GetVulkanAllocator() const { return allocator; }
 
         FORCEINLINE uint32 GetGraphicsFamilyIndex() const { return graphicsQueueIndex; }
+
+        FORCEINLINE const RHIDeviceLimits& GetLimits() const { return deviceLimits; }
 
         FORCEINLINE VulkanRHIQueue* GetVulkanGraphicsQueue() const { return graphicsQueue; }
 
@@ -165,10 +174,6 @@ namespace EE
         FORCEINLINE const uint32* GetFamilyIndices() const { return queueFamilyIndices; }
 
         const VulkanRHICommandPool* GetCommandPool( uint32 familyIndex ) const;
-
-        ~VulkanRHIDevice() override;
-
-        VulkanRHIDevice( VulkanRHIInstance* instance );
 
         bool IsValid() const;
 
@@ -257,6 +262,7 @@ namespace EE
         EBufferUsageFlags usage;
         ESharingMode sharing;
         uint64 size;
+        uint64 aligment;
         uint64 offset;
 
     public:
@@ -268,6 +274,8 @@ namespace EE
         uint64 GetSize() const override;
 
         uint64 GetOffset() const override;
+
+        uint64 GetAligment() const override;
 
         void UploadData( void* data, size_t offset, size_t size ) const override;
 
@@ -465,7 +473,7 @@ namespace EE
 
         void BindGraphicsPipeline( const RHIGraphicsPipeline* pipeline ) const override;
 
-        void BindBindGroup( const RHIGraphicsPipeline* pipeline, const class RHIBindGroup* bindGroup ) const override;
+        void BindBindGroup( const RHIGraphicsPipeline* pipeline, const class RHIBindGroup* bindGroup, const uint32& dynamicOffsetsCount, const uint32* dynamicOffsets ) const override;
 
         void BindVertexBuffer( const class RHIBuffer* buffer ) const override;
 
@@ -525,8 +533,16 @@ namespace EE
         VkFramebuffer lastAttachment;
 
         VkRect2D renderArea;
-        VkClearValue clearColorValue;
-        VkClearValue clearDepthStencilValue;
+
+        union
+        {
+            VkClearValue clearValues[ 2 ];
+            struct
+            {
+                VkClearValue clearColorValue;
+                VkClearValue clearDepthStencilValue;
+            };
+        };
         
         TMap<size_t, VkFramebuffer> framebufferAttachments;
 
@@ -594,7 +610,7 @@ namespace EE
 
         bool IsValid() const override;
 
-        const RHIBindLayout* GetBindLayout() const override;
+        const RHIBindLayout& GetBindLayout() const override;
 
         FORCEINLINE const VkDescriptorSet& GetVulkanDescriptorSet() const { return descriptorSet; }
     };

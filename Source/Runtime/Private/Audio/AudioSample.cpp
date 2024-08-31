@@ -1,5 +1,7 @@
 
 #include "CoreMinimal.h"
+
+#include "Engine/Ticker.h"
 #include "Audio/AudioSample.h"
 
 namespace EE

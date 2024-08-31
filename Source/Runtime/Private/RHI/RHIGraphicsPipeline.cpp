@@ -1,13 +1,15 @@
 
 #include "CoreMinimal.h"
 
+#include <Core/Collections.h>
+#include <Math/CoreMath.h>
 #include <RHI/RHI.h>
 
 namespace EE
 {
     void RHIBindGroupCreateInfo::AddResourceBinding( uint8 index, EBindingType binding, const RHIResource* resource, EShaderStageFlags shaderVisibility )
     {
-        bindings.emplace_back( index, binding, resource, shaderVisibility );
+        bindings.emplace_back( index, resource, binding, shaderVisibility );
     }
 
     void RHIRenderSubpassDescription::AddInputAttachment( uint32 atachmentIndex )
@@ -53,8 +55,8 @@ namespace EE
         colorAttachments.emplace_back( state );
     }
 
-    void RHIGraphicsPipelineCreateInfo::AddBindLayout( const RHIBindLayout* bindLayout )
+    void RHIGraphicsPipelineCreateInfo::AddBindLayout( const RHIBindLayout& bindLayout )
     {
-        bindLayouts.emplace_back( bindLayout );
+        bindLayouts.emplace_back( &bindLayout );
     }
 }

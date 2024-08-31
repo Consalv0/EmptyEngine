@@ -1,9 +1,5 @@
 #pragma once
 
-#include "CoreTypes.h"
-#include "Math/Matrix4x4.h"
-#include "Math/Vector3.h"
-
 namespace EE
 {
     enum class EFustrumPlanes : int
