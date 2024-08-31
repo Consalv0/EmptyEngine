@@ -4,13 +4,14 @@ project "EmptyEngine"
     kind "StaticLib"
     language "C++"
     cppdialect "C++20"
-    staticruntime "on"
+    staticruntime "On"
 
     targetdir ("%{prj.location}/Build/" .. outputdir)
     objdir ("%{prj.location}/BinObjs/" .. outputdir)
 
     pchsource "%{prj.location}/Source/Runtime/Private/CoreMinimal.cpp"
     pchheader "CoreMinimal.h"
+    inlining "Explicit"
 
     defines {
         "EMPTYENGINE_CORE",
@@ -28,6 +29,7 @@ project "EmptyEngine"
         "%{prj.location}/Source",
         "%{prj.location}/Source/Runtime",
         "%{prj.location}/Source/Runtime/Public",
+        "%{IncludeDir.JoltPhysics}",
         "%{IncludeDir.SDL}/include",
         "%{IncludeDir.VulkanSDK}/include",
         "%{IncludeDir.VMA}/include",
@@ -42,8 +44,13 @@ project "EmptyEngine"
     links {
         "spdlog",
         "VMA",
+        "JoltPhysics",
         "vulkan-1.lib",
         "SDL3.lib",
+    }
+    
+    flags { 
+        "MultiProcessorCompile"
     }
 
     filter "system:windows"
@@ -155,17 +162,70 @@ project "spdlog"
         "%{prj.location}/src",
         "%{prj.location}/include",
     }
+    
+    flags { 
+        "MultiProcessorCompile"
+    }
 
     filter "system:windows"
         systemversion "latest"
 
     filter "configurations:Debug"
         runtime "Debug"
-        symbols "on"
+        symbols "On"
 
     filter "configurations:Release"
         runtime "Release"
-        optimize "on"
+        optimize "Speed"
+
+project "JoltPhysics"
+    location "%{IncludeDir.JoltPhysics}"
+    kind "StaticLib"
+    language "C++"
+    cppdialect "C++17"
+    staticruntime "On"
+    pic "On"
+
+    targetdir ("%{prj.location}/Build/" .. outputdir)
+    objdir ("%{prj.location}/BinObjs/" .. outputdir)
+    
+    defines {
+        "JOLT_PHYSICS_SRC_FILES=%{prj.location}/Jolt/Jolt.natvis",
+        "JPH_CROSS_PLATFORM_DETERMINISTIC",
+        "JPH_USE_AVX2"
+    }
+
+    files {
+        "%{prj.location}/Jolt/**.h",
+        "%{prj.location}/Jolt/**.inl",
+        "%{prj.location}/Jolt/**.cpp"
+    }
+
+    removefiles {
+        "%{prj.location}/Jolt/ObjectStream/**.*",
+    }
+
+    includedirs {
+        "%{prj.location}",
+    }
+    
+    flags { 
+        "MultiProcessorCompile"
+    }
+
+    filter "system:windows"
+        buildoptions{ "/arch:AVX2" }
+        systemversion "latest"
+
+    filter "configurations:Debug"
+        defines{ "_DEBUG", "JPH_ENABLE_ASSERTS" }
+        runtime "Debug"
+        symbols "On"
+
+    filter "configurations:Release"
+        defines{ "NDEBUG" }
+        runtime "Release"
+        optimize "Speed"
 
 externalproject "SDL"
     location "%{IncludeDir.SDL}/VisualC/SDL"
