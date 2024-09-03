@@ -4,9 +4,6 @@ namespace EE
 {
     class Application
     {
-    protected:
-        bool initializationError;
-
     public:
         //* Entry point of the application
         void Start();
@@ -18,7 +15,7 @@ namespace EE
 
         virtual enum class EDynamicRHI GetPreferedRHI() const = 0;
 
-        bool HasErrors() { return initializationError; };
+        bool HasErrors() { return initializationError_; };
 
     protected:
         Application();
@@ -38,8 +35,6 @@ namespace EE
         virtual void OnTerminate() = 0;
 
     private:
-        bool initialized;
-
         //* Initialize the application objects
         bool Initialize();
 
@@ -48,6 +43,12 @@ namespace EE
 
         //* Terminates Application
         void Terminate();
+
+    private:
+        bool initialized_;
+
+    protected:
+        bool initializationError_;
     };
 
     extern Application* GMainApplication;

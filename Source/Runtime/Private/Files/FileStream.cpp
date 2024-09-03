@@ -1,6 +1,7 @@
 
 #include "CoreMinimal.h"
 
+#include "Utils/TextFormatting.h"
 #include "Core/Collections.h"
 #include "Files/FileStream.h"
 #include "Files/FileManager.h"
@@ -16,12 +17,12 @@
 namespace EE
 {
     File::File( const File& file )
-        : File( file.path )
+        : File( file.path_ )
     {
     }
 
     File::File( const WString& path )
-        : path( path )
+        : path_( path )
     {
     }
 
@@ -31,18 +32,18 @@ namespace EE
 
     bool File::IsValid() const
     {
-        return path.empty() == false;
+        return path_.empty() == false;
     }
 
     WString File::GetExtension() const
     {
         WString::size_type extensionIndex;
 
-        extensionIndex = path.rfind( '.' );
+        extensionIndex = path_.rfind( '.' );
 
         if ( extensionIndex != WString::npos )
         {
-            return path.substr( extensionIndex + 1 );
+            return path_.substr( extensionIndex + 1 );
         }
         else
         {
@@ -58,10 +59,10 @@ namespace EE
         separator = L'\\';
 #endif
 
-        size_t i = path.rfind( separator, path.length() );
+        size_t i = path_.rfind( separator, path_.length() );
         if ( i != WString::npos )
         {
-            return(path.substr( i + 1, path.length() - i ));
+            return(path_.substr( i + 1, path_.length() - i ));
         }
 
         return L"";
@@ -75,15 +76,15 @@ namespace EE
         return fileName;
     }
 
-    WString File::GetPath() const
+    const WString& File::GetPath() const
     {
-        return path;
+        return path_;
     }
 
     WString File::GetShortPath() const
     {
         WString currentDirectory = FileManager::GetAppDirectory();
-        WString returnValue = path;
+        WString returnValue = path_;
         Text::Replace( returnValue, currentDirectory, L".." );
 
         return returnValue;

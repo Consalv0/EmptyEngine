@@ -60,5 +60,5 @@
 #define EE_CLASSNOCOPY( clz ) \
     clz(clz&) = delete;   \
     clz& operator=(clz&) = delete; \
-    clz(const clz&) = delete; \
-    clz& operator=(const clz&) = delete;
+    clz(const clz&&) = delete; \
+    clz& operator=(const clz&&) = delete;

@@ -5,6 +5,7 @@
 
 #include "Utils/TextFormatting.h"
 #include "Files/FileManager.h"
+#include "Files/FileStream.h"
 
 #include <sstream>
 #include <fstream>
@@ -79,11 +80,13 @@ namespace EE
         WChar buffer[ MAX_PATH ];
         GetCurrentDirectory( _MAX_DIR, buffer );
         WString currentDirectory( buffer );
-#else
+#elif EE_PLATFORM_APPLE
         NSStringEncoding encode = CFStringConvertEncodingToNSStringEncoding( kCFStringEncodingUTF32LE );
         NSData* sData = [[[NSBundle mainBundle]resourcePath] dataUsingEncoding:encode];
 
         WString currentDirectory( (wchar_t*)[ sData bytes ], [ sData length ] / sizeof( wchar_t ) );
+#else
+        WString currentDirectory{};
 #endif
         return currentDirectory;
     }

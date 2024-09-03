@@ -35,7 +35,7 @@ namespace EE::Memory
             Deallocate();
         }
 
-        inline void* GetData() const { return pointer; }
+        inline T* GetData() const { return data; }
 
         inline size_t GetAlignment() const { return alignment; }
 

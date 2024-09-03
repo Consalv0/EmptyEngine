@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 
 #include "Engine/Ticker.h"
+#include "Utils/TextFormatting.h"
 #include "Utils/Hasher.h"
 #include "Resources/MeshParser.h"
 #include "Resources/OBJParser.h"

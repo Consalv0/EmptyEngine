@@ -1,30 +1,9 @@
 #pragma once
 
-#include "Utils/TextFormatting.h"
-#include "Utils/Hasher.h"
+#include "FileManager.h"
 
 namespace EE
 {
-    class File
-    {
-    protected:
-        WString path;
-    
-    public:
-        File( const File& file );
-        File( const WString& path );
-
-        ~File();
-
-        virtual bool IsValid() const;
-
-        WString GetExtension() const;
-        WString GetFileName() const;
-        WString GetFileNameWithoutExtension() const;
-        WString GetPath() const;
-        WString GetShortPath() const;
-    };
-
     template<typename StringType>
     class FileStream : public File
     {
@@ -34,10 +13,6 @@ namespace EE
         using IStream = std::basic_istream<Char, std::char_traits<Char>>;
         using OStream = std::basic_ostream<Char, std::char_traits<Char>>;
         using StringBuffer = std::basic_stringstream<Char, std::char_traits<Char>, std::allocator<Char>>;
-
-    private:
-        FStream* stream;
-        size_t length;
 
     public:
         FileStream( const File& file );
@@ -54,13 +29,13 @@ namespace EE
         template <typename T>
         inline const IStream& operator>>( T value )
         {
-            return (std::move( *stream ) >> value);
+            return (std::move( *stream_ ) >> value);
         }
 
         template <typename T>
         inline const OStream& operator<<( T value )
         {
-            return (std::move( *stream ) << value);
+            return (std::move( *stream_ ) << value);
         }
 
         inline float GetProgress() const;
@@ -78,31 +53,35 @@ namespace EE
         void MoveCursor( size_t pos );
 
         void ReadToStringBuffer( StringBuffer& buffer ) const;
+
+    private:
+        FStream* stream_;
+        size_t length_;
     };
 
     template<typename StringType>
     FileStream<StringType>::FileStream( const File& file ) : File( file )
     {
-        stream = new FStream();
+        stream_ = new FStream();
     }
 
     template<typename StringType>
     FileStream<StringType>::~FileStream()
     {
-        delete stream;
+        delete stream_;
     }
 
     template<typename StringType>
     inline float FileStream<StringType>::GetProgress() const
     {
-        size_t progress = size_t( stream->tellg() );
-        return progress / float( length );
+        size_t progress = size_t( stream_->tellg() );
+        return progress / float( length_ );
     }
 
     template<typename StringType>
     inline size_t FileStream<StringType>::GetPosition() const
     {
-        return stream->tellg();
+        return stream_->tellg();
     }
 
     template<typename StringType>
@@ -112,7 +91,7 @@ namespace EE
         {
             try
             {
-                stream->read( output, length );
+                stream_->read( output, length );
                 return true;
             }
             catch ( ... )
@@ -122,7 +101,7 @@ namespace EE
         }
         else
         {
-            EE_LOG_ERROR( L"File '{}' is not valid or do not exist", path );
+            EE_LOG_ERROR( L"File '{}' is not valid or do not exist", path_ );
             return false;
         }
     }
@@ -146,7 +125,7 @@ namespace EE
         }
         else
         {
-            EE_LOG_ERROR( L"File '{}' is not valid or do not exist", path );
+            EE_LOG_ERROR( L"File '{}' is not valid or do not exist", path_ );
             return false;
         }
     }
@@ -155,14 +134,14 @@ namespace EE
     StringType FileStream<StringType>::GetLine()
     {
         WString string;
-        std::getline( *stream, string );
+        std::getline( *stream_, string );
         return string;
     }
 
     template<typename StringType>
     bool FileStream<StringType>::IsValid() const
     {
-        return Super::IsValid() && stream != NULL && !stream->fail() && stream->good();
+        return Super::IsValid() && stream_ != NULL && !stream_->fail() && stream_->good();
     }
 
     template<typename StringType>
@@ -171,7 +150,7 @@ namespace EE
         if ( localeFormat == NULL )
             localeFormat = "en_US.UTF-8";
         static std::locale locale( localeFormat );
-        stream->imbue( locale );
+        stream_->imbue( locale );
     }
 
     template<typename StringType>
@@ -181,41 +160,41 @@ namespace EE
             LocaleToUTF8( NULL );
 
 #ifdef EE_PLATFORM_WINDOWS
-        stream->open( path, openFlags );
+        stream_->open( path_, openFlags );
 #else
-        stream->open( Text::WideToNarrow( path ), openFlags );
+        stream_->open( Text::WideToNarrow( path_ ), openFlags );
 #endif
 
-        return stream->is_open();
+        return stream_->is_open();
     }
 
     template<typename StringType>
     void FileStream<StringType>::Clean()
     {
-        if ( stream->is_open() )
-            stream->close();
+        if ( stream_->is_open() )
+            stream_->close();
 #ifdef EE_PLATFORM_WINDOWS
-        stream->open( path, std::ios::in | std::ios::out | std::ios::trunc );
+        stream_->open( path_, std::ios::in | std::ios::out | std::ios::trunc );
 #else
-        stream->open( Text::WideToNarrow( path ), std::ios::in | std::ios::out | std::ios::trunc );
+        stream_->open( Text::WideToNarrow( path_ ), std::ios::in | std::ios::out | std::ios::trunc );
 #endif
     }
 
     template<typename StringType>
     void FileStream<StringType>::MoveCursor( size_t pos )
     {
-        stream->seekg( pos );
+        stream_->seekg( pos );
     }
 
     template<typename StringType>
     void FileStream<StringType>::Close()
     {
-        stream->close();
+        stream_->close();
     }
 
     template<typename StringType>
     void FileStream<StringType>::ReadToStringBuffer( FileStream<StringType>::StringBuffer& buffer ) const
     {
-        buffer << stream->rdbuf();
+        buffer << stream_->rdbuf();
     }
 }

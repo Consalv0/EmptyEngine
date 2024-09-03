@@ -1,10 +1,29 @@
 #pragma once
 
-#include "Files/FileStream.h"
 #include "Core/Collections.h"
 
 namespace EE
 {
+    class File
+    {
+    public:
+        File( const File& file );
+        File( const WString& path );
+
+        ~File();
+
+        virtual bool IsValid() const;
+
+        WString GetExtension() const;
+        WString GetFileName() const;
+        WString GetFileNameWithoutExtension() const;
+        const WString& GetPath() const;
+        WString GetShortPath() const;
+
+    protected:
+        WString path_;
+    };
+
     typedef TList<File> FileList;
 
     class FileManager
