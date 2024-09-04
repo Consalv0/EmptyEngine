@@ -5,7 +5,6 @@
 #include "Rendering/Mesh.h"
 #include "Files/FileManager.h"
 #include "Resources/MeshParser.h"
-#include "Resources/OBJParser.h"
 #include "Resources/OBJImporter.h"
 
 #include "Utils/TextFormatting.h"

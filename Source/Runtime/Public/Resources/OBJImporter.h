@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Resources/MeshParser.h"
-#include "Utils/Hasher.h"
 
 namespace EE
 {
