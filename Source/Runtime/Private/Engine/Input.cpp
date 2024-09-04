@@ -30,19 +30,21 @@ namespace EE
         return true;
     }
 
-    bool Input::IsKeyState( EScancode keyCode, EButtonStateFlags state )
+    bool Input::IsKeyState( EScancode keyCode, EButtonStateFlags state, uint64 frame )
     {
-        if ( state & ButtonState_Down ) return GScancodeStates[ keyCode ].framePressed;
+        if ( frame != UINT64_MAX && frame != GScancodeStates[ keyCode ].frameDown )
+            return false;
         return GScancodeStates[ keyCode ].state & state;
     }
 
-    bool Input::IsMouseState( EMouseButton button, EButtonStateFlags state )
+    bool Input::IsMouseState( EMouseButton button, EButtonStateFlags state, uint64 frame )
     {
-        if ( state & ButtonState_Down ) return GMouseButtonStates[ button ].framePressed;
+        if ( frame != UINT64_MAX && frame != GMouseButtonStates[ button ].frameDown )
+            return false;
         return GMouseButtonStates[ button ].state & state;
     }
 
-    bool Input::IsButtonState( int index, EGamepadButton button, EButtonStateFlags state )
+    bool Input::IsButtonState( int index, EGamepadButton button, EButtonStateFlags state, uint64 frame )
     {
         if ( index == -1 )
         {
@@ -51,10 +53,9 @@ namespace EE
             if ( Indices.empty() ) index = 0;
             else index = Indices[ 0 ];
         }
-        if ( state & ButtonState_Down )
-        {
-            return GGamepadButtonStates[ index ][ button ].framePressed;
-        }
+
+        if ( frame != UINT64_MAX && frame != GGamepadButtonStates[ index ][ button ].frameDown )
+            return false;
         return GGamepadButtonStates[ index ][ button ].state & state;
     }
 
@@ -140,34 +141,13 @@ namespace EE
 
     void Input::Update()
     {
-        UpdateMouseState();
-
+        UpdateMouseState(); 
+        
         for ( int i = 0; i < Scancode_NUM; i++ )
         {
-            if ( GScancodeStates[ i ].state & ButtonState_Pressed )
+            if ( GScancodeStates[ i ].state & ButtonState_Typed )
             {
-                GScancodeStates[ i ].framePressed = GEngine->GetFrameCount();
-            }
-            GScancodeStates[ i ].state &= ~(ButtonState_Pressed | ButtonState_Released | ButtonState_Typed);
-        }
-        for ( int i = 0; i < Mouse_Button_NUM; i++ )
-        {
-            if ( GMouseButtonStates[ i ].state & ButtonState_Pressed )
-            {
-                GMouseButtonStates[ i ].framePressed = GEngine->GetFrameCount();
-            }
-            GMouseButtonStates[ i ].state &= ~(ButtonState_Pressed | ButtonState_Released);
-        }
-        for ( int i = 0; i < EE_MAX_GAMEPAD_COUNT; i++ )
-        {
-            auto gamepad = GGamepadButtonStates[ i ];
-            for ( int j = 0; j < Gamepad_Button_MAX; j++ )
-            {
-                if ( gamepad[ j ].state & ButtonState_Pressed )
-                {
-                    gamepad[ j ].framePressed = GEngine->GetFrameCount();
-                }
-                gamepad[ j ].state &= ~(ButtonState_Pressed | ButtonState_Released);
+                GScancodeStates[ i ].state &= ~ButtonState_Typed;
             }
         }
     }
@@ -325,8 +305,8 @@ namespace EE
                 if ( joystickState == NULL ) break;
 
                 auto& joyButtonState = GGamepadButtonStates[ index ][ (EGamepadButton)sdlEvent->jbutton.button ];
-                joyButtonState.state = ButtonState_Released;
-                joyButtonState.framePressed = 0;
+                joyButtonState.state = ButtonState_Up;
+                joyButtonState.frameDown = GEngine->GetFrameCount();
 
                 JoystickButtonReleaseEvent inEvent(
                     joystickState->instanceID, (EGamepadButton)sdlEvent->gbutton.button
@@ -362,8 +342,9 @@ namespace EE
                 }
                 if ( joystickState == NULL ) break;
 
-                auto& JoyButtonState = GGamepadButtonStates[ index ][ (EGamepadButton)sdlEvent->gbutton.button ];
-                JoyButtonState.state = ButtonState_Pressed;
+                auto& joyButtonState = GGamepadButtonStates[ index ][ (EGamepadButton)sdlEvent->gbutton.button ];
+                joyButtonState.state = ButtonState_Down;
+                joyButtonState.frameDown = GEngine->GetFrameCount();
 
                 EE_LOG_INFO( "{} Button pressed {}", sdlEvent->gbutton.which, sdlEvent->gbutton.button );
 
@@ -406,9 +387,14 @@ namespace EE
         case SDL_EVENT_KEY_DOWN:
         {
             if ( sdlEvent->key.repeat == 0 )
-                keyState.state = ButtonState_Pressed | ButtonState_Typed;
+            {
+                keyState.state = ButtonState_Down | ButtonState_Typed;
+                keyState.frameDown = GEngine->GetFrameCount();
+            }
             else
-                keyState.state = ButtonState_Typed;
+            {
+                keyState.state |= ButtonState_Typed;
+            }
             keyState.repetitions = sdlEvent->key.repeat;
 
             KeyPressedEvent inEvent(
@@ -425,8 +411,8 @@ namespace EE
 
         case SDL_EVENT_KEY_UP:
         {
-            keyState.state = ButtonState_Released;
-            keyState.framePressed = 0;
+            keyState.state = ButtonState_Up;
+            keyState.frameDown = GEngine->GetFrameCount();
             keyState.repetitions = 0;
 
             KeyReleasedEvent inEvent(
@@ -449,7 +435,8 @@ namespace EE
 
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
         {
-            mouseState.state = ButtonState_Pressed;
+            mouseState.state = ButtonState_Down;
+            mouseState.frameDown = GEngine->GetFrameCount();
             mouseState.clicks = sdlEvent->button.clicks;
 
             mouseButtonPressedCount[ sdlEvent->button.button ]++;
@@ -460,8 +447,8 @@ namespace EE
 
         case SDL_EVENT_MOUSE_BUTTON_UP:
         {
-            mouseState.state = ButtonState_Released;
-            mouseState.framePressed = 0;
+            mouseState.state = ButtonState_Up;
+            mouseState.frameDown = GEngine->GetFrameCount();
             mouseState.clicks = 0;
 
             mouseButtonPressedCount[ sdlEvent->button.button ] = -1;

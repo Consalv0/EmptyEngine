@@ -6,18 +6,17 @@ namespace EE
 {
     enum EButtonStateFlags : char
     {
-        ButtonState_Up          = 0,
-        ButtonState_Down        = 1 << 0,
-        ButtonState_Pressed     = 1 << 1,
-        ButtonState_Released    = 1 << 2,
-        ButtonState_Typed       = 1 << 3
+        ButtonState_Unknown =   0,
+        ButtonState_Up =        1 << 0,
+        ButtonState_Down =      1 << 1,
+        ButtonState_Typed =     1 << 2
     };
     ENUM_FLAGS_OPERATORS( EButtonStateFlags );
 
     struct ScancodeState
     {
-        EButtonStateFlags state;
-        uint64 framePressed;
+        EButtonStateFlags state = ButtonState_Up;
+        uint64 frameDown;
         uint32 repetitions;
     };
 
@@ -34,8 +33,8 @@ namespace EE
 
     struct GamepadButtonState
     {
-        EButtonStateFlags state;
-        uint64 framePressed;
+        EButtonStateFlags state = ButtonState_Up;
+        uint64 frameDown;
     };
 
     // Taken from SDL Gamepad for easy compatibility
@@ -80,8 +79,8 @@ namespace EE
 
     struct MouseButtonState
     {
-        EButtonStateFlags state;
-        uint64 framePressed;
+        EButtonStateFlags state = ButtonState_Up;
+        uint64 frameDown;
         uint32 clicks;
     };
 
