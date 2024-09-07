@@ -1,6 +1,10 @@
 
+#include <optional>
+
 namespace EE
 {
+    static bool CreateNativeVmaAllocator( VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VmaAllocator* outAllocator );
+
     class VulkanRHIPhysicalDevice;
     class VulkanRHIInstance;
     class VulkanRHIDevice;
@@ -16,6 +20,27 @@ namespace EE
     class VulkanRHICommandBuffer;
     class VulkanRHIShaderStage;
     class VulkanRHIBindGroup;
+
+    struct QueueFamilyIndices
+    {
+        std::optional<uint32> graphicsFamily;
+        std::optional<uint32> presentFamily;
+
+        bool isComplete()
+        {
+            return graphicsFamily.has_value() && presentFamily.has_value();
+        }
+    };
+
+    struct VulkanSurfaceSupportDetails
+    {
+        VkBool32 supported = false;
+        VkSurfaceCapabilitiesKHR capabilities = {};
+        uint32 formatCount = 0;
+        TArray<VkSurfaceFormatKHR> formats;
+        uint32 presentModeCount = 0;
+        TArray<VkPresentModeKHR> presentModes;
+    };
 
     class VulkanRHIPhysicalDevice
     {
@@ -473,7 +498,7 @@ namespace EE
 
         void BindGraphicsPipeline( const RHIGraphicsPipeline* pipeline ) const override;
 
-        void BindBindGroup( const RHIGraphicsPipeline* pipeline, const class RHIBindGroup* bindGroup, const uint32& dynamicOffsetsCount, const uint32* dynamicOffsets ) const override;
+        void BindBindingsGroup( const RHIGraphicsPipeline* pipeline, const class RHIBindGroup* bindGroup, const uint32& dynamicOffsetsCount, const uint32* dynamicOffsets ) const override;
 
         void BindVertexBuffer( const class RHIBuffer* buffer ) const override;
 

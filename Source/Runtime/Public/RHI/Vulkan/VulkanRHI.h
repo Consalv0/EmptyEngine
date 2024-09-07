@@ -38,4 +38,5 @@ namespace EE
     };
 
     void GetVulkanInstanceExtensions( uint32* count, const NChar* const*& extensions );
+    void* GetVulkanRHIInstance( );
 }

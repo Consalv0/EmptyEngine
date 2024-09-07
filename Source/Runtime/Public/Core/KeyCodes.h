@@ -16,8 +16,8 @@ namespace EE
     struct ScancodeState
     {
         EButtonStateFlags state = ButtonState_Up;
-        uint64 frameDown;
-        uint32 repetitions;
+        uint64 frameDown = UINT64_MAX;
+        uint32 repetitions = 0;
     };
 
     enum EMouseButton
@@ -34,7 +34,7 @@ namespace EE
     struct GamepadButtonState
     {
         EButtonStateFlags state = ButtonState_Up;
-        uint64 frameDown;
+        uint64 frameDown = UINT64_MAX;
     };
 
     // Taken from SDL Gamepad for easy compatibility
@@ -80,8 +80,8 @@ namespace EE
     struct MouseButtonState
     {
         EButtonStateFlags state = ButtonState_Up;
-        uint64 frameDown;
-        uint32 clicks;
+        uint64 frameDown = UINT64_MAX;
+        uint32 clicks = 0;
     };
 
     /**

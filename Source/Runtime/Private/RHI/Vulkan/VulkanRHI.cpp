@@ -6,15 +6,13 @@
 #include "Utils/Hasher.h"
 
 #include "RHI/Vulkan/VulkanRHI.h"
+#include "RHI/Vulkan/Vulkan.h"
+#include <RHI/Vulkan/VulkanRHIObjects.h>
 
-// #define VMA_IMPLEMENTATION
-#include <vk_mem_alloc.h>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
 #include <SDL3/SDL_video.h>
-#include <vulkan/vulkan.h>
 
-#include <optional>
 #include <set>
 #include <map>
 
@@ -878,30 +876,7 @@ namespace EE
 
         return vmaCreateAllocator( &info, outAllocator );
     }
-
-    struct QueueFamilyIndices
-    {
-        std::optional<uint32> graphicsFamily;
-        std::optional<uint32> presentFamily;
-
-        bool isComplete()
-        {
-            return graphicsFamily.has_value() && presentFamily.has_value();
-        }
-    };
-
-    struct VulkanSurfaceSupportDetails
-    {
-        VkBool32 supported = false;
-        VkSurfaceCapabilitiesKHR capabilities = {};
-        uint32 formatCount = 0;
-        TArray<VkSurfaceFormatKHR> formats;
-        uint32 presentModeCount = 0;
-        TArray<VkPresentModeKHR> presentModes;
-    };
 }
-
-#include "RHI/Vulkan/VulkanRHIObjects.h"
 
 namespace EE
 {
@@ -952,14 +927,14 @@ namespace EE
         vkGetPhysicalDeviceFeatures( physicalDevice, &deviceFeatures );
 
         // Logic to find queue family indices to populate struct with
-        vkGetPhysicalDeviceQueueFamilyProperties( physicalDevice, &queueFamilyCount, VK_NULL_HANDLE );
+        vkGetPhysicalDeviceQueueFamilyProperties( physicalDevice, &queueFamilyCount, NULL );
         queueFamilies.resize( queueFamilyCount );
         vkGetPhysicalDeviceQueueFamilyProperties( physicalDevice, &queueFamilyCount, queueFamilies.data() );
 
         // Get extension support
-        vkEnumerateDeviceExtensionProperties( physicalDevice, VK_NULL_HANDLE, &extensionCount, VK_NULL_HANDLE );
+        vkEnumerateDeviceExtensionProperties( physicalDevice, NULL, &extensionCount, NULL );
         extensions.resize( extensionCount );
-        vkEnumerateDeviceExtensionProperties( physicalDevice, VK_NULL_HANDLE, &extensionCount, extensions.data() );
+        vkEnumerateDeviceExtensionProperties( physicalDevice, NULL, &extensionCount, extensions.data() );
     }
 
     VulkanRHIPhysicalDevice::~VulkanRHIPhysicalDevice()
@@ -2281,7 +2256,7 @@ namespace EE
         vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetVulkanPipeline() );
     }
 
-    void VulkanRHICommandBuffer::BindBindGroup( const RHIGraphicsPipeline* pipeline, const RHIBindGroup* bindGroup, const uint32& dynamicOffsetsCount, const uint32* dynamicOffsets ) const
+    void VulkanRHICommandBuffer::BindBindingsGroup( const RHIGraphicsPipeline* pipeline, const RHIBindGroup* bindGroup, const uint32& dynamicOffsetsCount, const uint32* dynamicOffsets ) const
     {
         const VulkanRHIBindGroup* vulkanBindGroup = static_cast<const VulkanRHIBindGroup*>( bindGroup );
         const VulkanRHIGraphicsPipeline* vulkanPipeline = static_cast<const VulkanRHIGraphicsPipeline*>(pipeline);
@@ -2579,7 +2554,7 @@ namespace EE
         for ( uint32 i = 0; i < attachmentCount; i++ )
         {
             imageViews[ i ] = static_cast<const VulkanRHITexture*>(textures[ i ])->GetVulkanImageView();
-            HashCombine( hash, imageViews[ i ] );
+            HashCombine( &hash, imageViews[ i ] );
         }
 
         if ( framebufferAttachments.contains( hash ) == false )
@@ -3348,5 +3323,10 @@ namespace EE
     RHIGraphicsPipeline* VulkanRHI::CreateRHIGraphicsPipeline( const RHIGraphicsPipelineCreateInfo& info ) const
     {
         return new VulkanRHIGraphicsPipeline( info, GVulkanDevice );
+    }
+
+    void* GetVulkanRHIInstance()
+    {
+        return GVulkanInstance;
     }
 }

@@ -189,7 +189,7 @@ namespace EE
 
         virtual void BindGraphicsPipeline( const class RHIGraphicsPipeline* pipeline ) const = 0;
 
-        virtual void BindBindGroup( const RHIGraphicsPipeline* pipeline, const class RHIBindGroup* bindGroup, const uint32& dynamicOffsetsCount, const uint32* dynamicOffests ) const = 0;
+        virtual void BindBindingsGroup( const RHIGraphicsPipeline* pipeline, const class RHIBindGroup* bindGroup, const uint32& dynamicOffsetsCount, const uint32* dynamicOffests ) const = 0;
 
         virtual void BindVertexBuffer( const class RHIBuffer* buffer ) const = 0;
 
