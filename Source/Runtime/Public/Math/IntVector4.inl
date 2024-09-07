@@ -8,6 +8,12 @@ namespace EE::Math
 	}
 
     template <typename T>
+    FORCEINLINE constexpr TIntVector4<T>::TIntVector4( const TIntVector4<T>& vector )
+        : x( (T)vector.x ), y( (T)vector.y ), z( (T)vector.z ), w( (T)vector.w )
+    {
+    }
+
+    template <typename T>
     template <typename R>
 	FORCEINLINE constexpr TIntVector4<T>::TIntVector4( const TVector2<R>& vector )
 		: x( (T)vector.x ), y( (T)vector.y ), z( (T)0 ), w( (T)0 )

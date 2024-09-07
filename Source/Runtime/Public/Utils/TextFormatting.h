@@ -141,19 +141,20 @@ namespace EE
         template<typename ... Arguments>
         WString Formatted( const WString& format, Arguments ... Args )
         {
-            const WChar* FormatBuffer = format.c_str();
-            int Size = (int)sizeof( WChar ) * (int)format.size();
-            std::unique_ptr<WChar[]> Buffer;
+            const WChar* formatBuffer = format.c_str();
+            size_t size = sizeof( WChar ) * format.size();
+            WString result;
+            result.resize( size );
 
             while ( true )
             {
-                Buffer = std::make_unique<WChar[]>( Size );
-                int OldSize = Size;
-                Size = std::swprintf( Buffer.get(), Size, FormatBuffer, Args ... );
+                size_t oldSize = size;
+                size = std::swprintf( result.data(), size, formatBuffer, Args ...);
 
-                if ( Size < 0 )
+                if ( size < 0 )
                 {
-                    Size += OldSize + 10;
+                    size += oldSize + 10;
+                    result.resize( size );
                 }
                 else
                 {
@@ -161,24 +162,52 @@ namespace EE
                 }
             }
 
-            return WString( Buffer.get(), Buffer.get() + Size );
+            return result;
+        }
+
+        template<typename ... Arguments>
+        NString FormattedN( const NString& format, Arguments ... Args )
+        {
+            const NChar* formatBuffer = format.c_str();
+            size_t size = sizeof( NChar ) * format.size();
+            NString result;
+            result.resize( size );
+
+            while ( true )
+            {
+                size_t oldSize = size;
+                size = std::sprintf( result.data(), formatBuffer, Args ...);
+
+                if ( size < 0 )
+                {
+                    size += oldSize + 10;
+                    result.resize( size );
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return result;
         }
 
         template<typename ... Arguments>
         WString Formatted( const WChar* format, Arguments ... Args )
         {
-            int Size = (int)std::wcslen( format );
-            std::unique_ptr<WChar[]> Buffer;
+            size_t size = std::wcslen( format );
+            WString result;
+            result.resize( size );
 
             while ( true )
             {
-                Buffer = std::make_unique<WChar[]>( Size );
-                int OldSize = Size;
-                Size = std::swprintf( Buffer.get(), Size, format, Args ... );
+                size_t oldSize = size;
+                size = std::swprintf( result.data(), size, format, Args ... );
 
-                if ( Size < 0 )
+                if ( size < 0 )
                 {
-                    Size += OldSize + 25;
+                    size += oldSize + 25;
+                    result.resize( size );
                 }
                 else
                 {
@@ -186,8 +215,35 @@ namespace EE
                 }
             }
 
-            return WString( Buffer.get(), Buffer.get() + Size ); // We don't want the '\0' inside
+            return result;
         }
+
+        template<typename ... Arguments>
+        NString FormattedN( const NChar* format, Arguments ... Args )
+        {
+            size_t size = std::strlen( format );
+            NString result;
+            result.resize( size );
+
+            while ( true )
+            {
+                size_t oldSize = size;
+                size = std::sprintf( result.data(), format, Args ...);
+
+                if ( size < 0 )
+                {
+                    size += oldSize + 25;
+                    result.resize( size );
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return result;
+        }
+
 
         template<class Num>
         inline WString FormatUnit( const Num& number, const int& Decimals )
@@ -229,6 +285,45 @@ namespace EE
         }
 
         template<class Num>
+        inline NString FormatUnitN( const Num& number, const int& Decimals )
+        {
+            double PrecisionNumber = (double)number;
+            NString suffix{};
+            if ( PrecisionNumber > 1e3 && PrecisionNumber <= 1e6 )
+            {
+                suffix = 'k';
+                PrecisionNumber /= 1e3;
+            }
+            else
+                if ( PrecisionNumber > 1e6 && PrecisionNumber <= 1e9 )
+                {
+                    suffix = 'M';
+                    PrecisionNumber /= 1e6;
+                }
+                else
+                    if ( PrecisionNumber > 1e9 && PrecisionNumber <= 1e12 )
+                    {
+                        suffix = 'G';
+                        PrecisionNumber /= 1e9;
+                    }
+                    else
+                        if ( PrecisionNumber > 1e12 )
+                        {
+                            suffix = 'T';
+                            PrecisionNumber /= 1e12;
+                        }
+
+            if ( int( PrecisionNumber ) == PrecisionNumber )
+            {
+                return Formatted( "%d%s", (int)PrecisionNumber, suffix.c_str() );
+            }
+            else
+            {
+                return Formatted( "%." + std::to_string( Decimals ) + "f%s", PrecisionNumber, suffix.c_str() );
+            }
+        }
+
+        template<class Num>
         inline WString FormatData( const Num& number, const int& MaxDecimals )
         {
             double PrecisionNumber = (double)number;
@@ -264,6 +359,45 @@ namespace EE
             else
             {
                 return Formatted( L"%." + std::to_wstring( MaxDecimals ) + L"f%s", PrecisionNumber, Suffix.c_str() );
+            }
+        }
+
+        template<class Num>
+        inline NString FormatDataN( const Num& number, const int& maxDecimals )
+        {
+            double precisionNumber = (double)number;
+            NString suffix = "b";
+            if ( precisionNumber > 1 << 10 && precisionNumber <= 1 << 20 )
+            {
+                suffix = "kb";
+                precisionNumber /= 1 << 10;
+            }
+            else
+                if ( precisionNumber > 1 << 20 && precisionNumber <= 1 << 30 )
+                {
+                    suffix = "Mb";
+                    precisionNumber /= 1 << 20;
+                }
+                else
+                    if ( precisionNumber > 1 << 30 && precisionNumber <= (size_t)1 << 40 )
+                    {
+                        suffix = "Gb";
+                        precisionNumber /= 1 << 30;
+                    }
+                    else
+                        if ( precisionNumber > (size_t)1 << 40 )
+                        {
+                            suffix = "Tb";
+                            precisionNumber /= (size_t)1 << 40;
+                        }
+
+            if ( int( precisionNumber ) == precisionNumber )
+            {
+                return Formatted( "%d%s", (int)precisionNumber, suffix.c_str() );
+            }
+            else
+            {
+                return Formatted( "%." + std::to_string( maxDecimals ) + "f%s", precisionNumber, suffix.c_str() );
             }
         }
     }
