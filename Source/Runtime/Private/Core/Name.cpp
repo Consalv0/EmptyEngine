@@ -106,7 +106,7 @@ namespace EE
 	size_t Name::GetInstanceID() const
 	{
 		size_t ret = 0;
-		EE::HashCombine( ret, id, number );
+		EE::HashCombine( &ret, id, number );
 		return ret;
 	}
 

@@ -2,19 +2,27 @@
 
 namespace EE
 {
-	inline void HashCombine(std::size_t& seed) { }
+	inline void HashCombine( size_t* seed ) { }
 
 	template <typename T, typename... Rest>
-	inline void HashCombine(std::size_t& seed, const T& v, Rest... rest) {
-		std::hash<T> hasher;
-		seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-		HashCombine(seed, rest...);
+	inline void HashCombine( size_t* seed, const T& v, Rest... rest )
+    {
+	    std::hash<T> hasher;
+        *seed ^= hasher(v) + 0x9e3779b9 + (*seed << 6) + (*seed >> 2);
+        HashCombine(seed, rest...);
 	}
 
-	inline size_t WStringToHash(const WString & name) {
-		static const std::hash<WString> Hasher;
-		return Hasher(name);
+	inline size_t WStringToHash( const WString& name)
+    {
+		static const std::hash<WString> hasher;
+		return hasher(name);
 	}
+
+    inline size_t ConstStringToHash( const NChar*& name )
+    {
+        static const std::hash<std::string_view> hasher;
+        return hasher( std::string_view( name, std::strlen( name ) ) );
+    }
 
 	// Code taken from https://stackoverflow.com/a/28801005 by tux3
 	// Generate CRC lookup table
@@ -58,9 +66,9 @@ namespace EE
 #define EE_MAKE_HASHABLE(type, ...) \
 namespace std {\
     template<> struct hash<type> {\
-        std::size_t operator()(const type &t) const {\
-            std::size_t ret = 0;\
-            EE::HashCombine(ret, __VA_ARGS__);\
+        size_t operator()(const type &t) const {\
+            size_t ret = 0;\
+            EE::HashCombine(&ret, __VA_ARGS__);\
             return ret;\
         }\
     };\
