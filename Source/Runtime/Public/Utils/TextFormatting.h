@@ -151,7 +151,7 @@ namespace EE
                 size_t oldSize = size;
                 size = std::swprintf( result.data(), size, formatBuffer, Args ...);
 
-                if ( size < 0 )
+                if ( size < 0 || oldSize < size )
                 {
                     size += oldSize + 10;
                     result.resize( size );
@@ -177,9 +177,9 @@ namespace EE
             while ( true )
             {
                 size_t oldSize = size;
-                size = std::sprintf( result.data(), formatBuffer, Args ...);
+                size = std::snprintf( result.data(), size, formatBuffer, Args ...);
 
-                if ( size < 0 )
+                if ( size < 0 || oldSize < size )
                 {
                     size += oldSize + 10;
                     result.resize( size );
@@ -206,7 +206,7 @@ namespace EE
                 size_t oldSize = size;
                 size = std::swprintf( result.data(), size, format, Args ... );
 
-                if ( size < 0 )
+                if ( size < 0 || oldSize < size )
                 {
                     size += oldSize + 25;
                     result.resize( size );
@@ -231,9 +231,9 @@ namespace EE
             while ( true )
             {
                 size_t oldSize = size;
-                size = std::sprintf( result.data(), format, Args ...);
+                size = std::snprintf( result.data(), size, format, Args ...);
 
-                if ( size < 0 )
+                if ( size < 0 || oldSize < size )
                 {
                     size += oldSize + 25;
                     result.resize( size );
