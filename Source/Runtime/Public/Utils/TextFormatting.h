@@ -158,6 +158,7 @@ namespace EE
                 }
                 else
                 {
+                    result.resize( size );
                     break;
                 }
             }
@@ -185,6 +186,7 @@ namespace EE
                 }
                 else
                 {
+                    result.resize( size );
                     break;
                 }
             }
@@ -211,6 +213,7 @@ namespace EE
                 }
                 else
                 {
+                    result.resize( size );
                     break;
                 }
             }
@@ -237,6 +240,7 @@ namespace EE
                 }
                 else
                 {
+                    result.resize( size );
                     break;
                 }
             }
@@ -248,39 +252,39 @@ namespace EE
         template<class Num>
         inline WString FormatUnit( const Num& number, const int& Decimals )
         {
-            double PrecisionNumber = (double)number;
-            WString Suffix = L"";
-            if ( PrecisionNumber > 1e3 && PrecisionNumber <= 1e6 )
+            double precisionNumber = (double)number;
+            WString suffix = L"";
+            if ( precisionNumber > 1e3 && precisionNumber <= 1e6 )
             {
-                Suffix = L'k';
-                PrecisionNumber /= 1e3;
+                suffix = L'k';
+                precisionNumber /= 1e3;
             }
             else
-                if ( PrecisionNumber > 1e6 && PrecisionNumber <= 1e9 )
+                if ( precisionNumber > 1e6 && precisionNumber <= 1e9 )
                 {
-                    Suffix = L'M';
-                    PrecisionNumber /= 1e6;
+                    suffix = L'M';
+                    precisionNumber /= 1e6;
                 }
                 else
-                    if ( PrecisionNumber > 1e9 && PrecisionNumber <= 1e12 )
+                    if ( precisionNumber > 1e9 && precisionNumber <= 1e12 )
                     {
-                        Suffix = L'G';
-                        PrecisionNumber /= 1e9;
+                        suffix = L'G';
+                        precisionNumber /= 1e9;
                     }
                     else
-                        if ( PrecisionNumber > 1e12 )
+                        if ( precisionNumber > 1e12 )
                         {
-                            Suffix = L'T';
-                            PrecisionNumber /= 1e12;
+                            suffix = L'T';
+                            precisionNumber /= 1e12;
                         }
 
-            if ( int( PrecisionNumber ) == PrecisionNumber )
+            if ( int( precisionNumber ) == precisionNumber )
             {
-                return Formatted( L"%d%s", (int)PrecisionNumber, Suffix.c_str() );
+                return Formatted( L"%d%s", (int)precisionNumber, suffix.c_str() );
             }
             else
             {
-                return Formatted( L"%." + std::to_wstring( Decimals ) + L"f%s", PrecisionNumber, Suffix.c_str() );
+                return Formatted( L"%." + std::to_wstring( Decimals ) + L"f%s", precisionNumber, suffix.c_str() );
             }
         }
 
