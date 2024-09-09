@@ -3,42 +3,52 @@ namespace EE
 {
     class JoltPhysicsEngine;
 
-    class JoltSphereBody : public PhysicsSphereBody
+    class JoltPhysicsShapeSphere : public PhysicsShapeSphere
     {
-        EE_CLASSNOCOPY( JoltSphereBody )
-
     public:
-        JoltSphereBody( const PhysicsSphereBodyCreateInfo& createInfo, JoltPhysicsEngine* physicsEngine );
+        JPH::Shape* GetJoltShape() { return shape_; };
 
-        virtual ~JoltSphereBody() override;
-
-        Vector3f GetPosition() const;
-        void SetPosition( const Vector3f& position );
-        Vector3f GetLinearVelocity() const;
-        void SetLinearVelocity( const Vector3f& velocity );
+        JoltPhysicsShapeSphere( const PhysicsShapeSphereCreateInfo& createInfo );
+        ~JoltPhysicsShapeSphere( );
 
     private:
-        JPH::BodyID bodyId_;
-        JPH::PhysicsSystem* physicsSystem_;
+        JPH::Shape* shape_;
     };
 
-    class JoltBoxBody : public PhysicsBoxBody
+    class JoltPhysicsShapeBox : public PhysicsShapeBox
     {
-        EE_CLASSNOCOPY( JoltBoxBody )
+    public:
+        JPH::Shape* GetJoltShape() { return shape_; };
+
+        JoltPhysicsShapeBox( const PhysicsShapeBoxCreateInfo& createInfo );
+        ~JoltPhysicsShapeBox();
+
+    private:
+        JPH::Shape* shape_;
+    };
+
+    class JoltPhysicsBody : public PhysicsBody
+    {
+        EE_CLASSNOCOPY( JoltPhysicsBody )
 
     public:
-        JoltBoxBody( const PhysicsBoxBodyCreateInfo& createInfo, JoltPhysicsEngine* physicsEngine );
+        JoltPhysicsBody( const PhysicsBodyCreateInfo& createInfo, JoltPhysicsEngine* physicsEngine );
 
-        virtual ~JoltBoxBody() override;
+        virtual ~JoltPhysicsBody() override;
 
-        Vector3f GetPosition() const;
-        void SetPosition( const Vector3f& position );
-        Vector3f GetLinearVelocity() const;
-        void SetLinearVelocity( const Vector3f& velocity );
+        void GetPosition( Vector3f* position ) const override;
+        void SetPosition( const Vector3f& position ) override;
+        void GetRotation( Quaternionf* position ) const override;
+        void SetRotation( const Quaternionf& position ) override;
+        void GetLinearVelocity( Vector3f* velocity ) const override;
+        void SetLinearVelocity( const Vector3f& velocity ) override;
+        void GetFriction( float* friction ) const override;
+        void SetFriction( const float& friction ) override;
 
     private:
         JPH::BodyID bodyId_;
         JPH::PhysicsSystem* physicsSystem_;
+        PhysicsShape* physicsShape_;
     };
 
     class JoltPhysicsEngine : public PhysicsEngine
@@ -51,9 +61,10 @@ namespace EE
 
         bool UpdateSimulation( uint8 steps );
 
-        PhysicsSphereBody* CreateSphereBody( const PhysicsSphereBodyCreateInfo& createInfo );
+        PhysicsShapeBox* CreateBoxShape( const PhysicsShapeBoxCreateInfo& createInfo ) override;
+        PhysicsShapeSphere* CreateSphereShape( const PhysicsShapeSphereCreateInfo& createInfo ) override;
 
-        PhysicsBoxBody* CreateBoxBody( const PhysicsBoxBodyCreateInfo& createInfo );
+        PhysicsBody* CreateBody( const PhysicsBodyCreateInfo& createInfo ) override;
 
         FORCEINLINE JPH::PhysicsSystem* GetPhysicsSystem() { return physicsSystem_; }
     

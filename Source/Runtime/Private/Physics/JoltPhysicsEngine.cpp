@@ -199,6 +199,28 @@ namespace EE
         }
     };
 
+    JoltPhysicsShapeSphere::JoltPhysicsShapeSphere( const PhysicsShapeSphereCreateInfo& createInfo ) : PhysicsShapeSphere( createInfo )
+        , shape_( NULL )
+    {
+        shape_ = new JPH::SphereShape( radius_ );
+    }
+
+    JoltPhysicsShapeSphere::~JoltPhysicsShapeSphere()
+    {
+        delete shape_;
+    }
+
+    JoltPhysicsShapeBox::JoltPhysicsShapeBox( const PhysicsShapeBoxCreateInfo& createInfo ) : PhysicsShapeBox( createInfo )
+        , shape_( NULL )
+    {
+        shape_ = new JPH::BoxShape( JPH::Vec3( extents_.x, extents_.y, extents_.z ) );
+    }
+
+    JoltPhysicsShapeBox::~JoltPhysicsShapeBox()
+    {
+        delete shape_;
+    }
+
     JoltPhysicsEngine::JoltPhysicsEngine()
     {
         // Register allocation hook. In this example we'll just let Jolt use malloc / free but you can override these if you want (see Memory.h).
@@ -326,29 +348,54 @@ namespace EE
         return true;
     }
 
-    PhysicsSphereBody* JoltPhysicsEngine::CreateSphereBody( const PhysicsSphereBodyCreateInfo& createInfo )
+    PhysicsShapeBox* JoltPhysicsEngine::CreateBoxShape( const PhysicsShapeBoxCreateInfo& createInfo )
     {
-        return new JoltSphereBody( createInfo, this );
+        return new JoltPhysicsShapeBox( createInfo );
     }
 
-    PhysicsBoxBody* JoltPhysicsEngine::CreateBoxBody( const PhysicsBoxBodyCreateInfo& createInfo )
+    PhysicsShapeSphere* JoltPhysicsEngine::CreateSphereShape( const PhysicsShapeSphereCreateInfo& createInfo )
     {
-        return new JoltBoxBody( createInfo, this );
+        return new JoltPhysicsShapeSphere( createInfo );
     }
 
-    JoltSphereBody::JoltSphereBody( const PhysicsSphereBodyCreateInfo& createInfo, JoltPhysicsEngine* physicsEngine )
+    PhysicsBody* JoltPhysicsEngine::CreateBody( const PhysicsBodyCreateInfo& createInfo )
+    {
+        return new JoltPhysicsBody( createInfo, this );
+    }
+
+    JoltPhysicsBody::JoltPhysicsBody( const PhysicsBodyCreateInfo& createInfo, JoltPhysicsEngine* physicsEngine )
         : physicsSystem_( physicsEngine->GetPhysicsSystem() )
+        , physicsShape_( createInfo.physicsShape )
         , bodyId_()
     {
         // The main way to interact with the bodies in the physics system is through the body interface. There is a locking and a non-locking
         // variant of this. We're going to use the locking version (even though we're not planning to access bodies from multiple threads)
         JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
 
+        JPH::Shape* shape = NULL;
+        switch ( physicsShape_->shape )
+        {
+        case PhysicsShape_Sphere:
+        {
+            JoltPhysicsShapeSphere* sphereShape = static_cast<JoltPhysicsShapeSphere*>(physicsShape_);
+            shape = sphereShape->GetJoltShape();
+        }
+            break;
+        case PhysicsShape_Box:
+        {
+            JoltPhysicsShapeBox* boxShape = static_cast<JoltPhysicsShapeBox*>(physicsShape_);
+            shape = boxShape->GetJoltShape();
+        }
+            break;
+        default:
+            break;
+        }
+
         // Now create a dynamic body to bounce on the floor
         // Note that this uses the shorthand version of creating and adding a body to the world
         JPH::BodyCreationSettings sphereSettings
         (
-            new JPH::SphereShape( createInfo.radius ),
+            shape,
             JPH::RVec3( createInfo.position.x, createInfo.position.y, createInfo.position.z ),
             JPH::Quat( createInfo.rotation.x, createInfo.rotation.y, createInfo.rotation.z, createInfo.rotation.w ),
             ConvertMotionType( createInfo.motionType ),
@@ -358,80 +405,7 @@ namespace EE
         bodyId_ = bodyInterface.CreateAndAddBody( sphereSettings, createInfo.activate ? JPH::EActivation::Activate : JPH::EActivation::DontActivate );
     }
 
-    JoltSphereBody::~JoltSphereBody()
-    {
-        // The main way to interact with the bodies in the physics system is through the body interface. There is a locking and a non-locking
-        // variant of this. We're going to use the locking version (even though we're not planning to access bodies from multiple threads)
-        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
-
-        // Remove the sphere from the physics system. Note that the sphere itself keeps all of its state and can be re-added at any time.
-        bodyInterface.RemoveBody( bodyId_ );
-
-        // Destroy the sphere. After this the sphere ID is no longer valid.
-        bodyInterface.DestroyBody( bodyId_ );
-    }
-
-    Vector3f JoltSphereBody::GetPosition() const
-    {
-        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
-        JPH::RVec3 position = bodyInterface.GetPosition( bodyId_ );
-
-        return Vector3f( position.GetX(), position.GetY(), position.GetZ() );
-    }
-
-    void JoltSphereBody::SetPosition( const Vector3f& position )
-    {
-        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
-        bodyInterface.SetPosition( bodyId_, JPH::RVec3( position.x, position.y, position.z ), JPH::EActivation::DontActivate );
-    }
-
-    Vector3f JoltSphereBody::GetLinearVelocity() const
-    {
-        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
-        JPH::Vec3 position = bodyInterface.GetLinearVelocity( bodyId_ );
-
-        return Vector3f( position.GetX(), position.GetY(), position.GetZ() );
-    }
-
-    void JoltSphereBody::SetLinearVelocity( const Vector3f& velocity )
-    {
-        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
-        // Now you can interact with the dynamic body, in this case we're going to give it a velocity.
-        // (note that if we had used CreateBody then we could have set the velocity straight on the body before adding it to the physics system)
-        bodyInterface.SetLinearVelocity( bodyId_, JPH::Vec3( velocity.x, velocity.y, velocity.z ) );
-    }
-
-    JoltBoxBody::JoltBoxBody( const PhysicsBoxBodyCreateInfo& createInfo, JoltPhysicsEngine* physicsEngine )
-        : physicsSystem_( physicsEngine->GetPhysicsSystem() )
-        , bodyId_()
-    {
-        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
-
-        // Next we can create a rigid body to serve as the floor, we make a large box
-        // Create the settings for the collision volume (the shape).
-        // Note that for simple shapes (like boxes) you can also directly construct a BoxShape.
-        JPH::BoxShapeSettings floorShapeSettings( JPH::Vec3( createInfo.extents.x, createInfo.extents.y, createInfo.extents.z) );
-        floorShapeSettings.SetEmbedded(); // A ref counted object on the stack (base class RefTarget) should be marked as such to prevent it from being freed when its reference count goes to 0.
-
-        // Create the shape
-        JPH::ShapeSettings::ShapeResult floorShapeResult = floorShapeSettings.Create();
-        JPH::ShapeRefC floorShape = floorShapeResult.Get(); // We don't expect an error here, but you can check floor_shape_result for HasError() / GetError()
-
-        // Create the settings for the body itself. Note that here you can also set other properties like the restitution / friction.
-        JPH::BodyCreationSettings floorSettings
-        ( 
-            floorShape,
-            JPH::RVec3( createInfo.position.x, createInfo.position.y, createInfo.position.z ),
-            JPH::Quat( createInfo.rotation.x, createInfo.rotation.y, createInfo.rotation.z, createInfo.rotation.w ),
-            ConvertMotionType( createInfo.motionType ),
-            Layers::NonMoving
-        );
-
-        // Create the actual rigid body
-        bodyId_ = bodyInterface.CreateAndAddBody( floorSettings, createInfo.activate ? JPH::EActivation::Activate : JPH::EActivation::DontActivate ); 
-    }
-
-    JoltBoxBody::~JoltBoxBody()
+    JoltPhysicsBody::~JoltPhysicsBody()
     {
         JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
 
@@ -442,31 +416,65 @@ namespace EE
         bodyInterface.DestroyBody( bodyId_ );
     }
 
-    Vector3f JoltBoxBody::GetPosition() const
+    void JoltPhysicsBody::GetPosition( Vector3f* outPosition ) const
     {
         JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
         JPH::RVec3 position = bodyInterface.GetPosition( bodyId_ );
 
-        return Vector3f( position.GetX(), position.GetY(), position.GetZ() );
+        outPosition->x = position.GetX();
+        outPosition->y = position.GetY();
+        outPosition->z = position.GetZ();
     }
 
-    void JoltBoxBody::SetPosition( const Vector3f& position )
+    void JoltPhysicsBody::SetPosition( const Vector3f& position )
     {
         JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
         bodyInterface.SetPosition( bodyId_, JPH::RVec3( position.x, position.y, position.z ), JPH::EActivation::DontActivate );
     }
 
-    Vector3f JoltBoxBody::GetLinearVelocity() const
+    void JoltPhysicsBody::GetRotation( Quaternionf* outRotation ) const
     {
         JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
-        JPH::Vec3 position = bodyInterface.GetLinearVelocity( bodyId_ );
+        JPH::Quat rotation = bodyInterface.GetRotation( bodyId_ );
 
-        return Vector3f( position.GetX(), position.GetY(), position.GetZ() );
+        outRotation->x = rotation.GetX();
+        outRotation->y = rotation.GetY();
+        outRotation->z = rotation.GetZ();
+        outRotation->w = rotation.GetW();
     }
 
-    void JoltBoxBody::SetLinearVelocity( const Vector3f& velocity )
+    void JoltPhysicsBody::SetRotation( const Quaternionf& rotation )
+    {
+        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
+        bodyInterface.SetRotation( bodyId_, JPH::Quat( rotation.x, rotation.y, rotation.z, rotation.w ), JPH::EActivation::DontActivate );
+    }
+
+    void JoltPhysicsBody::GetLinearVelocity( Vector3f* outVelocity ) const
+    {
+        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
+        JPH::Vec3 velocity = bodyInterface.GetLinearVelocity( bodyId_ );
+
+        outVelocity->x = velocity.GetX();
+        outVelocity->y = velocity.GetY();
+        outVelocity->z = velocity.GetZ();
+    }
+
+    void JoltPhysicsBody::SetLinearVelocity( const Vector3f& velocity )
     {
         JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
         bodyInterface.SetLinearVelocity( bodyId_, JPH::Vec3( velocity.x, velocity.y, velocity.z ) );
+        bodyInterface.ActivateBody( bodyId_ );
+    }
+
+    void JoltPhysicsBody::GetFriction( float* friction ) const
+    {
+        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
+        *friction = bodyInterface.GetFriction( bodyId_ );
+    }
+
+    void JoltPhysicsBody::SetFriction( const float& friction )
+    {
+        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
+        bodyInterface.SetFriction( bodyId_, friction );
     }
 }

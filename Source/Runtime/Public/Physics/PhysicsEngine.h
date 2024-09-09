@@ -6,11 +6,75 @@
 
 namespace EE
 {
+    enum EPhysicsShape
+    {
+        PhysicsShape_Undefined,
+        PhysicsShape_Box,
+        PhysicsShape_Sphere,
+    };
+
     enum EMotionType
     {
         MotionTye_Static,     ///< Non movable
         MotionTye_Kinematic,  ///< Movable using velocities only, does not respond to forces
         MotionTye_Dynamic,    ///< Responds to forces as a normal physics object
+    };
+
+    class PhysicsShape
+    {
+        EE_CLASSNOCOPY( PhysicsShape )
+
+    protected:
+        PhysicsShape() = delete;
+
+        PhysicsShape( EPhysicsShape shape ) : shape( shape ) {};
+
+    public:
+        const EPhysicsShape shape = PhysicsShape_Undefined;
+    };
+
+    struct PhysicsShapeSphereCreateInfo
+    {
+        float radius = 0.0F;
+    };
+
+    class PhysicsShapeSphere : public PhysicsShape
+    {
+    protected:
+        PhysicsShapeSphere( const PhysicsShapeSphereCreateInfo& createInfo ) : PhysicsShape( PhysicsShape_Sphere )
+            , radius_( createInfo.radius )
+        {
+        }
+
+    protected:
+        const float radius_;
+    };
+
+    struct PhysicsShapeBoxCreateInfo
+    {
+        Vector3f extents = Vector3f();
+    };
+
+    class PhysicsShapeBox : public PhysicsShape
+    {
+    protected:
+        PhysicsShapeBox( const PhysicsShapeBoxCreateInfo& createInfo ) : PhysicsShape( PhysicsShape_Box )
+            , extents_( createInfo.extents )
+        {
+        }
+
+    protected:
+        const Vector3f extents_;
+    };
+
+    struct PhysicsBodyCreateInfo
+    {
+        PhysicsShape* physicsShape = NULL;
+        Vector3f position = Vector3f();
+        Quaternionf rotation = Quaternionf();
+        Vector3f velocity = Vector3f();
+        EMotionType motionType = MotionTye_Static;
+        bool activate = true;
     };
 
     class PhysicsBody
@@ -23,53 +87,14 @@ namespace EE
     public:
         virtual ~PhysicsBody() {};
 
-        virtual Vector3f GetPosition() const = 0;
+        virtual void GetPosition( Vector3f* position ) const = 0;
         virtual void SetPosition( const Vector3f& position ) = 0;
-        virtual Vector3f GetLinearVelocity() const = 0;
+        virtual void GetRotation( Quaternionf* position ) const = 0;
+        virtual void SetRotation( const Quaternionf& position ) = 0;
+        virtual void GetLinearVelocity( Vector3f* position ) const = 0;
         virtual void SetLinearVelocity( const Vector3f& velocity ) = 0;
-    };
-
-    struct PhysicsSphereBodyCreateInfo
-    {
-        float radius;
-        Vector3f position;
-        Quaternionf rotation;
-        Vector3f velocity;
-        EMotionType motionType;
-        bool activate;
-    };
-
-    class PhysicsSphereBody : public PhysicsBody
-    {
-        EE_CLASSNOCOPY( PhysicsSphereBody )
-
-    protected:
-        PhysicsSphereBody() {};
-
-    public:
-        virtual ~PhysicsSphereBody() override {};
-    };
-
-    struct PhysicsBoxBodyCreateInfo
-    {
-        Vector3f extents;
-        Vector3f position;
-        Quaternionf rotation;
-        Vector3f velocity;
-        EMotionType motionType;
-        bool activate;
-    };
-
-    class PhysicsBoxBody : public PhysicsBody
-    {
-        EE_CLASSNOCOPY( PhysicsBoxBody )
-
-    protected:
-        // Use GPhysicsEngine->CreateBoxBody
-        PhysicsBoxBody() {};
-
-    public:
-        virtual ~PhysicsBoxBody() override {};
+        virtual void GetFriction( float* friction ) const = 0;
+        virtual void SetFriction( const float& friction ) = 0;
     };
 
     class PhysicsEngine
@@ -86,9 +111,10 @@ namespace EE
 
         virtual bool UpdateSimulation( uint8 steps ) = 0;
 
-        virtual PhysicsSphereBody* CreateSphereBody( const PhysicsSphereBodyCreateInfo& createInfo ) = 0;
-
-        virtual PhysicsBoxBody* CreateBoxBody( const PhysicsBoxBodyCreateInfo& createInfo ) = 0;
+        virtual PhysicsShapeBox* CreateBoxShape( const PhysicsShapeBoxCreateInfo& createInfo ) = 0;
+        virtual PhysicsShapeSphere* CreateSphereShape( const PhysicsShapeSphereCreateInfo& createInfo ) = 0;
+        
+        virtual PhysicsBody* CreateBody( const PhysicsBodyCreateInfo& createInfo ) = 0;
     };
 
     extern PhysicsEngine* GPhysicsEngine;
