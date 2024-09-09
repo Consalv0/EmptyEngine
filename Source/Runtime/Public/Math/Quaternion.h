@@ -19,8 +19,8 @@ namespace EE
         public:
             union
             {
-                struct { T x, y, z, w; };
-                struct { TVector3<T> vector; T scalar; };
+                struct { T w, x, y, z; };
+                struct { T scalar; TVector3<T> vector; };
             };
 
             HOST_DEVICE FORCEINLINE constexpr TQuaternion();
@@ -85,6 +85,9 @@ namespace EE
             HOST_DEVICE FORCEINLINE TQuaternion& operator*=( const TQuaternion& other );
             HOST_DEVICE FORCEINLINE TQuaternion& operator*=( const T& value );
             HOST_DEVICE FORCEINLINE TQuaternion& operator/=( const T& value );
+
+            template<typename R>
+            explicit TQuaternion<T>( const TQuaternion<R>& other ) : TQuaternion<T>( (T)other.w, (T)other.x, (T)other.y, (T)other.z ) {}
         };
     }
 }

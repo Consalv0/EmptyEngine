@@ -14,8 +14,8 @@ namespace EE::Math
 	}
 
     template <typename T>
-	FORCEINLINE constexpr TQuaternion<T>::TQuaternion( T const& Scale, TVector3<T> const& vector )
-		: w( Scale ), x( vector.x ), y( vector.y ), z( vector.z )
+	FORCEINLINE constexpr TQuaternion<T>::TQuaternion( T const& scale, TVector3<T> const& vector )
+		: w( scale ), x( vector.x ), y( vector.y ), z( vector.z )
 	{
 	}
 
@@ -171,22 +171,22 @@ namespace EE::Math
 			sclq = factor;
 		}
 
+		out.w = sclp * start.w + sclq * adjEnd.w;
 		out.x = sclp * start.x + sclq * adjEnd.x;
 		out.y = sclp * start.y + sclq * adjEnd.y;
 		out.z = sclp * start.z + sclq * adjEnd.z;
-		out.w = sclp * start.w + sclq * adjEnd.w;
 	}
 
     template <typename T>
 	inline T TQuaternion<T>::Magnitude() const
 	{
-		return Math::Sqrt( x * x + y * y + z * z + w * w );
+		return Math::Sqrt( MagnitudeSquared() );
 	}
 
     template <typename T>
 	inline T TQuaternion<T>::MagnitudeSquared() const
 	{
-		return x * x + y * y + z * z + w * w;
+		return w * w + x * x + y * y + z * z;
 	}
 
     template <typename T>
@@ -386,7 +386,7 @@ namespace EE::Math
     template <typename T>
 	FORCEINLINE T TQuaternion<T>::Dot( const TQuaternion<T>& other ) const
 	{
-		return x * other.x + y * other.y + z * other.z + w * other.w;
+		return w * other.w + x * other.x + y * other.y + z * other.z;
 	}
 
     template <typename T>
@@ -421,13 +421,13 @@ namespace EE::Math
     template <typename T>
 	FORCEINLINE bool TQuaternion<T>::operator==( const TQuaternion<T>& other ) const
 	{
-		return (x == other.x && y == other.y && z == other.z && w == other.w);
+		return (w == other.w && x == other.x && y == other.y && z == other.z);
 	}
 
     template <typename T>
 	FORCEINLINE bool TQuaternion<T>::operator!=( const TQuaternion<T>& other ) const
 	{
-		return (x != other.x || y != other.y || z != other.z || w != other.w);
+		return (w != other.w || x != other.x || y != other.y || z != other.z);
 	}
 
     template <typename T>
