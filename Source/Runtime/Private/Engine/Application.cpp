@@ -47,6 +47,7 @@ namespace EE
     void Application::Awake()
     {
         OnAwake();
+        Ticker::Tick();
     }
 
     void Application::MainLoop()

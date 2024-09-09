@@ -202,7 +202,27 @@ project "JoltPhysics"
     }
 
     removefiles {
-        "%{prj.location}/Jolt/ObjectStream/**.*",
+		"%{prj.location}/Jolt/ObjectStream/GetPrimitiveTypeOfType.h",
+		"%{prj.location}/Jolt/ObjectStream/ObjectStream.cpp",
+		"%{prj.location}/Jolt/ObjectStream/ObjectStream.h",
+		"%{prj.location}/Jolt/ObjectStream/ObjectStreamBinaryIn.cpp",
+		"%{prj.location}/Jolt/ObjectStream/ObjectStreamBinaryIn.h",
+		"%{prj.location}/Jolt/ObjectStream/ObjectStreamBinaryOut.cpp",
+		"%{prj.location}/Jolt/ObjectStream/ObjectStreamBinaryOut.h",
+		"%{prj.location}/Jolt/ObjectStream/ObjectStreamIn.cpp",
+		"%{prj.location}/Jolt/ObjectStream/ObjectStreamIn.h",
+		"%{prj.location}/Jolt/ObjectStream/ObjectStreamOut.cpp",
+		"%{prj.location}/Jolt/ObjectStream/ObjectStreamOut.h",
+		"%{prj.location}/Jolt/ObjectStream/ObjectStreamTextIn.cpp",
+		"%{prj.location}/Jolt/ObjectStream/ObjectStreamTextIn.h",
+		"%{prj.location}/Jolt/ObjectStream/ObjectStreamTextOut.cpp",
+		"%{prj.location}/Jolt/ObjectStream/ObjectStreamTextOut.h",
+		"%{prj.location}/Jolt/ObjectStream/ObjectStreamTypes.h",
+		"%{prj.location}/Jolt/ObjectStream/SerializableAttribute.h",
+		"%{prj.location}/Jolt/ObjectStream/SerializableAttributeEnum.h",
+		"%{prj.location}/Jolt/ObjectStream/SerializableAttributeTyped.h",
+		"%{prj.location}/Jolt/ObjectStream/TypeDeclarations.cpp",
+		"%{prj.location}/Jolt/ObjectStream/TypeDeclarations.h",
     }
 
     includedirs {

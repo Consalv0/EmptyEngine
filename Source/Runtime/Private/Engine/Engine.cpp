@@ -4,6 +4,7 @@
 #include "Engine/Engine.h"
 #include "Engine/Input.h"
 #include "RHI/RHI.h"
+#include "Physics/PhysicsEngine.h"
 
 #include "Platform/PlatformDevice.h"
 
@@ -37,6 +38,7 @@ namespace EE
         GDynamicRHI = PlatformCreateDynamicRHI( GMainApplication->GetPreferedRHI() );
         GInput = PlatformCreateInput();
         GPlatformDevice = PlatformCreatePlatformDevice();
+        GPhysicsEngine = CreatePhysicsEngine();
 
 #ifdef EE_PLATFORM_CUDA
         CUDA::FindCudaDevice();
@@ -73,6 +75,7 @@ namespace EE
         delete GPlatformDevice;
         delete GInput;
         delete GMainApplication;
+        delete GPhysicsEngine;
 
         SDL_Quit();
     }
