@@ -295,6 +295,8 @@ namespace EE
         if ( steps == 0 )
             return false;
 
+        steps = Math::Min( steps, (uint8)3u );
+
         // We need a temp allocator for temporary allocations during the physics update. We're
         // pre-allocating 10 MB to avoid having to do allocations during the physics update.
         // B.t.w. 10 MB is way too much for this example but it is a typical value you can use.
