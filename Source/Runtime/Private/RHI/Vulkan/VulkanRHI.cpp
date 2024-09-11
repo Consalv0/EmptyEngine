@@ -1732,7 +1732,7 @@ namespace EE
         return aligment;
     }
 
-    void VulkanRHIBuffer::UploadData( void* data, size_t offset, size_t size ) const
+    void VulkanRHIBuffer::UploadData( void* data, uint64 offset, uint64 size ) const
     {
         void* gpuData = NULL;
         VkResult result = vmaMapMemory( device->GetVulkanAllocator(), nativeAllocation, &gpuData);
@@ -2263,17 +2263,16 @@ namespace EE
         vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetVulkanPipelineLayout(), 0, 1, &vulkanBindGroup->GetVulkanDescriptorSet(), dynamicOffsetsCount, dynamicOffsets );
     }
 
-    void VulkanRHICommandBuffer::BindVertexBuffer( const RHIBuffer* buffer ) const
+    void VulkanRHICommandBuffer::BindVertexBuffer( const RHIBuffer* buffer, uint32 bindIndex, uint64 offset ) const
     {
         const VulkanRHIBuffer* vulkanBuffer = static_cast<const VulkanRHIBuffer*>( buffer );
-        VkDeviceSize offsets[] = { 0 };
-        vkCmdBindVertexBuffers( commandBuffer, 0, 1, &vulkanBuffer->GetVulkanBuffer(), offsets );
+        vkCmdBindVertexBuffers( commandBuffer, bindIndex, 1, &vulkanBuffer->GetVulkanBuffer(), &offset );
     }
 
-    void VulkanRHICommandBuffer::BindIndexBuffer( const RHIBuffer* buffer ) const
+    void VulkanRHICommandBuffer::BindIndexBuffer( const RHIBuffer* buffer, uint64 offset ) const
     {
         const VulkanRHIBuffer* vulkanBuffer = static_cast<const VulkanRHIBuffer*>(buffer);
-        vkCmdBindIndexBuffer( commandBuffer, vulkanBuffer->GetVulkanBuffer(), 0, VK_INDEX_TYPE_UINT32 );
+        vkCmdBindIndexBuffer( commandBuffer, vulkanBuffer->GetVulkanBuffer(), offset, VK_INDEX_TYPE_UINT32 );
     }
 
     void VulkanRHICommandBuffer::SetCullMode( const ECullModeFlags& cull ) const
@@ -2788,7 +2787,10 @@ namespace EE
                 .dstBinding = binding.index,
                 .dstArrayElement = 0,
                 .descriptorCount = 1,
-                .descriptorType = ConvertDescriptorType( binding.type )
+                .descriptorType = ConvertDescriptorType( binding.type ),
+                .pImageInfo = NULL,
+                .pBufferInfo = NULL,
+                .pTexelBufferView = NULL
             };
 
             switch ( binding.type )
@@ -2804,7 +2806,7 @@ namespace EE
                 {
                     .buffer = vulkanBuffer->GetVulkanBuffer(),
                     .offset = vulkanBuffer->GetOffset(),
-                    .range = vulkanBuffer->GetAligment(),
+                    .range = binding.bufferRange,
                 };
                 bufferInfos.emplace_back( bufferInfo );
 

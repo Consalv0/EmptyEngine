@@ -302,7 +302,7 @@ namespace EE
 
         uint64 GetAligment() const override;
 
-        void UploadData( void* data, size_t offset, size_t size ) const override;
+        void UploadData( void* data, uint64 offset, uint64 size ) const override;
 
         void BindBuffer() const;
 
@@ -500,9 +500,9 @@ namespace EE
 
         void BindBindingsGroup( const RHIGraphicsPipeline* pipeline, const class RHIBindGroup* bindGroup, const uint32& dynamicOffsetsCount, const uint32* dynamicOffsets ) const override;
 
-        void BindVertexBuffer( const class RHIBuffer* buffer ) const override;
+        void BindVertexBuffer( const class RHIBuffer* buffer, uint32 bindIndex, uint64 offset ) const override;
 
-        void BindIndexBuffer( const class RHIBuffer* buffer ) const override;
+        void BindIndexBuffer( const class RHIBuffer* buffer, uint64 offset ) const override;
 
         void SetCullMode( const ECullModeFlags& cull ) const override;
 

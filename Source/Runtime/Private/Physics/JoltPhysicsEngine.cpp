@@ -162,7 +162,7 @@ namespace EE
         // See: ContactListener
         virtual JPH::ValidateResult OnContactValidate( const JPH::Body& inBody1, const JPH::Body& inBody2, JPH::RVec3Arg inBaseOffset, const JPH::CollideShapeResult& inCollisionResult ) override
         {
-            EE_LOG_INFO( L"Contact validate callback" );
+            // EE_LOG_DEBUG( L"Contact validate callback" );
 
             // Allows you to ignore a contact before it is created (using layers to not make objects collide is cheaper!)
             return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
@@ -170,17 +170,17 @@ namespace EE
 
         virtual void OnContactAdded( const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings ) override
         {
-            EE_LOG_INFO( L"A contact was added" );
+            // EE_LOG_DEBUG( L"A contact was added" );
         }
 
         virtual void OnContactPersisted( const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings ) override
         {
-            EE_LOG_INFO( L"A contact was persisted" );
+            // EE_LOG_DEBUG( L"A contact was persisted" );
         }
 
         virtual void OnContactRemoved( const JPH::SubShapeIDPair& inSubShapePair ) override
         {
-            EE_LOG_INFO( L"A contact was removed" );
+            // EE_LOG_DEBUG( L"A contact was removed" );
         }
     };
 
@@ -190,12 +190,12 @@ namespace EE
     public:
         virtual void OnBodyActivated( const JPH::BodyID& inBodyID, uint64 inBodyUserData ) override
         {
-            EE_LOG_INFO( L"A body got activated" );
+            // EE_LOG_DEBUG( L"A body got activated" );
         }
 
         virtual void OnBodyDeactivated( const JPH::BodyID& inBodyID, uint64 inBodyUserData ) override
         {
-            EE_LOG_INFO( L"A body went to sleep" );
+            // EE_LOG_DEBUG( L"A body went to sleep" );
         }
     };
 

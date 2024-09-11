@@ -191,9 +191,9 @@ namespace EE
 
         virtual void BindBindingsGroup( const RHIGraphicsPipeline* pipeline, const class RHIBindGroup* bindGroup, const uint32& dynamicOffsetsCount, const uint32* dynamicOffests ) const = 0;
 
-        virtual void BindVertexBuffer( const class RHIBuffer* buffer ) const = 0;
+        virtual void BindVertexBuffer( const class RHIBuffer* buffer, uint32 bindIndex, uint64 offset ) const = 0;
 
-        virtual void BindIndexBuffer( const class RHIBuffer* buffer ) const = 0;
+        virtual void BindIndexBuffer( const class RHIBuffer* buffer, uint64 offset ) const = 0;
 
         virtual void SetCullMode( const ECullModeFlags& cull ) const = 0;
 
@@ -320,7 +320,7 @@ namespace EE
 
         virtual uint64 GetAligment() const = 0;
 
-        virtual void UploadData( void* data, size_t offset, size_t size ) const = 0;
+        virtual void UploadData( void* data, uint64 offset, uint64 size ) const = 0;
     };
 
     class RHIVertexBuffer : public RHIResource
@@ -389,6 +389,7 @@ namespace EE
         const RHIResource* resource;
         EBindingType type;
         EShaderStageFlags shaderVisibility;
+        uint64 bufferRange = 0;
     };
 
     struct RHIBindGroupCreateInfo
@@ -397,7 +398,7 @@ namespace EE
         TArray<RHIResourceBinding> bindings;
 
     public:
-        void AddResourceBinding( uint8 index, EBindingType binding, const RHIResource* resource, EShaderStageFlags shaderVisibility );
+        void AddResourceBinding( const RHIResourceBinding& resourceBinding );
     };
 
     class RHIBindLayout : public RHIObject

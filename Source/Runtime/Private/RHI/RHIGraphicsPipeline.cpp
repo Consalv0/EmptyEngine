@@ -7,9 +7,9 @@
 
 namespace EE
 {
-    void RHIBindGroupCreateInfo::AddResourceBinding( uint8 index, EBindingType binding, const RHIResource* resource, EShaderStageFlags shaderVisibility )
+    void RHIBindGroupCreateInfo::AddResourceBinding( const RHIResourceBinding& resourceBinding )
     {
-        bindings.emplace_back( index, resource, binding, shaderVisibility );
+        bindings.emplace_back( resourceBinding );
     }
 
     void RHIRenderSubpassDescription::AddInputAttachment( uint32 atachmentIndex )
