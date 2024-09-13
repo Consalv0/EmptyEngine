@@ -1698,11 +1698,17 @@ namespace EE
 
         VmaAllocationCreateInfo allocInfo
         {
-            .usage = VMA_MEMORY_USAGE_AUTO
+            .flags = 0,
+            .usage = VMA_MEMORY_USAGE_AUTO,
+            .requiredFlags = 0,
+            .preferredFlags = 0,
+            .memoryTypeBits = 0,
+            .pool = NULL,
+            .priority = 0
         };
         if ( (usage & BufferUsage_MapWite_Bit) > 0 )
         {
-            allocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+            allocInfo.flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
         }
         
         VkResult memoryResult = vmaCreateBuffer( device->GetVulkanAllocator(), &bufferInfo, &allocInfo, &buffer, &nativeAllocation, VK_NULL_HANDLE );

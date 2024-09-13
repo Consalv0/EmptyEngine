@@ -68,7 +68,7 @@ namespace EE::Memory
             if ( alignment == sizeof( T ) )
                 data = new T[ count ];
             else
-                data = static_cast<T*>(AlignedAlloc( count, alignment ));
+                data = static_cast<T*>(AlignedAlloc( count * alignment, alignment ));
         }
 
         inline void Deallocate()
