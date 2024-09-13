@@ -239,6 +239,15 @@ namespace EE
         ColorSpace_HDR10_2084,
     };
 
+    struct PixelFormatInfo
+    {
+        const WChar* name;
+        int size;
+        int channels;
+        bool supported;
+        EPixelFormat format;
+    };
+
     // UNORM is a float in the range of [0, 1].
     // SNORM is the same but in the range of [-1, 1]
     // USCALED is the unsigned integer value converted to float
@@ -545,15 +554,6 @@ namespace EE
         VertexFormat_SINT_32X2,
         VertexFormat_SINT_32X3,
         VertexFormat_SINT_32X4
-    };
-
-    struct PixelFormatInfo
-    {
-        const WChar* name;
-        int size;
-        int channels;
-        bool supported;
-        EPixelFormat format;
     };
 
     enum ESamplerAddressMode
