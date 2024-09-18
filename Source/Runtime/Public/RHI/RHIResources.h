@@ -320,7 +320,7 @@ namespace EE
 
         virtual uint64 GetAligment() const = 0;
 
-        virtual void UploadData( void* data, uint64 offset, uint64 size ) const = 0;
+        virtual void UploadData( const void* data, uint64 offset, uint64 size ) const = 0;
     };
 
     class RHIVertexBuffer : public RHIResource

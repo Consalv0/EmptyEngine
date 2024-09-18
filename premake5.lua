@@ -33,7 +33,8 @@ project "EmptyEngine"
         "%{IncludeDir.SDL}/include",
         "%{IncludeDir.VulkanSDK}/include",
         "%{IncludeDir.VMA}/include",
-        "%{IncludeDir.spdlog}/include"
+        "%{IncludeDir.spdlog}/include",
+        "%{IncludeDir.stb}",
     }
 
     libdirs { 

@@ -168,11 +168,11 @@ namespace EE
 
     void Window::SetIcon( PixelMap* Icon )
     {
-        if ( Icon->GetColorFormat() != PixelFormat_R8G8B8A8_UINT ) return;
+        if ( Icon->GetFormat() != PixelFormat_R8G8B8A8_UINT ) return;
         SDL_Surface* Surface = SDL_CreateSurfaceFrom(
             Icon->GetWidth(), Icon->GetHeight(),
             SDL_PIXELFORMAT_RGBA32,
-            (void*)Icon->PointerToValue(),
+            (void*)Icon->GetData(),
             NULL
         );
         SDL_SetWindowIcon( static_cast<SDL_Window*>(windowHandle), Surface );

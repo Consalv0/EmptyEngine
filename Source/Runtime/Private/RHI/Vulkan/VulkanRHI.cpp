@@ -1738,7 +1738,7 @@ namespace EE
         return aligment;
     }
 
-    void VulkanRHIBuffer::UploadData( void* data, uint64 offset, uint64 size ) const
+    void VulkanRHIBuffer::UploadData( const void* data, uint64 offset, uint64 size ) const
     {
         void* gpuData = NULL;
         VkResult result = vmaMapMemory( device->GetVulkanAllocator(), nativeAllocation, &gpuData);
@@ -1811,7 +1811,7 @@ namespace EE
         format( ConvertPixelFormat( info.format ) ),
         pixelFormat( ConvertImageFormat( format ) ),
         ownership( true ),
-        sampler( VK_NULL_HANDLE ), memory( VK_NULL_HANDLE ), imageView( VK_NULL_HANDLE )
+        sampler( VK_NULL_HANDLE ), memory( VK_NULL_HANDLE ), imageView( VK_NULL_HANDLE ), image( VK_NULL_HANDLE )
     {
         VkImageCreateInfo imageInfo
         {
@@ -2077,7 +2077,7 @@ namespace EE
         instance( instance ),
         surface( VK_NULL_HANDLE )
     {
-        if ( SDL_Vulkan_CreateSurface( (SDL_Window*)window->GetWindowHandle(), instance->GetVulkanInstance(), VK_NULL_HANDLE, &surface ) != 0 )
+        if ( SDL_Vulkan_CreateSurface( (SDL_Window*)window->GetWindowHandle(), instance->GetVulkanInstance(), VK_NULL_HANDLE, &surface ) == SDL_FALSE )
         {
             EE_LOG_CRITICAL( L"Failed SDL_Vulkan_CreateSurface! {}", Text::NarrowToWide( SDL_GetError() ) );
             return;

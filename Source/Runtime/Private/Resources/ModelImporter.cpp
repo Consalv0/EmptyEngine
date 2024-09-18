@@ -4,7 +4,7 @@
 #include "Utils/Hasher.h"
 #include "Rendering/Mesh.h"
 #include "Files/FileManager.h"
-#include "Resources/MeshParser.h"
+#include "Resources/ModelImporter.h"
 #include "Resources/OBJImporter.h"
 
 #include "Utils/TextFormatting.h"
@@ -14,10 +14,10 @@
 
 namespace EE
 {
-    bool ModelParser::TaskRunning;
-    std::queue<ModelParser::Task*> ModelParser::pendingTasks = std::queue<Task*>();
-    std::future<bool> ModelParser::currentFutureTask;
-    std::mutex ModelParserQueueLock;
+    bool ModelImporter::TaskRunning;
+    std::queue<ModelImporter::Task*> ModelImporter::pendingTasks = std::queue<Task*>();
+    std::future<bool> ModelImporter::currentFutureTask;
+    std::mutex ModelImporterQueueLock;
 
     ModelNode& ModelNode::operator=( const ModelNode& other )
     {
@@ -53,7 +53,7 @@ namespace EE
         return false;
     }
 
-    bool ModelParser::RecognizeFileExtensionAndLoad( ModelDataInfo& info, const ParsingOptions& options )
+    bool ModelImporter::RecognizeFileExtensionAndLoad( ModelResult& info, const Options& options )
     {
         const WString extension = options.file.GetExtension();
         if ( Text::CompareIgnoreCase( extension, WString( L"OBJ" ) ) )
@@ -63,7 +63,7 @@ namespace EE
         return false;
     }
 
-    bool ModelParser::Initialize()
+    bool ModelImporter::Initialize()
     {
         if ( std::thread::hardware_concurrency() <= 1 )
         {
@@ -74,7 +74,7 @@ namespace EE
         return true;
     }
 
-    void ModelParser::UpdateStatus()
+    void ModelImporter::UpdateStatus()
     {
         if ( !pendingTasks.empty() && currentFutureTask.valid() && !TaskRunning )
         {
@@ -89,7 +89,7 @@ namespace EE
         }
     }
 
-    void ModelParser::FinishAsyncTasks()
+    void ModelImporter::FinishAsyncTasks()
     {
         do
         {
@@ -98,7 +98,7 @@ namespace EE
         } while ( !pendingTasks.empty() );
     }
 
-    void ModelParser::FinishCurrentAsyncTask()
+    void ModelImporter::FinishCurrentAsyncTask()
     {
         if ( !pendingTasks.empty() && currentFutureTask.valid() )
         {
@@ -109,18 +109,18 @@ namespace EE
         }
     }
 
-    size_t ModelParser::GetAsyncTaskCount()
+    size_t ModelImporter::GetAsyncTaskCount()
     {
         return pendingTasks.size();
     }
 
-    void ModelParser::Exit()
+    void ModelImporter::Exit()
     {
         if ( currentFutureTask.valid() )
             currentFutureTask.get();
     }
 
-    bool ModelParser::Load( ModelDataInfo& info, const ParsingOptions& options )
+    bool ModelImporter::Load( ModelResult& info, const Options& options )
     {
         if ( options.file.IsValid() == false ) return false;
 
@@ -136,24 +136,24 @@ namespace EE
         return info.isValid;
     }
 
-    void ModelParser::LoadAsync( const ParsingOptions& options, FinishTaskFunction then )
+    void ModelImporter::LoadAsync( const Options& options, FinishTaskFunction then )
     {
         if ( options.file.IsValid() == false ) return;
 
         pendingTasks.push(
-            new Task { options, then, []( ModelDataInfo& data, const ParsingOptions& options, std::future<bool>& futureTask )
+            new Task { options, then, []( ModelResult& data, const Options& options, std::future<bool>& futureTask )
             {
                 futureTask = std::async( std::launch::async, Load, std::ref( data ),  std::ref( options ) );
             } }
         );
     }
 
-    ModelParser::ModelDataInfo::ModelDataInfo()
+    ModelImporter::ModelResult::ModelResult()
         : meshes(), parentNode( "ParentNode" ), isValid( false ), hasAnimations( false )
     {
     }
 
-    void ModelParser::ModelDataInfo::Transfer( ModelDataInfo& other )
+    void ModelImporter::ModelResult::Transfer( ModelResult& other )
     {
         meshes.clear();
         parentNode = other.parentNode;
@@ -163,7 +163,7 @@ namespace EE
         other.isValid = false;
     }
 
-    ModelParser::Task::Task( const ParsingOptions& options, FinishTaskFunction finishTaskFunction, FutureTask futureTask ) :
+    ModelImporter::Task::Task( const Options& options, FinishTaskFunction finishTaskFunction, FutureTask futureTask ) :
         info(), options( options ), finishTaskFunction( finishTaskFunction ), futureTask( futureTask )
     {
     }

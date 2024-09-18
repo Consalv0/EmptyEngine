@@ -37,16 +37,16 @@ namespace EE
         }
     };
 
-    class ModelParser
+    class ModelImporter
     {
     public:
-        struct ParsingOptions
+        struct Options
         {
             const File& file;
             bool optimize;
         };
 
-        struct ModelDataInfo
+        struct ModelResult
         {
             TArray<MeshData> meshes;
             ModelNode parentNode;
@@ -55,31 +55,31 @@ namespace EE
             bool isValid;
             bool hasAnimations;
 
-            void Transfer( ModelDataInfo& other );
+            void Transfer( ModelResult& other );
 
-            ModelDataInfo();
+            ModelResult();
 
-            ModelDataInfo( const ModelDataInfo& other ) = delete;
+            ModelResult( const ModelResult& other ) = delete;
         };
 
     private:
-        typedef std::function<void( ModelDataInfo& )> FinishTaskFunction;
-        typedef std::function<void( ModelDataInfo&, const ParsingOptions&, std::future<bool>& )> FutureTask;
+        typedef std::function<void( ModelResult& )> FinishTaskFunction;
+        typedef std::function<void( ModelResult&, const Options&, std::future<bool>& )> FutureTask;
 
         static bool TaskRunning;
 
         struct Task
         {
-            ParsingOptions options;
-            ModelDataInfo info;
+            Options options;
+            ModelResult info;
             FinishTaskFunction finishTaskFunction;
             FutureTask futureTask;
 
             Task( const Task& Other ) = delete;
-            Task( const ParsingOptions& options, FinishTaskFunction finishTaskFunction, FutureTask futureTask );
+            Task( const Options& options, FinishTaskFunction finishTaskFunction, FutureTask futureTask );
         };
 
-        static bool RecognizeFileExtensionAndLoad( ModelDataInfo& data, const ParsingOptions& options );
+        static bool RecognizeFileExtensionAndLoad( ModelResult& data, const Options& options );
 
         static void FinishCurrentAsyncTask();
 
@@ -98,9 +98,9 @@ namespace EE
 
         static void Exit();
 
-        static bool Load( ModelDataInfo& info, const ParsingOptions& options );
+        static bool Load( ModelResult& info, const Options& options );
 
-        static void LoadAsync( const ParsingOptions& options, FinishTaskFunction onComplete );
+        static void LoadAsync( const Options& options, FinishTaskFunction onComplete );
 
     };
 }

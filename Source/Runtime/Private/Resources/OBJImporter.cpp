@@ -380,7 +380,7 @@ namespace EE
         return true;
     }
 
-    bool OBJImporter::LoadModel( ModelParser::ModelDataInfo& info, const ModelParser::ParsingOptions& options )
+    bool OBJImporter::LoadModel( ModelImporter::ModelResult& info, const ModelImporter::Options& options )
     {
         ExtractedData parsedData;
 

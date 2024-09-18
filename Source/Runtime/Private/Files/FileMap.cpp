@@ -105,7 +105,7 @@ namespace EE
 #endif
     }
 
-    int FileMap::ReadBlock( size_t offset, size_t size, NChar* buffer )
+    int FileMap::ReadBlock( uint64 offset, uint64 size, void* buffer )
     {
 #ifdef _WIN32
         EE_ASSERT( FileMapHandleValid( handle_ ) );
@@ -172,7 +172,7 @@ namespace EE
 #endif
     }
 
-    int FileMap::WaitForResult( size_t* outBytesRead )
+    int FileMap::WaitForResult( uint64* outBytesRead )
     {
 #ifdef _WIN32
         EE_ASSERT( FileMapHandleValid( handle_ ) );

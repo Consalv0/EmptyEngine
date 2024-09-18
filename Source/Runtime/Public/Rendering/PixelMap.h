@@ -1,7 +1,21 @@
 #pragma once
 
+#include "Math/CoreMath.h"
+#include "Rendering/Common.h"
+
 namespace EE
 {
+	struct PixelFormatInfo
+	{
+		const WChar* name;
+		uint8 size;
+		uint8 channels;
+		bool supported;
+		EPixelFormat format;
+	};
+
+	extern PixelFormatInfo GPixelFormatInfo[ EPixelFormat::PixelFormat_MAX ];
+
 	class PixelMap
 	{
 	public:
@@ -11,39 +25,41 @@ namespace EE
 
 		PixelMap( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, void*& data );
 
-		PixelMap( const PixelMap& other );
+		PixelMap( const PixelMap& other ) = delete;
+
+		void Clear();
+
+		void Swap( PixelMap& other );
 
 		void SetData( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, void*& data );
 
 		//* Width in pixels. 
-		inline uint32 GetWidth() const { return width; };
+		constexpr inline uint32 GetWidth() const { return width_; };
 
 		//* Height in pixels.
-		inline uint32 GetHeight() const { return height; };
+		constexpr inline uint32 GetHeight() const { return height_; };
 
 		//* Depth in pixels.
-		inline uint32 GetDepth() const { return depth; };
+		constexpr inline uint32 GetDepth() const { return depth_; };
 
-		inline IntVector3 GetSize() const { return { (int32)width, (int32)height, (int32)depth }; }
+		constexpr inline UIntVector3 GetExtents() const { return { width_, height_, depth_ }; }
 
-		inline bool IsEmpty() const { return data == NULL; };
+		constexpr inline bool IsEmpty() const { return data_ == NULL; };
 
-		size_t GetMemorySize() const;
+		size_t GetSize() const;
 
-		inline EPixelFormat GetColorFormat() const { return pixelFormat; };
+		inline EPixelFormat GetFormat() const { return pixelFormat_; };
 
-		PixelMap& operator=( const PixelMap& other );
-
-        constexpr const void* PointerToValue() const { return data; }
+		constexpr const void* GetData() const { return data_; }
 
 		~PixelMap();
 
 	private:
 		friend class PixelMapUtility;
 
-		void* data;
-		EPixelFormat pixelFormat;
-		uint32 width, height, depth;
+		void* data_;
+		EPixelFormat pixelFormat_;
+		uint32 width_, height_, depth_;
 	};
 
 	class PixelMapUtility
@@ -68,17 +84,13 @@ namespace EE
 
 		static void PerPixelOperator( PixelMap& map, std::function<void( unsigned char*, const unsigned char& channels )> const& function );
 
-		static bool FormatIsFloat( EPixelFormat format );
-
-		static bool FormatIsShort( EPixelFormat format );
-
 	private:
 		template<typename T>
-		static void _FlipVertically( const uint32& width, const uint32& height, const uint32& depth, void*& data );
+		static void FlipVertically( const uint32& width, const uint32& height, const uint32& depth, void*& data );
 	};
 
 	template<typename T>
-	inline void PixelMapUtility::_FlipVertically( const uint32& width, const uint32& height, const uint32& depth, void*& inData )
+	inline void PixelMapUtility::FlipVertically( const uint32& width, const uint32& height, const uint32& depth, void*& inData )
 	{
 		T* data = (T*)inData;
 		T* tempRow = (T*)malloc( width * sizeof( T ) );

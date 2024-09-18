@@ -302,7 +302,7 @@ namespace EE
 
         uint64 GetAligment() const override;
 
-        void UploadData( void* data, uint64 offset, uint64 size ) const override;
+        void UploadData( const void* data, uint64 offset, uint64 size ) const override;
 
         void BindBuffer() const;
 

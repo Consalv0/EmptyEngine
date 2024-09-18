@@ -13,25 +13,25 @@ namespace EE
         FileMap( const File& filePath );
         ~FileMap() noexcept;
 
-        int ReadBlock( size_t offset, size_t size, NChar* buffer );
-        int WaitForResult( size_t* bytesRead );
+        int ReadBlock( uint64 offset, uint64 size, void* buffer );
+        int WaitForResult( uint64* bytesRead );
 
         explicit operator bool() const;
         void* GetHandle() const { return handle_; }
-        size_t GetSize() const { return size_; }
+        uint64 GetSize() const { return size_; }
         int GetError() const { return error_; }
         uint32 NumRequests() const noexcept { return requestCount_; }
-        size_t BytesRead() const noexcept { return bytesRead_; }
+        uint64 BytesRead() const noexcept { return bytesRead_; }
         int Error() const noexcept { return errorCode_; }
 
     protected:
         uint32  requestCount_{};
-        size_t  bytesRead_{};
+        uint64  bytesRead_{};
         int     errorCode_{};
         void*   handle_{};
-        size_t  size_{};
+        uint64  size_{};
         int     error_{};
-        NChar*  buffer_{};
-        size_t  offset_{};
+        uint64  offset_{};
+        void*   buffer_{};
     };
 }
