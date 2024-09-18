@@ -132,7 +132,7 @@ namespace EE
     {
         if ( !hasBoundingBox )
         {
-            bounding = BoundingBox3f();
+            bounding = Box3f();
             for ( MeshVertices::const_iterator Vertex = staticVertices.begin(); Vertex != staticVertices.end(); ++Vertex )
             {
                 bounding.Add( Vertex->position );
@@ -211,7 +211,7 @@ namespace EE
         name.clear();
         faces.clear();
         staticVertices.clear();
-        bounding = BoundingBox3f();
+        bounding = Box3f();
         hasNormals = false;
         hasTangents = false;
         hasVertexColor = false;

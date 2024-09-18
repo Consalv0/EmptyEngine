@@ -22,7 +22,7 @@ namespace EE::Math
     }
 
     template <typename T>
-    FORCEINLINE TPlane<T> TPlane<T>::FromPointNormal( const TPoint3<T>& point, const TVector3<T>& normal )
+    FORCEINLINE TPlane<T> TPlane<T>::FromPointNormal( const TVector3<T>& point, const TVector3<T>& normal )
     {
         TVector3<T> normalizedNormal = normal.Normalized();
         return TPlane(
@@ -34,7 +34,7 @@ namespace EE::Math
     }
 
     template <typename T>
-    FORCEINLINE TPlane<T> TPlane<T>::From3Points( const TPoint3<T>& v0, const TPoint3<T>& v1, const TPoint3<T>& v2 )
+    FORCEINLINE TPlane<T> TPlane<T>::From3Points( const TVector3<T>& v0, const TVector3<T>& v1, const TVector3<T>& v2 )
     {
         TVector3<T> normal = TVector3<T>::Cross( v1 - v0, v2 - v0 );
         normal.Normalize();
@@ -58,19 +58,19 @@ namespace EE::Math
     }
 
     template <typename T>
-    inline TPoint3<T> TPlane<T>::SegmentIntersection( const TPoint3<T>& point1, const TPoint3<T>& point2 ) const
+    inline TVector3<T> TPlane<T>::SegmentIntersection( const TVector3<T>& point1, const TVector3<T>& point2 ) const
     {
         return point1 + (point2 - point1) * ((d - Dot( point1 )) / (Dot( point2 - point1 )));
     }
 
     template <typename T>
-    FORCEINLINE TPoint3<T> TPlane<T>::GetOrigin() const
+    FORCEINLINE TVector3<T> TPlane<T>::GetOrigin() const
     {
         return normal * d;
     }
 
     template <typename T>
-    FORCEINLINE T TPlane<T>::DotPoint( const TPoint3<T>& p ) const
+    FORCEINLINE T TPlane<T>::DotPoint( const TVector3<T>& p ) const
     {
         return x * p.x + y * p.y + z * p.z - d;
     }
@@ -117,7 +117,7 @@ namespace EE::Math
     }
 
     template <typename T>
-    FORCEINLINE bool TFrustrum<T>::Inside( const TPoint3<T>& point ) const
+    FORCEINLINE bool TFrustrum<T>::Inside( const TVector3<T>& point ) const
     {
         return
               left.DotPoint( point ) < T(0) &&

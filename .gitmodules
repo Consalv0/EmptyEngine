@@ -10,3 +10,6 @@
 [submodule "External/JoltPhysics"]
 	path = External/JoltPhysics
 	url = git@github.com:jrouwe/JoltPhysics.git
+[submodule "External/stb"]
+	path = External/stb
+	url = git@github.com:nothings/stb.git

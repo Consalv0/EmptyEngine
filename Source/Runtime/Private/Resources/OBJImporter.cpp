@@ -38,7 +38,7 @@ namespace EE
         };
 
         NString name;
-        BoundingBox3f bounding;
+        Box3f bounding;
         TArray<Subdivision> subdivisions;
         bool hasNormals;
         bool hasTextureCoords;

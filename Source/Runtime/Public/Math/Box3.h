@@ -46,7 +46,7 @@ namespace EE
             }
 
             //* Add point to the BondingBox
-            inline void Add( TPoint3<T> point )
+            inline void Add( TVector3<T> point )
             {
                 minX = Math::Min( minX, point.x ); minY = Math::Min( minY, point.y ); minZ = Math::Min( minZ, point.z );
                 maxX = Math::Max( maxX, point.x ); maxY = Math::Max( maxY, point.y ); maxZ = Math::Max( maxZ, point.z );
@@ -59,10 +59,10 @@ namespace EE
             FORCEINLINE TVector3<T> GetCenter() const { return TVector3<T>( minX + maxX, minY + maxY, minZ + maxZ ) * T( 0.5 ); }
 
             //* Get the lower point of the bounding box
-            FORCEINLINE TPoint3<T> GetMinPoint() const { return { Math::Min( left, right ), Math::Min( top, bottom ), Math::Min( front, back ) }; }
+            FORCEINLINE TVector3<T> GetMinPoint() const { return { Math::Min( left, right ), Math::Min( top, bottom ), Math::Min( front, back ) }; }
 
             //* Get the upper point of the bounding box
-            FORCEINLINE TPoint3<T> GetMaxPoint() const { return { Math::Max( left, right ), Math::Max( top, bottom ), Math::Max( front, back ) }; }
+            FORCEINLINE TVector3<T> GetMaxPoint() const { return { Math::Max( left, right ), Math::Max( top, bottom ), Math::Max( front, back ) }; }
 
             //* Get the width of the bounding box
             FORCEINLINE T GetWidth() const { return Math::Max( left, right ) - Math::Min( left, right ); }
@@ -80,10 +80,10 @@ namespace EE
             FORCEINLINE T GetPerimeter() const { return GetWidth() * T( 2 ) + GetHeight() * T( 2 ) + GetDepth() * T( 2 ); }
 
             // Used in frustrum computations
-            inline TPoint3<T> GetPointPositive( const TVector3<T>& normal ) const
+            inline TVector3<T> GetPointPositive( const TVector3<T>& normal ) const
             {
-                TPoint3<T> maxPoint = GetMaxPoint();
-                TPoint3<T> result = GetMinPoint();
+                TVector3<T> maxPoint = GetMaxPoint();
+                TVector3<T> result = GetMinPoint();
                 if ( normal.x > 0 ) result.x = maxPoint.x;
                 if ( normal.y > 0 ) result.y = maxPoint.y;
                 if ( normal.z > 0 ) result.z = maxPoint.z;
@@ -91,10 +91,10 @@ namespace EE
             }
 
             // Used in frustrum computations
-            inline TPoint3<T> GetPointNegative( const TVector3<T>& normal ) const
+            inline TVector3<T> GetPointNegative( const TVector3<T>& normal ) const
             {
-                TPoint3<T> maxPoint = GetMaxPoint();
-                TPoint3<T> result = GetMinPoint();
+                TVector3<T> maxPoint = GetMaxPoint();
+                TVector3<T> result = GetMinPoint();
                 if ( normal.x < 0 ) result.x = maxPoint.x;
                 if ( normal.y < 0 ) result.y = maxPoint.y;
                 if ( normal.z < 0 ) result.z = maxPoint.z;

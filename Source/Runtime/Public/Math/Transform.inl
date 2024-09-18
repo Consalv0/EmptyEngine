@@ -7,19 +7,19 @@ namespace EE::Math
 	}
 
     template <typename T>
-	TTransform<T>::TTransform( const TPoint3<T>& position, const TQuaternion<T>& rotation, const TVector3<T>& scale ) :
+	TTransform<T>::TTransform( const TVector3<T>& position, const TQuaternion<T>& rotation, const TVector3<T>& scale ) :
 		position( position ), rotation( rotation ), scale( scale )
 	{
 	}
 
     template <typename T>
-	TTransform<T>::TTransform( const TPoint3<T>& position, const TQuaternion<T>& rotation ) :
+	TTransform<T>::TTransform( const TVector3<T>& position, const TQuaternion<T>& rotation ) :
 		position( position ), rotation( rotation ), scale( 1.F )
 	{
 	}
 
     template <typename T>
-	TTransform<T>::TTransform( const TPoint3<T>& position ) :
+	TTransform<T>::TTransform( const TVector3<T>& position ) :
 		position( position ), rotation(), scale( 1 )
 	{
 	}

@@ -97,7 +97,7 @@ namespace EE
         TMap<int32, NString> materialsMap;
         TArray<StaticVertex> staticVertices;
         TArray<SkinVertex> skinVertices;
-        BoundingBox3f bounding;
+        Box3f bounding;
 
         bool hasNormals = false;
         bool hasTangents = false;

@@ -25,7 +25,7 @@ namespace EE::Math
 		{
 		}
 		//* Add point to the BondingBox
-		inline void Add( TIntPoint3<T> point )
+		inline void Add( TIntVector3<T> point )
 		{
 			minX = Math::Min( minX, point.x ); minY = Math::Min( minY, point.y ); minZ = Math::Min( minZ, point.z );
 			maxX = Math::Max( maxX, point.x ); maxY = Math::Max( maxY, point.y ); maxZ = Math::Max( maxZ, point.z );
@@ -43,10 +43,10 @@ namespace EE::Math
         }
 
 		//* Get the lower point of the bounding box
-		inline TIntPoint3<T> GetMinPoint() const { return { Math::Min( left, right ), Math::Min( top, bottom ), Math::Min( front, back ) }; }
+		inline TIntVector3<T> GetMinPoint() const { return { Math::Min( left, right ), Math::Min( top, bottom ), Math::Min( front, back ) }; }
 
 		//* Get the upper point of the bounding box
-		inline TIntPoint3<T> GetMaxPoint() const { return { Math::Max( left, right ), Math::Max( top, bottom ), Math::Max( front, back ) }; }
+		inline TIntVector3<T> GetMaxPoint() const { return { Math::Max( left, right ), Math::Max( top, bottom ), Math::Max( front, back ) }; }
 
 		//* Get the width of the bounding box
 		inline T GetWidth() const { return Math::Max( left, right ) - Math::Min( left, right ); }

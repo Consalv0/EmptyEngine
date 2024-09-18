@@ -10,14 +10,14 @@ namespace EE
             static_assert(IsFixedOrFloatingPoint<T>, "T must be floating point.");
 
         public:
-            TPoint3<T> position;
+            TVector3<T> position;
             TQuaternion<T> rotation;
             TVector3<T> scale;
 
             TTransform();
-            TTransform( const TPoint3<T>& position, const TQuaternion<T>& rotation, const TVector3<T>& scale );
-            TTransform( const TPoint3<T>& position, const TQuaternion<T>& rotation );
-            TTransform( const TPoint3<T>& position );
+            TTransform( const TVector3<T>& position, const TQuaternion<T>& rotation, const TVector3<T>& scale );
+            TTransform( const TVector3<T>& position, const TQuaternion<T>& rotation );
+            TTransform( const TVector3<T>& position );
             TTransform( const TMatrix4x4<T>& matrix );
             TTransform( const TTransform<T>& other );
 

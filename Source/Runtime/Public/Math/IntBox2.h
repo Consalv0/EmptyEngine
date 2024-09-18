@@ -44,10 +44,10 @@ namespace EE::Math
 		}
 
 		//* Get the lower point of the bounding box
-		inline TIntPoint2<T> GetMinPoint() const { return { Math::Min( left, right ), Math::Min( top, bottom ) }; }
+		inline TIntVector2<T> GetMinPoint() const { return { Math::Min( left, right ), Math::Min( top, bottom ) }; }
 
 		//* Get the upper point of the bounding box
-		inline TIntPoint2<T> GetMaxPoint() const { return { Math::Max( left, right ), Math::Max( top, bottom ) }; }
+		inline TIntVector2<T> GetMaxPoint() const { return { Math::Max( left, right ), Math::Max( top, bottom ) }; }
 
         //* Get the center position of the bounding box
         template<typename R>
