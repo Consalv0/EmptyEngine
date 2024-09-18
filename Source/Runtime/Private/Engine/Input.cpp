@@ -21,7 +21,7 @@ namespace EE
 
     float GMousePositionX, GMousePositionY, GRelativeMousePositionX, GRelativeMousePositionY;
 
-    int InputEventsHandler_Internal( void* userData, SDL_Event* sdlEvent );
+    SDL_bool InputEventsHandler_Internal( void* userData, SDL_Event* sdlEvent );
 
     bool Input::Initialize()
     {
@@ -156,7 +156,7 @@ namespace EE
     {
     }
 
-    int InputEventsHandler_Internal( void* userData, SDL_Event* sdlEvent )
+    SDL_bool InputEventsHandler_Internal( void* userData, SDL_Event* sdlEvent )
     {
         Input& input = *(Input*)userData; 
 
@@ -476,7 +476,7 @@ namespace EE
         }
         }
 
-        return 0;
+        return true;
     }
 
     void Input::CheckForConnectedJoysticks()

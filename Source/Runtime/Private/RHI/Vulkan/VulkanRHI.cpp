@@ -3195,7 +3195,7 @@ namespace EE
             .apiVersion = VK_API_VERSION_1_3
         };
 
-        if ( SDL_Vulkan_LoadLibrary( nullptr ) != 0 )
+        if ( SDL_Vulkan_LoadLibrary( nullptr ) == SDL_FALSE )
         {
             EE_LOG_CRITICAL( L"Failed to load SDL Vulkan Library! {}", Text::NarrowToWide( SDL_GetError() ) );
         }

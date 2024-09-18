@@ -16,7 +16,7 @@
 
 namespace EE
 {
-    int WindowEventsHandler( void* userData, SDL_Event* sdlEvent )
+    SDL_bool WindowEventsHandler( void* userData, SDL_Event* sdlEvent )
     {
         Window* window = static_cast<Window*>( userData );
 
@@ -25,7 +25,7 @@ namespace EE
             SDL_WindowID windowID = SDL_GetWindowID( (SDL_Window*)window->GetWindowHandle() );
 
             if ( sdlEvent->window.windowID != windowID )
-                return 0;
+                return true;
 
             // EE_LOG_INFO( L"SDL: Window Event: WindowID({}), Event({})", windowID, sdlEvent->type );
 
@@ -61,7 +61,7 @@ namespace EE
             }
         }
 
-        return 0;
+        return true;
     }
 
     bool Window::Initialize()
@@ -185,7 +185,7 @@ namespace EE
         EE_LOG_DEBUG( L"Window: \"{}\" closed!", GetName() );
 #endif // EE_DEBUG
 
-        SDL_DelEventWatch( WindowEventsHandler, (void*)this );
+        SDL_RemoveEventWatch( WindowEventsHandler, (void*)this );
         GDynamicRHI->FreeRHIPresentContextOfWindow( this );
         SDL_DestroyWindow( (SDL_Window*)(windowHandle) );
         windowHandle = NULL;
