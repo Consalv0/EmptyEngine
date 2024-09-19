@@ -23,7 +23,7 @@ namespace EE
 
 		PixelMap( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat );
 
-		PixelMap( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, void*& data );
+		PixelMap( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, const void* data );
 
 		PixelMap( const PixelMap& other ) = delete;
 
@@ -31,7 +31,7 @@ namespace EE
 
 		void Swap( PixelMap& other );
 
-		void SetData( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, void*& data );
+		void SetData( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, const void* data );
 
 		//* Width in pixels. 
 		constexpr inline uint32 GetWidth() const { return width_; };
@@ -65,9 +65,9 @@ namespace EE
 	class PixelMapUtility
 	{
 	public:
-		static void CreateData( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, void*& data );
+		static void CreateData( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, void** data );
 
-		static void CreateData( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, void*& target, void* data );
+		static void CreateData( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, void** target, const void* data );
 
 		//* Flips the pixels vertically
 		static void FlipVertically( PixelMap& map );
@@ -86,11 +86,11 @@ namespace EE
 
 	private:
 		template<typename T>
-		static void FlipVertically( const uint32& width, const uint32& height, const uint32& depth, void*& data );
+		static void FlipVertically( const uint32& width, const uint32& height, const uint32& depth, void* data );
 	};
 
 	template<typename T>
-	inline void PixelMapUtility::FlipVertically( const uint32& width, const uint32& height, const uint32& depth, void*& inData )
+	inline void PixelMapUtility::FlipVertically( const uint32& width, const uint32& height, const uint32& depth, void* inData )
 	{
 		T* data = (T*)inData;
 		T* tempRow = (T*)malloc( width * sizeof( T ) );

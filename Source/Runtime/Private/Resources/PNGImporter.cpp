@@ -23,7 +23,7 @@ constexpr size_t kBufferBlockSize = 1u << 18u;
 
 bool EE::PNGImporter::LoadImage( ImageImporter::ImageResult& result, const ImageImporter::Options& options )
 {
-	result.isValid = false;
+	result.Clear();
     Timestamp timer;
 
     timer.Begin();
@@ -65,10 +65,10 @@ bool EE::PNGImporter::LoadImage( ImageImporter::ImageResult& result, const Image
 		EE_LOG_ERROR( L"Image '{0}' couldn't be loaded", options.file.GetFileName().c_str() );
 		return false;
 	}
-	result.pixelMap.SetData( width, height, 1, options.format, data );
+
+	result.Populate( { (uint32)width, (uint32)height, 1u }, options.format, data );
 	stbi_image_free( data );
 	timer.Stop();
 
-	result.isValid = true;
     return true;
 }

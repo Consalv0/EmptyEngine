@@ -142,13 +142,13 @@ namespace EE
     PixelMap::PixelMap( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat )
         : width_( width ), height_( height ), depth_( depth ), pixelFormat_( pixelFormat ), data_( NULL )
     {
-        PixelMapUtility::CreateData( width_, height_, depth_, pixelFormat_, data_ );
+        PixelMapUtility::CreateData( width_, height_, depth_, pixelFormat_, &data_ );
     }
 
-    PixelMap::PixelMap( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, void*& inData )
+    PixelMap::PixelMap( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, const void* inData )
         : width_( width ), height_( height ), depth_( depth ), pixelFormat_( pixelFormat ), data_( NULL )
     {
-        PixelMapUtility::CreateData( width_, height_, depth_, pixelFormat_, data_, inData );
+        PixelMapUtility::CreateData( width_, height_, depth_, pixelFormat_, &data_, inData );
     }
 
     void PixelMap::Clear()
@@ -179,12 +179,12 @@ namespace EE
         other.pixelFormat_ = otherPixelFormat;
     }
 
-    void PixelMap::SetData( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, void*& data )
+    void PixelMap::SetData( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, const void* data )
     {
         Clear();
         this->width_ = width, this->height_ = height; this->depth_ = depth;
         this->pixelFormat_ = pixelFormat;
-        PixelMapUtility::CreateData( width, height, depth, pixelFormat, data_, data );
+        PixelMapUtility::CreateData( width, height, depth, pixelFormat, &data_, data );
     }
 
     size_t PixelMap::GetSize() const
@@ -197,24 +197,24 @@ namespace EE
         Clear();
     }
 
-    void PixelMapUtility::CreateData( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, void*& data )
+    void PixelMapUtility::CreateData( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, void** data )
     {
-        if ( data != NULL ) return;
+        if ( *data != NULL ) return;
         const size_t size = (size_t)width * height * depth * GPixelFormatInfo[ pixelFormat ].size * GPixelFormatInfo[ pixelFormat ].channels;
         if ( size == 0 )
         {
-            data = NULL;
+            *data = NULL;
             return;
         }
 
-        data = malloc( size );
+        *data = malloc( size );
     }
 
-    void PixelMapUtility::CreateData( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, void*& target, void* data )
+    void PixelMapUtility::CreateData( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, void** target, const void* data )
     {
         CreateData( width, height, depth, pixelFormat, target );
-        if ( target == NULL || data == NULL ) return;
-        memcpy( target, data, (size_t)width * height * depth * GPixelFormatInfo[ pixelFormat ].size * GPixelFormatInfo[ pixelFormat ].channels );
+        if ( *target == NULL || data == NULL ) return;
+        memcpy( *target, data, (size_t)width * height * depth * GPixelFormatInfo[ pixelFormat ].size * GPixelFormatInfo[ pixelFormat ].channels );
     }
 
     void PixelMapUtility::FlipVertically( PixelMap& map )

@@ -16,18 +16,29 @@ namespace EE
             EPixelFormat format;
         };
 
-        struct ImageResult
+        class ImageResult
         {
-            PixelMap pixelMap;
-
-            //* The image has been succesfully loaded
-            bool isValid;
-
-            void Transfer( ImageResult& other );
-
+        public:
             ImageResult();
 
             ImageResult( const ImageResult& other ) = delete;
+
+            ~ImageResult();
+
+            void Transfer( ImageResult& other );
+
+            void Clear();
+
+            void Populate( const UIntVector3& extents, EPixelFormat format, const void* data );
+
+            constexpr const PixelMap& GetPixelMap() const { return pixelMap_; }
+
+            constexpr const bool& IsValid() const { return isValid_; }
+
+        private:
+            PixelMap pixelMap_;
+            //* The image has been succesfully loaded
+            bool isValid_;
         };
 
     private:

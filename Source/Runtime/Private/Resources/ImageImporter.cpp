@@ -93,7 +93,7 @@ namespace EE
         EE_LOG_INFO( L"Reading File Model '{}'", options.file.GetShortPath() );
         RecognizeFileExtensionAndLoad( info, options );
         TaskRunning = false;
-        return info.isValid;
+        return info.IsValid();
     }
 
     void ImageImporter::LoadAsync( const Options& options, FinishTaskFunction then )
@@ -109,16 +109,33 @@ namespace EE
     }
 
     ImageImporter::ImageResult::ImageResult()
-        : pixelMap(), isValid( false )
+        : pixelMap_(), isValid_( false )
     {
+    }
+
+    ImageImporter::ImageResult::~ImageResult()
+    {
+        Clear();
     }
 
     void ImageImporter::ImageResult::Transfer( ImageResult& other )
     {
-        pixelMap.Clear();
-        pixelMap.Swap( other.pixelMap );
-        isValid = other.isValid;
-        other.isValid = false;
+        pixelMap_.Clear();
+        pixelMap_.Swap( other.pixelMap_ );
+        isValid_ = other.isValid_;
+        other.isValid_ = false;
+    }
+
+    void ImageImporter::ImageResult::Clear()
+    {
+        pixelMap_.Clear();
+        isValid_ = false;
+    }
+
+
+    void ImageImporter::ImageResult::Populate( const UIntVector3& extents, EPixelFormat format, const void* data )
+    {
+        pixelMap_.SetData( extents.x, extents.y, extents.z, format, data );
     }
 
     ImageImporter::Task::Task( const Options& options, FinishTaskFunction finishTaskFunction, FutureTask futureTask ) :

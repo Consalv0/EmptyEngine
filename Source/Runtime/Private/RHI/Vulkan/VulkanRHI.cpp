@@ -648,6 +648,7 @@ namespace EE
     {
         VkImageUsageFlags flags = VkImageUsageFlags( 0 );
         if ( usage & UsageMode_Sampled_Bit )    flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
+        if ( usage & UsageMode_Transfer_Bit )   flags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
         if ( usage & UsageMode_Storage_Bit )    flags |= VK_IMAGE_USAGE_STORAGE_BIT;
         if ( usage & UsageMode_Color_Bit )      flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
         if ( usage & UsageMode_DepthStencil )   flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
@@ -671,6 +672,7 @@ namespace EE
         case TextureLayout_General:             return VK_IMAGE_LAYOUT_GENERAL;
         case TextureLayout_TransferSRC:         return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
         case TextureLayout_TransferDST:         return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        case TextureLayout_Shader:              return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         case TextureLayout_ColorAttachment:     return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         case TextureLayout_DepthAttachment:     return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
         case TextureLayout_StencilAttachment:   return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -808,6 +810,58 @@ namespace EE
         case BlendOperation_Max:                return VK_BLEND_OP_MAX;
         default:
             return VK_BLEND_OP_MAX_ENUM;
+        }
+    }
+
+    static VkBorderColor ConvertSamplerBorder( ESamplerBorder border )
+    {
+
+        switch ( border )
+        {
+        case SamplerBorder_Zero:    return VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+        case SamplerBorder_Black:   return VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
+        case SamplerBorder_White:   return VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+        default:
+            return VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+        }
+    }
+
+    static VkSamplerAddressMode ConvertSamplerMode( ESamplerMode sampler )
+    {
+        switch ( sampler )
+        {
+        case SamplerMode_Repeat:   return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        case SamplerMode_Mirror:   return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+        case SamplerMode_Border:   return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+        case SamplerMode_Clamp:    return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        default:
+            return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        }
+    }
+
+    static VkFilter ConvertMinFilterMode( EFilterMode filter )
+    {
+        switch ( filter )
+        {
+        case FilterMode_MinMagNearest:          return VK_FILTER_NEAREST;
+        case FilterMode_MinMagLinear:           return VK_FILTER_LINEAR;
+        case FilterMode_MinLinearMagNearest:    return VK_FILTER_LINEAR;
+        case FilterMode_MinNearestMagLinear:    return VK_FILTER_NEAREST;
+        default:
+            return VK_FILTER_NEAREST;
+        }
+    }
+
+    static VkFilter ConvertMagFilterMode( EFilterMode filter )
+    {
+        switch ( filter )
+        {
+        case FilterMode_MinMagNearest:          return VK_FILTER_NEAREST;
+        case FilterMode_MinMagLinear:           return VK_FILTER_LINEAR;
+        case FilterMode_MinLinearMagNearest:    return VK_FILTER_NEAREST;
+        case FilterMode_MinNearestMagLinear:    return VK_FILTER_LINEAR;
+        default:
+            return VK_FILTER_NEAREST;
         }
     }
 
@@ -1610,8 +1664,8 @@ namespace EE
         auto vulkanFence = static_cast<const VulkanRHIFence*>( info.signalFence );
 
         uint32 waitSemaphoreCount = (uint32)info.waitSemaphores.size();
-        std::vector<VkSemaphore> waitSemaphores;
-        std::vector<VkPipelineStageFlags> waitStageFlags;
+        TArray<VkSemaphore> waitSemaphores;
+        TArray<VkPipelineStageFlags> waitStageFlags;
         waitSemaphores.resize( waitSemaphoreCount );
         waitStageFlags.resize( waitSemaphoreCount );
         for ( uint32 i = 0; i < waitSemaphoreCount; i++ )
@@ -1622,7 +1676,7 @@ namespace EE
         }
 
         uint32 signalSemaphoreCount = (uint32)info.signalSemaphores.size();
-        std::vector<VkSemaphore> signalSemaphores;
+        TArray<VkSemaphore> signalSemaphores;
         signalSemaphores.resize( signalSemaphoreCount );
         for ( uint32 i = 0; i < signalSemaphoreCount; i++ )
         {
@@ -1644,7 +1698,7 @@ namespace EE
         };
 
         VkFence nativeFence = vulkanFence == NULL ? VK_NULL_HANDLE : vulkanFence->GetVulkanFence();
-        auto result = vkQueueSubmit( queue, 1, &vkSubmitInfo, nativeFence );
+        VkResult result = vkQueueSubmit( queue, 1, &vkSubmitInfo, nativeFence );
         if ( result != VK_SUCCESS )
         {
             EE_LOG_CRITICAL( L"Failed command vkQueueSubmit! {}", (uint32)result );
@@ -1762,14 +1816,61 @@ namespace EE
         }
     }
 
+    VulkanRHISampler::VulkanRHISampler( const RHISamplerCreateInfo& info, VulkanRHIDevice* device )
+        : device_( device )
+        , sampler_( VK_NULL_HANDLE )
+        , filter_( info.filter )
+        , modeU_( info.modeU ), modeV_( info.modeV ), modeW_( info.modeW )
+        , border_( info.border )
+    {
+        VkSamplerCreateInfo samplerInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+            .pNext = NULL,
+            .flags = 0,
+            .magFilter = ConvertMagFilterMode( filter_ ),
+            .minFilter = ConvertMinFilterMode( filter_ ),
+            .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
+            .addressModeU = ConvertSamplerMode( modeU_ ),
+            .addressModeV = ConvertSamplerMode( modeV_ ),
+            .addressModeW = ConvertSamplerMode( modeW_ ),
+            .mipLodBias = 0.0F,
+            // Enable anisotropic filtering
+            // This feature is optional, so we must check if it's supported on the device
+            .anisotropyEnable = VK_FALSE,
+            .maxAnisotropy = 1.0F,
+            .compareEnable = VK_FALSE,
+            .compareOp = ConvertCompareOperation( info.compareOperation ),
+            .minLod = 0.0F,
+            .maxLod = 0.0F,
+            .borderColor = ConvertSamplerBorder( border_ ),
+            .unnormalizedCoordinates = VK_FALSE
+        };
+        VkResult result = vkCreateSampler( device_->GetVulkanDevice(), &samplerInfo, NULL, &sampler_ );
+        if ( result != VK_SUCCESS )
+        {
+            EE_LOG_CRITICAL( L"Failed to create sampler {}!", (int32)result );
+        }
+    }
+
+    VulkanRHISampler::~VulkanRHISampler()
+    {
+        vkDestroySampler( device_->GetVulkanDevice(), sampler_, NULL );
+    }
+
+    bool VulkanRHISampler::IsValid() const
+    {
+        return sampler_ != VK_NULL_HANDLE;
+    }
+
     VulkanRHITexture::VulkanRHITexture( const RHITextureCreateInfo& info, VulkanRHIDevice* device, VkImage image ) :
-        device( device ),
-        extents( info.extents ),
-        format( ConvertPixelFormat( info.format ) ),
-        pixelFormat( ConvertImageFormat( format ) ),
-        sampler( VK_NULL_HANDLE ), memory( VK_NULL_HANDLE ),
-        image( image ),
-        ownership( false )
+        device_( device ),
+        extents_( info.extents ),
+        format_( ConvertPixelFormat( info.format ) ),
+        pixelFormat_( ConvertImageFormat( format_ ) ),
+        memory_( VK_NULL_HANDLE ),
+        image_( image ),
+        ownership_( false )
     {
         VkImageViewCreateInfo viewInfo
         {
@@ -1778,7 +1879,7 @@ namespace EE
             .flags = 0,
             .image = image,
             .viewType = ConvertTextureType( info.type ),
-            .format = format,
+            .format = ConvertPixelFormat( info.viewFormat == PixelFormat_Unknown ? info.format : info.viewFormat ),
             .components = VkComponentMapping
             {
                 .r = VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -1796,22 +1897,22 @@ namespace EE
             } 
         };
 
-        if ( vkCreateImageView( device->GetVulkanDevice(), &viewInfo, nullptr, &imageView ) != VK_SUCCESS )
+        if ( vkCreateImageView( device->GetVulkanDevice(), &viewInfo, nullptr, &imageView_ ) != VK_SUCCESS )
         {
             EE_LOG_CRITICAL( L"Failed to create texture image view!" );
             return;
         }
 
-        pixelFormat = ConvertImageFormat( format );
+        pixelFormat_ = ConvertImageFormat( format_ );
     }
 
     VulkanRHITexture::VulkanRHITexture( const RHITextureCreateInfo& info, VulkanRHIDevice* device ) :
-        device( device ),
-        extents( info.extents ),
-        format( ConvertPixelFormat( info.format ) ),
-        pixelFormat( ConvertImageFormat( format ) ),
-        ownership( true ),
-        sampler( VK_NULL_HANDLE ), memory( VK_NULL_HANDLE ), imageView( VK_NULL_HANDLE ), image( VK_NULL_HANDLE )
+        device_( device ),
+        extents_( info.extents ),
+        format_( ConvertPixelFormat( info.format ) ),
+        pixelFormat_( ConvertImageFormat( format_ ) ),
+        ownership_( true ),
+        memory_( VK_NULL_HANDLE ), imageView_( VK_NULL_HANDLE ), image_( VK_NULL_HANDLE )
     {
         VkImageCreateInfo imageInfo
         {
@@ -1819,11 +1920,12 @@ namespace EE
             .pNext = NULL,
             .flags = 0,
             .imageType = VK_IMAGE_TYPE_2D,
-            .format = format,
-            .extent = VkExtent3D {
-                .width = extents.x,
-                .height = extents.y,
-                .depth = extents.z
+            .format = format_,
+            .extent
+            {
+                .width = extents_.x,
+                .height = extents_.y,
+                .depth = extents_.z
             },
             . mipLevels = info.mipLevels,
             . arrayLayers = info.arraySize,
@@ -1836,7 +1938,7 @@ namespace EE
             . initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         };
 
-        if ( vkCreateImage( device->GetVulkanDevice(), &imageInfo, VK_NULL_HANDLE, &image ) != VK_SUCCESS )
+        if ( vkCreateImage( device->GetVulkanDevice(), &imageInfo, VK_NULL_HANDLE, &image_ ) != VK_SUCCESS )
         {
             EE_LOG_CRITICAL( L"Failed to create image!" );
             return;
@@ -1854,7 +1956,7 @@ namespace EE
             .priority = 0.0F
         };
 
-        if ( vmaCreateImage( device->GetVulkanAllocator(), &imageInfo, &allocInfo, &image, &memory, NULL ) != VK_SUCCESS )
+        if ( vmaCreateImage( device->GetVulkanAllocator(), &imageInfo, &allocInfo, &image_, &memory_, NULL ) != VK_SUCCESS )
         {
             EE_LOG_CRITICAL( L"Failed to allocate image memory!" );
             return;
@@ -1865,9 +1967,9 @@ namespace EE
             .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
             .pNext = NULL,
             .flags = 0,
-            .image = image,
+            .image = image_,
             .viewType = ConvertTextureType( info.type ),
-            .format = format,
+            .format = ConvertPixelFormat( info.viewFormat == PixelFormat_Unknown ? info.format : info.viewFormat ),
             .components = VkComponentMapping
             {
                 .r = VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -1885,7 +1987,7 @@ namespace EE
             }
         };
 
-        if ( vkCreateImageView( device->GetVulkanDevice(), &viewInfo, nullptr, &imageView ) != VK_SUCCESS )
+        if ( vkCreateImageView( device->GetVulkanDevice(), &viewInfo, nullptr, &imageView_ ) != VK_SUCCESS )
         {
             EE_LOG_CRITICAL( L"Failed to create texture image view!" );
             return;
@@ -1894,9 +1996,9 @@ namespace EE
 
     VulkanRHITexture::~VulkanRHITexture()
     {
-        if ( image != VK_NULL_HANDLE && ownership )
+        if ( image_ != VK_NULL_HANDLE && ownership_ )
         {
-            vkDestroyImage( device->GetVulkanDevice(), image, NULL );
+            vkDestroyImage( device_->GetVulkanDevice(), image_, NULL );
         }
 
         CleanImageView();
@@ -1904,15 +2006,15 @@ namespace EE
 
     void VulkanRHITexture::CleanImageView() const
     {
-        if ( imageView != VK_NULL_HANDLE )
+        if ( imageView_ != VK_NULL_HANDLE )
         {
-            vkDestroyImageView( device->GetVulkanDevice(), imageView, NULL );
+            vkDestroyImageView( device_->GetVulkanDevice(), imageView_, NULL );
         }
     }
 
     bool VulkanRHITexture::IsValid() const
     {
-        return image != VK_NULL_HANDLE;
+        return image_ != VK_NULL_HANDLE;
     }
 
     bool VulkanRHISwapChain::IsValid() const
@@ -2315,7 +2417,7 @@ namespace EE
         vkCmdSetScissor( commandBuffer, 0, 1, &vkscissor );
     }
 
-    void VulkanRHICommandBuffer::TransitionTexture( const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer, const ETextureLayout from, const ETextureLayout to ) const
+    void VulkanRHICommandBuffer::TransitionTexture( const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer, const ETextureLayout& from, const ETextureLayout& to ) const
     {
         auto vulkanTexture = static_cast<const VulkanRHITexture*>(texture);
 
@@ -2354,6 +2456,43 @@ namespace EE
             0, NULL,            // memory barriers
             0, NULL,            // buffer memory barriers
             1, &imageBarrier ); // image memory barriers
+    }
+
+    void VulkanRHICommandBuffer::CopyBufferToTexture( const RHIBuffer* buffer, const RHITexture* texture, const ETextureLayout& layout ) const
+    {
+        auto vulkanBuffer = static_cast<const VulkanRHIBuffer*>(buffer);
+        auto vulkanTexture = static_cast<const VulkanRHITexture*>(texture);
+        
+        VkBufferImageCopy region
+        {
+            .bufferOffset = 0,
+            .bufferRowLength = 0,
+            .bufferImageHeight = 0,
+            .imageSubresource
+            {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .mipLevel = 0,
+                .baseArrayLayer = 0,
+                .layerCount = 1
+            },
+            .imageOffset = { 0, 0, 0 },
+            .imageExtent
+            {
+                .width = texture->GetWidth(),
+                .height = texture->GetHeight(),
+                .depth = texture->GetDepth()
+            }
+        };
+
+        vkCmdCopyBufferToImage
+        (
+            commandBuffer,
+            vulkanBuffer->GetVulkanBuffer(),
+            vulkanTexture->GetVulkanImage(),
+            ConvertTextureLayout( layout ),
+            1,
+            &region
+        );
     }
 
     void VulkanRHICommandBuffer::ClearColor( Vector3f color, const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer ) const
@@ -2767,8 +2906,6 @@ namespace EE
                 bufferInfosNum++;
             } break;
             case BindingType_Sampler:
-            {
-            } break;
             case BindingType_Texture:
             case BindingType_TextureStorage:
             {
@@ -2820,24 +2957,31 @@ namespace EE
             } break;
             case BindingType_Sampler:
             {
-                //     const auto* sampler = static_cast<VulkanSampler*>(std::get<Sampler*>( entry.entity ));
-                // 
-                //     imageInfos.emplace_back();
-                //     imageInfos.back().sampler = sampler->GetNative();
-                // 
-                //     writeDescriptorSet.pImageInfo = &imageInfos.back();
+                const VulkanRHISampler* sampler = static_cast<const VulkanRHISampler*>( binding.resource );
+                VkDescriptorImageInfo imageInfo
+                {
+                    .sampler = sampler->GetVulkanSampler(),
+                    .imageView = VK_NULL_HANDLE,
+                    .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                };
+                imageInfos.emplace_back( imageInfo );
+
+                writeDescriptorSet.pImageInfo = &imageInfos.back();
             } break;
             case BindingType_Texture:
             case BindingType_TextureStorage:
             {
 
-                //    const auto* textureView = static_cast<VulkanTextureView*>(std::get<TextureView*>( entry.entity ));
-                //
-                //    imageInfos.emplace_back();
-                //    imageInfos.back().imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                //    imageInfos.back().imageView = textureView->GetNative();
-                //
-                //    writeDescriptorSet.pImageInfo = &imageInfos.back();
+                const VulkanRHITexture* texture = static_cast<const VulkanRHITexture*>( binding.resource );
+                VkDescriptorImageInfo imageInfo
+                {
+                    .sampler = VK_NULL_HANDLE,
+                    .imageView = texture->GetVulkanImageView(),
+                    .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                };
+                imageInfos.emplace_back( imageInfo );
+
+                writeDescriptorSet.pImageInfo = &imageInfos.back();
             } break;
             default:
                 break;
@@ -3310,7 +3454,7 @@ namespace EE
     
     RHISampler* VulkanRHI::CreateRHISampler( const RHISamplerCreateInfo& info ) const
     {
-        return NULL;
+        return new VulkanRHISampler( info, GVulkanDevice );
     }
     
     RHIShaderStage* VulkanRHI::CreateRHIShaderStage( const RHIShaderStageCreateInfo& info ) const

@@ -123,6 +123,7 @@ namespace EE
         UsageMode_Depth_Bit =       1 << 2,
         UsageMode_Sampled_Bit =     1 << 3,
         UsageMode_Storage_Bit =     1 << 4,
+        UsageMode_Transfer_Bit =    1 << 5,
 
         UsageMode_DepthStencil = UsageMode_Depth_Bit | UsageMode_Stencil_Bit,
     };
@@ -200,6 +201,7 @@ namespace EE
         TextureLayout_General,
         TextureLayout_TransferSRC,
         TextureLayout_TransferDST,
+        TextureLayout_Shader,
         TextureLayout_ColorAttachment,
         TextureLayout_DepthAttachment,
         TextureLayout_StencilAttachment,
@@ -547,12 +549,12 @@ namespace EE
         VertexFormat_SINT_32X4
     };
 
-    enum ESamplerAddressMode
+    enum ESamplerMode
     {
-        SamplerAdressMode_Repeat,
-        SamplerAdressMode_Mirror,
-        SamplerAdressMode_Clamp,
-        SamplerAdressMode_Border
+        SamplerMode_Repeat,
+        SamplerMode_Mirror,
+        SamplerMode_Clamp,
+        SamplerMode_Border
     };
 
     enum ERasterMode
@@ -597,7 +599,7 @@ namespace EE
 
     enum ESamplerBorder
     {
-        SamplerBorder_BlackTransparent,
+        SamplerBorder_Zero,
         SamplerBorder_Black,
         SamplerBorder_White
     };

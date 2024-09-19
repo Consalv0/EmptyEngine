@@ -48,6 +48,7 @@ namespace EE
         uint32 arraySize = 1;
         uint32 mipLevels = 1;
         EPixelFormat format = PixelFormat_Unknown;
+        EPixelFormat viewFormat = PixelFormat_Unknown;
         EColorSpace colorSpace = ColorSpace_Unknown;
         ETilingMode tiling = TilingMode_Default;
         uint32 sampleCount = 1;
@@ -69,6 +70,12 @@ namespace EE
 
     public:
         virtual ~RHITexture() = default;
+
+        virtual const uint32& GetWidth() const = 0;
+
+        virtual const uint32& GetHeight() const = 0;
+
+        virtual const uint32& GetDepth() const = 0;
 
         virtual const UIntVector3& GetExtents() const = 0;
 
@@ -203,7 +210,9 @@ namespace EE
 
         virtual void SetScissor( IntBox2 scissor ) const = 0;
 
-        virtual void TransitionTexture( const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer, const ETextureLayout from, const ETextureLayout to ) const = 0;
+        virtual void TransitionTexture( const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer, const ETextureLayout& from, const ETextureLayout& to ) const = 0;
+
+        virtual void CopyBufferToTexture( const RHIBuffer* buffer, const RHITexture* texture, const ETextureLayout& layout ) const = 0;
 
         virtual void ClearColor( Vector3f color, const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer ) const = 0;
 
@@ -249,8 +258,8 @@ namespace EE
     struct RHIQueueSubmitInfo
     {
     public:
-        std::vector<const RHISemaphore*> waitSemaphores;
-        std::vector<const RHISemaphore*> signalSemaphores;
+        TArray<const RHISemaphore*> waitSemaphores;
+        TArray<const RHISemaphore*> signalSemaphores;
         EPipelineStage stageFlags;
 
         const RHIFence* signalFence;
@@ -268,6 +277,8 @@ namespace EE
         virtual ~RHIQueue() = default;
 
         virtual void SubmitCommandBuffer( const RHICommandBuffer* commandBuffer, const RHIQueueSubmitInfo& info ) = 0;
+
+        virtual void WaitIdle() const = 0;
     };
 
     struct RHIDeviceLimits
@@ -338,15 +349,15 @@ namespace EE
     struct RHISamplerCreateInfo
     {
         EFilterMode filter = FilterMode_MinMagNearest;
-        ESamplerAddressMode addressU = SamplerAdressMode_Clamp;
-        ESamplerAddressMode addressV = SamplerAdressMode_Clamp;
-        ESamplerAddressMode addressW = SamplerAdressMode_Clamp;
+        ESamplerMode modeU = SamplerMode_Clamp;
+        ESamplerMode modeV = SamplerMode_Clamp;
+        ESamplerMode modeW = SamplerMode_Clamp;
         float mipLODBias = 0.0F;
-        uint32 maxAnisotropy = 0;
+        float maxAnisotropy = 0.0F;
         ECompareOperation compareOperation = CompareOperation_Always;
-        ESamplerBorder border = SamplerBorder_BlackTransparent;
+        ESamplerBorder border = SamplerBorder_Zero;
         float minLOD = 0.0F;
-        float maxLOD = FLT_MAX;
+        float maxLOD = 1.0F;
     };
 
     class RHISampler : public RHIResource
@@ -359,6 +370,14 @@ namespace EE
 
     public:
         virtual ~RHISampler() = default;
+
+        virtual const EFilterMode& GetFilterMode() const = 0;
+
+        virtual const ESamplerMode& GetSamplerModeU() const = 0;
+        virtual const ESamplerMode& GetSamplerModeV() const = 0;
+        virtual const ESamplerMode& GetSamplerModeW() const = 0;
+        
+        virtual const ESamplerBorder& GetSamplerBorder() const = 0;
     };
 
     class RHIRenderPass : public RHIResource

@@ -140,7 +140,7 @@ namespace EE
 
         FORCEINLINE const VkQueue& GetVulkanQueue() const { return queue; }
 
-        void WaitIdle() const;
+        void WaitIdle() const override;
 
         void SubmitCommandBuffer( const RHICommandBuffer* commandBuffer, const RHIQueueSubmitInfo& info ) override;
     };
@@ -314,22 +314,40 @@ namespace EE
 
     };
 
+    class VulkanRHISampler : public RHISampler
+    {
+    public:
+        EE_CLASSNOCOPY( VulkanRHISampler )
+
+    public:
+        VulkanRHISampler( const RHISamplerCreateInfo& info, VulkanRHIDevice* device );
+
+        ~VulkanRHISampler() override;
+
+        const EFilterMode& GetFilterMode() const override { return filter_; }
+
+        const ESamplerMode& GetSamplerModeU() const override { return modeU_; }
+        const ESamplerMode& GetSamplerModeV() const override { return modeV_; }
+        const ESamplerMode& GetSamplerModeW() const override { return modeW_; }
+
+        const ESamplerBorder& GetSamplerBorder() const override { return border_; }
+
+        const VkSampler GetVulkanSampler() const { return sampler_; }
+
+        bool IsValid() const override;
+
+    private:
+        VulkanRHIDevice* device_;
+        VkSampler sampler_;
+        EFilterMode filter_;
+        ESamplerMode modeU_, modeV_, modeW_;
+        ESamplerBorder border_;
+    };
+
     class VulkanRHITexture : public RHITexture
     {
     public:
         EE_CLASSNOCOPY( VulkanRHITexture )
-
-    private:
-        VulkanRHIDevice* device;
-        VkSampler sampler;
-        VkImage image;
-        VkImageView imageView;
-        VmaAllocation memory;
-        UIntVector3 extents;
-        VkFormat format;
-        bool ownership;
-
-        EPixelFormat pixelFormat;
 
     public:
         VulkanRHITexture( const RHITextureCreateInfo& info, VulkanRHIDevice* device, VkImage image );
@@ -340,15 +358,32 @@ namespace EE
 
         void CleanImageView() const;
 
-        const VkImage& GetVulkanImage() const { return image; }
+        const VkImage& GetVulkanImage() const { return image_; }
 
-        const VkImageView& GetVulkanImageView() const { return imageView; }
+        const VkImageView& GetVulkanImageView() const { return imageView_; }
 
-        const UIntVector3& GetExtents() const override { return extents; };
+        const uint32& GetWidth() const override { return extents_.x; };
 
-        const EPixelFormat& GetFormat() const override { return pixelFormat; };
+        const uint32& GetHeight() const override { return extents_.y; };
+
+        const uint32& GetDepth() const override { return extents_.z; };
+
+        const UIntVector3& GetExtents() const override { return extents_; };
+
+        const EPixelFormat& GetFormat() const override { return pixelFormat_; };
 
         bool IsValid() const;
+
+    private:
+        VulkanRHIDevice* device_;
+        VkImage image_;
+        VkImageView imageView_;
+        VmaAllocation memory_;
+        UIntVector3 extents_;
+        VkFormat format_;
+        bool ownership_;
+
+        EPixelFormat pixelFormat_;
     };
 
     class VulkanRHISwapChain : public RHISwapChain
@@ -512,7 +547,9 @@ namespace EE
 
         void SetScissor( IntBox2 scissor ) const override;
 
-        void TransitionTexture( const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer, const ETextureLayout from, const ETextureLayout to ) const override;
+        void TransitionTexture( const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer, const ETextureLayout& from, const ETextureLayout& to ) const override;
+
+        void CopyBufferToTexture( const RHIBuffer* buffer, const RHITexture* texture, const ETextureLayout& layout ) const override;
 
         void ClearColor( Vector3f color, const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer ) const override;
         
