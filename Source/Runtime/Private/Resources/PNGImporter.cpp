@@ -15,11 +15,12 @@
 #endif // EE_PLATFORM_WINDOWS
 
 #define STBI_ONLY_PNG
+#define STBI_
 #define STBI_ASSERT(x) EE_ASSERT( x )
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-constexpr size_t kBufferBlockSize = 1u << 18u;
+constexpr size_t kBufferBlockSize = 1u << 16u;
 
 bool EE::PNGImporter::LoadImage( ImageImporter::ImageResult& result, const ImageImporter::Options& options )
 {
@@ -39,9 +40,10 @@ bool EE::PNGImporter::LoadImage( ImageImporter::ImageResult& result, const Image
 	int32 width, height, comp;
 
 	uint64 bytesRead = 0;
-	void* fileData = malloc( kBufferBlockSize );
+	uint64 blockSize = ((file.GetSize() / kBufferBlockSize) + 1) * kBufferBlockSize;
+	void* fileData = malloc( blockSize );
 
-	if ( file.ReadBlock( 0, kBufferBlockSize, fileData ) != 0 )
+	if ( file.ReadBlock( 0, blockSize, fileData ) != 0 )
 	{
 		EE_LOG_ERROR( L"Error reading block of file '{}', returned code {}", options.file.GetPath(), file.GetError() );
 		return false;
@@ -55,14 +57,14 @@ bool EE::PNGImporter::LoadImage( ImageImporter::ImageResult& result, const Image
 
 	void* data = NULL;
 	if ( GPixelFormatInfo[ options.format ].format )
-		data = stbi_loadf_from_memory( static_cast<const stbi_uc*>( fileData ), (int)bytesRead, &width, &height, &comp, GPixelFormatInfo[options.format].channels );
+		data = stbi_load_from_memory( static_cast<const stbi_uc*>( fileData ), (int)bytesRead, &width, &height, &comp, GPixelFormatInfo[options.format].channels );
 	else
-		data = stbi_load_from_memory( static_cast<const stbi_uc*>(fileData), (int)bytesRead, &width, &height, &comp, GPixelFormatInfo[options.format].channels );
+		data = stbi_loadf_from_memory( static_cast<const stbi_uc*>( fileData ), (int)bytesRead, &width, &height, &comp, GPixelFormatInfo[options.format].channels );
 
 	free( fileData );
 	if ( data == NULL )
 	{
-		EE_LOG_ERROR( L"Image '{0}' couldn't be loaded", options.file.GetFileName().c_str() );
+		EE_LOG_ERROR( L"Image '{}' couldn't be loaded: {}", options.file.GetFileName().c_str(), Text::NarrowToWide( stbi_failure_reason() ) );
 		return false;
 	}
 

@@ -90,7 +90,7 @@ namespace EE
         }
 
         TaskRunning = true;
-        EE_LOG_INFO( L"Reading File Model '{}'", options.file.GetShortPath() );
+        EE_LOG_INFO( L"Reading File Image '{}'", options.file.GetShortPath() );
         RecognizeFileExtensionAndLoad( info, options );
         TaskRunning = false;
         return info.IsValid();
@@ -136,6 +136,7 @@ namespace EE
     void ImageImporter::ImageResult::Populate( const UIntVector3& extents, EPixelFormat format, const void* data )
     {
         pixelMap_.SetData( extents.x, extents.y, extents.z, format, data );
+        isValid_ = true;
     }
 
     ImageImporter::Task::Task( const Options& options, FinishTaskFunction finishTaskFunction, FutureTask futureTask ) :

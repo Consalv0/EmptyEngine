@@ -48,7 +48,6 @@ namespace EE
         uint32 arraySize = 1;
         uint32 mipLevels = 1;
         EPixelFormat format = PixelFormat_Unknown;
-        EPixelFormat viewFormat = PixelFormat_Unknown;
         EColorSpace colorSpace = ColorSpace_Unknown;
         ETilingMode tiling = TilingMode_Default;
         uint32 sampleCount = 1;

@@ -1879,7 +1879,7 @@ namespace EE
             .flags = 0,
             .image = image,
             .viewType = ConvertTextureType( info.type ),
-            .format = ConvertPixelFormat( info.viewFormat == PixelFormat_Unknown ? info.format : info.viewFormat ),
+            .format = format_,
             .components = VkComponentMapping
             {
                 .r = VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -1969,7 +1969,7 @@ namespace EE
             .flags = 0,
             .image = image_,
             .viewType = ConvertTextureType( info.type ),
-            .format = ConvertPixelFormat( info.viewFormat == PixelFormat_Unknown ? info.format : info.viewFormat ),
+            .format = format_,
             .components = VkComponentMapping
             {
                 .r = VK_COMPONENT_SWIZZLE_IDENTITY,
