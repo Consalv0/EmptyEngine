@@ -284,6 +284,7 @@ namespace EE
     {
     public:
         uint64 minUniformBufferOffsetAlignment;
+        uint64 maxUniformBufferRange;
     };
 
     class RHIDevice : public RHIObject

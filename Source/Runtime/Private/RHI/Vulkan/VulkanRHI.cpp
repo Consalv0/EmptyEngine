@@ -88,6 +88,23 @@ namespace EE
         }
     }
 
+    static bool IsPixelFormatDepth( EPixelFormat format )
+    {
+        switch ( format )
+        {
+        case PixelFormat_D16_UNORM:
+        case PixelFormat_X8_D24_UNORM_PACK32:
+        case PixelFormat_D32_SFLOAT:
+        case PixelFormat_S8_UINT:
+        case PixelFormat_D16_UNORM_S8_UINT:
+        case PixelFormat_D24_UNORM_S8_UINT:
+        case PixelFormat_D32_SFLOAT_S8_UINT:
+            return true;
+        default:
+            return false;
+        }
+    }
+
     static VkFormat ConvertPixelFormat( EPixelFormat format )
     {
         switch ( format )
@@ -1258,6 +1275,7 @@ namespace EE
 
         auto properties = physicalDevice->GetProperties();
         deviceLimits.minUniformBufferOffsetAlignment = properties.limits.minUniformBufferOffsetAlignment;
+        deviceLimits.maxUniformBufferRange = properties.limits.maxUniformBufferRange;
 
         // Specifying the queues to be created
         QueueFamilyIndices indices = physicalDevice->GetQueueFamilies();
@@ -2642,6 +2660,7 @@ namespace EE
 
         uint32 attachmentSize = (uint32)info.attachments.size();
         TArray<VkAttachmentDescription> attachments( attachmentSize );
+        TArray<VkSubpassDependency> dependencies( attachmentSize );
         for ( uint32 i = 0; i < attachmentSize; i++ )
         {
             const RHIAttachmentDescription& attachment = info.attachments[ i ];
@@ -2658,18 +2677,34 @@ namespace EE
                 .initialLayout = ConvertTextureLayout( attachment.initialLayout ),
                 .finalLayout = ConvertTextureLayout( attachment.finalLayout )
             };
+
+            if ( IsPixelFormatDepth( attachment.format ) )
+            {
+                dependencies[ i ] = VkSubpassDependency
+                {
+                    .srcSubpass = VK_SUBPASS_EXTERNAL,
+                    .dstSubpass = 0,
+                    .srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+                    .dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+                    .srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+                    .dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT,
+                    .dependencyFlags = 0
+                };
+            }
+            else
+            {
+                dependencies[ i ] = VkSubpassDependency
+                {
+                    .srcSubpass = VK_SUBPASS_EXTERNAL,
+                    .dstSubpass = 0,
+                    .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                    .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                    .srcAccessMask = 0,
+                    .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT,
+                    .dependencyFlags = 0
+                };
+            }
         }
-        
-        VkSubpassDependency dependency
-        {
-            .srcSubpass = VK_SUBPASS_EXTERNAL,
-            .dstSubpass = 0,
-            .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-            .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-            .srcAccessMask = 0,
-            .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-            .dependencyFlags = 0
-        };
 
         VkRenderPassCreateInfo renderPassInfo
         {
@@ -2680,8 +2715,8 @@ namespace EE
             .pAttachments = attachments.data(),
             .subpassCount = subpassesSize,
             .pSubpasses = subpasses.data(),
-            .dependencyCount = 1,
-            .pDependencies = &dependency
+            .dependencyCount = attachmentSize,
+            .pDependencies = dependencies.data()
         };
 
         VkResult result = vkCreateRenderPass( device->GetVulkanDevice(), &renderPassInfo, NULL, &renderPass );
@@ -2827,8 +2862,8 @@ namespace EE
 
     VulkanRHIBindGroup::~VulkanRHIBindGroup()
     {
-        // vkFreeDescriptorSets( device->GetVulkanDevice(), pool, 1, &descriptorSet );
-        vkDestroyDescriptorPool( device->GetVulkanDevice(), pool, NULL );
+        // vkFreeDescriptorSets( device_->GetVulkanDevice(), pool_, 1, &descriptorSet );
+        vkDestroyDescriptorPool( device_->GetVulkanDevice(), pool_, NULL );
     }
 
     const void VulkanRHIBindGroup::CreateDescriptorPool( const RHIBindGroupCreateInfo& info )
@@ -2854,7 +2889,7 @@ namespace EE
             .pPoolSizes = poolSizes.data()
         };
 
-        VkResult result = vkCreateDescriptorPool( device->GetVulkanDevice(), &poolInfo, NULL, &pool );
+        VkResult result = vkCreateDescriptorPool( device_->GetVulkanDevice(), &poolInfo, NULL, &pool_ );
         if ( result != VK_SUCCESS )
         {
             EE_LOG_CRITICAL( L"Failed to create descriptor set pool {}", (int32)result );
@@ -2862,10 +2897,10 @@ namespace EE
     }
 
     VulkanRHIBindGroup::VulkanRHIBindGroup( const RHIBindGroupCreateInfo& info, VulkanRHIDevice* device )
-        : bindLayout( info, device )
-        , device( device )
-        , descriptorSet( VK_NULL_HANDLE )
-        , pool ( VK_NULL_HANDLE )
+        : bindLayout_( info, device )
+        , device_( device )
+        , descriptorSet_( VK_NULL_HANDLE )
+        , pool_( VK_NULL_HANDLE )
     {
         CreateDescriptorPool( info );
 
@@ -2873,12 +2908,12 @@ namespace EE
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
             .pNext = NULL,
-            .descriptorPool = pool,
+            .descriptorPool = pool_,
             .descriptorSetCount = 1,
-            .pSetLayouts = &bindLayout.GetVulkanDescriptorSetLayout()
+            .pSetLayouts = &bindLayout_.GetVulkanDescriptorSetLayout()
         };
 
-        VkResult allocateResult = vkAllocateDescriptorSets( device->GetVulkanDevice(), &allocInfo, &descriptorSet );
+        VkResult allocateResult = vkAllocateDescriptorSets( device->GetVulkanDevice(), &allocInfo, &descriptorSet_ );
         if ( allocateResult != VK_SUCCESS )
         {
             EE_LOG_CRITICAL( L"Failed to allocate descriptor set {}", (int32)allocateResult );
@@ -2926,7 +2961,7 @@ namespace EE
             {
                 .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
                 .pNext = NULL,
-                .dstSet = descriptorSet,
+                .dstSet = descriptorSet_,
                 .dstBinding = binding.index,
                 .dstArrayElement = 0,
                 .descriptorCount = 1,
@@ -2945,6 +2980,12 @@ namespace EE
             {
                 const VulkanRHIBuffer* vulkanBuffer = static_cast<const VulkanRHIBuffer*>(binding.resource);
 
+                if ( ( binding.type == BindingType_Uniform || binding.type == BindingType_UniformDynamic) 
+                    && ( binding.bufferRange > device->GetLimits().maxUniformBufferRange ) )
+                {
+                    EE_LOG_WARN( L"Uniform buffer binding has a range ({}), which is higher than the device limits ({}).",
+                        binding.bufferRange, device->GetLimits().maxUniformBufferRange );
+                }
                 VkDescriptorBufferInfo bufferInfo
                 {
                     .buffer = vulkanBuffer->GetVulkanBuffer(),
@@ -2995,12 +3036,12 @@ namespace EE
 
     bool VulkanRHIBindGroup::IsValid() const
     {
-        return descriptorSet != VK_NULL_HANDLE;
+        return descriptorSet_ != VK_NULL_HANDLE;
     }
 
     const RHIBindLayout& VulkanRHIBindGroup::GetBindLayout() const
     {
-        return bindLayout;
+        return bindLayout_;
     }
 
     VulkanRHIGraphicsPipeline::~VulkanRHIGraphicsPipeline()
@@ -3344,9 +3385,20 @@ namespace EE
             EE_LOG_CRITICAL( L"Failed to load SDL Vulkan Library! {}", Text::NarrowToWide( SDL_GetError() ) );
         }
 
+        uint32 layerCount;
+        vkEnumerateInstanceLayerProperties( &layerCount, nullptr );
+        TArray<VkLayerProperties> availableLayers( layerCount );
+        vkEnumerateInstanceLayerProperties( &layerCount, availableLayers.data() );
+
         TArray<const NChar*> layers;
 #if defined(EMPTYENGINE_CORE_LOG) && defined(EE_CORE_VULKAN_VALIDATION_LAYER)
-        layers.emplace_back( "VK_LAYER_KHRONOS_validation" );
+        for ( uint32 i = 0; i < layerCount; i++ )
+        {
+            if ( std::strcmp( availableLayers[ i ].layerName, "VK_LAYER_KHRONOS_validation" ) == 0 )
+            {
+                layers.emplace_back( availableLayers[ i ].layerName );
+            }
+        }
 #endif
 
         uint32 extensionCount;
@@ -3362,10 +3414,25 @@ namespace EE
         extensions.emplace_back( VK_EXT_DEBUG_UTILS_EXTENSION_NAME );
 #endif
 
+        VkValidationFeatureEnableEXT validationFeatureEnables[] =
+        {
+            VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT
+        };
+
+        VkValidationFeaturesEXT validationFeatures
+        {
+            .sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT,
+            .pNext = NULL,
+            .enabledValidationFeatureCount = EE_ARRAYSIZE( validationFeatureEnables ),
+            .pEnabledValidationFeatures = validationFeatureEnables,
+            .disabledValidationFeatureCount = 0,
+            .pDisabledValidationFeatures = NULL
+        };
+
         VkInstanceCreateInfo createInfo
         {
             .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-            .pNext = NULL,
+            .pNext = &validationFeatures,
             .flags = 0,
             .pApplicationInfo = &appInfo,
             .enabledLayerCount = (uint32)layers.size(),

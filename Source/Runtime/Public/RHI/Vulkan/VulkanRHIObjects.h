@@ -654,15 +654,6 @@ namespace EE
         EE_CLASSNOCOPY( VulkanRHIBindGroup )
 
     private:
-        VulkanRHIDevice* device;
-
-        VulkanRHIBindLayout bindLayout;
-
-        VkDescriptorSet descriptorSet;
-
-        VkDescriptorPool pool;
-
-    private:
         const void CreateDescriptorPool( const RHIBindGroupCreateInfo& info );
 
     public:
@@ -674,7 +665,13 @@ namespace EE
 
         const RHIBindLayout& GetBindLayout() const override;
 
-        FORCEINLINE const VkDescriptorSet& GetVulkanDescriptorSet() const { return descriptorSet; }
+        FORCEINLINE const VkDescriptorSet& GetVulkanDescriptorSet() const { return descriptorSet_; }
+
+    private:
+        VulkanRHIDevice* device_;
+        VulkanRHIBindLayout bindLayout_;
+        VkDescriptorSet descriptorSet_;
+        VkDescriptorPool pool_;
     };
 
     class VulkanRHIGraphicsPipeline : public RHIGraphicsPipeline

@@ -25,6 +25,13 @@ constexpr size_t kBufferBlockSize = 1u << 16u;
 bool EE::PNGImporter::LoadImage( ImageImporter::ImageResult& result, const ImageImporter::Options& options )
 {
 	result.Clear();
+
+	if ( GPixelFormatInfo[ options.format ].supported == false )
+	{
+		EE_LOG_ERROR( L"Error importing image, format not supported '{}'", (int32)options.format );
+		return false;
+	}
+
     Timestamp timer;
 
     timer.Begin();
@@ -56,7 +63,7 @@ bool EE::PNGImporter::LoadImage( ImageImporter::ImageResult& result, const Image
 	}
 
 	void* data = NULL;
-	if ( GPixelFormatInfo[ options.format ].format )
+	if ( GPixelFormatInfo[ options.format ].size <= 1 )
 		data = stbi_load_from_memory( static_cast<const stbi_uc*>( fileData ), (int)bytesRead, &width, &height, &comp, GPixelFormatInfo[options.format].channels );
 	else
 		data = stbi_loadf_from_memory( static_cast<const stbi_uc*>( fileData ), (int)bytesRead, &width, &height, &comp, GPixelFormatInfo[options.format].channels );
