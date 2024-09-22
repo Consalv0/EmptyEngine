@@ -51,7 +51,7 @@ namespace EE
 
         struct EventData
         {
-            Window* window;
+            Window* window = NULL;
             OnResizeEvent resizeEvent;
             OnModeChangedEvent modeChangedEvent;
         };
@@ -135,7 +135,6 @@ namespace EE
         EPresentMode presentMode_;
         float whiteLevel_;
         bool allowHDR_;
-        uint32 windowedWidth_, windowedHeight_;
         EventData eventData_;
     };
 

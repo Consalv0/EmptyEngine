@@ -172,8 +172,6 @@ namespace EE
         whiteLevel_ = parameters.whiteLevel;
         options_ = parameters.options;
         presentMode_ = parameters.presentMode;
-        windowedWidth_ = width_;
-        windowedHeight_ = height_;
     }
 
     Window::~Window()
@@ -261,12 +259,6 @@ namespace EE
     void Window::OnWindowModeChanged( const EWindowMode& mode )
     {
         mode_ = mode;
-        if ( mode != WindowMode_Windowed )
-            windowedWidth_ = width_; windowedHeight_ = height_;
-        if ( mode == WindowMode_Windowed )
-        {
-            // Resize( windowedWidth_, windowedHeight_ );
-        }
     }
 
     const WString& Window::GetName() const
