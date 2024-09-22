@@ -13,42 +13,31 @@ namespace EE
     enum EWindowMode
     {
         WindowMode_Windowed = 0,
-        WindowMode_FullScreen = 1
+        WindowMode_Fullscreen = 1,
+        WindowMode_Maximized = 2,
     };
 
-    enum EWindowOption
+    enum EWindowOptionFlags : uint32
     {
         WindowOption_None = 0,
-        WindowOption_Borderless = 1 << 0,
-        WindowOption_Resizable = 1 << 1,
-        WindowOption_AlwaysOnTop = 1 << 2,
-        WindowOption_SkipTaskbar = 1 << 3,
+        WindowOption_Borderless_Bit =  1 << 0,
+        WindowOption_Resizable_Bit =   1 << 1,
+        WindowOption_AlwaysOnTop_Bit = 1 << 2,
+        WindowOption_SkipTaskbar_Bit = 1 << 3,
     };
+    ENUM_FLAGS_OPERATORS( EWindowOptionFlags );
 
     struct WindowCreateDescription
     {
+        WString name = L"Empty Engine";
         //* Name displayed in header window
-        EWindowMode windowMode;
-        uint32 width;
-        uint32 height;
-        float whiteLevel;
-        bool allowHDR;
-        uint32 options;
-        WString name;
-        EPresentMode presentMode;
-
-        WindowCreateDescription(
-            const WString& title = L"Empty Engine",
-            uint32 width = -1,
-            uint32 height = -1,
-            EWindowMode mode = WindowMode_Windowed,
-            float whiteLevel = 200, 
-            bool allowHDR = false,
-            uint32 options = WindowOption_None,
-            EPresentMode presentMode = PresentMode_VSync
-        )
-            : name(title), width(width), height(height), windowMode(mode), whiteLevel(whiteLevel), allowHDR(allowHDR), options(options), presentMode(presentMode) {
-        }
+        EWindowMode windowMode = WindowMode_Windowed;
+        EPresentMode presentMode = PresentMode_VSync;
+        uint32 width = 0;
+        uint32 height = 0;
+        float whiteLevel = 200;
+        bool allowHDR = false;
+        EWindowOptionFlags options = WindowOption_Resizable_Bit;
     };
 
     typedef void* WindowHandleRef;
@@ -57,20 +46,14 @@ namespace EE
     class Window
     {
     public:
-        bool closeRequested;
+        typedef std::function<void( const uint32& width, const uint32& height )> OnResizeEvent;
+        typedef std::function<void( const EWindowMode& mode )> OnModeChangedEvent;
 
-    protected:
-        struct
+        struct EventData
         {
-            WString name;
-            EWindowMode mode;
-            WindowHandleRef windowHandle;
-            uint32 options;
-            int32 width;
-            int32 height;
-            EPresentMode presentMode;
-            float whiteLevel;
-            bool allowHDR;
+            Window* window;
+            OnResizeEvent resizeEvent;
+            OnModeChangedEvent modeChangedEvent;
         };
 
     public:
@@ -97,10 +80,10 @@ namespace EE
         virtual const WString& GetName() const;
 
         //* Get the width in pixels of the window
-        virtual const int32& GetWidth() const;
+        virtual const uint32& GetWidth() const;
 
         //* Get the height in pixels of the window
-        virtual const int32& GetHeight() const;
+        virtual const uint32& GetHeight() const;
 
         //* Get present mode
         virtual const EPresentMode& GetPresentMode() const;
@@ -112,9 +95,9 @@ namespace EE
         virtual const bool& GetAllowHDR() const;
 
         //* Get the size of the window in pixels
-        virtual void GetSize( int& width, int& height ) const;
+        virtual void GetSize( uint32& width, uint32& height ) const;
 
-        //* Get the viewportt of the window in pixels
+        //* Get the viewport of the window in pixels
         virtual void GetViewport( int& x, int& y, int& width, int& height ) const;
 
         //* Get the aspect of width divided by height in pixels of the window
@@ -131,7 +114,29 @@ namespace EE
 
         //* OS specific window handle
         //* Get SDL_Window Pointer
-        FORCEINLINE WindowHandleRef GetWindowHandle() const { return windowHandle; };
+        FORCEINLINE WindowHandleRef GetWindowHandle() const { return windowHandle_; };
+
+        FORCEINLINE bool IsResizable() const { return (options_ & WindowOption_Resizable_Bit) > 0; };
+
+    protected:
+        virtual void OnResize( const uint32& width, const uint32& height );
+
+        virtual void OnWindowModeChanged( const EWindowMode& mode );
+
+    public:
+        bool closeRequested;
+
+    protected:
+        WString name_;
+        EWindowMode mode_;
+        WindowHandleRef windowHandle_;
+        EWindowOptionFlags options_;
+        uint32 width_, height_;
+        EPresentMode presentMode_;
+        float whiteLevel_;
+        bool allowHDR_;
+        uint32 windowedWidth_, windowedHeight_;
+        EventData eventData_;
     };
 
     //* Creates a window

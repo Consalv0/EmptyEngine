@@ -2085,8 +2085,8 @@ namespace EE
 
         uint32 width = info.width;
         uint32 height = info.height;
-        width = EE_CLAMP( width, surfaceDetails.capabilities.minImageExtent.width, surfaceDetails.capabilities.maxImageExtent.width );
-        height = EE_CLAMP( height, surfaceDetails.capabilities.minImageExtent.height, surfaceDetails.capabilities.maxImageExtent.height );
+        // width = EE_CLAMP( width, surfaceDetails.capabilities.minImageExtent.width, surfaceDetails.capabilities.maxImageExtent.width );
+        // height = EE_CLAMP( height, surfaceDetails.capabilities.minImageExtent.height, surfaceDetails.capabilities.maxImageExtent.height );
         size.width = width;
         size.height = height;
 

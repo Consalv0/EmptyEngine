@@ -18,10 +18,10 @@ namespace EE
 {
     WindowsWindow::WindowsWindow( const WindowCreateDescription& description ) : Super::Window( description )
     {
-        if ( width < 0 )
-            width = GetSystemMetrics( SM_CXSCREEN );
-        if ( height < 0 )
-            height = GetSystemMetrics( SM_CYSCREEN );
+        if ( width_ < 0 )
+            width_ = GetSystemMetrics( SM_CXSCREEN );
+        if ( height_ < 0 )
+            height_ = GetSystemMetrics( SM_CYSCREEN );
     }
 
     WindowsWindow::~WindowsWindow()
@@ -37,7 +37,6 @@ namespace EE
 
         COLORREF colorKey = RGB( r, g, b );
         return SetLayeredWindowAttributes( hWnd, colorKey, a, LWA_ALPHA | LWA_COLORKEY );
-        return true;
     }
 
     Window* PlatformCreateWindow( const WindowCreateDescription& description )
