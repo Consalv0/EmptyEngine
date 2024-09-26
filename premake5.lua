@@ -43,6 +43,7 @@ project "EmptyEngine"
     }
 
     links {
+        "Dwmapi.lib",
         "spdlog",
         "VMA",
         "JoltPhysics",

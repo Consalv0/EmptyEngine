@@ -47,18 +47,6 @@ namespace EE
     public:
         EE_CLASSNOCOPY( VulkanRHIPhysicalDevice )
 
-    private:
-        VkInstance instance;
-        VkPhysicalDevice physicalDevice;
-        VkPhysicalDeviceProperties deviceProperties;
-        VkPhysicalDeviceFeatures deviceFeatures;
-        uint32 extensionCount;
-        TArray<VkExtensionProperties> extensions;
-        uint32 queueFamilyCount;
-        TArray<VkQueueFamilyProperties> queueFamilies;
-
-        TMap<VkSurfaceKHR, VulkanSurfaceSupportDetails> surfaceSupportDetails;
-
     public:
         VulkanRHIPhysicalDevice( VkInstance instance, VkPhysicalDevice physicalDevice );
 
@@ -74,19 +62,31 @@ namespace EE
 
         void AddSurfaceSupportDetails( VkSurfaceKHR surface, uint32 queueFamilyIndex );
 
-        FORCEINLINE const VkPhysicalDevice GetPhysicalDevice() const { return physicalDevice; }
+        FORCEINLINE const VkPhysicalDevice GetPhysicalDevice() const { return physicalDevice_; }
 
-        FORCEINLINE VkPhysicalDevice GetPhysicalDevice() { return physicalDevice; }
+        FORCEINLINE VkPhysicalDevice GetPhysicalDevice() { return physicalDevice_; }
 
         const VulkanSurfaceSupportDetails* GetSurfaceSupportDetails( VkSurfaceKHR surface ) const;
 
         void UpdateSurfaceSupportDetails( VkSurfaceKHR surface );
 
-        FORCEINLINE const VkPhysicalDeviceProperties& GetProperties() const { return deviceProperties; }
+        FORCEINLINE const VkPhysicalDeviceProperties& GetProperties() const { return deviceProperties_; }
 
-        FORCEINLINE const bool HasSurfaceAnyFormat( VkSurfaceKHR surface ) const { return surfaceSupportDetails.at( surface ).formatCount > 0; }
-        FORCEINLINE const VulkanSurfaceSupportDetails& GetSurfaceDetails( VkSurfaceKHR surface ) const { return surfaceSupportDetails.at( surface ); }
-        FORCEINLINE const bool HasSurfaceAnyPresentMode( VkSurfaceKHR surface ) const { return surfaceSupportDetails.at( surface ).presentModeCount > 0; }
+        FORCEINLINE const bool HasSurfaceAnyFormat( VkSurfaceKHR surface ) const { return surfaceSupportDetails_.at( surface ).formatCount > 0; }
+        FORCEINLINE const VulkanSurfaceSupportDetails& GetSurfaceDetails( VkSurfaceKHR surface ) const { return surfaceSupportDetails_.at( surface ); }
+        FORCEINLINE const bool HasSurfaceAnyPresentMode( VkSurfaceKHR surface ) const { return surfaceSupportDetails_.at( surface ).presentModeCount > 0; }
+
+    private:
+        VkInstance instance_;
+        VkPhysicalDevice physicalDevice_;
+        VkPhysicalDeviceProperties deviceProperties_;
+        VkPhysicalDeviceFeatures deviceFeatures_;
+        uint32 extensionCount_;
+        TArray<VkExtensionProperties> extensions_;
+        uint32 queueFamilyCount_;
+        TArray<VkQueueFamilyProperties> queueFamilies_;
+
+        TMap<VkSurfaceKHR, VulkanSurfaceSupportDetails> surfaceSupportDetails_;
     };
 
     class VulkanRHIInstance : RHIInstance

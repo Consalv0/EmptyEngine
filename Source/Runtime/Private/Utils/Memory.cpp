@@ -19,7 +19,7 @@ namespace EE::Memory
         void* p1; // original block
         void** p2; // aligned block
         int offset = alignment - 1 + sizeof( void* );
-        if ( (p1 = (void*)malloc( required_bytes + offset )) == NULL )
+        if ( (p1 = (void*)malloc( size + offset )) == NULL )
         {
             return NULL;
         }
@@ -37,7 +37,7 @@ namespace EE::Memory
 #elif ((defined(_POSIX_VERSION) && (_POSIX_VERSION >= 200112L)) || defined(__linux__) || defined(__APPLE__))
         ::free( data );
 #else
-        free( ((void**)p)[ -1 ] );
+        free( ((void**)pointer)[ -1 ] );
 #endif
     }
 }

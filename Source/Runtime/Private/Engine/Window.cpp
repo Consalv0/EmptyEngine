@@ -45,6 +45,13 @@ namespace EE
                 eventData->resizeEvent( w, h );
                 break;
             }
+            case SDL_EVENT_WINDOW_MOVED:
+            {
+                int x, y;
+                SDL_GetWindowPosition( (SDL_Window*)eventData->window->GetWindowHandle(), &x, &y );
+                eventData->positionChangeEvent( x, y );
+                break;
+            }
             case SDL_EVENT_WINDOW_MAXIMIZED:
             {
                 eventData->modeChangedEvent( WindowMode_Maximized );
@@ -69,10 +76,6 @@ namespace EE
                 break;
             }
             case SDL_EVENT_WINDOW_MOUSE_LEAVE:
-            {
-                break;
-            }
-            case SDL_EVENT_WINDOW_MOVED:
             {
                 break;
             }
@@ -124,7 +127,7 @@ namespace EE
         }
         if ( options_ & WindowOption_SkipTaskbar_Bit )
         {
-            windowFlags |= SDL_WINDOW_UTILITY | SDL_WINDOW_TRANSPARENT;
+            windowFlags |= SDL_WINDOW_UTILITY;
         }
         if ( mode_ == WindowMode_Fullscreen )
         {
@@ -134,6 +137,8 @@ namespace EE
         {
             windowFlags |= SDL_WINDOW_MAXIMIZED;
         }
+        if ( compositeAlpha_ )
+            windowFlags |= SDL_WINDOW_TRANSPARENT;
 
         if ( (windowHandle_ = SDL_CreateWindow(
             Text::WideToNarrow( name_ ).c_str(),
@@ -145,7 +150,12 @@ namespace EE
             return false;
         }
 
+        SDL_GetWindowPosition( (SDL_Window*)windowHandle_, &positionX_, &positionY_ );
+
         GDynamicRHI->CreateRHIPresentContextOfWindow( this );
+
+        if ( compositeAlpha_ )
+            compositeAlpha_ = MakeTransparent( true, 255 );
 
         SDL_SetWindowKeyboardGrab( (SDL_Window*)windowHandle_, SDL_bool( false ) );
 
@@ -153,10 +163,12 @@ namespace EE
         {
             .window = this,
             .resizeEvent = [this]( const uint32& width, const uint32& height ) constexpr { OnResize( width, height ); },
+            .positionChangeEvent = [this]( const int32& x, const int32& y ) constexpr { OnPositionChange( x, y ); },
             .modeChangedEvent = [this]( const EWindowMode& mode ) constexpr { OnWindowModeChanged( mode ); }
         };
 
         SDL_AddEventWatch( WindowEventsHandler, (void*)&eventData_ );
+
         return true;
     }
 
@@ -166,12 +178,15 @@ namespace EE
         windowHandle_ = NULL;
         width_ = parameters.width;
         height_ = parameters.height;
+        positionX_ = parameters.positionX;
+        positionY_ = parameters.positionY;
         name_ = parameters.name;
         mode_ = parameters.windowMode;
         allowHDR_ = parameters.allowHDR;
         whiteLevel_ = parameters.whiteLevel;
         options_ = parameters.options;
         presentMode_ = parameters.presentMode;
+        compositeAlpha_ = parameters.compositeAlpha;
     }
 
     Window::~Window()
@@ -184,6 +199,14 @@ namespace EE
         if ( this->width_ != width || this->height_ != height )
         {
             SDL_SetWindowSize( (SDL_Window*)(windowHandle_), width, height );
+        }
+    }
+
+    void Window::SetPosition( const int32& x, const int32& y )
+    {
+        if ( this->positionX_ != x || this->positionY_ != y )
+        {
+            SDL_SetWindowPosition( (SDL_Window*)(windowHandle_), x, y );
         }
     }
 
@@ -256,6 +279,11 @@ namespace EE
         width_ = width; height_ = height;
     }
 
+    void Window::OnPositionChange( const int32& x, const int32& y )
+    {
+        positionX_ = x; positionY_ = y;
+    }
+
     void Window::OnWindowModeChanged( const EWindowMode& mode )
     {
         mode_ = mode;
@@ -281,6 +309,16 @@ namespace EE
         return height_;
     }
 
+    const int32& Window::GetPositionX() const
+    {
+        return positionX_;
+    }
+
+    const int32& Window::GetPositionY() const
+    {
+        return positionY_;
+    }
+
     const EPresentMode& Window::GetPresentMode() const
     {
         return presentMode_;
@@ -291,12 +329,17 @@ namespace EE
         w = width_; h = height_;
     }
 
+    void Window::GetPosition( int32& x, int32& y ) const
+    {
+        x = width_; y = height_;
+    }
+
     void Window::GetViewport( int& x, int& y, int& w, int& h ) const
     {
         x = 0; y = 0; w = width_; h = height_;
     }
 
-    bool Window::MakeTransparent( const uint8& r, const uint8& g, const uint8& b, const uint8& a )
+    bool Window::MakeTransparent( bool enable, const uint8& a )
     {
         return false;
     }

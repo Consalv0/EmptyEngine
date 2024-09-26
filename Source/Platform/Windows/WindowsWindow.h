@@ -15,6 +15,6 @@ namespace EE
 
         ~WindowsWindow();
 
-        bool MakeTransparent( const uint8& r, const uint8& g, const uint8& b, const uint8& a );
+        bool MakeTransparent( bool enable, const uint8& a ) override;
     };
 }

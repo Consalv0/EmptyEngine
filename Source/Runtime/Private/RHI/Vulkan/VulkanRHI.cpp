@@ -991,21 +991,21 @@ namespace EE
     const float QueuePriorities[] = { 1.0F };
 
     VulkanRHIPhysicalDevice::VulkanRHIPhysicalDevice( VkInstance instance, VkPhysicalDevice physicalDevice ) :
-        instance( instance ),
-        physicalDevice( physicalDevice )
+        instance_( instance ),
+        physicalDevice_( physicalDevice )
     {
-        vkGetPhysicalDeviceProperties( physicalDevice, &deviceProperties );
-        vkGetPhysicalDeviceFeatures( physicalDevice, &deviceFeatures );
+        vkGetPhysicalDeviceProperties( physicalDevice_, &deviceProperties_ );
+        vkGetPhysicalDeviceFeatures( physicalDevice_, &deviceFeatures_ );
 
         // Logic to find queue family indices to populate struct with
-        vkGetPhysicalDeviceQueueFamilyProperties( physicalDevice, &queueFamilyCount, NULL );
-        queueFamilies.resize( queueFamilyCount );
-        vkGetPhysicalDeviceQueueFamilyProperties( physicalDevice, &queueFamilyCount, queueFamilies.data() );
+        vkGetPhysicalDeviceQueueFamilyProperties( physicalDevice_, &queueFamilyCount_, NULL );
+        queueFamilies_.resize( queueFamilyCount_ );
+        vkGetPhysicalDeviceQueueFamilyProperties( physicalDevice_, &queueFamilyCount_, queueFamilies_.data() );
 
         // Get extension support
-        vkEnumerateDeviceExtensionProperties( physicalDevice, NULL, &extensionCount, NULL );
-        extensions.resize( extensionCount );
-        vkEnumerateDeviceExtensionProperties( physicalDevice, NULL, &extensionCount, extensions.data() );
+        vkEnumerateDeviceExtensionProperties( physicalDevice_, NULL, &extensionCount_, NULL );
+        extensions_.resize( extensionCount_ );
+        vkEnumerateDeviceExtensionProperties( physicalDevice_, NULL, &extensionCount_, extensions_.data() );
     }
 
     VulkanRHIPhysicalDevice::~VulkanRHIPhysicalDevice()
@@ -1017,7 +1017,7 @@ namespace EE
     {
         std::set<std::string> requiredExtensions( DeviceExtensions.begin(), DeviceExtensions.end() );
 
-        for ( const auto& extension : extensions )
+        for ( const auto& extension : extensions_ )
         {
             requiredExtensions.erase( extension.extensionName );
         }
@@ -1030,7 +1030,7 @@ namespace EE
         QueueFamilyIndices indices;
 
         int i = 0;
-        for ( const auto& queueFamily : queueFamilies )
+        for ( const auto& queueFamily : queueFamilies_ )
         {
             if ( queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT )
             {
@@ -1060,7 +1060,7 @@ namespace EE
         bool extensionsSupported = CheckDeviceExtensionSupport();
 
         bool swapChainAdequate = false;
-        if ( auto search = surfaceSupportDetails.find( surface->GetVulkanSurface() ); search != surfaceSupportDetails.end() )
+        if ( auto search = surfaceSupportDetails_.find( surface->GetVulkanSurface() ); search != surfaceSupportDetails_.end() )
         {
             if ( search->second.supported )
             {
@@ -1076,16 +1076,16 @@ namespace EE
         int score = 0;
 
         // Discrete GPUs have a significant performance advantage
-        if ( deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU )
+        if ( deviceProperties_.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU )
         {
             score += 1000;
         }
 
         // Maximum possible size of textures affects graphics quality
-        score += deviceProperties.limits.maxImageDimension2D;
+        score += deviceProperties_.limits.maxImageDimension2D;
 
         // Application can't function without geometry shaders
-        if ( deviceFeatures.geometryShader == VK_FALSE )
+        if ( deviceFeatures_.geometryShader == VK_FALSE )
         {
             return 0;
         }
@@ -1097,7 +1097,7 @@ namespace EE
 
         EE_LOG_INFO(
             L"\u2570\u2500> {0} : {1}",
-            Text::NarrowToWide( deviceProperties.deviceName ),
+            Text::NarrowToWide( deviceProperties_.deviceName ),
             score
         );
 
@@ -1108,9 +1108,9 @@ namespace EE
     {
         VulkanSurfaceSupportDetails surfaceDetails;
 
-        vkGetPhysicalDeviceSurfaceSupportKHR( physicalDevice, queueFamilyIndex, surface, &surfaceDetails.supported );
+        vkGetPhysicalDeviceSurfaceSupportKHR( physicalDevice_, queueFamilyIndex, surface, &surfaceDetails.supported );
 
-        surfaceSupportDetails.insert( std::make_pair( surface, surfaceDetails ) );
+        surfaceSupportDetails_.insert( std::make_pair( surface, surfaceDetails ) );
 
         if ( surfaceDetails.supported == VK_FALSE )
         {
@@ -1122,29 +1122,29 @@ namespace EE
 
     void VulkanRHIPhysicalDevice::UpdateSurfaceSupportDetails( VkSurfaceKHR surface )
     {
-        if ( auto search = surfaceSupportDetails.find( surface ); search != surfaceSupportDetails.end() )
+        if ( auto search = surfaceSupportDetails_.find( surface ); search != surfaceSupportDetails_.end() )
         {
-            vkGetPhysicalDeviceSurfaceCapabilitiesKHR( physicalDevice, surface, &search->second.capabilities );
+            vkGetPhysicalDeviceSurfaceCapabilitiesKHR( physicalDevice_, surface, &search->second.capabilities );
 
-            vkGetPhysicalDeviceSurfaceFormatsKHR( physicalDevice, surface, &search->second.formatCount, VK_NULL_HANDLE );
+            vkGetPhysicalDeviceSurfaceFormatsKHR( physicalDevice_, surface, &search->second.formatCount, VK_NULL_HANDLE );
             if ( search->second.formatCount != 0 )
             {
                 search->second.formats.resize( search->second.formatCount );
-                vkGetPhysicalDeviceSurfaceFormatsKHR( physicalDevice, surface, &search->second.formatCount, search->second.formats.data() );
+                vkGetPhysicalDeviceSurfaceFormatsKHR( physicalDevice_, surface, &search->second.formatCount, search->second.formats.data() );
             }
 
-            vkGetPhysicalDeviceSurfacePresentModesKHR( physicalDevice, surface, &search->second.presentModeCount, VK_NULL_HANDLE );
+            vkGetPhysicalDeviceSurfacePresentModesKHR( physicalDevice_, surface, &search->second.presentModeCount, VK_NULL_HANDLE );
             if ( search->second.presentModeCount != 0 )
             {
                 search->second.presentModes.resize( search->second.presentModeCount );
-                vkGetPhysicalDeviceSurfacePresentModesKHR( physicalDevice, surface, &search->second.presentModeCount, search->second.presentModes.data() );
+                vkGetPhysicalDeviceSurfacePresentModesKHR( physicalDevice_, surface, &search->second.presentModeCount, search->second.presentModes.data() );
             }
         }
     };
 
     const VulkanSurfaceSupportDetails* VulkanRHIPhysicalDevice::GetSurfaceSupportDetails( VkSurfaceKHR surface ) const
     {
-        if ( auto search = surfaceSupportDetails.find( surface ); search != surfaceSupportDetails.end() )
+        if ( auto search = surfaceSupportDetails_.find( surface ); search != surfaceSupportDetails_.end() )
             return NULL;
         else
             return &search->second;
@@ -1313,7 +1313,8 @@ namespace EE
         VkPhysicalDeviceFeatures deviceFeatures
         {
             .geometryShader = VK_TRUE,
-            .samplerAnisotropy = VK_TRUE
+            .logicOp = VK_FALSE,
+            .samplerAnisotropy = VK_TRUE,
         };
 
         VkDeviceCreateInfo deviceCreateInfo
@@ -1546,6 +1547,7 @@ namespace EE
             .format = desiredFormat,
             .colorSpace = desiredColorSpace,
             .presentMode = window->GetPresentMode(),
+            .compositeAlpha = window->IsUsingCompositeAlpha(),
         };
 
         swapChain = new VulkanRHISwapChain( swapChainInfo, this, GVulkanDevice );
@@ -1583,6 +1585,7 @@ namespace EE
             .format = desiredFormat,
             .colorSpace = desiredColorSpace,
             .presentMode = window->GetPresentMode(),
+            .compositeAlpha = window->IsUsingCompositeAlpha(),
         };
 
         swapChain->CreateSwapChain( swapChainInfo );
@@ -2121,8 +2124,18 @@ namespace EE
             createInfo.pQueueFamilyIndices = device->GetFamilyIndices();
         }
 
+        VkCompositeAlphaFlagBitsKHR compositeAlpha = (info.compositeAlpha ? VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR : VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR);
+        if ( (surfaceDetails.capabilities.supportedCompositeAlpha & compositeAlpha) > 0 )
+        {
+            createInfo.compositeAlpha = compositeAlpha;
+        }
+        else
+        {
+            createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+            EE_LOG_ERROR( L"Falied to create surface with composite alpha, valid formats {}", (uint32)surfaceDetails.capabilities.supportedCompositeAlpha );
+        }
+
         createInfo.preTransform = surfaceDetails.capabilities.currentTransform;
-        createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
         createInfo.presentMode = ConvertPresentMode( info.presentMode );
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = VK_NULL_HANDLE;

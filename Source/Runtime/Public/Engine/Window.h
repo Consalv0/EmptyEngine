@@ -35,9 +35,12 @@ namespace EE
         EPresentMode presentMode = PresentMode_VSync;
         uint32 width = 0;
         uint32 height = 0;
+        int32 positionX = 0;
+        int32 positionY = 0;
         float whiteLevel = 200;
         bool allowHDR = false;
-        EWindowOptionFlags options = WindowOption_Resizable_Bit;
+        bool compositeAlpha = false;
+        EWindowOptionFlags options = WindowOption_None;
     };
 
     typedef void* WindowHandleRef;
@@ -47,12 +50,14 @@ namespace EE
     {
     public:
         typedef std::function<void( const uint32& width, const uint32& height )> OnResizeEvent;
+        typedef std::function<void( const int32& x, const int32& y )> OnPositionChangeEvent;
         typedef std::function<void( const EWindowMode& mode )> OnModeChangedEvent;
 
         struct EventData
         {
             Window* window = NULL;
             OnResizeEvent resizeEvent;
+            OnPositionChangeEvent positionChangeEvent;
             OnModeChangedEvent modeChangedEvent;
         };
 
@@ -70,6 +75,9 @@ namespace EE
         //* Resize the size of the window
         void Resize( const uint32& width, const uint32& height );
 
+        //* Set position of the window
+        void SetPosition( const int32& x, const int32& y );
+
         //* Rename the window title
         void SetName( const WString& newName );
 
@@ -85,6 +93,12 @@ namespace EE
         //* Get the height in pixels of the window
         virtual const uint32& GetHeight() const;
 
+        //* Get the X position of the window
+        virtual const int32& GetPositionX() const;
+
+        //* Get the Y position of the window
+        virtual const int32& GetPositionY() const;
+
         //* Get present mode
         virtual const EPresentMode& GetPresentMode() const;
 
@@ -97,6 +111,9 @@ namespace EE
         //* Get the size of the window in pixels
         virtual void GetSize( uint32& width, uint32& height ) const;
 
+        //* Get the position of the window
+        virtual void GetPosition( int32& x, int32& y ) const;
+
         //* Get the viewport of the window in pixels
         virtual void GetViewport( int& x, int& y, int& width, int& height ) const;
 
@@ -104,7 +121,7 @@ namespace EE
         virtual float GetAspectRatio() const;
 
         //* Makes a window transparent by setting a transparency color.
-        virtual bool MakeTransparent( const uint8& r, const uint8& g, const uint8& b, const uint8& a );
+        virtual bool MakeTransparent( bool enable, const uint8& a );
 
         //* Sets the window icon
         void SetIcon( class PixelMap* icon );
@@ -118,8 +135,11 @@ namespace EE
 
         FORCEINLINE bool IsResizable() const { return (options_ & WindowOption_Resizable_Bit) > 0; };
 
+        constexpr bool IsUsingCompositeAlpha() const { return compositeAlpha_; };
+
     protected:
         virtual void OnResize( const uint32& width, const uint32& height );
+        virtual void OnPositionChange( const int32& x, const int32& y );
 
         virtual void OnWindowModeChanged( const EWindowMode& mode );
 
@@ -132,10 +152,12 @@ namespace EE
         WindowHandleRef windowHandle_;
         EWindowOptionFlags options_;
         uint32 width_, height_;
+        int32 positionX_, positionY_;
         EPresentMode presentMode_;
         float whiteLevel_;
         bool allowHDR_;
         EventData eventData_;
+        bool compositeAlpha_;
     };
 
     //* Creates a window

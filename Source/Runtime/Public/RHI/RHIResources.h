@@ -120,6 +120,7 @@ namespace EE
         EPixelFormat format = PixelFormat_Unknown;
         EColorSpace colorSpace = ColorSpace_Unknown;
         EPresentMode presentMode = PresentMode_VSync;
+        bool compositeAlpha = false;
     };
 
     class RHISwapChain : public RHIResource
