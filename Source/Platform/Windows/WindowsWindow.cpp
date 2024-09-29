@@ -12,21 +12,13 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL.h>
+
 #include <dwmapi.h>
 
 namespace EE
 {
     WindowsWindow::WindowsWindow( const WindowCreateDescription& description ) : Super::Window( description )
     {
-        if ( width_ == 0 )
-            width_ = GetSystemMetrics( SM_CXSCREEN );
-        if ( height_ == 0 )
-            height_ = GetSystemMetrics( SM_CYSCREEN );
-
-        if ( mode_ == WindowMode_Windowed )
-        {
-            height_ -= 1;
-        }
     }
 
     WindowsWindow::~WindowsWindow()
@@ -34,8 +26,30 @@ namespace EE
         Super::~Window();
     }
 
-    void SetWindowMousePassthroughWin32( HWND hWnd, bool enabled )
+    bool WindowsWindow::SetOpacity( const uint8& opacity )
     {
+        HWND hWnd = (HWND)SDL_GetPointerProperty( SDL_GetWindowProperties( (SDL_Window*)GetWindowHandle() ), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL );
+        
+        LONG exStyle = GetWindowLongW( hWnd, GWL_EXSTYLE );
+        if ( exStyle & WS_EX_TRANSPARENT )
+        {
+            opacity_ = opacity;
+            exStyle |= WS_EX_LAYERED;
+            SetWindowLongW( hWnd, GWL_EXSTYLE, exStyle );
+            return SetLayeredWindowAttributes( hWnd, 0, opacity_, LWA_ALPHA );
+        }
+        else
+        {
+            opacity_ = 255;
+            exStyle &= ~WS_EX_LAYERED;
+            return SetWindowLongW( hWnd, GWL_EXSTYLE, exStyle );
+        }
+    }
+
+    bool WindowsWindow::SetPassthrough( bool enable )
+    {
+        HWND hWnd = (HWND)SDL_GetPointerProperty( SDL_GetWindowProperties( (SDL_Window*)GetWindowHandle() ), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL );
+
         COLORREF key = 0;
         BYTE alpha = 0;
         DWORD flags = 0;
@@ -44,7 +58,7 @@ namespace EE
         if ( exStyle & WS_EX_LAYERED )
             GetLayeredWindowAttributes( hWnd, &key, &alpha, &flags );
 
-        if ( enabled )
+        if ( enable )
             exStyle |= (WS_EX_TRANSPARENT | WS_EX_LAYERED);
         else
         {
@@ -58,43 +72,8 @@ namespace EE
             }
         }
 
-        SetWindowLongW( hWnd, GWL_EXSTYLE, exStyle );
-
-        if ( enabled )
-            SetLayeredWindowAttributes( hWnd, key, alpha, flags );
-    }
-    
-    void SetWindowOpacityWin32( HWND hWnd, uint8 opacity )
-    {
-        LONG exStyle = GetWindowLongW( hWnd, GWL_EXSTYLE );
-        if ( opacity < 255 || (exStyle & WS_EX_TRANSPARENT) )
-        {
-            MARGINS margins = { -1 };
-            DwmExtendFrameIntoClientArea( hWnd, &margins );
-
-            const BYTE alpha = (BYTE)(opacity);
-            exStyle |= WS_EX_LAYERED;
-            SetWindowLongW( hWnd, GWL_EXSTYLE, exStyle );
-            SetLayeredWindowAttributes( hWnd, 0, alpha, LWA_ALPHA );
-        }
-        else if ( exStyle & WS_EX_TRANSPARENT )
-        {
-            SetLayeredWindowAttributes( hWnd, 0, 0, 0 );
-        }
-        else
-        {
-            exStyle &= ~WS_EX_LAYERED;
-            SetWindowLongW( hWnd, GWL_EXSTYLE, exStyle );
-        }
-    }
-
-    bool WindowsWindow::MakeTransparent( bool enable, const uint8& a )
-    {
-        HWND hWnd = (HWND)SDL_GetPointerProperty( SDL_GetWindowProperties( (SDL_Window*)GetWindowHandle() ), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL );
-
-        SetWindowMousePassthroughWin32( hWnd, true );
-        SetWindowOpacityWin32( hWnd, a );
-        return true;
+        passthrough_ = enable;
+        return SetWindowLongW( hWnd, GWL_EXSTYLE, exStyle );
     }
 
     Window* PlatformCreateWindow( const WindowCreateDescription& description )

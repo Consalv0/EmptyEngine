@@ -105,6 +105,8 @@ namespace EE
         if ( windowHandle_ != NULL ) 
             return false;
 
+        SDL_PropertiesID windowProperties = SDL_CreateProperties();
+
         uint32 windowFlags = SDL_WINDOW_KEYBOARD_GRABBED;
         EDynamicRHI renderingInterface = EE::GDynamicRHI->GetType();
 
@@ -140,11 +142,15 @@ namespace EE
         if ( compositeAlpha_ )
             windowFlags |= SDL_WINDOW_TRANSPARENT;
 
-        if ( (windowHandle_ = SDL_CreateWindow(
-            Text::WideToNarrow( name_ ).c_str(),
-            width_, height_,
-            windowFlags
-        )) == NULL )
+        SDL_SetStringProperty( windowProperties, SDL_PROP_WINDOW_CREATE_TITLE_STRING, Text::WideToNarrow( name_ ).c_str() );
+        SDL_SetNumberProperty( windowProperties, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, width_ );
+        SDL_SetNumberProperty( windowProperties, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, height_ );
+        SDL_SetNumberProperty( windowProperties, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, windowFlags );
+        
+        windowHandle_ = SDL_CreateWindowWithProperties( windowProperties );
+        SDL_DestroyProperties( windowProperties );
+        
+        if ( windowHandle_ == NULL )
         {
             EE_LOG_CRITICAL( L"Window: \"{0}\" could not be initialized: {1}", name_, Text::NarrowToWide( SDL_GetError() ) );
             return false;
@@ -155,7 +161,7 @@ namespace EE
         GDynamicRHI->CreateRHIPresentContextOfWindow( this );
 
         if ( compositeAlpha_ )
-            compositeAlpha_ = MakeTransparent( true, 255 );
+            SetOpacity( opacity_ );
 
         SDL_SetWindowKeyboardGrab( (SDL_Window*)windowHandle_, SDL_bool( false ) );
 
@@ -187,6 +193,42 @@ namespace EE
         options_ = parameters.options;
         presentMode_ = parameters.presentMode;
         compositeAlpha_ = parameters.compositeAlpha;
+        opacity_ = 255;
+        passthrough_ = false;
+        
+        if ( (options_ & WindowOption_CustomPosition_Bit) == 0 )
+        {
+            positionX_ = SDL_WINDOWPOS_CENTERED;
+            positionY_ = SDL_WINDOWPOS_CENTERED;
+        }
+
+        int displayCount;
+        SDL_DisplayID* displays = SDL_GetDisplays( &displayCount );
+
+        // get display bounds for all displays
+        TMap<SDL_DisplayID, SDL_Rect> displayBounds;
+        for ( int i = 0; i < displayCount; i++ )
+        {
+            SDL_Rect rect;
+            SDL_GetDisplayUsableBounds( displays[ i ], &rect );
+            displayBounds.emplace( displays[ i ], rect );
+        }
+        SDL_free( displays );
+
+        SDL_DisplayID displayID = SDL_GetPrimaryDisplay();
+        if ( (SDL_WINDOWPOS_ISUNDEFINED( positionX_ ) || SDL_WINDOWPOS_ISCENTERED( positionX_ )) && (positionX_ & 0xFFFF) )
+        {
+            displayID = (positionX_ & 0xFFFF);
+        }
+        else if ( (SDL_WINDOWPOS_ISUNDEFINED( positionY_ ) || SDL_WINDOWPOS_ISCENTERED( positionY_ )) && (positionY_ & 0xFFFF) )
+        {
+            displayID = (positionY_ & 0xFFFF);
+        }
+
+        if ( width_ == 0 )
+            width_ = displayBounds[ displayID ].w;
+        if ( height_ == 0 )
+            height_ = displayBounds[ displayID ].h;
     }
 
     Window::~Window()
@@ -337,10 +379,5 @@ namespace EE
     void Window::GetViewport( int& x, int& y, int& w, int& h ) const
     {
         x = 0; y = 0; w = width_; h = height_;
-    }
-
-    bool Window::MakeTransparent( bool enable, const uint8& a )
-    {
-        return false;
     }
 }

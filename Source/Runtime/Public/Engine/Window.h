@@ -1,7 +1,5 @@
 #pragma once
 
-#include "CoreMinimal.h"
-
 #include "Events/WindowEvent.h"
 #include "Events/InputEvent.h"
 #include "Rendering/Common.h"
@@ -24,13 +22,13 @@ namespace EE
         WindowOption_Resizable_Bit =   1 << 1,
         WindowOption_AlwaysOnTop_Bit = 1 << 2,
         WindowOption_SkipTaskbar_Bit = 1 << 3,
+        WindowOption_CustomPosition_Bit = 1 << 4,
     };
     ENUM_FLAGS_OPERATORS( EWindowOptionFlags );
 
     struct WindowCreateDescription
     {
         WString name = L"Empty Engine";
-        //* Name displayed in header window
         EWindowMode windowMode = WindowMode_Windowed;
         EPresentMode presentMode = PresentMode_VSync;
         uint32 width = 0;
@@ -121,7 +119,10 @@ namespace EE
         virtual float GetAspectRatio() const;
 
         //* Makes a window transparent by setting a transparency color.
-        virtual bool MakeTransparent( bool enable, const uint8& a );
+        virtual bool SetOpacity( const uint8& opacity ) = 0;
+
+        //* Makes the window invisible to input events
+        virtual bool SetPassthrough( bool enable ) = 0;
 
         //* Sets the window icon
         void SetIcon( class PixelMap* icon );
@@ -131,11 +132,15 @@ namespace EE
 
         //* OS specific window handle
         //* Get SDL_Window Pointer
-        FORCEINLINE WindowHandleRef GetWindowHandle() const { return windowHandle_; };
+        FORCEINLINE WindowHandleRef GetWindowHandle() const { return windowHandle_; }
 
-        FORCEINLINE bool IsResizable() const { return (options_ & WindowOption_Resizable_Bit) > 0; };
+        FORCEINLINE bool IsResizable() const { return (options_ & WindowOption_Resizable_Bit) > 0; }
 
-        constexpr bool IsUsingCompositeAlpha() const { return compositeAlpha_; };
+        constexpr bool IsUsingCompositeAlpha() const { return compositeAlpha_; }
+
+        constexpr bool GetOpacity() const { return opacity_; }
+
+        constexpr bool IsPassthrough() const { return passthrough_; }
 
     protected:
         virtual void OnResize( const uint32& width, const uint32& height );
@@ -158,6 +163,8 @@ namespace EE
         bool allowHDR_;
         EventData eventData_;
         bool compositeAlpha_;
+        uint8 opacity_;
+        bool passthrough_;
     };
 
     //* Creates a window

@@ -13,7 +13,7 @@ namespace EE
         // Returns the battery life, -1 if no information
         virtual float GetBatteryStatus() = 0;
 
-        virtual float GetDeviceTemperature( const int& DeviceIndex ) = 0;
+        virtual float GetDeviceTemperature( const int& deviceIndex ) = 0;
     };
 
     extern PlatformDevice* GPlatformDevice;

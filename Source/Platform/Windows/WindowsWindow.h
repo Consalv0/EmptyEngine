@@ -15,6 +15,8 @@ namespace EE
 
         ~WindowsWindow();
 
-        bool MakeTransparent( bool enable, const uint8& a ) override;
+        bool SetOpacity( const uint8& opacity ) override;
+
+        bool SetPassthrough( bool enable ) override;
     };
 }

@@ -15,6 +15,6 @@ namespace EE
 
         virtual float GetBatteryStatus();
 
-        virtual float GetDeviceTemperature( const int& DeviceIndex );
+        virtual float GetDeviceTemperature( const int& deviceIndex );
     };
 }
