@@ -36,6 +36,8 @@ namespace EE
 
         void DeleteWindow( Window* window );
 
+        void ShowConsole( bool show );
+
         //* Get the total count of frames rendered
         FORCEINLINE uint64 GetFrameCount() const { return frameCount; };
 

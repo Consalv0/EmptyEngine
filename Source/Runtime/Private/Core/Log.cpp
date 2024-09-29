@@ -19,4 +19,12 @@ namespace EE
         GClientLogger = spdlog::stdout_color_mt( "~" );
         GClientLogger->set_level( spdlog::level::trace );
     }
+
+    void Log::Shotdown()
+    {
+        spdlog::drop( GCoreLogger->name() );
+        GCoreLogger.reset();
+        spdlog::drop( GClientLogger->name() );
+        GClientLogger.reset();
+    }
 }

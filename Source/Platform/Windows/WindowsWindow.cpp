@@ -30,19 +30,19 @@ namespace EE
     {
         HWND hWnd = (HWND)SDL_GetPointerProperty( SDL_GetWindowProperties( (SDL_Window*)GetWindowHandle() ), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL );
         
-        LONG exStyle = GetWindowLongW( hWnd, GWL_EXSTYLE );
+        LONG exStyle = GetWindowLong( hWnd, GWL_EXSTYLE );
         if ( exStyle & WS_EX_TRANSPARENT )
         {
             opacity_ = opacity;
             exStyle |= WS_EX_LAYERED;
-            SetWindowLongW( hWnd, GWL_EXSTYLE, exStyle );
+            SetWindowLong( hWnd, GWL_EXSTYLE, exStyle );
             return SetLayeredWindowAttributes( hWnd, 0, opacity_, LWA_ALPHA );
         }
         else
         {
             opacity_ = 255;
             exStyle &= ~WS_EX_LAYERED;
-            return SetWindowLongW( hWnd, GWL_EXSTYLE, exStyle );
+            return SetWindowLong( hWnd, GWL_EXSTYLE, exStyle );
         }
     }
 
@@ -53,7 +53,7 @@ namespace EE
         COLORREF key = 0;
         BYTE alpha = 0;
         DWORD flags = 0;
-        DWORD exStyle = GetWindowLongW( hWnd, GWL_EXSTYLE );
+        DWORD exStyle = GetWindowLong( hWnd, GWL_EXSTYLE );
 
         if ( exStyle & WS_EX_LAYERED )
             GetLayeredWindowAttributes( hWnd, &key, &alpha, &flags );
@@ -73,7 +73,7 @@ namespace EE
         }
 
         passthrough_ = enable;
-        return SetWindowLongW( hWnd, GWL_EXSTYLE, exStyle );
+        return SetWindowLong( hWnd, GWL_EXSTYLE, exStyle );
     }
 
     Window* PlatformCreateWindow( const WindowCreateDescription& description )
