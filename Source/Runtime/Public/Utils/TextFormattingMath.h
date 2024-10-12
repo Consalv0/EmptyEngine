@@ -7,6 +7,10 @@ namespace EE
 {
     namespace Text
     {
+        float ParseFloat( std::string_view* text );
+        
+        int32 ParseInt( std::string_view* text );
+
         inline WString FormatMath( const UIntVector2& value )
         {
             return Formatted( L"{%u, %u}", value.x, value.y );

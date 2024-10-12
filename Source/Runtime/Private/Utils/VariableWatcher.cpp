@@ -39,6 +39,8 @@ namespace EE
     {
         switch ( type_ )
         {
+          case DebugVariableWatcher::VariableType_NString     : return &static_cast<VariableWatcher_T<     NString>*>(variableWatcher_)->value;
+          case DebugVariableWatcher::VariableType_WString     : return &static_cast<VariableWatcher_T<     WString>*>(variableWatcher_)->value;
           case DebugVariableWatcher::VariableType_Float       : return &static_cast<VariableWatcher_T<       float>*>(variableWatcher_)->value;
           case DebugVariableWatcher::VariableType_Double      : return &static_cast<VariableWatcher_T<      double>*>(variableWatcher_)->value;
           case DebugVariableWatcher::VariableType_Int8        : return &static_cast<VariableWatcher_T<        int8>*>(variableWatcher_)->value;
@@ -116,6 +118,8 @@ namespace EE
     {
         switch ( type_ )
         {
+          case DebugVariableWatcher::VariableType_NString     : delete static_cast<VariableWatcher_T<     NString>*>(variableWatcher_); break;
+          case DebugVariableWatcher::VariableType_WString     : delete static_cast<VariableWatcher_T<     WString>*>(variableWatcher_); break;
           case DebugVariableWatcher::VariableType_Float       : delete static_cast<VariableWatcher_T<       float>*>(variableWatcher_); break;
           case DebugVariableWatcher::VariableType_Double      : delete static_cast<VariableWatcher_T<      double>*>(variableWatcher_); break;
           case DebugVariableWatcher::VariableType_Int8        : delete static_cast<VariableWatcher_T<        int8>*>(variableWatcher_); break;
@@ -153,8 +157,36 @@ namespace EE
             T& f = *static_cast<T*>(GVariables[ hash ].GetVariable());
             if ( f != x )
             {
+                DebugVariableWatcher::VariableWatcher& variableWatcher = GVariables[ hash ].GetWatcher();
+                variableWatcher.lastChangeTime = Ticker::GetEpochTimeNow<Ticker::Nano>();
                 f = x;
-                GVariables[ hash ].GetWatcher().lastChangeTime = Ticker::GetEpochTimeNow<Ticker::Nano>();
+            }
+        }
+        else
+        {
+            GVariables.emplace(
+                std::piecewise_construct,
+                std::forward_as_tuple( hash ),
+                std::forward_as_tuple( DebugVariableWatcher::VariableType<T>::type,
+                    new VariableWatcher_T<T>( watcher.value, watcher.name, watcher.line, watcher.file, watcher.function, Ticker::GetEpochTimeNow<Ticker::Nano>() ) )
+            );
+        }
+    }
+
+    template<typename T>
+    void WatchImplementation_Vector( const T& x, const char* name, size_t line, const char* file, const char* function )
+    {
+        auto watcher = VariableWatcher_T<T>( x, name, line, file, function, 0 );
+        size_t hash = 0;
+        EE::HashCombine( &hash, watcher );
+        if ( GVariables.contains( hash ) )
+        {
+            T& f = *static_cast<T*>(GVariables[ hash ].GetVariable());
+            if ( f != x )
+            {
+                DebugVariableWatcher::VariableWatcher& variableWatcher = GVariables[ hash ].GetWatcher();
+                variableWatcher.lastChangeTime = Ticker::GetEpochTimeNow<Ticker::Nano>();
+                f = x;
             }
         }
         else
@@ -188,24 +220,30 @@ namespace EE
                                     void EE::DebugVariableWatcher::Watch( const x& val, const char* name, size_t line, const char* file, const char* function ) { \
                                         EE::WatchImplementation( val, name, line, file, function ); }
 
-EE_IMPLEMENT_WATCHER(  float )
-EE_IMPLEMENT_WATCHER( double )
-EE_IMPLEMENT_WATCHER(   int8 )
-EE_IMPLEMENT_WATCHER(  uint8 )
-EE_IMPLEMENT_WATCHER(  int16 )
-EE_IMPLEMENT_WATCHER( uint16 )
-EE_IMPLEMENT_WATCHER(  int32 )
-EE_IMPLEMENT_WATCHER( uint32 )
-EE_IMPLEMENT_WATCHER(  int64 )
-EE_IMPLEMENT_WATCHER( uint64 )
-EE_IMPLEMENT_WATCHER( EE::   Vector2f )
-EE_IMPLEMENT_WATCHER( EE::   Vector3f )
-EE_IMPLEMENT_WATCHER( EE::   Vector4f )
-EE_IMPLEMENT_WATCHER( EE::    Vector2 )
-EE_IMPLEMENT_WATCHER( EE::    Vector3 )
-EE_IMPLEMENT_WATCHER( EE::    Vector4 )
-EE_IMPLEMENT_WATCHER( EE:: IntVector2 )
-EE_IMPLEMENT_WATCHER( EE:: IntVector3 )
-EE_IMPLEMENT_WATCHER( EE:: IntVector4 )
-EE_IMPLEMENT_WATCHER( EE::UIntVector2 )
-EE_IMPLEMENT_WATCHER( EE::UIntVector3 )
+#define EE_IMPLEMENT_VECTOR_WATCHER( x )   EE_MAKE_HASHABLE( EE::VariableWatcher_T<x>, t.line, t.file, t.function ); \
+                                    void EE::DebugVariableWatcher::Watch( const x& val, const char* name, size_t line, const char* file, const char* function ) { \
+                                        EE::WatchImplementation_Vector( val, name, line, file, function ); }
+
+EE_IMPLEMENT_WATCHER( NString )
+EE_IMPLEMENT_WATCHER( WString )
+EE_IMPLEMENT_WATCHER(   float )
+EE_IMPLEMENT_WATCHER(  double )
+EE_IMPLEMENT_WATCHER(    int8 )
+EE_IMPLEMENT_WATCHER(   uint8 )
+EE_IMPLEMENT_WATCHER(   int16 )
+EE_IMPLEMENT_WATCHER(  uint16 )
+EE_IMPLEMENT_WATCHER(   int32 )
+EE_IMPLEMENT_WATCHER(  uint32 )
+EE_IMPLEMENT_WATCHER(   int64 )
+EE_IMPLEMENT_WATCHER(  uint64 )
+EE_IMPLEMENT_VECTOR_WATCHER( EE::   Vector2f )
+EE_IMPLEMENT_VECTOR_WATCHER( EE::   Vector3f )
+EE_IMPLEMENT_VECTOR_WATCHER( EE::   Vector4f )
+EE_IMPLEMENT_VECTOR_WATCHER( EE::    Vector2 )
+EE_IMPLEMENT_VECTOR_WATCHER( EE::    Vector3 )
+EE_IMPLEMENT_VECTOR_WATCHER( EE::    Vector4 )
+EE_IMPLEMENT_VECTOR_WATCHER( EE:: IntVector2 )
+EE_IMPLEMENT_VECTOR_WATCHER( EE:: IntVector3 )
+EE_IMPLEMENT_VECTOR_WATCHER( EE:: IntVector4 )
+EE_IMPLEMENT_VECTOR_WATCHER( EE::UIntVector2 )
+EE_IMPLEMENT_VECTOR_WATCHER( EE::UIntVector3 )
