@@ -20,7 +20,7 @@ namespace EE
 
         public:
             size_t line;
-            const NChar* name;
+            const char* name;
             const NChar* file;
             const NChar* function;
             uint64 lastChangeTime;
@@ -115,7 +115,6 @@ namespace EE
             const NChar* GeFile() const;
             const NChar* GetFunction() const;
             const uint64& GetLastTimeChanged() const;
-            const bool& PositiveChange() const;
 
             const VariableWatcher& GetWatcher() const;
             VariableWatcher& GetWatcher();

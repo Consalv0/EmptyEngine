@@ -18,7 +18,7 @@
 
 namespace EE
 {
-    SDL_bool WindowEventsHandler( void* userData, SDL_Event* sdlEvent )
+    bool WindowEventsHandler( void* userData, SDL_Event* sdlEvent )
     {
         Window::EventData* eventData = static_cast<Window::EventData*>( userData );
 
@@ -163,7 +163,7 @@ namespace EE
         if ( compositeAlpha_ )
             SetOpacity( opacity_ );
 
-        SDL_SetWindowKeyboardGrab( (SDL_Window*)windowHandle_, SDL_bool( false ) );
+        SDL_SetWindowKeyboardGrab( (SDL_Window*)windowHandle_, false );
 
         eventData_ = Window::EventData
         {

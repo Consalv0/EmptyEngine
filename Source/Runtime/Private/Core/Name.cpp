@@ -31,8 +31,8 @@ namespace EE
         }
     }
 
-	Name::Name( const WChar * text )
-		: id( WStringToHash( text ) )
+	Name::Name( const WChar* text )
+		: id( ConstWStringToHash( text ) )
 		, number()
 	{
 		if ( GWideNamesTable.try_emplace(id, text).second )
@@ -69,10 +69,15 @@ namespace EE
 			number = ++GNameCountTable[ id ];
 		}
 	}
-
+	
 	Name::Name( const WString& text, size_t number )
 		: id ( WStringToHash( text ) )
 		, number( number )
+	{
+	}
+
+	Name::Name( const NChar* text, size_t number )
+		: Name( Text::NarrowToWide( text ), number )
 	{
 	}
 
@@ -90,7 +95,7 @@ namespace EE
 
 	WString Name::GetInstanceName() const
 	{
-		return GWideNamesTable[ id ] + L"_" + Text::ToWide(  number);
+		return GWideNamesTable[ id ] + L"_" + Text::ToWide( number );
 	}
 
 	NString Name::GetNarrowInstanceName() const

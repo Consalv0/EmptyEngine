@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Events/WindowEvent.h"
-#include "Events/InputEvent.h"
 #include "Rendering/Common.h"
 
 union WindowEventData;

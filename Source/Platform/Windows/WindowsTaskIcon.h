@@ -29,7 +29,6 @@ namespace EE
         WindowsTaskIcon( const TaskIconCreateInfo& createInfo );
 
         ~WindowsTaskIcon() override;
-
         //* Rename the icon name
         void SetName( const WString& newName ) override;
 

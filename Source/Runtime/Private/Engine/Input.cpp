@@ -6,6 +6,8 @@
 #include "Engine/Ticker.h"
 #include "Engine/Input.h"
 
+#include <Utils/VariableWatcher.h>
+
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL.h>
 
@@ -13,15 +15,15 @@ namespace EE
 {
     JoystickState GJoystickDeviceStates[ EE_MAX_GAMEPAD_COUNT ];
 
-    GamepadButtonState GGamepadButtonStates[ EE_MAX_GAMEPAD_COUNT ][ EGamepadButton::Gamepad_Button_MAX ];
+    GamepadButtonState GGamepadButtonStates[ EE_MAX_GAMEPAD_COUNT ][ EGamepadButton::GamepadButton_NUM ];
 
-    ScancodeState GScancodeStates[ EScancode::Scancode_NUM ];
+    KeyboardKeyState GKeyboardKeyStates[ EKeyboardKey::KeyboardKey_NUM ];
 
-    MouseButtonState GMouseButtonStates[ EMouseButton::Mouse_Button_NUM ];
+    MouseButtonState GMouseButtonStates[ EMouseButton::MouseButton_NUM ];
 
     float GMousePositionX, GMousePositionY, GRelativeMousePositionX, GRelativeMousePositionY;
 
-    SDL_bool InputEventsHandler_Internal( void* userData, SDL_Event* sdlEvent );
+    bool InputEventsHandler_Internal( void* userData, SDL_Event* sdlEvent );
 
     bool Input::Initialize()
     {
@@ -30,11 +32,11 @@ namespace EE
         return true;
     }
 
-    bool Input::IsKeyState( EScancode keyCode, EButtonStateFlags state, uint64 frame )
+    bool Input::IsKeyState( EKeyboardKey keyCode, EButtonStateFlags state, uint64 frame )
     {
-        if ( frame != UINT64_MAX && frame != GScancodeStates[ keyCode ].frameDown )
+        if ( frame != UINT64_MAX && frame != GKeyboardKeyStates[ keyCode ].frameDown )
             return false;
-        return GScancodeStates[ keyCode ].state & state;
+        return GKeyboardKeyStates[ keyCode ].state & state;
     }
 
     bool Input::IsMouseState( EMouseButton button, EButtonStateFlags state, uint64 frame )
@@ -143,29 +145,22 @@ namespace EE
     {
         UpdateMouseState(); 
         
-        for ( int i = 0; i < Scancode_NUM; i++ )
+        for ( int i = 0; i < KeyboardKey_NUM; i++ )
         {
-            if ( GScancodeStates[ i ].state & ButtonState_Typed )
+            if ( GKeyboardKeyStates[ i ].state & ButtonState_Typed )
             {
-                GScancodeStates[ i ].state &= ~ButtonState_Typed;
+                GKeyboardKeyStates[ i ].state &= ~ButtonState_Typed;
             }
         }
     }
 
-    void Input::InputEventsHandler( const InputEvent& inputEvent )
-    {
-    }
-
-    SDL_bool InputEventsHandler_Internal( void* userData, SDL_Event* sdlEvent )
+    bool InputEventsHandler_Internal( void* userData, SDL_Event* sdlEvent )
     {
         Input& input = *(Input*)userData; 
 
-        auto& keyState = GScancodeStates[ (EScancode)sdlEvent->key.scancode ];
+        auto& keyState = GKeyboardKeyStates[ (EKeyboardKey)sdlEvent->key.scancode ];
         auto& mouseState = GMouseButtonStates[ (EMouseButton)sdlEvent->button.button ];
-        static int32 mouseButtonPressedCount[ 255 ] = {
-            (int32)-1, (int32)-1, (int32)-1, (int32)-1, (int32)-1,
-            (int32)-1, (int32)-1, (int32)-1, (int32)-1, (int32)-1
-        };
+        static int32 mouseButtonPressedCount[ 255 ] {};
 
         switch ( sdlEvent->type )
         {
@@ -273,11 +268,6 @@ namespace EE
 
                 EE_LOG_INFO( L"Device {} Closed", joystickState->name.GetInstanceName() );
 
-                JoystickConnectionEvent inEvent(
-                    joystickState->instanceID, 0
-                );
-                input.InputEventsHandler( inEvent );
-
                 SDL_CloseHaptic( (SDL_Haptic*)joystickState->hapticDevice );
                 SDL_CloseJoystick( joystick );
             }
@@ -307,11 +297,6 @@ namespace EE
                 auto& joyButtonState = GGamepadButtonStates[ index ][ (EGamepadButton)sdlEvent->jbutton.button ];
                 joyButtonState.state = ButtonState_Up;
                 joyButtonState.frameDown = GEngine->GetFrameCount();
-
-                JoystickButtonReleaseEvent inEvent(
-                    joystickState->instanceID, (EGamepadButton)sdlEvent->gbutton.button
-                );
-                input.InputEventsHandler( inEvent );
             }
             break;
         }
@@ -346,13 +331,8 @@ namespace EE
                 joyButtonState.state = ButtonState_Down;
                 joyButtonState.frameDown = GEngine->GetFrameCount();
 
+                EE_WATCH( sdlEvent->gbutton.button );
                 EE_LOG_INFO( "{} Button pressed {}", sdlEvent->gbutton.which, sdlEvent->gbutton.button );
-
-                JoystickButtonPressedEvent inEvent
-                (
-                    joystickState->instanceID, (EGamepadButton)sdlEvent->gbutton.button
-                );
-                input.InputEventsHandler( inEvent );
             }
             break;
         }
@@ -365,7 +345,7 @@ namespace EE
             if ( SDL_JoystickConnected( joystick ) )
             {
                 JoystickState* joystickState = NULL;
-                Name deviceName = Name( Text::NarrowToWide( SDL_GetJoystickName( joystick ) ), sdlEvent->jdevice.which );
+                Name deviceName = Name( SDL_GetJoystickName( joystick ), sdlEvent->jdevice.which );
                 for ( int i = 0; i < EE_MAX_GAMEPAD_COUNT; i++ )
                 {
                     if ( GJoystickDeviceStates[ i ].name.GetID() == deviceName.GetID() )
@@ -376,10 +356,9 @@ namespace EE
                 }
                 if ( joystickState == NULL ) break;
 
-                JoystickAxisEvent inEvent(
-                    joystickState->instanceID, (EGamepadAxis)sdlEvent->gaxis.axis, sdlEvent->gaxis.value / 32768.F
-                );
-                input.InputEventsHandler( inEvent );
+                // NChar* s = new NChar[]{ SDL_GetJoystickName( joystick ) };
+                // s[std::strlen( s ) - 1] = ('0' + sdlEvent->gaxis.axis);
+                EE_WATCH( sdlEvent->gaxis.value / 32768.F );
             }
             break;
         }
@@ -396,16 +375,6 @@ namespace EE
                 keyState.state |= ButtonState_Typed;
             }
             keyState.repetitions = sdlEvent->key.repeat;
-
-            KeyPressedEvent inEvent(
-                sdlEvent->key.scancode,
-                (SDL_GetModState() & SDL_KMOD_SHIFT) != 0,
-                (SDL_GetModState() & SDL_KMOD_CTRL) != 0,
-                (SDL_GetModState() & SDL_KMOD_ALT) != 0,
-                (SDL_GetModState() & SDL_KMOD_GUI) != 0,
-                sdlEvent->key.repeat
-            );
-            input.InputEventsHandler( inEvent );
             break;
         }
 
@@ -414,22 +383,11 @@ namespace EE
             keyState.state = ButtonState_Up;
             keyState.frameDown = GEngine->GetFrameCount();
             keyState.repetitions = 0;
-
-            KeyReleasedEvent inEvent(
-                sdlEvent->key.scancode,
-                (SDL_GetModState() & SDL_KMOD_SHIFT) != 0,
-                (SDL_GetModState() & SDL_KMOD_CTRL) != 0,
-                (SDL_GetModState() & SDL_KMOD_ALT) != 0,
-                (SDL_GetModState() & SDL_KMOD_GUI) != 0
-            );
-            input.InputEventsHandler( inEvent );
             break;
         }
 
         case SDL_EVENT_TEXT_INPUT:
         {
-            KeyTypedEvent inEvent( sdlEvent->text.text );
-            input.InputEventsHandler( inEvent );
             break;
         }
 
@@ -439,9 +397,9 @@ namespace EE
             mouseState.frameDown = GEngine->GetFrameCount();
             mouseState.clicks = sdlEvent->button.clicks;
 
+            EE_WATCH( mouseState.frameDown );
+
             mouseButtonPressedCount[ sdlEvent->button.button ]++;
-            MouseButtonPressedEvent inEvent( sdlEvent->button.button, sdlEvent->button.clicks == 2, mouseButtonPressedCount[ sdlEvent->button.button ] );
-            input.InputEventsHandler( inEvent );
             break;
         }
 
@@ -452,26 +410,16 @@ namespace EE
             mouseState.clicks = 0;
 
             mouseButtonPressedCount[ sdlEvent->button.button ] = -1;
-            MouseButtonReleasedEvent inEvent( sdlEvent->button.button );
-            input.InputEventsHandler( inEvent );
             break;
         }
 
         case SDL_EVENT_MOUSE_MOTION:
         {
-            MouseMovedEvent inEvent( (float)sdlEvent->motion.x, (float)sdlEvent->motion.y, (float)sdlEvent->motion.xrel, (float)sdlEvent->motion.yrel );
-            input.InputEventsHandler( inEvent );
             break;
         }
 
         case SDL_EVENT_MOUSE_WHEEL:
         {
-            MouseScrolledEvent inEvent
-            (
-                (float)sdlEvent->wheel.x, (float)sdlEvent->wheel.y,
-                sdlEvent->wheel.direction == SDL_MOUSEWHEEL_FLIPPED
-            );
-            input.InputEventsHandler( inEvent );
             break;
         }
         }
@@ -486,11 +434,11 @@ namespace EE
 
         for ( int i = 0; i < count; i++ )
         {
-            bool isGamePad = SDL_IsGamepad( i );
+            bool isGamePad = SDL_IsGamepad( ids[ i ] );
             if ( isGamePad == false )
                 continue;
 
-            SDL_Gamepad* gamepad = SDL_OpenGamepad( i );
+            SDL_Gamepad* gamepad = SDL_OpenGamepad( ids[ i ] );
             SDL_Joystick* joystick = SDL_GetGamepadJoystick( gamepad );
 
             Name deviceName = Name( Text::NarrowToWide( SDL_GetJoystickName( SDL_GetGamepadJoystick( gamepad ) ) ), ids[ i ] );

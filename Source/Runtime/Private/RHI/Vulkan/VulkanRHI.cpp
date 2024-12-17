@@ -1529,7 +1529,7 @@ namespace EE
         SDL_PropertiesID displayProperties = SDL_GetDisplayProperties( SDL_GetPrimaryDisplay() );
 
         bool tryHDR = false;
-        if ( window->GetAllowHDR() && SDL_GetBooleanProperty( displayProperties, SDL_PROP_DISPLAY_HDR_ENABLED_BOOLEAN, SDL_FALSE ) )
+        if ( window->GetAllowHDR() && SDL_GetBooleanProperty( displayProperties, SDL_PROP_DISPLAY_HDR_ENABLED_BOOLEAN, false ) )
         {
             tryHDR = true;
         }
@@ -1567,7 +1567,7 @@ namespace EE
         SDL_PropertiesID displayProperties = SDL_GetDisplayProperties( SDL_GetPrimaryDisplay() );
 
         bool tryHDR = false;
-        if ( window->GetAllowHDR() && SDL_GetBooleanProperty( displayProperties, SDL_PROP_DISPLAY_HDR_ENABLED_BOOLEAN, SDL_FALSE ) )
+        if ( window->GetAllowHDR() && SDL_GetBooleanProperty( displayProperties, SDL_PROP_DISPLAY_HDR_ENABLED_BOOLEAN, false ) )
         {
             tryHDR = true;
         }
@@ -2210,7 +2210,7 @@ namespace EE
         instance( instance ),
         surface( VK_NULL_HANDLE )
     {
-        if ( SDL_Vulkan_CreateSurface( (SDL_Window*)window->GetWindowHandle(), instance->GetVulkanInstance(), VK_NULL_HANDLE, &surface ) == SDL_FALSE )
+        if ( SDL_Vulkan_CreateSurface( (SDL_Window*)window->GetWindowHandle(), instance->GetVulkanInstance(), VK_NULL_HANDLE, &surface ) == false )
         {
             EE_LOG_CRITICAL( L"Failed SDL_Vulkan_CreateSurface! {}", Text::NarrowToWide( SDL_GetError() ) );
             return;
@@ -3393,7 +3393,7 @@ namespace EE
             .apiVersion = VK_API_VERSION_1_3
         };
 
-        if ( SDL_Vulkan_LoadLibrary( nullptr ) == SDL_FALSE )
+        if ( SDL_Vulkan_LoadLibrary( nullptr ) == false )
         {
             EE_LOG_CRITICAL( L"Failed to load SDL Vulkan Library! {}", Text::NarrowToWide( SDL_GetError() ) );
         }

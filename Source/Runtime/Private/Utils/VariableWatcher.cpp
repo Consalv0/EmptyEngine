@@ -168,7 +168,7 @@ namespace EE
                 std::piecewise_construct,
                 std::forward_as_tuple( hash ),
                 std::forward_as_tuple( DebugVariableWatcher::VariableType<T>::type,
-                    new VariableWatcher_T<T>( watcher.value, watcher.name, watcher.line, watcher.file, watcher.function, Ticker::GetEpochTimeNow<Ticker::Nano>() ) )
+                    new VariableWatcher_T<T>( watcher.value, watcher.name, watcher.line, watcher.file, watcher.function, Ticker::GetEpochTimeNow<Ticker::Nano>()))
             );
         }
     }
@@ -195,7 +195,7 @@ namespace EE
                 std::piecewise_construct,
                 std::forward_as_tuple( hash ),
                 std::forward_as_tuple( DebugVariableWatcher::VariableType<T>::type,
-                    new VariableWatcher_T<T>( watcher.value, watcher.name, watcher.line, watcher.file, watcher.function, Ticker::GetEpochTimeNow<Ticker::Nano>() ) )
+                    new VariableWatcher_T<T>( watcher.value, watcher.name, watcher.line, watcher.file, watcher.function, Ticker::GetEpochTimeNow<Ticker::Nano>()))
             );
         }
     }
@@ -216,11 +216,11 @@ namespace EE
     }
 }
 
-#define EE_IMPLEMENT_WATCHER( x )   EE_MAKE_HASHABLE( EE::VariableWatcher_T<x>, t.line, t.file, t.function ); \
+#define EE_IMPLEMENT_WATCHER( x )   EE_MAKE_HASHABLE( EE::VariableWatcher_T<x>, t.name, t.line, t.file, t.function ); \
                                     void EE::DebugVariableWatcher::Watch( const x& val, const char* name, size_t line, const char* file, const char* function ) { \
                                         EE::WatchImplementation( val, name, line, file, function ); }
 
-#define EE_IMPLEMENT_VECTOR_WATCHER( x )   EE_MAKE_HASHABLE( EE::VariableWatcher_T<x>, t.line, t.file, t.function ); \
+#define EE_IMPLEMENT_VECTOR_WATCHER( x )   EE_MAKE_HASHABLE( EE::VariableWatcher_T<x>, t.name, t.line, t.file, t.function ); \
                                     void EE::DebugVariableWatcher::Watch( const x& val, const char* name, size_t line, const char* file, const char* function ) { \
                                         EE::WatchImplementation_Vector( val, name, line, file, function ); }
 

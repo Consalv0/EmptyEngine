@@ -18,11 +18,17 @@ namespace EE
 		return hasher(name);
 	}
 
-    inline size_t ConstStringToHash( const NChar*& name )
-    {
-        static const std::hash<std::string_view> hasher;
-        return hasher( std::string_view( name, std::strlen( name ) ) );
-    }
+	inline size_t ConstNStringToHash( const NChar*& name )
+	{
+		static const std::hash<std::string_view> hasher;
+		return hasher( std::string_view( name, std::strlen( name ) ) );
+	}
+
+	inline size_t ConstWStringToHash( const WChar*& name )
+	{
+		static const std::hash<std::wstring_view> hasher;
+		return hasher( std::wstring_view( name, std::wcslen( name ) ) );
+	}
 
 	// Code taken from https://stackoverflow.com/a/28801005 by tux3
 	// Generate CRC lookup table
