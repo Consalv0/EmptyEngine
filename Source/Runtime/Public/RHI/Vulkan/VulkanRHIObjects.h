@@ -14,6 +14,7 @@ namespace EE
     class VulkanRHIQueue;
     class VulkanRHIBuffer;
     class VulkanRHITexture;
+    class VulkanRHITextureView;
     class VulkanRHISwapChain;
     class VulkanRHISurface;
     class VulkanRHICommandPool;
@@ -256,7 +257,7 @@ namespace EE
 
         const RHIFence* GetRenderFence() const override;
 
-        const RHITexture* GetBackbuffer() const override;
+        const RHITextureView* GetBackbuffer() const override;
 
         const EPixelFormat& GetFormat() const override;
 
@@ -314,7 +315,7 @@ namespace EE
 
     };
 
-    class VulkanRHISampler : public RHISampler
+    class VulkanRHISampler final : public RHISampler
     {
     public:
         EE_CLASSNOCOPY( VulkanRHISampler )
@@ -344,7 +345,32 @@ namespace EE
         ESamplerBorder border_;
     };
 
-    class VulkanRHITexture : public RHITexture
+    class VulkanRHITextureView final : public RHITextureView
+    {
+    public:
+        EE_CLASSNOCOPY( VulkanRHITextureView )
+
+    public:
+        VulkanRHITextureView( const RHITextureViewCreateInfo& info, VulkanRHIDevice* device );
+
+        ~VulkanRHITextureView() override;
+
+        const RHITexture* GetTexture() const override { return (const RHITexture*)vulkanTexture_; }
+
+        const VulkanRHITexture* GetVulkanTexture() const { return vulkanTexture_; }
+
+        const VkImageView& GetVulkanImageView() const { return imageView_; }
+
+        bool IsValid() const;
+
+    private:
+        VulkanRHIDevice* device_;
+        const VulkanRHITexture* vulkanTexture_;
+        VkImageView imageView_;
+        ETextureType type_;
+    };
+
+    class VulkanRHITexture final : public RHITexture
     {
     public:
         EE_CLASSNOCOPY( VulkanRHITexture )
@@ -356,11 +382,7 @@ namespace EE
 
         ~VulkanRHITexture() override;
 
-        void CleanImageView() const;
-
         const VkImage& GetVulkanImage() const { return image_; }
-
-        const VkImageView& GetVulkanImageView() const { return imageView_; }
 
         const uint32& GetWidth() const override { return extents_.x; };
 
@@ -377,7 +399,6 @@ namespace EE
     private:
         VulkanRHIDevice* device_;
         VkImage image_;
-        VkImageView imageView_;
         VmaAllocation memory_;
         UIntVector3 extents_;
         VkFormat format_;
@@ -386,7 +407,7 @@ namespace EE
         EPixelFormat pixelFormat_;
     };
 
-    class VulkanRHISwapChain : public RHISwapChain
+    class VulkanRHISwapChain final : public RHISwapChain
     {
     public:
         EE_CLASSNOCOPY( VulkanRHISwapChain )
@@ -399,6 +420,7 @@ namespace EE
         uint32 imageCount;
         TArray<VkImage> images;
         TArray<VulkanRHITexture*> textures;
+        TArray<VulkanRHITextureView*> textureViews;
         uint32 backImageIndex;
 
     public:
@@ -422,10 +444,10 @@ namespace EE
 
         VkImage GetImage( uint32 index ) const { return images[ index ]; }
 
-        const VulkanRHITexture* GetTexture( uint32 index ) const { return textures[ index ]; }
+        const VulkanRHITextureView* GetTextureView( uint32 index ) const { return textureViews[ index ]; }
     };
 
-    class VulkanRHISurface : public RHISurface
+    class VulkanRHISurface final : public RHISurface
     {
     public:
         EE_CLASSNOCOPY( VulkanRHISurface )
@@ -549,7 +571,9 @@ namespace EE
 
         void TransitionTexture( const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer, const ETextureLayout& from, const ETextureLayout& to ) const override;
 
-        void CopyBufferToTexture( const RHIBuffer* buffer, const RHITexture* texture, const ETextureLayout& layout ) const override;
+        void CopyBuffer( const RHIBuffer* fromBuffer, const RHIBuffer* toBuffer, uint32 regionCount, const RHIBufferCopyRegion* regions ) const override;
+
+        void CopyBufferToTexture( const RHIBuffer* buffer, const RHITexture* texture, const ETextureLayout& layout, uint32 regionCount, const RHIBufferImageCopyRegion* regions ) const override;
 
         void ClearColor( Vector3f color, const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer ) const override;
         
@@ -613,7 +637,7 @@ namespace EE
 
         ~VulkanRHIRenderPass() override;
 
-        void SetAttachments( uint32 attachmentCount, const RHITexture** texture ) override;
+        void SetAttachments( uint32 attachmentCount, const RHITextureView** textureViews ) override;
 
         void SetDrawArea( const IntBox2& extent ) override;
 

@@ -52,7 +52,6 @@ namespace EE
         ETilingMode tiling = TilingMode_Default;
         uint32 sampleCount = 1;
         EUsageModeFlags usage = UsageMode_Color_Bit;
-        EUsageModeFlags viewUsage = UsageMode_Color_Bit;
         ESharingMode sharing = SharingMode_Default;
         uint32 bindFlags = 0;
         uint32 accessFlags = 0;
@@ -79,6 +78,42 @@ namespace EE
         virtual const UIntVector3& GetExtents() const = 0;
 
         virtual const EPixelFormat& GetFormat() const = 0;
+    };
+
+    struct RHITextureSubresource
+    {
+        ETextureAspectFlags aspect = TextureAspect_Color_Bit;
+        uint8 baseMipLevel = 0;
+        uint8 levelCount = 1;
+        uint8 baseArrayLayer = 0;
+        uint8 arrayLayer = 1;
+    };
+
+    struct RHITextureViewCreateInfo
+    {
+        ETextureType type = TextureType_None;
+        ETextureLayout layout = TextureLayout_Undefined;
+        const RHITexture* texture;
+        RHITextureSubresource subresource = {};
+    };
+
+    class RHITextureView : public RHIResource
+    {
+    public:
+        EE_CLASSNOCOPY( RHITextureView )
+
+    protected:
+        RHITextureView() {}
+
+    public:
+        virtual ~RHITextureView() = default;
+
+        virtual const RHITexture* GetTexture() const = 0;
+
+        const RHITextureSubresource& GetTextureSubresource() const { return subresourceRange_; };
+
+    protected:
+        RHITextureSubresource subresourceRange_;
     };
 
     class RHIFence : public RHIResource
@@ -175,6 +210,23 @@ namespace EE
         virtual const NChar* GetEntryPoint() const = 0;
     };
 
+    struct RHIBufferCopyRegion
+    {
+        uint64 sourceOffset;
+        uint64 destOffset;
+        uint64 size;
+    };
+
+    struct RHIBufferImageCopyRegion
+    {
+        uint64 bufferOffset = 0;
+        uint32 bufferRowLength = 0;
+        uint32 bufferImageHeight = 0;
+        IntVector3 imageOffset = { 0, 0, 0 };
+        UIntVector3 imageExtent;
+        RHITextureSubresource subresource = {};
+    };
+
     struct RHICommandBufferCreateInfo
     {
     };
@@ -212,7 +264,9 @@ namespace EE
 
         virtual void TransitionTexture( const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer, const ETextureLayout& from, const ETextureLayout& to ) const = 0;
 
-        virtual void CopyBufferToTexture( const RHIBuffer* buffer, const RHITexture* texture, const ETextureLayout& layout ) const = 0;
+        virtual void CopyBuffer( const RHIBuffer* fromBuffer, const RHIBuffer* toBuffer, uint32 regionCount, const RHIBufferCopyRegion* regions ) const = 0;
+
+        virtual void CopyBufferToTexture( const RHIBuffer* buffer, const RHITexture* texture, const ETextureLayout& layout, uint32 regionCount, const RHIBufferImageCopyRegion* regions ) const = 0;
 
         virtual void ClearColor( Vector3f color, const RHITexture* texture, uint32 mipLevel, uint32 arrayLayer ) const = 0;
 
@@ -235,7 +289,7 @@ namespace EE
     public:
         virtual ~RHIPresentContext() = default;
 
-        virtual const RHITexture* GetBackbuffer() const = 0;
+        virtual const RHITextureView* GetBackbuffer() const = 0;
 
         virtual void SubmitRenderCommandBuffer( EPipelineStage stage ) const = 0;
 
@@ -392,7 +446,7 @@ namespace EE
     public:
         virtual ~RHIRenderPass() = default;
 
-        virtual void SetAttachments( uint32 attachmentCount, const RHITexture** texture ) = 0;
+        virtual void SetAttachments( uint32 attachmentCount, const RHITextureView** textureViews ) = 0;
 
         virtual void SetDrawArea( const IntBox2& extent ) = 0;
 

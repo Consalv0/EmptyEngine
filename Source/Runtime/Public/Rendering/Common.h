@@ -48,7 +48,7 @@ namespace EE
         BindingType_UniformDynamic,
         BindingType_StorageDynamic,
         BindingType_Sampler,
-        BindingType_Texture,
+        BindingType_TextureView,
         BindingType_TextureStorage
     };
 
@@ -114,6 +114,17 @@ namespace EE
         TilingMode_Optimal,
         TilingMode_Linear
     };
+
+    enum ETextureAspectFlags : uint32
+    {
+        TextureAspect_None = 0,
+        TextureAspect_Color_Bit = 1 << 0,
+        TextureAspect_Stencil_Bit = 1 << 1,
+        TextureAspect_Depth_Bit = 1 << 2,
+
+        TextureAspect_DepthStencil = TextureAspect_Depth_Bit | TextureAspect_Stencil_Bit,
+    };
+    ENUM_FLAGS_OPERATORS( ETextureAspectFlags );
 
     enum EUsageModeFlags : uint32
     {

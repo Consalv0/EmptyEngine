@@ -1,6 +1,7 @@
 
 #include "RHI/RHI.h"
 
+// Enabling this makes the depth buffer fail??
 // #define EE_CORE_VULKAN_VALIDATION_LAYER
 
 namespace EE
@@ -20,6 +21,7 @@ namespace EE
         RHICommandBuffer* CreateRHICommandBuffer( const RHICommandBufferCreateInfo& info ) const;
         RHIBuffer* CreateRHIBuffer( const RHIBufferCreateInfo& info ) const;
         RHITexture* CreateRHITexture( const RHITextureCreateInfo& info ) const;
+        RHITextureView* CreateRHITextureView( const RHITextureViewCreateInfo& info ) const;
         RHISampler* CreateRHISampler( const RHISamplerCreateInfo& info ) const;
         RHIShaderStage* CreateRHIShaderStage( const RHIShaderStageCreateInfo& info ) const;
         RHIBindGroup* CreateRHIBindGroup( const RHIBindGroupCreateInfo& info ) const;

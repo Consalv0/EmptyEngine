@@ -672,12 +672,12 @@ namespace EE
         return flags;
     }
 
-    static VkImageAspectFlags ConvertTextureAspect( EUsageModeFlags usage )
+    static VkImageAspectFlags ConvertTextureAspect( ETextureAspectFlags aspect )
     {
         VkImageAspectFlags flags = VK_IMAGE_ASPECT_NONE;
-        if ( usage & UsageMode_Color_Bit )      flags |= VK_IMAGE_ASPECT_COLOR_BIT;
-        if ( usage & UsageMode_Depth_Bit )      flags |= VK_IMAGE_ASPECT_DEPTH_BIT;
-        if ( usage & UsageMode_Stencil_Bit )    flags |= VK_IMAGE_ASPECT_STENCIL_BIT;
+        if ( aspect & TextureAspect_Color_Bit )     flags |= VK_IMAGE_ASPECT_COLOR_BIT;
+        if ( aspect & TextureAspect_Depth_Bit )     flags |= VK_IMAGE_ASPECT_DEPTH_BIT;
+        if ( aspect & TextureAspect_Stencil_Bit )   flags |= VK_IMAGE_ASPECT_STENCIL_BIT;
         return flags;
     }
 
@@ -925,10 +925,65 @@ namespace EE
         case BindingType_UniformDynamic:    return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
         case BindingType_StorageDynamic:    return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
         case BindingType_Sampler:           return VK_DESCRIPTOR_TYPE_SAMPLER;
-        case BindingType_Texture:           return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        case BindingType_TextureView:       return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
         case BindingType_TextureStorage:    return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
         default:
             return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+        }
+    }
+
+    static const WChar* GetVKResultString( VkResult result )
+    {
+        switch ( result )
+        {
+        case VK_SUCCESS:                                            return L"VK_SUCCESS";
+        case VK_NOT_READY:                                          return L"VK_NOT_READY";
+        case VK_TIMEOUT:                                            return L"VK_TIMEOUT";
+        case VK_EVENT_SET:                                          return L"VK_EVENT_SET";
+        case VK_EVENT_RESET:                                        return L"VK_EVENT_RESET";
+        case VK_INCOMPLETE:                                         return L"VK_INCOMPLETE";
+        case VK_ERROR_OUT_OF_HOST_MEMORY:                           return L"VK_ERROR_OUT_OF_HOST_MEMORY";
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:                         return L"VK_ERROR_OUT_OF_DEVICE_MEMORY";
+        case VK_ERROR_INITIALIZATION_FAILED:                        return L"VK_ERROR_INITIALIZATION_FAILED";
+        case VK_ERROR_DEVICE_LOST:                                  return L"VK_ERROR_DEVICE_LOST";
+        case VK_ERROR_MEMORY_MAP_FAILED:                            return L"VK_ERROR_MEMORY_MAP_FAILED";
+        case VK_ERROR_LAYER_NOT_PRESENT:                            return L"VK_ERROR_LAYER_NOT_PRESENT";
+        case VK_ERROR_EXTENSION_NOT_PRESENT:                        return L"VK_ERROR_EXTENSION_NOT_PRESENT";
+        case VK_ERROR_FEATURE_NOT_PRESENT:                          return L"VK_ERROR_FEATURE_NOT_PRESENT";
+        case VK_ERROR_INCOMPATIBLE_DRIVER:                          return L"VK_ERROR_INCOMPATIBLE_DRIVER";
+        case VK_ERROR_TOO_MANY_OBJECTS:                             return L"VK_ERROR_TOO_MANY_OBJECTS";
+        case VK_ERROR_FORMAT_NOT_SUPPORTED:                         return L"VK_ERROR_FORMAT_NOT_SUPPORTED";
+        case VK_ERROR_FRAGMENTED_POOL:                              return L"VK_ERROR_FRAGMENTED_POOL";
+        case VK_ERROR_UNKNOWN:                                      return L"VK_ERROR_UNKNOWN";
+        case VK_ERROR_OUT_OF_POOL_MEMORY:                           return L"VK_ERROR_OUT_OF_POOL_MEMORY";
+        case VK_ERROR_INVALID_EXTERNAL_HANDLE:                      return L"VK_ERROR_INVALID_EXTERNAL_HANDLE";
+        case VK_ERROR_FRAGMENTATION:                                return L"VK_ERROR_FRAGMENTATION";
+        case VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS:               return L"VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS";
+        case VK_PIPELINE_COMPILE_REQUIRED:                          return L"VK_PIPELINE_COMPILE_REQUIRED";
+        case VK_ERROR_SURFACE_LOST_KHR:                             return L"VK_ERROR_SURFACE_LOST_KHR";
+        case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR:                     return L"VK_ERROR_NATIVE_WINDOW_IN_USE_KHR";
+        case VK_SUBOPTIMAL_KHR:                                     return L"VK_SUBOPTIMAL_KHR";
+        case VK_ERROR_OUT_OF_DATE_KHR:                              return L"VK_ERROR_OUT_OF_DATE_KHR";
+        case VK_ERROR_INCOMPATIBLE_DISPLAY_KHR:                     return L"VK_ERROR_INCOMPATIBLE_DISPLAY_KHR";
+        case VK_ERROR_VALIDATION_FAILED_EXT:                        return L"VK_ERROR_VALIDATION_FAILED_EXT";
+        case VK_ERROR_INVALID_SHADER_NV:                            return L"VK_ERROR_INVALID_SHADER_NV";
+        case VK_ERROR_IMAGE_USAGE_NOT_SUPPORTED_KHR:                return L"VK_ERROR_IMAGE_USAGE_NOT_SUPPORTED_KHR";
+        case VK_ERROR_VIDEO_PICTURE_LAYOUT_NOT_SUPPORTED_KHR:       return L"VK_ERROR_VIDEO_PICTURE_LAYOUT_NOT_SUPPORTED_KHR";
+        case VK_ERROR_VIDEO_PROFILE_OPERATION_NOT_SUPPORTED_KHR:    return L"VK_ERROR_VIDEO_PROFILE_OPERATION_NOT_SUPPORTED_KHR";
+        case VK_ERROR_VIDEO_PROFILE_FORMAT_NOT_SUPPORTED_KHR:       return L"VK_ERROR_VIDEO_PROFILE_FORMAT_NOT_SUPPORTED_KHR";
+        case VK_ERROR_VIDEO_PROFILE_CODEC_NOT_SUPPORTED_KHR:        return L"VK_ERROR_VIDEO_PROFILE_CODEC_NOT_SUPPORTED_KHR";
+        case VK_ERROR_VIDEO_STD_VERSION_NOT_SUPPORTED_KHR:          return L"VK_ERROR_VIDEO_STD_VERSION_NOT_SUPPORTED_KHR";
+        case VK_ERROR_INVALID_DRM_FORMAT_MODIFIER_PLANE_LAYOUT_EXT: return L"VK_ERROR_INVALID_DRM_FORMAT_MODIFIER_PLANE_LAYOUT_EXT";
+        case VK_ERROR_NOT_PERMITTED_KHR:                            return L"VK_ERROR_NOT_PERMITTED_KHR";
+        case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT:          return L"VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT";
+        case VK_THREAD_IDLE_KHR:                                    return L"VK_THREAD_IDLE_KHR";
+        case VK_THREAD_DONE_KHR:                                    return L"VK_THREAD_DONE_KHR";
+        case VK_OPERATION_DEFERRED_KHR:                             return L"VK_OPERATION_DEFERRED_KHR";
+        case VK_OPERATION_NOT_DEFERRED_KHR:                         return L"VK_OPERATION_NOT_DEFERRED_KHR";
+        case VK_ERROR_INVALID_VIDEO_STD_PARAMETERS_KHR:             return L"VK_ERROR_INVALID_VIDEO_STD_PARAMETERS_KHR";
+        case VK_ERROR_COMPRESSION_EXHAUSTED_EXT:                    return L"VK_ERROR_COMPRESSION_EXHAUSTED_EXT";
+        case VK_INCOMPATIBLE_SHADER_BINARY_EXT:                     return L"VK_INCOMPATIBLE_SHADER_BINARY_EXT";
+        default: return L"Unkown";
         }
     }
 
@@ -1157,10 +1212,10 @@ namespace EE
         physicalDevices(),
         selectedDeviceIndex()
     {
-        VkResult createResult;
-        if ( (createResult = vkCreateInstance( &createInfo, VK_NULL_HANDLE, &instance )) != VK_SUCCESS )
+        VkResult createResult = vkCreateInstance( &createInfo, VK_NULL_HANDLE, &instance );
+        if ( createResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"vkCreateInstance failed : {}", (int32)createResult );
+            EE_LOG_CRITICAL( L"vkCreateInstance failed : {}", GetVKResultString( createResult ) );
             return;
         }
 
@@ -1453,7 +1508,7 @@ namespace EE
         }
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to present image: {}! {}", swapChain->BackImageIndex(), (int32)result );
+            EE_LOG_CRITICAL( L"Failed to present image: {}! {}", swapChain->BackImageIndex(), GetVKResultString( result )  );
         }
         return true;
     }
@@ -1497,14 +1552,14 @@ namespace EE
         return &*renderFencesIt;
     }
 
-    const RHITexture* VulkanRHIPresentContext::GetBackbuffer() const
+    const RHITextureView* VulkanRHIPresentContext::GetBackbuffer() const
     {
-        return swapChain->GetTexture( swapChain->BackImageIndex() );
+        return swapChain->GetTextureView( swapChain->BackImageIndex() );
     }
 
     const EPixelFormat& VulkanRHIPresentContext::GetFormat() const
     {
-        return swapChain->GetTexture( 0 )->GetFormat();
+        return swapChain->GetTextureView( 0 )->GetTexture()->GetFormat();
     }
 
     void VulkanRHIPresentContext::CreateSurface()
@@ -1722,7 +1777,7 @@ namespace EE
         VkResult result = vkQueueSubmit( queue, 1, &vkSubmitInfo, nativeFence );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed command vkQueueSubmit! {}", (uint32)result );
+            EE_LOG_CRITICAL( L"Failed command vkQueueSubmit! {}", GetVKResultString( result ) );
         }
     }
 
@@ -1768,7 +1823,7 @@ namespace EE
         VkResult createResult = vkCreateBuffer( device->GetVulkanDevice(), &bufferInfo, nullptr, &buffer );
         if ( createResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create buffer {}!", (int32)createResult );
+            EE_LOG_CRITICAL( L"Failed to create buffer! {}", GetVKResultString( createResult ) );
         }
 
         VmaAllocationCreateInfo allocInfo
@@ -1789,7 +1844,7 @@ namespace EE
         VkResult memoryResult = vmaCreateBuffer( device->GetVulkanAllocator(), &bufferInfo, &allocInfo, &buffer, &nativeAllocation, VK_NULL_HANDLE );
         if ( memoryResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to allocate buffer memory {}!", (int32)memoryResult );
+            EE_LOG_CRITICAL( L"Failed to allocate buffer memory! {}", GetVKResultString( memoryResult ) );
         }
     }
 
@@ -1870,7 +1925,7 @@ namespace EE
         VkResult result = vkCreateSampler( device_->GetVulkanDevice(), &samplerInfo, NULL, &sampler_ );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create sampler {}!", (int32)result );
+            EE_LOG_CRITICAL( L"Failed to create sampler! {}", GetVKResultString( result ) );
         }
     }
 
@@ -1884,23 +1939,22 @@ namespace EE
         return sampler_ != VK_NULL_HANDLE;
     }
 
-    VulkanRHITexture::VulkanRHITexture( const RHITextureCreateInfo& info, VulkanRHIDevice* device, VkImage image ) :
+    VulkanRHITextureView::VulkanRHITextureView( const RHITextureViewCreateInfo& info, VulkanRHIDevice* device ) :
         device_( device ),
-        extents_( info.extents ),
-        format_( ConvertPixelFormat( info.format ) ),
-        pixelFormat_( ConvertImageFormat( format_ ) ),
-        memory_( VK_NULL_HANDLE ),
-        image_( image ),
-        ownership_( false )
+        type_( info.type ),
+        imageView_( VK_NULL_HANDLE )
     {
+        subresourceRange_ = info.subresource;
+        vulkanTexture_ = static_cast<const VulkanRHITexture*>(info.texture);
+
         VkImageViewCreateInfo viewInfo
         {
             .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-            .pNext = NULL, 
+            .pNext = NULL,
             .flags = 0,
-            .image = image,
-            .viewType = ConvertTextureType( info.type ),
-            .format = format_,
+            .image = vulkanTexture_->GetVulkanImage(),
+            .viewType = ConvertTextureType( type_ ),
+            .format = ConvertPixelFormat( vulkanTexture_->GetFormat() ),
             .components = VkComponentMapping
             {
                 .r = VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -1910,20 +1964,43 @@ namespace EE
             },
             .subresourceRange = VkImageSubresourceRange
             {
-                .aspectMask = ConvertTextureAspect( info.viewUsage ),
-                .baseMipLevel = 0,
-                .levelCount = 1,
-                .baseArrayLayer = 0,
-                .layerCount = 1
-            } 
+                .aspectMask = ConvertTextureAspect( subresourceRange_.aspect ),
+                .baseMipLevel = subresourceRange_.baseMipLevel,
+                .levelCount = subresourceRange_.levelCount,
+                .baseArrayLayer = subresourceRange_.baseArrayLayer,
+                .layerCount = subresourceRange_.arrayLayer
+            }
         };
 
-        if ( vkCreateImageView( device->GetVulkanDevice(), &viewInfo, nullptr, &imageView_ ) != VK_SUCCESS )
+        VkResult result = vkCreateImageView( device->GetVulkanDevice(), &viewInfo, nullptr, &imageView_ );
+        if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create texture image view!" );
-            return;
+            EE_LOG_CRITICAL( L"Failed to create texture image view! {}", GetVKResultString( result ) );
         }
+    }
 
+    VulkanRHITextureView::~VulkanRHITextureView()
+    {
+        if ( imageView_ != VK_NULL_HANDLE )
+        {
+            vkDestroyImageView( device_->GetVulkanDevice(), imageView_, NULL );
+        }
+    }
+    
+    bool VulkanRHITextureView::IsValid() const
+    {
+        return imageView_ != VK_NULL_HANDLE;
+    }
+
+    VulkanRHITexture::VulkanRHITexture( const RHITextureCreateInfo& info, VulkanRHIDevice* device, VkImage image ) :
+        device_( device ),
+        extents_( info.extents ),
+        format_( ConvertPixelFormat( info.format ) ),
+        pixelFormat_( ConvertImageFormat( format_ ) ),
+        memory_( VK_NULL_HANDLE ),
+        image_( image ),
+        ownership_( false )
+    {
         pixelFormat_ = ConvertImageFormat( format_ );
     }
 
@@ -1932,8 +2009,8 @@ namespace EE
         extents_( info.extents ),
         format_( ConvertPixelFormat( info.format ) ),
         pixelFormat_( ConvertImageFormat( format_ ) ),
-        ownership_( true ),
-        memory_( VK_NULL_HANDLE ), imageView_( VK_NULL_HANDLE ), image_( VK_NULL_HANDLE )
+        memory_( VK_NULL_HANDLE ), image_( VK_NULL_HANDLE ),
+        ownership_( true )
     {
         VkImageCreateInfo imageInfo
         {
@@ -1959,9 +2036,10 @@ namespace EE
             . initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         };
 
-        if ( vkCreateImage( device->GetVulkanDevice(), &imageInfo, VK_NULL_HANDLE, &image_ ) != VK_SUCCESS )
+        VkResult imageResult = vkCreateImage( device->GetVulkanDevice(), &imageInfo, VK_NULL_HANDLE, &image_ );
+        if ( imageResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create image!" );
+            EE_LOG_CRITICAL( L"Failed to create image! {}", GetVKResultString( imageResult ) );
             return;
         }
 
@@ -1977,40 +2055,10 @@ namespace EE
             .priority = 0.0F
         };
 
-        if ( vmaCreateImage( device->GetVulkanAllocator(), &imageInfo, &allocInfo, &image_, &memory_, NULL ) != VK_SUCCESS )
+        VkResult memoryResult = vmaCreateImage( device->GetVulkanAllocator(), &imageInfo, &allocInfo, &image_, &memory_, NULL );
+        if ( memoryResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to allocate image memory!" );
-            return;
-        }
-
-        VkImageViewCreateInfo viewInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-            .pNext = NULL,
-            .flags = 0,
-            .image = image_,
-            .viewType = ConvertTextureType( info.type ),
-            .format = format_,
-            .components = VkComponentMapping
-            {
-                .r = VK_COMPONENT_SWIZZLE_IDENTITY,
-                .g = VK_COMPONENT_SWIZZLE_IDENTITY,
-                .b = VK_COMPONENT_SWIZZLE_IDENTITY,
-                .a = VK_COMPONENT_SWIZZLE_IDENTITY
-            },
-            .subresourceRange = VkImageSubresourceRange
-            {
-                .aspectMask = ConvertTextureAspect( info.viewUsage ),
-                .baseMipLevel = 0,
-                .levelCount = 1,
-                .baseArrayLayer = 0,
-                .layerCount = 1
-            }
-        };
-
-        if ( vkCreateImageView( device->GetVulkanDevice(), &viewInfo, nullptr, &imageView_ ) != VK_SUCCESS )
-        {
-            EE_LOG_CRITICAL( L"Failed to create texture image view!" );
+            EE_LOG_CRITICAL( L"Failed to allocate image memory! {}", GetVKResultString( memoryResult ) );
             return;
         }
     }
@@ -2020,16 +2068,6 @@ namespace EE
         if ( image_ != VK_NULL_HANDLE && ownership_ )
         {
             vkDestroyImage( device_->GetVulkanDevice(), image_, NULL );
-        }
-
-        CleanImageView();
-    }
-
-    void VulkanRHITexture::CleanImageView() const
-    {
-        if ( imageView_ != VK_NULL_HANDLE )
-        {
-            vkDestroyImageView( device_->GetVulkanDevice(), imageView_, NULL );
         }
     }
 
@@ -2140,10 +2178,10 @@ namespace EE
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-        auto result = vkCreateSwapchainKHR( device->GetVulkanDevice(), &createInfo, NULL, &swapChain );
+        VkResult result = vkCreateSwapchainKHR( device->GetVulkanDevice(), &createInfo, NULL, &swapChain );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed vkCreateSwapchainKHR! {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed vkCreateSwapchainKHR! {}", GetVKResultString( result ) );
         }
 
         vkGetSwapchainImagesKHR( device->GetVulkanDevice(), swapChain, &imageCount, NULL );
@@ -2166,8 +2204,20 @@ namespace EE
                 .format = info.format,
                 .colorSpace = info.colorSpace
             };
+            const VulkanRHITexture* texture = textures.emplace_back( new VulkanRHITexture( textureCreateInfo, device, images[ i ] ) );
 
-            textures.emplace_back( new VulkanRHITexture( textureCreateInfo, device, images[ i ] ) );
+            RHITextureViewCreateInfo textureViewCreateInfo
+            {
+                .type = TextureType_Texture2D,
+                .layout = TextureLayout_ColorAttachment,
+                .texture = texture,
+                .subresource = RHITextureSubresource
+                {
+                    .aspect = TextureAspect_Color_Bit
+                }
+            };
+
+            textureViews.emplace_back( new VulkanRHITextureView( textureViewCreateInfo, device ) );
         }
     }
 
@@ -2178,16 +2228,21 @@ namespace EE
             delete texture;
         }
         textures.clear();
+        for ( VulkanRHITextureView* textureView : textureViews )
+        {
+            delete textureView;
+        }
+        textureViews.clear();
 
         vkDestroySwapchainKHR( device->GetVulkanDevice(), swapChain, NULL );
     }
 
     bool VulkanRHISwapChain::AquireNextImage( uint64 timeout, const VulkanRHISemaphore* semaphore, const VulkanRHIFence* fence )
     {
-        auto vulkanSemaphore = semaphore == NULL ? VK_NULL_HANDLE : semaphore->GetVulkanSemaphore();
-        auto vulkanFence = fence == NULL ? VK_NULL_HANDLE : fence->GetVulkanFence();
+        VkSemaphore vulkanSemaphore = semaphore == NULL ? VK_NULL_HANDLE : semaphore->GetVulkanSemaphore();
+        VkFence vulkanFence = fence == NULL ? VK_NULL_HANDLE : fence->GetVulkanFence();
 
-        auto result = vkAcquireNextImageKHR( device->GetVulkanDevice(), swapChain, timeout, vulkanSemaphore, VK_NULL_HANDLE, &backImageIndex );
+        VkResult result = vkAcquireNextImageKHR( device->GetVulkanDevice(), swapChain, timeout, vulkanSemaphore, VK_NULL_HANDLE, &backImageIndex );
         if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR )
         {
             EE_LOG_INFO( L"Swap chain out of date!" );
@@ -2195,7 +2250,7 @@ namespace EE
         }
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed vkAcquireNextImageKHR! {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed vkAcquireNextImageKHR! {}", GetVKResultString( result ) );
         }
 
         return true;
@@ -2241,7 +2296,7 @@ namespace EE
         auto createResult = vkCreateFence( device->GetVulkanDevice(), &fenceCreateInfo, nullptr, &fence);
         if ( createResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to fence: {}", (int32)createResult );
+            EE_LOG_CRITICAL( L"Failed to fence: {}", GetVKResultString( createResult ) );
         }
     }
 
@@ -2255,7 +2310,7 @@ namespace EE
         auto result = vkResetFences( device->GetVulkanDevice(), 1, &fence );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed reset fence: {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed reset fence: {}", GetVKResultString( result ) );
         }
     }
 
@@ -2264,7 +2319,7 @@ namespace EE
         auto result = vkWaitForFences( device->GetVulkanDevice(), 1, &fence, VK_TRUE, timeout );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed wait fence: {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed wait fence: {}", GetVKResultString( result ) );
         }
     }
 
@@ -2292,7 +2347,7 @@ namespace EE
         auto createResult = vkCreateSemaphore( device->GetVulkanDevice(), &createInfo, nullptr, &semaphore );
         if ( createResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create semaphore: {}", (int32)createResult );
+            EE_LOG_CRITICAL( L"Failed to create semaphore: {}", GetVKResultString( createResult ) );
         }
     }
 
@@ -2329,7 +2384,7 @@ namespace EE
         auto createResult = vkCreateCommandPool( device->GetVulkanDevice(), &createInfo, NULL, &commandPool );
         if ( createResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create command pool: {}", (int32)createResult );
+            EE_LOG_CRITICAL( L"Failed to create command pool: {}", GetVKResultString( createResult ) );
         }
     }
 
@@ -2354,7 +2409,7 @@ namespace EE
         VkResult result = vkAllocateCommandBuffers( device->GetVulkanDevice(), &allocateInfo, &commandBuffer );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Unable to allocate command buffer {}", (int32)result );
+            EE_LOG_CRITICAL( L"Unable to allocate command buffer {}", GetVKResultString( result ) );
         }
     }
 
@@ -2376,7 +2431,7 @@ namespace EE
         auto result = vkBeginCommandBuffer( commandBuffer, &beginInfo );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to end command buffer {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed to end command buffer {}", GetVKResultString( result ) );
         }
     }
 
@@ -2385,7 +2440,7 @@ namespace EE
         auto result = vkEndCommandBuffer( commandBuffer );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to end command buffer {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed to end command buffer {}", GetVKResultString( result ) );
         }
     }
 
@@ -2489,31 +2544,70 @@ namespace EE
             1, &imageBarrier ); // image memory barriers
     }
 
-    void VulkanRHICommandBuffer::CopyBufferToTexture( const RHIBuffer* buffer, const RHITexture* texture, const ETextureLayout& layout ) const
+    void VulkanRHICommandBuffer::CopyBuffer( const RHIBuffer* fromBuffer, const RHIBuffer* toBuffer, uint32 regionCount, const RHIBufferCopyRegion* copyRegions ) const
+    {
+        auto vulkanFromBuffer = static_cast<const VulkanRHIBuffer*>(fromBuffer);
+        auto vulkanToBuffer = static_cast<const VulkanRHIBuffer*>(toBuffer);
+
+        TArray<VkBufferCopy> regions( regionCount );
+
+        for ( uint32 i = 0; i < regionCount; i++ )
+        {
+            const RHIBufferCopyRegion& region = copyRegions[ i ];
+            regions[ i ] = VkBufferCopy
+            {
+                .srcOffset = region.sourceOffset,
+                .dstOffset = region.destOffset,
+                .size = region.size,
+            };
+        }
+
+        vkCmdCopyBuffer
+        (
+            commandBuffer,
+            vulkanFromBuffer->GetVulkanBuffer(),
+            vulkanToBuffer->GetVulkanBuffer(),
+            regionCount,
+            regions.data()
+        );
+    }
+
+    void VulkanRHICommandBuffer::CopyBufferToTexture( const RHIBuffer* buffer, const RHITexture* texture, const ETextureLayout& layout, uint32 regionCount, const RHIBufferImageCopyRegion* copyRegions ) const
     {
         auto vulkanBuffer = static_cast<const VulkanRHIBuffer*>(buffer);
         auto vulkanTexture = static_cast<const VulkanRHITexture*>(texture);
-        
-        VkBufferImageCopy region
+
+        TArray<VkBufferImageCopy> regions( regionCount );
+
+        for ( uint32 i = 0; i < regionCount; i++ )
         {
-            .bufferOffset = 0,
-            .bufferRowLength = 0,
-            .bufferImageHeight = 0,
-            .imageSubresource
+            const RHIBufferImageCopyRegion& region = copyRegions[ i ];
+            regions[ i ] = VkBufferImageCopy
             {
-                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                .mipLevel = 0,
-                .baseArrayLayer = 0,
-                .layerCount = 1
-            },
-            .imageOffset = { 0, 0, 0 },
-            .imageExtent
-            {
-                .width = texture->GetWidth(),
-                .height = texture->GetHeight(),
-                .depth = texture->GetDepth()
-            }
-        };
+                .bufferOffset = region.bufferOffset,
+                .bufferRowLength = region.bufferRowLength,
+                .bufferImageHeight = region.bufferImageHeight,
+                .imageSubresource
+                {
+                    .aspectMask = ConvertTextureAspect( region.subresource.aspect ),
+                    .mipLevel = region.subresource.baseMipLevel,
+                    .baseArrayLayer = region.subresource.baseArrayLayer,
+                    .layerCount = region.subresource.arrayLayer
+                },
+                .imageOffset
+                {
+                    region.imageOffset.x,
+                    region.imageOffset.y,
+                    region.imageOffset.z
+                },
+                .imageExtent
+                {
+                    .width = region.imageExtent.x,
+                    .height = region.imageExtent.y,
+                    .depth = region.imageExtent.z
+                }
+            };
+        }
 
         vkCmdCopyBufferToImage
         (
@@ -2521,8 +2615,8 @@ namespace EE
             vulkanBuffer->GetVulkanBuffer(),
             vulkanTexture->GetVulkanImage(),
             ConvertTextureLayout( layout ),
-            1,
-            &region
+            regionCount,
+            regions.data()
         );
     }
 
@@ -2572,9 +2666,10 @@ namespace EE
              .pCode = reinterpret_cast<const uint32*>( info.code )
         };
 
-        if ( vkCreateShaderModule( device->GetVulkanDevice(), &createInfo, nullptr, &shaderModule ) != VK_SUCCESS )
+        VkResult result = vkCreateShaderModule( device->GetVulkanDevice(), &createInfo, nullptr, &shaderModule );
+        if ( result != VK_SUCCESS )
         {
-            EE_LOG_ERROR( "Failed to create shader module!" );
+            EE_LOG_ERROR( L"Failed to create shader module! {}", GetVKResultString( result ) );
             return;
         }
     }
@@ -2735,17 +2830,17 @@ namespace EE
         VkResult result = vkCreateRenderPass( device->GetVulkanDevice(), &renderPassInfo, NULL, &renderPass );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create render pass {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed to create render pass {}", GetVKResultString( result ) );
         }
     }
 
-    void VulkanRHIRenderPass::SetAttachments( uint32 attachmentCount, const RHITexture** textures )
+    void VulkanRHIRenderPass::SetAttachments( uint32 attachmentCount, const RHITextureView** textureViews )
     {
         size_t hash = 0;
         TArray<VkImageView> imageViews( attachmentCount );
         for ( uint32 i = 0; i < attachmentCount; i++ )
         {
-            imageViews[ i ] = static_cast<const VulkanRHITexture*>(textures[ i ])->GetVulkanImageView();
+            imageViews[ i ] = static_cast<const VulkanRHITextureView*>(textureViews[ i ])->GetVulkanImageView();
             HashCombine( &hash, imageViews[ i ] );
         }
 
@@ -2759,8 +2854,8 @@ namespace EE
                 .renderPass = renderPass,
                 .attachmentCount = attachmentCount,
                 .pAttachments = imageViews.data(),
-                .width = textures[ 0 ]->GetExtents().x,
-                .height = textures[ 0 ]->GetExtents().y,
+                .width = textureViews[ 0 ]->GetTexture()->GetExtents().x,
+                .height = textureViews[ 0 ]->GetTexture()->GetExtents().y,
                 .layers = 1
             };
 
@@ -2768,7 +2863,7 @@ namespace EE
             VkResult result = vkCreateFramebuffer( device->GetVulkanDevice(), &framebufferInfo, nullptr, &framebuffer );
             if ( result != VK_SUCCESS )
             {
-                EE_LOG_CRITICAL( L"Failed to create frame buffer! {}", (int32)result );
+                EE_LOG_CRITICAL( L"Failed to create frame buffer! {}", GetVKResultString( result ) );
                 return;
             }
 
@@ -2864,7 +2959,7 @@ namespace EE
         VkResult descriptorResult = vkCreateDescriptorSetLayout( device->GetVulkanDevice(), &descriptorInfo, NULL, &descriptorSetLayout );
         if ( descriptorResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create descriptor set layout {}", (int32)descriptorResult );
+            EE_LOG_CRITICAL( L"Failed to create descriptor set layout {}", GetVKResultString( descriptorResult ) );
         }
     }
 
@@ -2905,7 +3000,7 @@ namespace EE
         VkResult result = vkCreateDescriptorPool( device_->GetVulkanDevice(), &poolInfo, NULL, &pool_ );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create descriptor set pool {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed to create descriptor set pool {}", GetVKResultString( result ) );
         }
     }
 
@@ -2929,7 +3024,7 @@ namespace EE
         VkResult allocateResult = vkAllocateDescriptorSets( device->GetVulkanDevice(), &allocInfo, &descriptorSet_ );
         if ( allocateResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to allocate descriptor set {}", (int32)allocateResult );
+            EE_LOG_CRITICAL( L"Failed to allocate descriptor set {}", GetVKResultString( allocateResult ) );
         }
 
         const uint32 bindingCount = (uint32)info.bindings.size();
@@ -2954,7 +3049,7 @@ namespace EE
                 bufferInfosNum++;
             } break;
             case BindingType_Sampler:
-            case BindingType_Texture:
+            case BindingType_TextureView:
             case BindingType_TextureStorage:
             {
                 imageInfosNum++;
@@ -3022,15 +3117,13 @@ namespace EE
 
                 writeDescriptorSet.pImageInfo = &imageInfos.back();
             } break;
-            case BindingType_Texture:
-            case BindingType_TextureStorage:
+            case BindingType_TextureView:
             {
-
-                const VulkanRHITexture* texture = static_cast<const VulkanRHITexture*>( binding.resource );
+                const VulkanRHITextureView* textureView = static_cast<const VulkanRHITextureView*>( binding.resource );
                 VkDescriptorImageInfo imageInfo
                 {
                     .sampler = VK_NULL_HANDLE,
-                    .imageView = texture->GetVulkanImageView(),
+                    .imageView = textureView->GetVulkanImageView(),
                     .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 };
                 imageInfos.emplace_back( imageInfo );
@@ -3300,7 +3393,7 @@ namespace EE
         VkResult layoutResult = vkCreatePipelineLayout( device->GetVulkanDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout );
         if ( layoutResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create pipeline layout {}", (int32)layoutResult );
+            EE_LOG_CRITICAL( L"Failed to create pipeline layout {}", GetVKResultString( layoutResult ) );
         }
 
         VkPipelineRenderingCreateInfo pipelineRenderingCreateInfo
@@ -3342,7 +3435,7 @@ namespace EE
         VkResult result = vkCreateGraphicsPipelines( device->GetVulkanDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, NULL, &pipeline);
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create graphics pipeline {}", (int32)result );
+            EE_LOG_CRITICAL( L"Failed to create graphics pipeline {}", GetVKResultString( result ) );
         }
     }
     
@@ -3484,7 +3577,7 @@ namespace EE
         VkResult result = vkCreateDebugUtilsMessenger( GVulkanInstance->GetVulkanInstance(), &messageCreateInfo, NULL, &GVulkanDebugMessager );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create vulkan messenger {}", (uint32)result );
+            EE_LOG_CRITICAL( L"Failed to create vulkan messenger {}", GetVKResultString( result ) );
         }
 #endif
     }
@@ -3526,10 +3619,15 @@ namespace EE
     {
         return new VulkanRHIBuffer( info, GVulkanDevice );
     }
-    
+
     RHITexture* VulkanRHI::CreateRHITexture( const RHITextureCreateInfo& info ) const
     {
         return new VulkanRHITexture( info, GVulkanDevice );
+    }
+
+    RHITextureView* VulkanRHI::CreateRHITextureView( const RHITextureViewCreateInfo& info ) const
+    {
+        return new VulkanRHITextureView( info, GVulkanDevice );
     }
     
     RHISampler* VulkanRHI::CreateRHISampler( const RHISamplerCreateInfo& info ) const
