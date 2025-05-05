@@ -11,22 +11,22 @@ namespace EE::Math
 
     template <typename T>
 	FORCEINLINE constexpr TMatrix3x3<T>::TMatrix3x3( const TMatrix3x3& matrix )
-		: m0( matrix.m0 ), m1( matrix.m1 ), m2( matrix.m2 )
+		: c0( matrix.c0 ), c1( matrix.c1 ), c2( matrix.c2 )
 	{
 	}
 
     template <typename T>
 	FORCEINLINE constexpr TMatrix3x3<T>::TMatrix3x3( const TMatrix4x4<T>& matrix )
 	{
-		TMatrix3x3( matrix.GetRow( 0 ), matrix.GetRow( 1 ), matrix.GetRow( 2 ) );
+		TMatrix3x3( matrix.c0, matrix.c1, matrix.c2 );
 	}
 
     template <typename T>
-	FORCEINLINE constexpr TMatrix3x3<T>::TMatrix3x3( const TVector3<T>& row0, const TVector3<T>& row1, const TVector3<T>& row2 )
+	FORCEINLINE constexpr TMatrix3x3<T>::TMatrix3x3( const TVector3<T>& col0, const TVector3<T>& col1, const TVector3<T>& col2 )
 	{
-		m00 = row0.x; m01 = row0.y; m02 = row0.z;
-		m10 = row1.x; m11 = row1.y; m12 = row1.z;
-		m20 = row2.x; m21 = row2.y; m22 = row2.z;
+		m00 = col0.x; m01 = col0.y; m02 = col0.z;
+		m10 = col1.x; m11 = col1.y; m12 = col1.z;
+		m20 = col2.x; m21 = col2.y; m22 = col2.z;
 	}
 
     template <typename T>
@@ -38,24 +38,17 @@ namespace EE::Math
     template <typename T>
 	inline void TMatrix3x3<T>::Transpose()
 	{
-		*this = TMatrix3x3( GetColumn( 0 ), GetColumn( 1 ), GetColumn( 2 ) );
+		*this = TMatrix3x3( GetRow( 0 ), GetRow( 1 ), GetRow( 2 ) );
 	}
 
     template <typename T>
 	inline TMatrix3x3<T> TMatrix3x3<T>::Transposed() const
 	{
-		return TMatrix3x3( GetColumn( 0 ), GetColumn( 1 ), GetColumn( 2 ) );
+		return TMatrix3x3( GetRow( 0 ), GetRow( 1 ), GetRow( 2 ) );
 	}
 
     template <typename T>
 	inline TVector3<T> TMatrix3x3<T>::GetRow( const unsigned char& i ) const
-	{
-		if ( (i > 2) ) return TVector3<T>();
-		return ((TVector3<T>*)this)[ i ];
-	}
-
-    template <typename T>
-	inline TVector3<T> TMatrix3x3<T>::GetColumn( const unsigned char& i ) const
 	{
 		switch ( i )
 		{
@@ -65,6 +58,13 @@ namespace EE::Math
 		}
 
 		return TVector3<T>();
+	}
+
+    template <typename T>
+	inline TVector3<T> TMatrix3x3<T>::GetColumn( const unsigned char& i ) const
+	{
+		if ( (i > 2) ) return TVector3<T>();
+		return ((TVector3<T>*)this)[ i ];
 	}
 
     template <typename T>
@@ -85,19 +85,19 @@ namespace EE::Math
 	FORCEINLINE TMatrix3x3<T> TMatrix3x3<T>::operator*( const TMatrix3x3<T>& other ) const
 	{
 		TMatrix3x3 result = TMatrix3x3();
-		const TVector3<T>& col0 = GetColumn( 0 ), col1 = GetColumn( 1 ), col2 = GetColumn( 2 );
+		const TVector3<T>& row0 = GetRow( 0 ), row1 = GetRow( 1 ), row2 = GetRow( 2 );
 
-		result.m00 = other.m0.Dot( col0 );
-		result.m10 = other.m1.Dot( col0 );
-		result.m20 = other.m2.Dot( col0 );
+		result.m00 = other.c0.Dot( row0 );
+		result.m10 = other.c1.Dot( row0 );
+		result.m20 = other.c2.Dot( row0 );
 
-		result.m01 = other.m0.Dot( col1 );
-		result.m11 = other.m1.Dot( col1 );
-		result.m21 = other.m2.Dot( col1 );
+		result.m01 = other.c0.Dot( row1 );
+		result.m11 = other.c1.Dot( row1 );
+		result.m21 = other.c2.Dot( row1 );
 
-		result.m02 = other.m0.Dot( col2 );
-		result.m12 = other.m1.Dot( col2 );
-		result.m22 = other.m2.Dot( col2 );
+		result.m02 = other.c0.Dot( row2 );
+		result.m12 = other.c1.Dot( row2 );
+		result.m22 = other.c2.Dot( row2 );
 
 		return result;
 	}
@@ -106,9 +106,9 @@ namespace EE::Math
 	FORCEINLINE TVector3<T> TMatrix3x3<T>::operator*( const TVector3<T>& vector ) const
 	{
 		TVector3<T> result(
-			GetColumn( 0 ).Dot( vector ),
-			GetColumn( 1 ).Dot( vector ),
-			GetColumn( 2 ).Dot( vector )
+			GetRow( 0 ).Dot( vector ),
+			GetRow( 1 ).Dot( vector ),
+			GetRow( 2 ).Dot( vector )
 		);
 
 		return result;
@@ -117,7 +117,7 @@ namespace EE::Math
     template <typename T>
 	inline const T* TMatrix3x3<T>::PointerToValue( void ) const
 	{
-		return &m0[ 0 ];
+		return &m00;
 	}
 
 }

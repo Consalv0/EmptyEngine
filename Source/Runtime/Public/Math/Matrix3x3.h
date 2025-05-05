@@ -13,13 +13,13 @@ namespace EE
             struct
             {
                 struct { T m00, m01, m02, m10, m11, m12, m20, m21, m22; };
-                TVector3<T> m0, m1, m2;
+                TVector3<T> c0, c1, c2;
             };
 
             HOST_DEVICE FORCEINLINE constexpr TMatrix3x3();
             HOST_DEVICE FORCEINLINE constexpr TMatrix3x3( const TMatrix3x3<T>& matrix );
             HOST_DEVICE FORCEINLINE constexpr TMatrix3x3( const TMatrix4x4<T>& matrix );
-            HOST_DEVICE FORCEINLINE constexpr TMatrix3x3( const TVector3<T>&row0, const TVector3<T>& row1, const TVector3<T>& row2 );
+            HOST_DEVICE FORCEINLINE constexpr TMatrix3x3( const TVector3<T>& col0, const TVector3<T>& col1, const TVector3<T>& col2 );
 
             HOST_DEVICE constexpr static TMatrix3x3 Identity();
 

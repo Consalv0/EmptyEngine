@@ -66,29 +66,31 @@ namespace EE
             return Formatted( L"{%.3f, %.3f, %.3f, %.3f}", value.x, value.y, value.z, value.w );
         }
 
-        inline WString FormatMath( const Quaternion& value )
+        template <typename T>
+        inline WString FormatMath( const Math::TQuaternion<T>& value )
         {
             return Formatted( L"{%.3f, %.3f, %.3f, %.3f}", value.w, value.x, value.y, value.z );
         }
 
-        inline WString FormatMath( const Matrix4x4& value, bool ColumnMajor = false )
+        template <typename T>
+        inline WString FormatMath( const Math::TMatrix4x4<T>& value, bool columnMajor = false )
         {
-            if ( ColumnMajor )
+            if ( columnMajor )
             {
                 return Formatted( L"{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
-                    value.m0.x, value.m1.x, value.m2.x, value.m3.x,
-                    value.m0.y, value.m1.y, value.m2.y, value.m3.y,
-                    value.m0.z, value.m1.z, value.m2.z, value.m3.z,
-                    value.m0.w, value.m1.w, value.m2.w, value.m3.w
+                    value.m00, value.m10, value.m20, value.m30,
+                    value.m01, value.m11, value.m21, value.m31,
+                    value.m02, value.m12, value.m22, value.m32,
+                    value.m03, value.m13, value.m23, value.m33
                 );
             }
             else
             {
                 return Formatted( L"{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
-                    value.m0.x, value.m0.y, value.m0.z, value.m0.w,
-                    value.m1.x, value.m1.y, value.m1.z, value.m1.w,
-                    value.m2.x, value.m2.y, value.m2.z, value.m2.w,
-                    value.m3.x, value.m3.y, value.m3.z, value.m3.w
+                    value.m00, value.m01, value.m02, value.m03,
+                    value.m10, value.m11, value.m12, value.m13,
+                    value.m20, value.m21, value.m22, value.m23,
+                    value.m30, value.m31, value.m32, value.m33
                 );
             }
         }
@@ -153,24 +155,24 @@ namespace EE
             return FormattedN( "{%.3f, %.3f, %.3f, %.3f}", value.w, value.x, value.y, value.z );
         }
 
-        inline NString FormatMathN( const Matrix4x4& value, bool ColumnMajor = false )
+        inline NString FormatMathN( const Matrix4x4& value, bool columnMajor = false )
         {
-            if ( ColumnMajor )
+            if ( columnMajor )
             {
                 return FormattedN( "{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
-                    value.m0.x, value.m1.x, value.m2.x, value.m3.x,
-                    value.m0.y, value.m1.y, value.m2.y, value.m3.y,
-                    value.m0.z, value.m1.z, value.m2.z, value.m3.z,
-                    value.m0.w, value.m1.w, value.m2.w, value.m3.w
+                    value.m00, value.m10, value.m20, value.m30,
+                    value.m01, value.m11, value.m21, value.m31,
+                    value.m02, value.m12, value.m22, value.m32,
+                    value.m03, value.m13, value.m23, value.m33
                 );
             }
             else
             {
                 return FormattedN( "{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
-                    value.m0.x, value.m0.y, value.m0.z, value.m0.w,
-                    value.m1.x, value.m1.y, value.m1.z, value.m1.w,
-                    value.m2.x, value.m2.y, value.m2.z, value.m2.w,
-                    value.m3.x, value.m3.y, value.m3.z, value.m3.w
+                    value.m00, value.m01, value.m02, value.m03,
+                    value.m10, value.m11, value.m12, value.m13,
+                    value.m20, value.m21, value.m22, value.m23,
+                    value.m30, value.m31, value.m32, value.m33
                 );
             }
         }

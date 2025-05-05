@@ -53,7 +53,7 @@ namespace EE::Math
 	}
 
     template <typename T>
-	TMatrix4x4<T> TTransform<T>::GetViewMatrix() const
+	TMatrix4x4<T> TTransform<T>::GetWorldToViewMatrix() const
 	{
 		const TVector3<T> forward( rotation * TVector3<T>::Back() );
 		const TVector3<T> side( rotation * TVector3<T>::Right() );

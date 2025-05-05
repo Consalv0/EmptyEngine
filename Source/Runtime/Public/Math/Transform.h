@@ -30,11 +30,11 @@ namespace EE
             //* Get the inverse of the Model matrix
             TMatrix4x4<T> GetWorldToLocalMatrix() const;
 
-            //* Get the Model matrix
+            //* Get the model matrix
             TMatrix4x4<T> GetLocalToWorldMatrix() const;
 
-            //* Get the Model matrix
-            TMatrix4x4<T> GetViewMatrix() const;
+            //* Get the view matrix
+            TMatrix4x4<T> GetWorldToViewMatrix() const;
         };
     }
 }

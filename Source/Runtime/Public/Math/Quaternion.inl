@@ -263,58 +263,63 @@ namespace EE::Math
 	inline T TQuaternion<T>::GetPitch() const
 	{
 		T pitch;
-		const T singularityTest = x * y + z * w;
-		if ( Math::Abs( singularityTest ) > T(0.499995) )
+
+		T pitchY = Math::Asin( T( 2 ) * (x * w - y * z) );
+		T test = Math::Cos( pitchY );
+		if ( test > MathConstants<T>::TendencyZero )
 		{
-			return 0;
+			pitch = pitchY * MathConstants<T>::RadToDegree;
 		}
 		else
 		{
-            pitch = Math::Atan2( (T(2) * x * w) - (T(2) * y * z), T(1) - (T(2) * Math::Square( x )) - (T(2) * Math::Square( z )) );
+			pitch = pitchY * MathConstants<T>::RadToDegree;
 		}
-		return pitch * MathConstants<T>::RadToDegree;
+
+		if ( Math::IsInfiniteOrNan( pitch ) ) pitch = T( 0 );
+
+		return pitch;
 	}
 
     template <typename T>
 	inline T TQuaternion<T>::GetYaw() const
 	{
 		T yaw;
-		const T SingularityTest = x * y + z * w;
-        if ( SingularityTest > T(0.499995) )
+
+		T pitchY = Math::Asin( T( 2 ) * (x * w - y * z) );
+		T test = Math::Cos( pitchY );
+		if ( test > MathConstants<T>::TendencyZero )
 		{
-            yaw = T(2) * Math::Atan2( x, w );
-		}
-		else if ( SingularityTest < T(-0.49999) )
-		{
-			yaw = T(-2) * Math::Atan2(x, w);
+			yaw = Math::Atan2( T( -2 ) * (z * x + y * w), T( 1 ) - (T( 2 ) * (Math::Square( y ) + Math::Square( x ))) ) * MathConstants<T>::RadToDegree;
 		}
 		else
 		{
-			const T sqy = y * y;
-			const T sqz = z * z;
-            yaw = Math::Atan2( (T(2) * y * w) - (T(2) * x * z), T(1) - (T(2) * sqy) - (T(2) * sqz) );
+			yaw = T( 0 );
 		}
-		return yaw * MathConstants<T>::RadToDegree;
+
+		if ( Math::IsInfiniteOrNan( yaw ) ) yaw = T( 0 );
+
+		return yaw;
 	}
 
     template <typename T>
 	inline T TQuaternion<T>::GetRoll() const
 	{
 		T roll;
-		const T singularityTest = x * y + z * w;
-        if ( singularityTest > T(0.499995) )
+
+		T pitchY = Math::Asin( T( 2 ) * (x * w - y * z) );
+		T test = Math::Cos( pitchY );
+		if ( test > MathConstants<T>::TendencyZero )
 		{
-			roll = MathConstants<T>::HalfPi;
-		}
-		else if ( singularityTest < T(-0.499995) )
-		{
-			roll = -MathConstants<T>::HalfPi;
+			roll = Math::Atan2( T( 2 ) * (x * y + z * w), T( 1 ) - (T( 2 ) * (Math::Square( z ) + Math::Square( x ))) ) * MathConstants<T>::RadToDegree;
 		}
 		else
 		{
-            roll = asin( T(2) * singularityTest );
+			roll = Math::Atan2( T( -2 ) * (x * y - z * w), T( 1 ) - (T( 2 ) * (Math::Square( y ) + Math::Square( z ))) ) * MathConstants<T>::RadToDegree;
 		}
-		return roll * MathConstants<T>::RadToDegree;
+
+		if ( Math::IsInfiniteOrNan( roll ) ) roll = T( 0 );
+
+		return roll;
 	}
 
     template <typename T>
@@ -361,19 +366,19 @@ namespace EE::Math
 	{
 		TVector3<T> eulerFromQuat;
 
-		T PitchY = Math::Asin( T(2) * (x * w - y * z) );
-		T Test = Math::Cos( PitchY );
-		if ( Test > MathConstants<T>::TendencyZero )
+		T pitchY = Math::Asin( T(2) * (x * w - y * z) );
+		T test = Math::Cos( pitchY );
+		if ( test > MathConstants<T>::TendencyZero )
 		{
+			eulerFromQuat[ Pitch ] = pitchY * MathConstants<T>::RadToDegree;
+			eulerFromQuat[ Yaw ] = Math::Atan2( T(-2) * (z * x + y * w), T(1) - (T(2) * (Math::Square( y ) + Math::Square( x ))) ) * MathConstants<T>::RadToDegree;
 			eulerFromQuat[ Roll ] = Math::Atan2( T(2) * (x * y + z * w), T(1) - (T(2) * (Math::Square( z ) + Math::Square( x ))) ) * MathConstants<T>::RadToDegree;
-			eulerFromQuat[ Pitch ] = PitchY * MathConstants<T>::RadToDegree;
-			eulerFromQuat[ Yaw ] = Math::Atan2( T(2) * (z * x + y * w), T(1) - (T(2) * (Math::Square( y ) + Math::Square( x ))) ) * MathConstants<T>::RadToDegree;
 		}
 		else
 		{
-			eulerFromQuat[ Roll ] = Math::Atan2( T(-2.F) * (x * y - z * w), T(1) - (T(2) * (Math::Square( y ) + Math::Square( z ))) ) * MathConstants<T>::RadToDegree;
-			eulerFromQuat[ Pitch ] = PitchY * MathConstants<T>::RadToDegree;
+			eulerFromQuat[ Pitch ] = pitchY * MathConstants<T>::RadToDegree;
 			eulerFromQuat[ Yaw ] = T(0);
+			eulerFromQuat[ Roll ] = Math::Atan2( T(-2) * (x * y - z * w), T(1) - (T(2) * (Math::Square( y ) + Math::Square( z ))) ) * MathConstants<T>::RadToDegree;
 		}
 
 		if ( Math::IsInfiniteOrNan( eulerFromQuat[ Roll ] ) )   eulerFromQuat[ Roll ] = T(0);

@@ -13,13 +13,13 @@ namespace EE
             union
             {
                 struct { T m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33; };
-                struct { TVector4<T> m0, m1, m2, m3; };
+                struct { TVector4<T> c0, c1, c2, c3; };
                 struct { TVector4<T> x, y, z, w; };
             };
 
             HOST_DEVICE FORCEINLINE constexpr TMatrix4x4();
             HOST_DEVICE FORCEINLINE constexpr TMatrix4x4( const TMatrix4x4& other );
-            HOST_DEVICE FORCEINLINE constexpr TMatrix4x4( const TVector4<T>& row0, const TVector4<T>& row1, const TVector4<T>& row2, const TVector4<T> row3 );
+            HOST_DEVICE FORCEINLINE constexpr TMatrix4x4( const TVector4<T>& col0, const TVector4<T>& col1, const TVector4<T>& col2, const TVector4<T> col3 );
             HOST_DEVICE FORCEINLINE constexpr TMatrix4x4(
                 T m00, T m01, T m02, T m03,
                 T m10, T m11, T m12, T m13,
@@ -60,6 +60,11 @@ namespace EE
 
             HOST_DEVICE inline TVector4<T> MultiplyPoint( const TVector3<T>& vector ) const;
             HOST_DEVICE inline TVector4<T> MultiplyPoint( const TVector4<T>& vector ) const;
+              HOST_DEVICE inline TVector4<T> MultiplyPointTransposed( const TVector4<T>& vector ) const;
+              HOST_DEVICE FORCEINLINE TMatrix4x4<T> Multiply( const TMatrix4x4<T>& vector ) const;
+              HOST_DEVICE FORCEINLINE TMatrix4x4<T> MultiplyTransposed( const TMatrix4x4<T>& vector ) const;
+              HOST_DEVICE inline TVector4<T> Multiply( const TVector4<T>& vector ) const;
+              HOST_DEVICE inline TVector4<T> MultiplyTransposed( const TVector4<T>& vector ) const;
             HOST_DEVICE inline TVector3<T> MultiplyVector( const TVector3<T>& vector ) const;
 
             HOST_DEVICE FORCEINLINE TMatrix4x4 operator*( const TMatrix4x4& other ) const;

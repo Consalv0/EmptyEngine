@@ -6,9 +6,9 @@ namespace EE
     {
         enum AngleAxes
         {
-            Pitch = 0, // x left - right
-            Yaw = 1,   // y up - down
-            Roll = 2   // z forward - backward
+            Pitch = 0, // x forward to up
+            Yaw = 1,   // y right to forward
+            Roll = 2   // z up to right
         };
 
         template <typename T>
