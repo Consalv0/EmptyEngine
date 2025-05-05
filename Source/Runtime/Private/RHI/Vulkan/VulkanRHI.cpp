@@ -553,22 +553,22 @@ namespace EE
         {
         case VK_COLOR_SPACE_SRGB_NONLINEAR_KHR:             return ColorSpace_sRGB;
         case VK_COLOR_SPACE_DISPLAY_P3_NONLINEAR_EXT:       return ColorSpace_sRGB;
-        case VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT:       return ColorSpace_sRGB;
+        case VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT:       return ColorSpace_Linear;
         case VK_COLOR_SPACE_DISPLAY_P3_LINEAR_EXT:          return ColorSpace_Linear;
         case VK_COLOR_SPACE_DCI_P3_NONLINEAR_EXT:           return ColorSpace_sRGB;
         case VK_COLOR_SPACE_BT709_LINEAR_EXT:               return ColorSpace_Linear;
         case VK_COLOR_SPACE_BT709_NONLINEAR_EXT:            return ColorSpace_sRGB;
         case VK_COLOR_SPACE_BT2020_LINEAR_EXT:              return ColorSpace_Linear;
-        case VK_COLOR_SPACE_HDR10_ST2084_EXT:               return ColorSpace_HDR10_2084;
-        case VK_COLOR_SPACE_DOLBYVISION_EXT:                return ColorSpace_HDR10_SCRGB;
-        case VK_COLOR_SPACE_HDR10_HLG_EXT:                  return ColorSpace_HDR10;
+        case VK_COLOR_SPACE_HDR10_ST2084_EXT:               return ColorSpace_HDR;
+        case VK_COLOR_SPACE_DOLBYVISION_EXT:                return ColorSpace_HDR;
+        case VK_COLOR_SPACE_HDR10_HLG_EXT:                  return ColorSpace_HDR;
         case VK_COLOR_SPACE_ADOBERGB_LINEAR_EXT:            return ColorSpace_Linear;
         case VK_COLOR_SPACE_ADOBERGB_NONLINEAR_EXT:         return ColorSpace_sRGB;
-        case VK_COLOR_SPACE_PASS_THROUGH_EXT:               return ColorSpace_Linear;
+        case VK_COLOR_SPACE_PASS_THROUGH_EXT:               return ColorSpace_Unknown;
         case VK_COLOR_SPACE_EXTENDED_SRGB_NONLINEAR_EXT:    return ColorSpace_sRGB;
-        case VK_COLOR_SPACE_DISPLAY_NATIVE_AMD:             return ColorSpace_sRGB;
+        case VK_COLOR_SPACE_DISPLAY_NATIVE_AMD:             return ColorSpace_Unknown;
         default:
-            return ColorSpace_Linear;
+            return ColorSpace_Unknown;
         }
     }
 
@@ -1172,6 +1172,8 @@ namespace EE
             return;
         }
 
+        surfaceSupportDetails_.insert( std::make_pair( surface, surfaceDetails ) );
+
         UpdateSurfaceSupportDetails( surface );
     }
 
@@ -1479,7 +1481,7 @@ namespace EE
     void VulkanRHIPresentContext::Present()
     {
         bool success = SubmitPresentImage( GVulkanDevice->GetVulkanPresentQueue() );
-        if ( success == false )
+        if ( success == false || isSwapChainDirty_ )
         {
             RecreateSwapChain();
         }
@@ -1557,100 +1559,34 @@ namespace EE
         return swapChain->GetTextureView( swapChain->BackImageIndex() );
     }
 
-    const EPixelFormat& VulkanRHIPresentContext::GetFormat() const
-    {
-        return swapChain->GetTextureView( 0 )->GetTexture()->GetFormat();
-    }
-
-    void VulkanRHIPresentContext::CreateSurface()
-    {
-        surface = new VulkanRHISurface( window, instance );
-
-        instance->AddSurfaceSupportDetails( surface );
-        // Vulkan needs the surface information in order to determine the driver, so the driver creation is here, the device selection is handled inside CreateSurface
-        if ( GVulkanDevice == NULL )
-        {
-            if ( instance->SelectSuitableDevice( surface ) == false )
-            {
-                return;
-            }
-
-            GVulkanDevice = new VulkanRHIDevice( instance );
-        }
-    }
-
-    void VulkanRHIPresentContext::CreateSwapChain()
-    {
-        SDL_PropertiesID displayProperties = SDL_GetDisplayProperties( SDL_GetPrimaryDisplay() );
-
-        bool tryHDR = false;
-        if ( window->GetAllowHDR() && SDL_GetBooleanProperty( displayProperties, SDL_PROP_DISPLAY_HDR_ENABLED_BOOLEAN, false ) )
-        {
-            tryHDR = true;
-        }
-
-        EPixelFormat desiredFormat = PixelFormat_R8G8B8A8_UNORM;
-        EColorSpace desiredColorSpace = ColorSpace_sRGB;
-        GetSurfaceColorFormat( tryHDR, &desiredFormat, &desiredColorSpace );
-
-        RHISwapChainCreateInfo swapChainInfo
-        {
-            .window = this->window,
-            .width = (uint32)window->GetWidth(),
-            .height = (uint32)window->GetHeight(),
-            .bufferCount = 2,
-            .format = desiredFormat,
-            .colorSpace = desiredColorSpace,
-            .presentMode = window->GetPresentMode(),
-            .compositeAlpha = window->IsUsingCompositeAlpha(),
-        };
-
-        swapChain = new VulkanRHISwapChain( swapChainInfo, this, GVulkanDevice );
-    }
-
-    void VulkanRHIPresentContext::RecreateSwapChain()
-    {
-        // Wait for all commands of this context
-        for ( auto& fence : renderFences )
-        {
-            fence.Wait( UINT64_MAX );
-        }
-
-        swapChain->Cleanup();
-        GVulkanDevice->GetVulkanPhysicalDevice()->UpdateSurfaceSupportDetails( surface->GetVulkanSurface() );
-
-        SDL_PropertiesID displayProperties = SDL_GetDisplayProperties( SDL_GetPrimaryDisplay() );
-
-        bool tryHDR = false;
-        if ( window->GetAllowHDR() && SDL_GetBooleanProperty( displayProperties, SDL_PROP_DISPLAY_HDR_ENABLED_BOOLEAN, false ) )
-        {
-            tryHDR = true;
-        }
-
-        EPixelFormat desiredFormat = PixelFormat_R8G8B8A8_UNORM;
-        EColorSpace desiredColorSpace = ColorSpace_sRGB;
-        GetSurfaceColorFormat( tryHDR, &desiredFormat, &desiredColorSpace );
-
-        RHISwapChainCreateInfo swapChainInfo
-        {
-            .window = window,
-            .width = (uint32)window->GetWidth(),
-            .height = (uint32)window->GetHeight(),
-            .bufferCount = 2,
-            .format = desiredFormat,
-            .colorSpace = desiredColorSpace,
-            .presentMode = window->GetPresentMode(),
-            .compositeAlpha = window->IsUsingCompositeAlpha(),
-        };
-
-        swapChain->CreateSwapChain( swapChainInfo );
-        // currentFrameIndex = swapChain->GetImageCount() - 1;
-    }
-
-    void VulkanRHIPresentContext::GetSurfaceColorFormat( bool hdr, EPixelFormat* outFormat, EColorSpace* outColorSpace ) const
+    void VulkanRHIPresentContext::UpdateSelectedSurfaceFormat()
     {
         auto& surfaceDetails = GVulkanDevice->GetVulkanPhysicalDevice()->GetSurfaceDetails( surface->GetVulkanSurface() );
-        // Find best format
+
+        {
+            const VkSurfaceFormatKHR& surfaceFormat = surfaceDetails.formats[ 0 ];
+            EColorSpace colorSpace = ConvertColorSpace( surfaceFormat.colorSpace );
+            EPixelFormat format = ConvertImageFormat( surfaceFormat.format );
+            selectedSurfaceFormat_.pixelFormat = format;
+            selectedSurfaceFormat_.colorSpace = colorSpace;
+        }
+
+        EPixelFormat desiredPixelFormat = window->GetDesiredPixelFormat();
+        EColorSpace desiredColorSpace = window->GetDesiredColorSpace();
+        if ( window->HDREnabled() == false )
+        {
+            if ( window->GetDesiredColorSpace() == ColorSpace_HDR )
+            {
+                desiredColorSpace = ColorSpace_sRGB;
+            }
+        }
+
+        if ( desiredColorSpace == ColorSpace_Unknown && desiredPixelFormat == PixelFormat_Unknown )
+        {
+            return;
+        }
+
+        // Find best format, the window desides that
         bool contains = false;
         for ( uint32 i = 0; i < surfaceDetails.formatCount; i++ )
         {
@@ -1663,28 +1599,86 @@ namespace EE
             if ( format == PixelFormat_Unknown )
                 continue;
 
-            if ( hdr )
+            if ((desiredColorSpace == colorSpace && desiredPixelFormat == PixelFormat_Unknown) ||
+                (desiredColorSpace == ColorSpace_Unknown && desiredPixelFormat == format) ||
+                (desiredColorSpace == colorSpace && desiredPixelFormat == format) )
             {
-                if ( colorSpace != ColorSpace_Linear && colorSpace != ColorSpace_sRGB )
-                {
-                    if ( format == PixelFormat_A2R10G10B10_UNORM_PACK32 || format == PixelFormat_A2B10G10R10_UNORM_PACK32 )
-                    {
-                        *outFormat = format;
-                        *outColorSpace = colorSpace;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                if ( colorSpace == ColorSpace_Linear || colorSpace == ColorSpace_sRGB )
-                {
-                    *outFormat = format;
-                    *outColorSpace = colorSpace;
-                    break;
-                }
+                selectedSurfaceFormat_.pixelFormat = format;
+                selectedSurfaceFormat_.colorSpace = colorSpace;
+                break;
             }
         }
+    }
+
+    void VulkanRHIPresentContext::SetSwapChainDirty()
+    {
+        isSwapChainDirty_ = true;
+    }
+
+    void VulkanRHIPresentContext::CreateSurface()
+    {
+        surface = new VulkanRHISurface( window, instance );
+
+        // Vulkan needs the surface information in order to determine the driver, so the driver creation is here, the device selection is handled inside CreateSurface
+        if ( GVulkanDevice == NULL )
+        {
+            if ( instance->SelectSuitableDevice( surface ) == false )
+            {
+                return;
+            }
+
+            GVulkanDevice = new VulkanRHIDevice( instance );
+        }
+        UpdateSelectedSurfaceFormat();
+    }
+
+    void VulkanRHIPresentContext::CreateSwapChain()
+    {
+        const RHISurfaceFormat& surfaceFormat = GetSurfaceFormat();
+
+        RHISwapChainCreateInfo swapChainInfo
+        {
+            .window = this->window,
+            .width = (uint32)window->GetWidth(),
+            .height = (uint32)window->GetHeight(),
+            .bufferCount = 2,
+            .format = surfaceFormat.pixelFormat,
+            .colorSpace = surfaceFormat.colorSpace,
+            .presentMode = window->GetPresentMode(),
+            .compositeAlpha = window->IsUsingCompositeAlpha(),
+        };
+
+        swapChain = new VulkanRHISwapChain( swapChainInfo, this, GVulkanDevice );
+        isSwapChainDirty_ = false;
+    }
+
+    void VulkanRHIPresentContext::RecreateSwapChain()
+    {
+        // Wait for all commands of this context
+        for ( auto& fence : renderFences )
+        {
+            fence.Wait( UINT64_MAX );
+        }
+
+        swapChain->Cleanup();
+        GVulkanDevice->GetVulkanPhysicalDevice()->UpdateSurfaceSupportDetails( surface->GetVulkanSurface() );
+        UpdateSelectedSurfaceFormat();
+        const RHISurfaceFormat& surfaceFormat = GetSurfaceFormat();
+
+        RHISwapChainCreateInfo swapChainInfo
+        {
+            .window = window,
+            .width = (uint32)window->GetWidth(),
+            .height = (uint32)window->GetHeight(),
+            .bufferCount = 2,
+            .format = surfaceFormat.pixelFormat,
+            .colorSpace = surfaceFormat.colorSpace,
+            .presentMode = window->GetPresentMode(),
+            .compositeAlpha = window->IsUsingCompositeAlpha(),
+        };
+
+        swapChain->CreateSwapChain( swapChainInfo );
+        isSwapChainDirty_ = false;
     }
 
     void VulkanRHIPresentContext::CreateCommandBuffers()
@@ -2270,6 +2264,8 @@ namespace EE
             EE_LOG_CRITICAL( L"Failed SDL_Vulkan_CreateSurface! {}", Text::NarrowToWide( SDL_GetError() ) );
             return;
         }
+
+        instance->AddSurfaceSupportDetails( this );
     }
 
     bool VulkanRHISurface::IsValid() const

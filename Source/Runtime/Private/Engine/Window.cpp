@@ -89,6 +89,10 @@ namespace EE
                 eventData->window->closeRequested = true;
                 break;
             }
+            case SDL_EVENT_WINDOW_HDR_STATE_CHANGED:
+            {
+                eventData->HDRChangedEvent( sdlEvent->display.data1 );
+            }
             default:
             {
                 EE_LOG_DEBUG( L"SDL: Window Event: WindowID({}), Event({})", windowID, sdlEvent->type );
@@ -170,7 +174,8 @@ namespace EE
             .window = this,
             .resizeEvent = [this]( const uint32& width, const uint32& height ) constexpr { OnResize( width, height ); },
             .positionChangeEvent = [this]( const int32& x, const int32& y ) constexpr { OnPositionChange( x, y ); },
-            .modeChangedEvent = [this]( const EWindowMode& mode ) constexpr { OnWindowModeChanged( mode ); }
+            .modeChangedEvent = [this]( const EWindowMode& mode ) constexpr { OnWindowModeChanged( mode ); },
+            .HDRChangedEvent = [this]( bool hdrEnabled ) constexpr { OnHDRChanged( hdrEnabled ); }
         };
 
         SDL_AddEventWatch( WindowEventsHandler, (void*)&eventData_ );
@@ -188,7 +193,8 @@ namespace EE
         positionY_ = parameters.positionY;
         name_ = parameters.name;
         mode_ = parameters.windowMode;
-        allowHDR_ = parameters.allowHDR;
+        pixelFormat_ = parameters.desiredPixelFormat;
+        colorSpace_ = parameters.desiredColorSpace;
         whiteLevel_ = parameters.whiteLevel;
         options_ = parameters.options;
         presentMode_ = parameters.presentMode;
@@ -224,6 +230,9 @@ namespace EE
         {
             displayID = (positionY_ & 0xFFFF);
         }
+
+        SDL_PropertiesID displayProperties = SDL_GetDisplayProperties( displayID );
+        hdrEnabled_ = SDL_GetBooleanProperty( displayProperties, SDL_PROP_DISPLAY_HDR_ENABLED_BOOLEAN, false );
 
         if ( width_ == 0 )
             width_ = displayBounds[ displayID ].w;
@@ -286,9 +295,9 @@ namespace EE
         return whiteLevel_;
     }
 
-    const bool& Window::GetAllowHDR() const
+    const bool& Window::HDREnabled() const
     {
-        return allowHDR_;
+        return hdrEnabled_;
     }
 
     void Window::SetIcon( PixelMap* Icon )
@@ -329,6 +338,12 @@ namespace EE
     void Window::OnWindowModeChanged( const EWindowMode& mode )
     {
         mode_ = mode;
+    }
+
+    void Window::OnHDRChanged( bool hdrEnabled )
+    {
+        hdrEnabled_ = hdrEnabled;
+        GDynamicRHI->GetRHIPresentContextOfWindow( this )->SetSwapChainDirty();
     }
 
     const WString& Window::GetName() const

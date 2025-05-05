@@ -219,6 +219,8 @@ namespace EE
         Window* window;
         VulkanRHISurface* surface;
         VulkanRHISwapChain* swapChain;
+        RHISurfaceFormat selectedSurfaceFormat_;
+        bool isSwapChainDirty_;
 
         TList<VulkanRHICommandBuffer> commandBuffers;
 
@@ -247,7 +249,7 @@ namespace EE
         FORCEINLINE const VulkanRHISwapChain* GetRHISwapChain() const { return swapChain; }
         FORCEINLINE const Window* GetWindow() const { return window; }
 
-        void GetSurfaceColorFormat( bool hdr, EPixelFormat* outFormat, EColorSpace* outColorSpace ) const;
+        const RHISurfaceFormat& GetSurfaceFormat() const override { return selectedSurfaceFormat_; }
 
         const VulkanRHISemaphore& GetPresentSempahore( uint32 frameIndex ) const;
 
@@ -259,7 +261,9 @@ namespace EE
 
         const RHITextureView* GetBackbuffer() const override;
 
-        const EPixelFormat& GetFormat() const override;
+        void UpdateSelectedSurfaceFormat();
+
+        void SetSwapChainDirty() override;
 
         void Present() override;
 
@@ -272,7 +276,6 @@ namespace EE
         bool IsValid() const;
 
     protected:
-
         void RecreateSwapChain();
     };
 

@@ -34,7 +34,8 @@ namespace EE
         int32 positionX = 0;
         int32 positionY = 0;
         float whiteLevel = 200;
-        bool allowHDR = false;
+        EPixelFormat desiredPixelFormat = PixelFormat_Unknown;
+        EColorSpace desiredColorSpace = ColorSpace_Unknown;
         bool compositeAlpha = false;
         EWindowOptionFlags options = WindowOption_None;
     };
@@ -48,6 +49,7 @@ namespace EE
         typedef std::function<void( const uint32& width, const uint32& height )> OnResizeEvent;
         typedef std::function<void( const int32& x, const int32& y )> OnPositionChangeEvent;
         typedef std::function<void( const EWindowMode& mode )> OnModeChangedEvent;
+        typedef std::function<void( bool )> OnHDRChangedEvent;
 
         struct EventData
         {
@@ -55,6 +57,7 @@ namespace EE
             OnResizeEvent resizeEvent;
             OnPositionChangeEvent positionChangeEvent;
             OnModeChangedEvent modeChangedEvent;
+            OnHDRChangedEvent HDRChangedEvent;
         };
 
     public:
@@ -101,8 +104,8 @@ namespace EE
         //* Get SDR white level option
         virtual const float& GetWhiteLevel() const;
 
-        //* Get hdr option
-        virtual const bool& GetAllowHDR() const;
+        //* HDr is available for this window
+        virtual const bool& HDREnabled() const;
 
         //* Get the size of the window in pixels
         virtual void GetSize( uint32& width, uint32& height ) const;
@@ -140,11 +143,17 @@ namespace EE
 
         constexpr bool IsPassthrough() const { return passthrough_; }
 
+        //* Desired present pixel format
+        constexpr const EPixelFormat& GetDesiredPixelFormat() const { return pixelFormat_; };
+
+        //* Desired present color space
+        constexpr const EColorSpace& GetDesiredColorSpace() const { return colorSpace_; };
+
     protected:
         virtual void OnResize( const uint32& width, const uint32& height );
         virtual void OnPositionChange( const int32& x, const int32& y );
-
         virtual void OnWindowModeChanged( const EWindowMode& mode );
+        virtual void OnHDRChanged( bool hdrEnabled );
 
     public:
         bool closeRequested;
@@ -158,7 +167,9 @@ namespace EE
         int32 positionX_, positionY_;
         EPresentMode presentMode_;
         float whiteLevel_;
-        bool allowHDR_;
+        bool hdrEnabled_;
+        EPixelFormat pixelFormat_;
+        EColorSpace colorSpace_;
         EventData eventData_;
         bool compositeAlpha_;
         uint8 opacity_;

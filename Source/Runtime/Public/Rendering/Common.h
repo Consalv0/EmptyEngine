@@ -246,10 +246,6 @@ namespace EE
         ColorSpace_Linear,
         ColorSpace_sRGB,
         ColorSpace_HDR,
-        ColorSpace_HDR_SCRGB,
-        ColorSpace_HDR10,
-        ColorSpace_HDR10_SCRGB,
-        ColorSpace_HDR10_2084,
     };
 
     // UNORM is a float in the range of [0, 1].

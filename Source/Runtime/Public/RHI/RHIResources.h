@@ -29,6 +29,12 @@ namespace EE
         virtual ~RHIResource() = default;
     };
 
+    struct RHISurfaceFormat
+    {
+        EPixelFormat pixelFormat = PixelFormat_Unknown;
+        EColorSpace colorSpace = ColorSpace_Unknown;
+    };
+    
     class RHISurface : public RHIResource
     {
     public:
@@ -289,6 +295,8 @@ namespace EE
     public:
         virtual ~RHIPresentContext() = default;
 
+        virtual const RHISurfaceFormat& GetSurfaceFormat() const = 0;
+
         virtual const RHITextureView* GetBackbuffer() const = 0;
 
         virtual void SubmitRenderCommandBuffer( EPipelineStage stage ) const = 0;
@@ -301,7 +309,7 @@ namespace EE
 
         FORCEINLINE const uint32& CurrentFrameIndex() const { return currentFrameIndex; }
 
-        virtual const EPixelFormat& GetFormat() const = 0;
+        virtual void SetSwapChainDirty() = 0;
 
         virtual void Present() = 0;
 
@@ -599,7 +607,7 @@ namespace EE
         bool depthEnabled = false;
         bool depthWriteEnabled = false;
         bool stencilEnabled = false;
-        EPixelFormat format = PixelFormat_MAX;
+        EPixelFormat format = PixelFormat_Unknown;
         ECompareOperation depthCompareOperation = CompareOperation_GreaterEqual;
         int32 depthBias = 0;
         float depthBiasSlopeScale = 0.0F;
@@ -617,7 +625,7 @@ namespace EE
 
     struct RHIColorAttachmentState
     {
-        EPixelFormat format = PixelFormat_MAX;
+        EPixelFormat format = PixelFormat_Unknown;
         EColorComponentFlags writeFlags = ColorComponent_RGBA;
         bool blendEnabled = false;
         RHIBlendComponent colorBlend = RHIBlendComponent();

@@ -23,6 +23,11 @@ namespace EE
         return GWindowRHIPresentContexts[ window ];
     };
 
+    RHIPresentContext* DynamicRHI::GetRHIPresentContextOfWindow( Window* window )
+    {
+        return GWindowRHIPresentContexts[ window ];
+    };
+
     void DynamicRHI::FreeRHIPresentContextOfWindow( Window* window ) const
     {
         RHIPresentContext* context = GWindowRHIPresentContexts[ window ];

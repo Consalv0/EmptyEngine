@@ -36,6 +36,8 @@ namespace EE
 
         const RHIPresentContext* GetRHIPresentContextOfWindow( Window* window ) const;
 
+        RHIPresentContext* GetRHIPresentContextOfWindow( Window* window );
+
         const RHIPresentContext* CreateRHIPresentContextOfWindow( Window* window ) const;
 
         void FreeRHIPresentContextOfWindow( Window* window ) const;
