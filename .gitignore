@@ -196,7 +196,7 @@ Temporary Items
 !/**/[Ll]ibraries/*.a
 !/**/[Ll]ibraries/*.la
 
-[Ee]xternal/[Vv]ulkan[Ss][Dd][Kk]
+[Ee]xternal/[Vv]ulkan[Ss][Dd][Kk]*
 
 #ImGui
 imgui.ini
