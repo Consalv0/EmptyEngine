@@ -52,16 +52,15 @@ namespace EE
         while ( SDL_PollEvent( &sdlEvent ) ) {}
     }
 
-    void GameEngine::Run()
+    void GameEngine::Start()
     {
         GInput->Initialize();
         GMainApplication->Start();
+    }
 
-        do
-        {
-            GMainApplication->MainLoop();
-        } 
-        while ( GEngine->WantToTerminate() == false );
+    void GameEngine::MainLoop()
+    {
+        GMainApplication->MainLoop();
     }
 
     void GameEngine::Terminate()

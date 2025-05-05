@@ -24,7 +24,9 @@ namespace EE
     public:
         bool Initialize( int argc, NChar* argv[] );
 
-        void Run();
+        void Start();
+
+        void MainLoop();
 
         void ShouldTerminate();
 

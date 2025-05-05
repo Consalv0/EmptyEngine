@@ -130,6 +130,9 @@ ipch/
 *.vcxproj
 *.vcxproj.filters
 
+# Generated make files
+Makefile
+
 ## Xcode User settings
 xcuserdata/
 

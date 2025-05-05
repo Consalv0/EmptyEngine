@@ -54,6 +54,20 @@ project "EmptyEngine"
         "MultiProcessorCompile"
     }
 
+    filter "system:emscripten"
+        systemversion "latest"
+        
+        linkoptions{
+            "-s USE_PTHREADS=1",
+            "-s FULL_ES3=1",
+            "-s MIN_WEBGL_VERSION=2", 
+            "-s MAX_WEBGL_VERSION=2"
+        }
+        
+        defines {
+            "EE_PLATFORM_WEB",
+        }
+
     filter "system:windows"
         systemversion "latest"
 
@@ -128,6 +142,9 @@ project "VMA"
     filter "system:windows"
         systemversion "latest"
 
+    filter "system:emscripten"
+        systemversion "latest"
+
     filter "configurations:Debug"
         runtime "Debug"
         symbols "On"
@@ -169,6 +186,9 @@ project "spdlog"
     }
 
     filter "system:windows"
+        systemversion "latest"
+
+    filter "system:emscripten"
         systemversion "latest"
 
     filter "configurations:Debug"
@@ -233,6 +253,10 @@ project "JoltPhysics"
     flags { 
         "MultiProcessorCompile"
     }
+
+    filter "system:emscripten"
+        buildoptions{ "/arch:AVX2" }
+        systemversion "latest"
 
     filter "system:windows"
         buildoptions{ "/arch:AVX2" }
