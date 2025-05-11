@@ -364,7 +364,7 @@ namespace EE
         uint32* indices = new uint32[ parsedData.vertexIndices.size() ];
         uint32 count = 0;
 
-        uint32 totalAllocatedSize = 0;
+        uint64 totalAllocatedSize = 0;
         uint32 totalUniqueVertices = 0;
 
         info.parentNode = ModelNode( "ParentNode" );
@@ -466,7 +466,7 @@ namespace EE
         delete[] indices;
 
         timer.Stop();
-        EE_LOG_INFO( "\u2514> Allocated {0} in {1:.2f}ms", Text::FormatData( totalAllocatedSize, 2 ), timer.GetDeltaTime<Ticker::Mili>() );
+        EE_LOG_INFO( "\u2514> Allocated {0} in {1:.2f}ms", totalAllocatedSize, timer.GetDeltaTime<Ticker::Mili>() );
 
         info.isValid = true;
         return true;
