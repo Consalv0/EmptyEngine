@@ -554,11 +554,11 @@ namespace EE
 //         mask = (inAngle.value >> (sizeof( int32 ) * CHAR_BIT - 1));
 //         abs_inAngle = (inAngle.value + mask) ^ mask;
 // 
-//         /* On 0->PI, sin looks like x² that is :
+//         /* On 0->PI, sin looks like xÂ² that is :
 //            - centered on PI/2,
 //            - equals 1 on PI/2,
 //            - equals 0 on 0 and PI
-//           that means :  4/PI * x  - 4/PI² * x²
+//           that means :  4/PI * x  - 4/PIÂ² * xÂ²
 //           Use abs(x) to handle (-PI) -> 0 zone.
 //          */
 //         fixed a = Multiply( fix16_t( FIX16_FOUR_DIV_PI ), inAngle );

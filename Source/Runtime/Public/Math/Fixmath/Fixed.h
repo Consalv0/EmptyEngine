@@ -22,7 +22,7 @@
 #define FIXED_QUARTER_PI( F ) (0xC90FDAA1 >> (32 - F))
 // fixed value of 4/PI
 #define FIXED_FOUR_DIV_PI( F ) (0x1921FB54 >> (32 - F))
-// fixed value of -4/PI²
+// fixed value of -4/PIÂ²
 #define FIXED_NEG_FOUR_DIV_PI2( F ) (0x983F4278 >> (32 - F))
 // fixed value of 3PI/4
 #define FIXED_THREE_PI_DIV4( F ) (0x25B2F8FE >> (32 - F))
