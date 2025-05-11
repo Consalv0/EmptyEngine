@@ -87,14 +87,14 @@ namespace EE
     typedef TArray<Vector2f>        MeshUVs;
     typedef TArray<Vector4f>        MeshColors;
     typedef TArray<StaticVertex>    MeshVertices;
-    typedef TMap<int32, NString>    MeshMaterials;
+    typedef TMap<int32, U8String>   MeshMaterials;
 
     struct MeshData
     {
-        NString name;
+        U8String name;
         TArray<MeshFace> faces;
         TMap<int32, Subdivision> subdivisionsMap;
-        TMap<int32, NString> materialsMap;
+        TMap<int32, U8String> materialsMap;
         TArray<StaticVertex> staticVertices;
         TArray<SkinVertex> skinVertices;
         Box3f bounding;

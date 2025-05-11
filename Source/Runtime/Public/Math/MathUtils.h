@@ -11,9 +11,9 @@ namespace EE
         static constexpr float Pi = 3.1415926535897932F;
         static constexpr float Tau = 6.2831853071795864F;
         static constexpr float TendencyZero = 1e-6F;
-        static constexpr float Epsilon = FLT_EPSILON;
-        static constexpr float MaxValue = FLT_MAX;
-        static constexpr float MinValue = FLT_MIN;
+        static constexpr float Epsilon = 1.192092896e-07F;
+        static constexpr float MaxValue = 3.402823466e+38F;
+        static constexpr float MinValue = 1.175494351e-38F;
         static constexpr float Euler = 2.7182817F;
         static constexpr float DeltaPrecision = 0.00001F;
         static constexpr float InversePi = 0.31830988618F;
@@ -30,9 +30,9 @@ namespace EE
         static constexpr double Pi = 3.1415926535897932384626433832795;
         static constexpr double Tau = 6.2831853071795864769252867665590;
         static constexpr double TendencyZero = 1e-08;
-        static constexpr double Epsilon = DBL_EPSILON;
-        static constexpr double MaxValue = DBL_MAX;
-        static constexpr double MinValue = DBL_MIN;
+        static constexpr double Epsilon = 2.2204460492503131e-016;
+        static constexpr double MaxValue = 1.7976931348623158e+308;
+        static constexpr double MinValue = 2.2250738585072014e-308;
         static constexpr double Euler = 2.7182818284590452353602874713527;
         static constexpr double InversePi = 0.318309886183790671537767526745;
         static constexpr double HalfPi = 0.5 * Pi;

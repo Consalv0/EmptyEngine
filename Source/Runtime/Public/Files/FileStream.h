@@ -42,7 +42,7 @@ namespace EE
 
         inline size_t GetPosition() const;
 
-        void LocaleToUTF8( const NChar* locale ) const;
+        void LocaleToUTF8( const U8Char* locale ) const;
 
         bool Open( int openFlags, bool utf8 );
 
@@ -101,7 +101,7 @@ namespace EE
         }
         else
         {
-            EE_LOG_ERROR( L"File '{}' is not valid or do not exist", path_ );
+            EE_LOG_ERROR( "File '{}' is not valid or do not exist", path_ );
             return false;
         }
     }
@@ -125,7 +125,7 @@ namespace EE
         }
         else
         {
-            EE_LOG_ERROR( L"File '{}' is not valid or do not exist", path_ );
+            EE_LOG_ERROR( "File '{}' is not valid or do not exist", path_ );
             return false;
         }
     }
@@ -145,7 +145,7 @@ namespace EE
     }
 
     template<typename StringType>
-    void FileStream<StringType>::LocaleToUTF8( const NChar* localeFormat ) const
+    void FileStream<StringType>::LocaleToUTF8( const U8Char* localeFormat ) const
     {
         if ( localeFormat == NULL )
             localeFormat = "en_US.UTF-8";
@@ -162,7 +162,7 @@ namespace EE
 #ifdef EE_PLATFORM_WINDOWS
         stream_->open( path_, openFlags );
 #else
-        stream_->open( Text::WideToNarrow( path_ ), openFlags );
+        stream_->open( path_, openFlags );
 #endif
 
         return stream_->is_open();
@@ -176,7 +176,7 @@ namespace EE
 #ifdef EE_PLATFORM_WINDOWS
         stream_->open( path_, std::ios::in | std::ios::out | std::ios::trunc );
 #else
-        stream_->open( Text::WideToNarrow( path_ ), std::ios::in | std::ios::out | std::ios::trunc );
+        stream_->open( path_, std::ios::in | std::ios::out | std::ios::trunc );
 #endif
     }
 

@@ -21,13 +21,13 @@ namespace EE
 
 	unsigned char* AudioSample::GetBufferAt( uint32 Offset )
 	{
-		EE_ASSERT( BufferLength - Offset >= 0, L"Trying to copy outside range of audio sample" );
+		EE_ASSERT( BufferLength - Offset >= 0, "Trying to copy outside range of audio sample" );
 		return &Buffer[ Offset ];
 	}
 
 	unsigned char* AudioSample::GetBufferCopy( uint32 Offset, uint32 Length ) const
 	{
-		EE_ASSERT( BufferLength - Offset > 0 || Length > BufferLength - Offset, L"Trying to copy outside range of audio sample" );
+		EE_ASSERT( BufferLength - Offset > 0 || Length > BufferLength - Offset, "Trying to copy outside range of audio sample" );
 		unsigned char* ReturnVal = new unsigned char[ Length ];
 		return (unsigned char*)memcpy( ReturnVal, &Buffer[ Offset ], Length );
 	}

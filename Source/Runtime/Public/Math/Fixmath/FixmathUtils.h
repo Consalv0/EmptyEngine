@@ -15,14 +15,44 @@ namespace EE
         static constexpr fixed<Frac> MaxValue = fixed<Frac>::FromRaw( FIXED_MAX );
         static constexpr fixed<Frac> MinValue = fixed<Frac>::FromRaw( FIXED_MIN );
     };
-
     template <class T>
     inline constexpr bool IsFixedOrFloatingPoint =
-        std::_Is_any_of_v<std::remove_cv_t<T>, float, double, long double,
-        fixed<1>, fixed<2>, fixed<3>, fixed<4>, fixed<5>, fixed<6>, fixed<7>, fixed<8>,
-        fixed<9>, fixed<10>, fixed<11>, fixed<12>, fixed<13>, fixed<14>, fixed<15>, fixed<16>,
-        fixed<17>, fixed<18>, fixed<19>, fixed<20>, fixed<21>, fixed<22>, fixed<23>, fixed<24>,
-        fixed<25>, fixed<26>, fixed<27>, fixed<28>, fixed<29>, fixed<30>, fixed<31>>;
+        std::disjunction_v<
+            std::is_same<std::remove_cv_t<T>, float>,
+            std::is_same<std::remove_cv_t<T>, double>,
+            std::is_same<std::remove_cv_t<T>, long double>,
+            std::is_same<std::remove_cv_t<T>, fixed<1>>,
+            std::is_same<std::remove_cv_t<T>, fixed<2>>,
+            std::is_same<std::remove_cv_t<T>, fixed<3>>,
+            std::is_same<std::remove_cv_t<T>, fixed<4>>,
+            std::is_same<std::remove_cv_t<T>, fixed<5>>,
+            std::is_same<std::remove_cv_t<T>, fixed<6>>,
+            std::is_same<std::remove_cv_t<T>, fixed<7>>,
+            std::is_same<std::remove_cv_t<T>, fixed<8>>,
+            std::is_same<std::remove_cv_t<T>, fixed<9>>,
+            std::is_same<std::remove_cv_t<T>, fixed<10>>,
+            std::is_same<std::remove_cv_t<T>, fixed<11>>,
+            std::is_same<std::remove_cv_t<T>, fixed<12>>,
+            std::is_same<std::remove_cv_t<T>, fixed<13>>,
+            std::is_same<std::remove_cv_t<T>, fixed<14>>,
+            std::is_same<std::remove_cv_t<T>, fixed<15>>,
+            std::is_same<std::remove_cv_t<T>, fixed<16>>,
+            std::is_same<std::remove_cv_t<T>, fixed<17>>,
+            std::is_same<std::remove_cv_t<T>, fixed<18>>,
+            std::is_same<std::remove_cv_t<T>, fixed<19>>,
+            std::is_same<std::remove_cv_t<T>, fixed<20>>,
+            std::is_same<std::remove_cv_t<T>, fixed<21>>,
+            std::is_same<std::remove_cv_t<T>, fixed<22>>,
+            std::is_same<std::remove_cv_t<T>, fixed<23>>,
+            std::is_same<std::remove_cv_t<T>, fixed<24>>,
+            std::is_same<std::remove_cv_t<T>, fixed<25>>,
+            std::is_same<std::remove_cv_t<T>, fixed<26>>,
+            std::is_same<std::remove_cv_t<T>, fixed<27>>,
+            std::is_same<std::remove_cv_t<T>, fixed<28>>,
+            std::is_same<std::remove_cv_t<T>, fixed<29>>,
+            std::is_same<std::remove_cv_t<T>, fixed<30>>,
+            std::is_same<std::remove_cv_t<T>, fixed<31>>
+        >;
 }
 
 namespace EE::Math

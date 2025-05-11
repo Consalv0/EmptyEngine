@@ -1,8 +1,10 @@
 
 #include "CoreMinimal.h"
 
+#include "Utils/TextFormatting.h"
 #include "Files/FileMap.h"
 
+#include "Platform/PrePlatform.h"
 #include "Platform/Platform.h"
 
 namespace EE
@@ -26,7 +28,7 @@ namespace EE
             CloseHandle( fileHandle->readEvent );
             delete fileHandle;
         }
-#elif defined(__APPLE__ || __linux__)
+#elif defined(__APPLE__) || defined(__linux__)
         int handlePtr = (int)(uintptr_t)(*handle);
         if ( handlePtr != -1 )
         {
@@ -35,13 +37,14 @@ namespace EE
 #endif
     }
 
-    FORCEINLINE int OpenFileMap( const File& filePath, void** handle, size_t* outSize )
+    FORCEINLINE int OpenFileMap( const File& filePath, void** handle, uint64* outSize )
     {
 #ifdef _WIN32
         *handle = new FileHandle();
         FileHandle* fileHandle = static_cast<FileHandle*>( *handle );
+        WString pathW = Text::UTF8ToWide( filePath.GetPath().c_str() );
         fileHandle->file = CreateFileW(
-            filePath.GetPath().c_str(),
+            pathW.c_str(),
             GENERIC_READ,
             0,
             nullptr,
@@ -69,9 +72,9 @@ namespace EE
             return static_cast<int>(GetLastError());
         }
 
-        *outSize = static_cast<size_t>(size.QuadPart);
-#elif defined(__APPLE__ || __linux__)
-        NString path = Text::WideToNarrow( filePath.GetPath() );
+        *outSize = size.QuadPart;
+#elif defined(__APPLE__) || defined(__linux__)
+        const U8String& path = filePath.GetPath();
 
         struct stat info;
         if ( -1 == stat( path.c_str(), &info ) )
@@ -99,10 +102,11 @@ namespace EE
         FileHandle* fileHandle = static_cast<FileHandle*>( handle );
         return fileHandle->file != nullptr && fileHandle->file != INVALID_HANDLE_VALUE &&
                fileHandle->readEvent != nullptr && fileHandle->readEvent != INVALID_HANDLE_VALUE;
-#elif defined(__APPLE__ || __linux__)
+#elif defined(__APPLE__) || defined(__linux__)
         int handlePtr = (int)(uintptr_t)(handle);
         return handlePtr != -1;
 #endif
+        return false;
     }
 
     int FileMap::ReadBlock( uint64 offset, uint64 size, void* buffer )
@@ -129,8 +133,6 @@ namespace EE
                 return error_ = static_cast<int>(ec);
             }
         }
-
-        return 0;
 #elif defined( __linux__ )
         EE_ASSERT( buffer_ );
         EE_ASSERT( FileMapHandleValid( handle_ ) );
@@ -147,7 +149,6 @@ namespace EE
         {
             return error_ = errno;
         }
-        return 0;
 #elif defined( __APPLE__ )
         EE_ASSERT( buffer_ );
         EE_ASSERT( FileMapHandleValid( handle_ ) );
@@ -168,8 +169,9 @@ namespace EE
         {
             return error_ = errno;
         }
-        return 0;
 #endif
+
+        return 0;
     }
 
     int FileMap::WaitForResult( uint64* outBytesRead )
@@ -193,8 +195,6 @@ namespace EE
 
         bytesRead_ += bytesRead;
         *outBytesRead = bytesRead;
-
-        return 0;
 #elif defined( __linux__ )
         auto result = pread64( (int)(uintptr_t)handle_, buffer_, size_, offset_ );
 
@@ -208,8 +208,6 @@ namespace EE
 
         bytesRead_ += bytesRead;
         *outBytesRead = bytesRead;
-
-        return 0;
 #elif defined( __APPLE__ )
         auto result = pread( (int)(uintptr_t)handle_, m_buffer, m_size, m_offset );
 
@@ -223,9 +221,9 @@ namespace EE
 
         bytesRead_ += bytesRead;
         *outBytesRead = bytesRead;
+#endif
 
         return 0;
-#endif
     }
 
     FileMap::FileMap( const File& filePath ) : File( filePath ),
@@ -241,3 +239,5 @@ namespace EE
 
     FileMap::operator bool() const { return FileMapHandleValid( handle_ ); }
 }
+
+#include "Platform/PostPlatform.h"

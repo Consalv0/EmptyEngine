@@ -634,9 +634,4 @@ namespace EE
         PipelineStage_OutputColor,
         PipelineStage_Top
     };
-
-    enum class EDynamicRHI
-    {
-        Vulkan
-    };
 }

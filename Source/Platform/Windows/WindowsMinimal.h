@@ -1,7 +1,7 @@
 #pragma once
 
 #if defined(_WINDOWS_) && !defined(EMPTYENGINE_WINDOWS_INCLUDE)
-#pragma message ( "You have included Windows.h before MinWindows.h. All useless stuff from the windows headers won't be excluded" )
+#pragma message ( "You have included Windows.h before WindowsMinimal.h. All useless stuff from the windows headers won't be excluded" )
 #endif // _WINDOWS_
 
 #define EMPTYENGINE_WINDOWS_INCLUDE
@@ -57,3 +57,5 @@
 
 // Now we can include windows.h
 #include <Windows.h>
+
+#include "WindowsPlatformTypes.h"

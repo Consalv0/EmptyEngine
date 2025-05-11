@@ -21,8 +21,13 @@ namespace EE
     {
     }
 
-    File::File( const WString& path )
+    File::File( const U8String& path )
         : path_( path )
+    {
+    }
+
+    File::File( const std::u8string& path )
+        : path_( (U8Char*)path.c_str() )
     {
     }
 
@@ -35,57 +40,57 @@ namespace EE
         return path_.empty() == false;
     }
 
-    WString File::GetExtension() const
+    U8String File::GetExtension() const
     {
-        WString::size_type extensionIndex;
+        U8String::size_type extensionIndex;
 
         extensionIndex = path_.rfind( '.' );
 
-        if ( extensionIndex != WString::npos )
+        if ( extensionIndex != U8String::npos )
         {
             return path_.substr( extensionIndex + 1 );
         }
         else
         {
-            return L"";
+            return "";
         }
     }
 
-    WString File::GetFileName() const
+    U8String File::GetFileName() const
     {
-        WChar separator = L'/';
+        U8Char separator = '/';
 
 #ifdef EE_PLATFORM_WINDOWS
-        separator = L'\\';
+        separator = '\\';
 #endif
 
         size_t i = path_.rfind( separator, path_.length() );
-        if ( i != WString::npos )
+        if ( i != U8String::npos )
         {
             return(path_.substr( i + 1, path_.length() - i ));
         }
 
-        return L"";
+        return "";
     }
 
-    WString File::GetFileNameWithoutExtension() const
+    U8String File::GetFileNameWithoutExtension() const
     {
-        WString fileName = GetFileName();
-        WString extension = GetExtension();
+        U8String fileName = GetFileName();
+        U8String extension = GetExtension();
         fileName = fileName.substr( 0, fileName.size() - extension.size() - 1 );
         return fileName;
     }
 
-    const WString& File::GetPath() const
+    const U8String& File::GetPath() const
     {
         return path_;
     }
 
-    WString File::GetShortPath() const
+    U8String File::GetShortPath() const
     {
-        WString currentDirectory = FileManager::GetAppDirectory();
-        WString returnValue = path_;
-        Text::Replace( returnValue, currentDirectory, L".." );
+        U8String currentDirectory = FileManager::GetAppDirectory();
+        U8String returnValue = path_;
+        Text::Replace( returnValue, currentDirectory, ".." );
 
         return returnValue;
     }

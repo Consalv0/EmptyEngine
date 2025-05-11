@@ -15,8 +15,8 @@ namespace EE
 
     bool ImageImporter::RecognizeFileExtensionAndLoad( ImageResult& info, const Options& options )
     {
-        const WString extension = options.file.GetExtension();
-        if ( Text::CompareIgnoreCase( extension, WString( L"PNG" ) ) )
+        const U8String extension = options.file.GetExtension();
+        if ( Text::CompareIgnoreCase( extension, U8String( "PNG" ) ) )
         {
             return PNGImporter::LoadImage( info, options );
         }
@@ -27,7 +27,7 @@ namespace EE
     {
         if ( std::thread::hardware_concurrency() <= 1 )
         {
-            EE_LOG_WARN( L"The aviable cores ({:d}) are insuficient for asyncronus loaders", std::thread::hardware_concurrency() );
+            EE_LOG_WARN( "The aviable cores ({:d}) are insuficient for asyncronus loaders", std::thread::hardware_concurrency() );
             return false;
         }
 
@@ -90,7 +90,7 @@ namespace EE
         }
 
         TaskRunning = true;
-        EE_LOG_INFO( L"Reading File Image '{}'", options.file.GetShortPath() );
+        EE_LOG_INFO( "Reading File Image '{}'", options.file.GetShortPath() );
         RecognizeFileExtensionAndLoad( info, options );
         TaskRunning = false;
         return info.IsValid();

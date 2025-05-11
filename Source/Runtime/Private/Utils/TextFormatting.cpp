@@ -4,16 +4,16 @@
 
 namespace EE::Text
 {
-    NString ToNarrow(   const int8& number ) { return std::to_string( number ); }
-    NString ToNarrow(  const int16& number ) { return std::to_string( number ); };
-    NString ToNarrow(  const int32& number ) { return std::to_string( number ); };
-    NString ToNarrow(  const int64& number ) { return std::to_string( number ); };
-    NString ToNarrow(  const uint8& number ) { return std::to_string( number ); };
-    NString ToNarrow( const uint16& number ) { return std::to_string( number ); };
-    NString ToNarrow( const uint32& number ) { return std::to_string( number ); };
-    NString ToNarrow( const uint64& number ) { return std::to_string( number ); };
-    NString ToNarrow(  const float& number ) { return std::to_string( number ); };
-    NString ToNarrow( const double& number ) { return std::to_string( number ); };
+    U8String ToUTF8(   const int8& number ) { return std::to_string( number ); }
+    U8String ToUTF8(  const int16& number ) { return std::to_string( number ); };
+    U8String ToUTF8(  const int32& number ) { return std::to_string( number ); };
+    U8String ToUTF8(  const int64& number ) { return std::to_string( number ); };
+    U8String ToUTF8(  const uint8& number ) { return std::to_string( number ); };
+    U8String ToUTF8( const uint16& number ) { return std::to_string( number ); };
+    U8String ToUTF8( const uint32& number ) { return std::to_string( number ); };
+    U8String ToUTF8( const uint64& number ) { return std::to_string( number ); };
+    U8String ToUTF8(  const float& number ) { return std::to_string( number ); };
+    U8String ToUTF8( const double& number ) { return std::to_string( number ); };
 
     WString ToWide(   const int8& number ) { return std::to_wstring( number ); };
     WString ToWide(  const int16& number ) { return std::to_wstring( number ); };
@@ -26,53 +26,53 @@ namespace EE::Text
     WString ToWide(  const float& number ) { return std::to_wstring( number ); };
     WString ToWide( const double& number ) { return std::to_wstring( number ); };
 
-	NString WideToNarrow( const WChar* from )
-	{
-		if ( from == NULL )
-			return "";
+    U8String WideToUTF8( const WChar* from )
+    {
+        if ( from == NULL )
+            return "";
 
-		std::mbstate_t state = std::mbstate_t();
-		size_t sizeNeeded = std::wcsrtombs( NULL, &from, 0, &state );
-		NString to = NString( sizeNeeded, '\0' );
-		std::wcsrtombs( &to[ 0 ], &from, sizeNeeded, &state );
+        std::mbstate_t state = std::mbstate_t();
+        size_t sizeNeeded = std::wcsrtombs( NULL, &from, 0, &state );
+        U8String to = U8String( sizeNeeded, '\0' );
+        std::wcsrtombs( &to[ 0 ], &from, sizeNeeded, &state );
 
-		return to;
-	}
+        return to;
+    }
 
-	WString NarrowToWide( const NChar* from )
-	{
-		if ( from == NULL )
-			return L"";
+    U8String WideToUTF8( const WString& from )
+    {
+        if ( from.empty() )
+            return "";
 
-		std::mbstate_t state = std::mbstate_t();
-		size_t sizeNeeded = std::mbsrtowcs( NULL, &from, 0, &state );
-		WString to = WString( sizeNeeded, L'\0' );
-		std::mbsrtowcs( &to[ 0 ], &from, sizeNeeded, &state );
+        size_t sizeNeeded = std::wcstombs( NULL, &from[ 0 ], 0 );
+        U8String to = U8String( sizeNeeded, '\0' );
+        to.resize( std::wcstombs( &to[ 0 ], from.c_str(), sizeNeeded ) );
 
-		return to;
-	}
+        return to;
+    }
 
-	NString WideToNarrow( const WString& from )
-	{
-		if ( from.empty() )
-			return NString();
+    WString UTF8ToWide( const U8Char* from )
+    {
+        if ( from == NULL )
+            return WString();
 
-		size_t sizeNeeded = std::wcstombs( NULL, &from[ 0 ], 0 );
-		NString to = NString( sizeNeeded, '\0' );
-		to.resize( std::wcstombs( &to[ 0 ], from.c_str(), sizeNeeded ) );
+        std::mbstate_t state = std::mbstate_t();
+        size_t sizeNeeded = std::mbsrtowcs( NULL, &from, 0, &state );
+        WString to = WString( sizeNeeded, L'\0' );
+        std::mbsrtowcs( &to[ 0 ], &from, sizeNeeded, &state );
 
-		return to;
-	}
+        return to;
+    }
 
-	WString NarrowToWide( const NString& from )
-	{
-		if ( from.empty() )
-			return WString();
+    WString UTF8ToWide( const U8String& from )
+    {
+        if ( from.empty() )
+            return WString();
 
-		size_t sizeNeeded = std::mbstowcs( NULL, &from[ 0 ], 0 );
-		WString to = WString( sizeNeeded, '\0' );
-		to.resize( std::mbstowcs( &to[ 0 ], from.c_str(), sizeNeeded ) );
+        size_t sizeNeeded = std::mbstowcs( NULL, &from[ 0 ], 0 );
+        WString to = WString( sizeNeeded, '\0' );
+        to.resize( std::mbstowcs( &to[ 0 ], from.c_str(), sizeNeeded ) );
 
-		return to;
-	}
+        return to;
+    }
 }

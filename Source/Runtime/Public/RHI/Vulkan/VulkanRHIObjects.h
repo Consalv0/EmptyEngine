@@ -116,7 +116,7 @@ namespace EE
 
         bool AddSurfaceSupportDetails( VulkanRHISurface* surface );
 
-        bool IsValid() const;
+        bool IsValid() const override;
 
         FORCEINLINE const uint32& GetPhysicalDeviceCount() const { return physicalDeviceCount; }
         FORCEINLINE const VulkanRHIPhysicalDevice& GetPhysicalDevice( uint32& index ) const { return *physicalDevices[ index ]; }
@@ -137,7 +137,7 @@ namespace EE
 
         VulkanRHIQueue( const VulkanRHIDevice* device, const uint32& familyIndex, const uint32& queueIndex );
 
-        bool IsValid() const;
+        bool IsValid() const override;
 
         FORCEINLINE const VkQueue& GetVulkanQueue() const { return queue; }
 
@@ -185,7 +185,7 @@ namespace EE
 
         FORCEINLINE uint32 GetGraphicsFamilyIndex() const { return graphicsQueueIndex; }
 
-        FORCEINLINE const RHIDeviceLimits& GetLimits() const { return deviceLimits; }
+        FORCEINLINE const RHIDeviceLimits& GetLimits() const override { return deviceLimits; }
 
         FORCEINLINE VulkanRHIQueue* GetVulkanGraphicsQueue() const { return graphicsQueue; }
 
@@ -201,7 +201,7 @@ namespace EE
 
         const VulkanRHICommandPool* GetCommandPool( uint32 familyIndex ) const;
 
-        bool IsValid() const;
+        bool IsValid() const override;
 
     private:
 
@@ -273,7 +273,7 @@ namespace EE
 
         void AquireBackbuffer( uint64 timeout ) override;
 
-        bool IsValid() const;
+        bool IsValid() const override;
 
     protected:
         void RecreateSwapChain();
@@ -364,7 +364,7 @@ namespace EE
 
         const VkImageView& GetVulkanImageView() const { return imageView_; }
 
-        bool IsValid() const;
+        bool IsValid() const override;
 
     private:
         VulkanRHIDevice* device_;
@@ -397,7 +397,7 @@ namespace EE
 
         const EPixelFormat& GetFormat() const override { return pixelFormat_; };
 
-        bool IsValid() const;
+        bool IsValid() const override;
 
     private:
         VulkanRHIDevice* device_;
@@ -427,8 +427,6 @@ namespace EE
         uint32 backImageIndex;
 
     public:
-        bool IsValid() const;
-
         VulkanRHISwapChain( const RHISwapChainCreateInfo& info, const VulkanRHIPresentContext* presentContext, VulkanRHIDevice* device );
 
         ~VulkanRHISwapChain() override;
@@ -448,6 +446,8 @@ namespace EE
         VkImage GetImage( uint32 index ) const { return images[ index ]; }
 
         const VulkanRHITextureView* GetTextureView( uint32 index ) const { return textureViews[ index ]; }
+        
+        bool IsValid() const override;
     };
 
     class VulkanRHISurface final : public RHISurface
@@ -466,7 +466,7 @@ namespace EE
     public:
         FORCEINLINE const VkSurfaceKHR GetVulkanSurface() const { return surface; }
 
-        bool IsValid() const;
+        bool IsValid() const override;
     };
 
     class VulkanRHIFence : public RHIFence
@@ -488,7 +488,7 @@ namespace EE
         void Reset() const override;
         void Wait( uint64 timeout ) const override;
 
-        bool IsValid() const;
+        bool IsValid() const override;
     };
 
     class VulkanRHISemaphore : public RHISemaphore
@@ -506,7 +506,7 @@ namespace EE
 
         FORCEINLINE const VkSemaphore& GetVulkanSemaphore() const { return semaphore; }
 
-        bool IsValid() const;
+        bool IsValid() const override;
     };
 
     // TODO 
@@ -548,7 +548,7 @@ namespace EE
 
         VulkanRHICommandBuffer( const RHICommandBufferCreateInfo& info, VulkanRHIDevice* device, uint32 queueFamilyIndex );
 
-        bool IsValid() const;
+        bool IsValid() const override;
 
         FORCEINLINE const VkCommandBuffer& GetVulkanCommandBuffer() const { return commandBuffer; }
 
@@ -593,7 +593,7 @@ namespace EE
     private:
         VulkanRHIDevice* device;
 
-        const NChar* entryPoint;
+        const U8Char* entryPoint;
 
         VkShaderModule shaderModule;
 
@@ -602,11 +602,11 @@ namespace EE
 
         VulkanRHIShaderStage( const RHIShaderStageCreateInfo& info, VulkanRHIDevice* device );
 
-        bool IsValid() const;
+        bool IsValid() const override;
 
         FORCEINLINE const VkShaderModule GetVulkanShaderModule() const { return shaderModule; }
 
-        const NChar* GetEntryPoint() const override;
+        const U8Char* GetEntryPoint() const override;
     };
 
     class VulkanRHIRenderPass : public RHIRenderPass
@@ -650,7 +650,7 @@ namespace EE
 
         void EndRenderPass( const RHICommandBuffer* cmd ) override;
 
-        bool IsValid() const;
+        bool IsValid() const override;
 
         FORCEINLINE VkRenderPass GetVulkanRenderPass() const { return renderPass; }
     };
@@ -720,7 +720,7 @@ namespace EE
 
         ~VulkanRHIGraphicsPipeline() override;
 
-        bool IsValid() const;
+        bool IsValid() const override;
 
         FORCEINLINE VkPipeline GetVulkanPipeline() const { return pipeline; }
         FORCEINLINE VkPipelineLayout GetVulkanPipelineLayout() const { return pipelineLayout; }

@@ -79,5 +79,5 @@ namespace EE
 
     Application* GMainApplication = NULL;
 
-    extern EE::Application* EE::CreateApplication( int argc, NChar* argv[] );
+    extern EE::Application* CreateApplication( int argc, U8Char* argv[] );
 }

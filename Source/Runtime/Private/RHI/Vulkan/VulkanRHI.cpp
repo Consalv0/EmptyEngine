@@ -16,13 +16,15 @@
 #include <set>
 #include <map>
 
+#ifdef EE_PLATFORM_WINDOWS
 // --- Make discrete GPU by default.
 extern "C" {
-	// --- developer.download.nvidia.com/devzone/devcenter/gamegraphics/files/OptimusRenderingPolicies.pdf
-	__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
-	// --- developer.amd.com/community/blog/2015/10/02/amd-enduro-system-for-developers/
-	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 0x00000001;
+    // --- developer.download.nvidia.com/devzone/devcenter/gamegraphics/files/OptimusRenderingPolicies.pdf
+    __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+    // --- developer.amd.com/community/blog/2015/10/02/amd-enduro-system-for-developers/
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 0x00000001;
 }
+#endif
 
 namespace EE
 {
@@ -777,8 +779,8 @@ namespace EE
     {
         switch ( mode )
         {
-        case RasterMode_Solid:        return VK_FRONT_FACE_COUNTER_CLOCKWISE;
-        case RasterMode_Wireframe:    return VK_FRONT_FACE_CLOCKWISE;
+        case FaceWinding_Clockwise:        return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        case FaceWinding_CounterClockwise: return VK_FRONT_FACE_CLOCKWISE;
         default:
             return VK_FRONT_FACE_COUNTER_CLOCKWISE;
         }
@@ -932,58 +934,58 @@ namespace EE
         }
     }
 
-    static const WChar* GetVKResultString( VkResult result )
+    static const U8Char* GetVKResultString( VkResult result )
     {
         switch ( result )
         {
-        case VK_SUCCESS:                                            return L"VK_SUCCESS";
-        case VK_NOT_READY:                                          return L"VK_NOT_READY";
-        case VK_TIMEOUT:                                            return L"VK_TIMEOUT";
-        case VK_EVENT_SET:                                          return L"VK_EVENT_SET";
-        case VK_EVENT_RESET:                                        return L"VK_EVENT_RESET";
-        case VK_INCOMPLETE:                                         return L"VK_INCOMPLETE";
-        case VK_ERROR_OUT_OF_HOST_MEMORY:                           return L"VK_ERROR_OUT_OF_HOST_MEMORY";
-        case VK_ERROR_OUT_OF_DEVICE_MEMORY:                         return L"VK_ERROR_OUT_OF_DEVICE_MEMORY";
-        case VK_ERROR_INITIALIZATION_FAILED:                        return L"VK_ERROR_INITIALIZATION_FAILED";
-        case VK_ERROR_DEVICE_LOST:                                  return L"VK_ERROR_DEVICE_LOST";
-        case VK_ERROR_MEMORY_MAP_FAILED:                            return L"VK_ERROR_MEMORY_MAP_FAILED";
-        case VK_ERROR_LAYER_NOT_PRESENT:                            return L"VK_ERROR_LAYER_NOT_PRESENT";
-        case VK_ERROR_EXTENSION_NOT_PRESENT:                        return L"VK_ERROR_EXTENSION_NOT_PRESENT";
-        case VK_ERROR_FEATURE_NOT_PRESENT:                          return L"VK_ERROR_FEATURE_NOT_PRESENT";
-        case VK_ERROR_INCOMPATIBLE_DRIVER:                          return L"VK_ERROR_INCOMPATIBLE_DRIVER";
-        case VK_ERROR_TOO_MANY_OBJECTS:                             return L"VK_ERROR_TOO_MANY_OBJECTS";
-        case VK_ERROR_FORMAT_NOT_SUPPORTED:                         return L"VK_ERROR_FORMAT_NOT_SUPPORTED";
-        case VK_ERROR_FRAGMENTED_POOL:                              return L"VK_ERROR_FRAGMENTED_POOL";
-        case VK_ERROR_UNKNOWN:                                      return L"VK_ERROR_UNKNOWN";
-        case VK_ERROR_OUT_OF_POOL_MEMORY:                           return L"VK_ERROR_OUT_OF_POOL_MEMORY";
-        case VK_ERROR_INVALID_EXTERNAL_HANDLE:                      return L"VK_ERROR_INVALID_EXTERNAL_HANDLE";
-        case VK_ERROR_FRAGMENTATION:                                return L"VK_ERROR_FRAGMENTATION";
-        case VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS:               return L"VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS";
-        case VK_PIPELINE_COMPILE_REQUIRED:                          return L"VK_PIPELINE_COMPILE_REQUIRED";
-        case VK_ERROR_SURFACE_LOST_KHR:                             return L"VK_ERROR_SURFACE_LOST_KHR";
-        case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR:                     return L"VK_ERROR_NATIVE_WINDOW_IN_USE_KHR";
-        case VK_SUBOPTIMAL_KHR:                                     return L"VK_SUBOPTIMAL_KHR";
-        case VK_ERROR_OUT_OF_DATE_KHR:                              return L"VK_ERROR_OUT_OF_DATE_KHR";
-        case VK_ERROR_INCOMPATIBLE_DISPLAY_KHR:                     return L"VK_ERROR_INCOMPATIBLE_DISPLAY_KHR";
-        case VK_ERROR_VALIDATION_FAILED_EXT:                        return L"VK_ERROR_VALIDATION_FAILED_EXT";
-        case VK_ERROR_INVALID_SHADER_NV:                            return L"VK_ERROR_INVALID_SHADER_NV";
-        case VK_ERROR_IMAGE_USAGE_NOT_SUPPORTED_KHR:                return L"VK_ERROR_IMAGE_USAGE_NOT_SUPPORTED_KHR";
-        case VK_ERROR_VIDEO_PICTURE_LAYOUT_NOT_SUPPORTED_KHR:       return L"VK_ERROR_VIDEO_PICTURE_LAYOUT_NOT_SUPPORTED_KHR";
-        case VK_ERROR_VIDEO_PROFILE_OPERATION_NOT_SUPPORTED_KHR:    return L"VK_ERROR_VIDEO_PROFILE_OPERATION_NOT_SUPPORTED_KHR";
-        case VK_ERROR_VIDEO_PROFILE_FORMAT_NOT_SUPPORTED_KHR:       return L"VK_ERROR_VIDEO_PROFILE_FORMAT_NOT_SUPPORTED_KHR";
-        case VK_ERROR_VIDEO_PROFILE_CODEC_NOT_SUPPORTED_KHR:        return L"VK_ERROR_VIDEO_PROFILE_CODEC_NOT_SUPPORTED_KHR";
-        case VK_ERROR_VIDEO_STD_VERSION_NOT_SUPPORTED_KHR:          return L"VK_ERROR_VIDEO_STD_VERSION_NOT_SUPPORTED_KHR";
-        case VK_ERROR_INVALID_DRM_FORMAT_MODIFIER_PLANE_LAYOUT_EXT: return L"VK_ERROR_INVALID_DRM_FORMAT_MODIFIER_PLANE_LAYOUT_EXT";
-        case VK_ERROR_NOT_PERMITTED_KHR:                            return L"VK_ERROR_NOT_PERMITTED_KHR";
-        case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT:          return L"VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT";
-        case VK_THREAD_IDLE_KHR:                                    return L"VK_THREAD_IDLE_KHR";
-        case VK_THREAD_DONE_KHR:                                    return L"VK_THREAD_DONE_KHR";
-        case VK_OPERATION_DEFERRED_KHR:                             return L"VK_OPERATION_DEFERRED_KHR";
-        case VK_OPERATION_NOT_DEFERRED_KHR:                         return L"VK_OPERATION_NOT_DEFERRED_KHR";
-        case VK_ERROR_INVALID_VIDEO_STD_PARAMETERS_KHR:             return L"VK_ERROR_INVALID_VIDEO_STD_PARAMETERS_KHR";
-        case VK_ERROR_COMPRESSION_EXHAUSTED_EXT:                    return L"VK_ERROR_COMPRESSION_EXHAUSTED_EXT";
-        case VK_INCOMPATIBLE_SHADER_BINARY_EXT:                     return L"VK_INCOMPATIBLE_SHADER_BINARY_EXT";
-        default: return L"Unkown";
+        case VK_SUCCESS:                                            return "VK_SUCCESS";
+        case VK_NOT_READY:                                          return "VK_NOT_READY";
+        case VK_TIMEOUT:                                            return "VK_TIMEOUT";
+        case VK_EVENT_SET:                                          return "VK_EVENT_SET";
+        case VK_EVENT_RESET:                                        return "VK_EVENT_RESET";
+        case VK_INCOMPLETE:                                         return "VK_INCOMPLETE";
+        case VK_ERROR_OUT_OF_HOST_MEMORY:                           return "VK_ERROR_OUT_OF_HOST_MEMORY";
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:                         return "VK_ERROR_OUT_OF_DEVICE_MEMORY";
+        case VK_ERROR_INITIALIZATION_FAILED:                        return "VK_ERROR_INITIALIZATION_FAILED";
+        case VK_ERROR_DEVICE_LOST:                                  return "VK_ERROR_DEVICE_LOST";
+        case VK_ERROR_MEMORY_MAP_FAILED:                            return "VK_ERROR_MEMORY_MAP_FAILED";
+        case VK_ERROR_LAYER_NOT_PRESENT:                            return "VK_ERROR_LAYER_NOT_PRESENT";
+        case VK_ERROR_EXTENSION_NOT_PRESENT:                        return "VK_ERROR_EXTENSION_NOT_PRESENT";
+        case VK_ERROR_FEATURE_NOT_PRESENT:                          return "VK_ERROR_FEATURE_NOT_PRESENT";
+        case VK_ERROR_INCOMPATIBLE_DRIVER:                          return "VK_ERROR_INCOMPATIBLE_DRIVER";
+        case VK_ERROR_TOO_MANY_OBJECTS:                             return "VK_ERROR_TOO_MANY_OBJECTS";
+        case VK_ERROR_FORMAT_NOT_SUPPORTED:                         return "VK_ERROR_FORMAT_NOT_SUPPORTED";
+        case VK_ERROR_FRAGMENTED_POOL:                              return "VK_ERROR_FRAGMENTED_POOL";
+        case VK_ERROR_UNKNOWN:                                      return "VK_ERROR_UNKNOWN";
+        case VK_ERROR_OUT_OF_POOL_MEMORY:                           return "VK_ERROR_OUT_OF_POOL_MEMORY";
+        case VK_ERROR_INVALID_EXTERNAL_HANDLE:                      return "VK_ERROR_INVALID_EXTERNAL_HANDLE";
+        case VK_ERROR_FRAGMENTATION:                                return "VK_ERROR_FRAGMENTATION";
+        case VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS:               return "VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS";
+        case VK_PIPELINE_COMPILE_REQUIRED:                          return "VK_PIPELINE_COMPILE_REQUIRED";
+        case VK_ERROR_SURFACE_LOST_KHR:                             return "VK_ERROR_SURFACE_LOST_KHR";
+        case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR:                     return "VK_ERROR_NATIVE_WINDOW_IN_USE_KHR";
+        case VK_SUBOPTIMAL_KHR:                                     return "VK_SUBOPTIMAL_KHR";
+        case VK_ERROR_OUT_OF_DATE_KHR:                              return "VK_ERROR_OUT_OF_DATE_KHR";
+        case VK_ERROR_INCOMPATIBLE_DISPLAY_KHR:                     return "VK_ERROR_INCOMPATIBLE_DISPLAY_KHR";
+        case VK_ERROR_VALIDATION_FAILED_EXT:                        return "VK_ERROR_VALIDATION_FAILED_EXT";
+        case VK_ERROR_INVALID_SHADER_NV:                            return "VK_ERROR_INVALID_SHADER_NV";
+        case VK_ERROR_IMAGE_USAGE_NOT_SUPPORTED_KHR:                return "VK_ERROR_IMAGE_USAGE_NOT_SUPPORTED_KHR";
+        case VK_ERROR_VIDEO_PICTURE_LAYOUT_NOT_SUPPORTED_KHR:       return "VK_ERROR_VIDEO_PICTURE_LAYOUT_NOT_SUPPORTED_KHR";
+        case VK_ERROR_VIDEO_PROFILE_OPERATION_NOT_SUPPORTED_KHR:    return "VK_ERROR_VIDEO_PROFILE_OPERATION_NOT_SUPPORTED_KHR";
+        case VK_ERROR_VIDEO_PROFILE_FORMAT_NOT_SUPPORTED_KHR:       return "VK_ERROR_VIDEO_PROFILE_FORMAT_NOT_SUPPORTED_KHR";
+        case VK_ERROR_VIDEO_PROFILE_CODEC_NOT_SUPPORTED_KHR:        return "VK_ERROR_VIDEO_PROFILE_CODEC_NOT_SUPPORTED_KHR";
+        case VK_ERROR_VIDEO_STD_VERSION_NOT_SUPPORTED_KHR:          return "VK_ERROR_VIDEO_STD_VERSION_NOT_SUPPORTED_KHR";
+        case VK_ERROR_INVALID_DRM_FORMAT_MODIFIER_PLANE_LAYOUT_EXT: return "VK_ERROR_INVALID_DRM_FORMAT_MODIFIER_PLANE_LAYOUT_EXT";
+        case VK_ERROR_NOT_PERMITTED_KHR:                            return "VK_ERROR_NOT_PERMITTED_KHR";
+        case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT:          return "VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT";
+        case VK_THREAD_IDLE_KHR:                                    return "VK_THREAD_IDLE_KHR";
+        case VK_THREAD_DONE_KHR:                                    return "VK_THREAD_DONE_KHR";
+        case VK_OPERATION_DEFERRED_KHR:                             return "VK_OPERATION_DEFERRED_KHR";
+        case VK_OPERATION_NOT_DEFERRED_KHR:                         return "VK_OPERATION_NOT_DEFERRED_KHR";
+        case VK_ERROR_INVALID_VIDEO_STD_PARAMETERS_KHR:             return "VK_ERROR_INVALID_VIDEO_STD_PARAMETERS_KHR";
+        case VK_ERROR_COMPRESSION_EXHAUSTED_EXT:                    return "VK_ERROR_COMPRESSION_EXHAUSTED_EXT";
+        case VK_INCOMPATIBLE_SHADER_BINARY_EXT:                     return "VK_INCOMPATIBLE_SHADER_BINARY_EXT";
+        default: return "Unkown";
         }
     }
 
@@ -1020,29 +1022,29 @@ namespace EE
     {
         if ( messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT )
         {
-            EE_LOG_ERROR( L"Vulkan: {}", Text::NarrowToWide( callbackData->pMessage ) );
+            EE_LOG_ERROR( "Vulkan: {}", callbackData->pMessage );
             return VK_FALSE;
         }
         if ( messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT )
         {
-            EE_LOG_WARN( L"Vulkan: {}", Text::NarrowToWide( callbackData->pMessage ) );
+            EE_LOG_WARN( "Vulkan: {}", callbackData->pMessage );
             return VK_FALSE;
         }
         if ( messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT )
         {
-            EE_LOG_INFO( L"Vulkan: {}", Text::NarrowToWide( callbackData->pMessage ) );
+            EE_LOG_INFO( "Vulkan: {}", callbackData->pMessage );
             return VK_FALSE;
         }
         if ( messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT )
         {
-            EE_LOG_INFO( L"Vulkan: {}", Text::NarrowToWide( callbackData->pMessage ) );
+            EE_LOG_INFO( "Vulkan: {}", callbackData->pMessage );
             return VK_FALSE;
         }
         return VK_FALSE;
     }
 #endif
 
-    const TArray<const NChar*> DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+    const TArray<const U8Char*> DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
     const float QueuePriorities[] = { 1.0F };
 
     VulkanRHIPhysicalDevice::VulkanRHIPhysicalDevice( VkInstance instance, VkPhysicalDevice physicalDevice ) :
@@ -1151,8 +1153,8 @@ namespace EE
         }
 
         EE_LOG_INFO(
-            L"\u2570\u2500> {0} : {1}",
-            Text::NarrowToWide( deviceProperties_.deviceName ),
+            "\u2570\u2500> {0} : {1}",
+            deviceProperties_.deviceName,
             score
         );
 
@@ -1217,7 +1219,7 @@ namespace EE
         VkResult createResult = vkCreateInstance( &createInfo, VK_NULL_HANDLE, &instance );
         if ( createResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"vkCreateInstance failed : {}", GetVKResultString( createResult ) );
+            EE_LOG_CRITICAL( "vkCreateInstance failed : {}", GetVKResultString( createResult ) );
             return;
         }
 
@@ -1225,11 +1227,11 @@ namespace EE
         vkEnumeratePhysicalDevices( instance, &physicalDeviceCount, VK_NULL_HANDLE );
         if ( physicalDeviceCount == 0 )
         {
-            EE_LOG_CRITICAL( L"Failed to find GPUs with Vulkan support!" );
+            EE_LOG_CRITICAL( "Failed to find GPUs with Vulkan support!" );
             return;
         }
 
-        EE_LOG_INFO( L"\u250C> Available devices : {}", physicalDeviceCount );
+        EE_LOG_INFO( "\u250C> Available devices : {}", physicalDeviceCount );
 
         // Get physical device info
         TArray<VkPhysicalDevice> vulkanPhysicalDevices( physicalDeviceCount );
@@ -1279,7 +1281,7 @@ namespace EE
 
         if ( selection < 0 )
         {
-            EE_LOG_CRITICAL( L"Failed to find a suitable device!" );
+            EE_LOG_CRITICAL( "Failed to find a suitable device!" );
             return false;
         }
 
@@ -1328,7 +1330,7 @@ namespace EE
         : physicalDevice( instance->GetSelectedPhysicalDevice() ),
         presentQueue( NULL ), graphicsQueue( NULL ), deviceLimits()
     {
-        EE_ASSERT( GVulkanDevice == NULL, L"Creating a second device!, Aborting..." );
+        EE_ASSERT( GVulkanDevice == NULL, "Creating a second device!, Aborting..." );
 
         auto properties = physicalDevice->GetProperties();
         deviceLimits.minUniformBufferOffsetAlignment = properties.limits.minUniformBufferOffsetAlignment;
@@ -1391,13 +1393,13 @@ namespace EE
         EE_ASSERT
         (
             vkCreateDevice( physicalDevice->GetPhysicalDevice(), &deviceCreateInfo, nullptr, &device ) == VK_SUCCESS,
-            L"Failed to create logical device!"
+            "Failed to create logical device!"
         );
 
         EE_ASSERT
         (
             CreateNativeVmaAllocator( instance->GetVulkanInstance(), physicalDevice->GetPhysicalDevice(), device, &allocator ) == VK_SUCCESS,
-            L"Failed to create VMA Allocator!"
+            "Failed to create VMA Allocator!"
         );
 
         graphicsQueue = new VulkanRHIQueue( this, graphicsQueueIndex = indices.graphicsFamily.value(), 0 );
@@ -1510,7 +1512,7 @@ namespace EE
         }
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to present image: {}! {}", swapChain->BackImageIndex(), GetVKResultString( result )  );
+            EE_LOG_CRITICAL( "Failed to present image: {}! {}", swapChain->BackImageIndex(), GetVKResultString( result )  );
         }
         return true;
     }
@@ -1771,13 +1773,13 @@ namespace EE
         VkResult result = vkQueueSubmit( queue, 1, &vkSubmitInfo, nativeFence );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed command vkQueueSubmit! {}", GetVKResultString( result ) );
+            EE_LOG_CRITICAL( "Failed command vkQueueSubmit! {}", GetVKResultString( result ) );
         }
     }
 
     VulkanRHIBuffer::~VulkanRHIBuffer()
     {
-        if ( buffer != NULL )
+        if ( buffer != VK_NULL_HANDLE )
         {
             vmaDestroyBuffer( device->GetVulkanAllocator(), buffer, NULL );
         }
@@ -1817,7 +1819,7 @@ namespace EE
         VkResult createResult = vkCreateBuffer( device->GetVulkanDevice(), &bufferInfo, nullptr, &buffer );
         if ( createResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create buffer! {}", GetVKResultString( createResult ) );
+            EE_LOG_CRITICAL( "Failed to create buffer! {}", GetVKResultString( createResult ) );
         }
 
         VmaAllocationCreateInfo allocInfo
@@ -1838,7 +1840,7 @@ namespace EE
         VkResult memoryResult = vmaCreateBuffer( device->GetVulkanAllocator(), &bufferInfo, &allocInfo, &buffer, &nativeAllocation, VK_NULL_HANDLE );
         if ( memoryResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to allocate buffer memory! {}", GetVKResultString( memoryResult ) );
+            EE_LOG_CRITICAL( "Failed to allocate buffer memory! {}", GetVKResultString( memoryResult ) );
         }
     }
 
@@ -1868,7 +1870,7 @@ namespace EE
         VkResult result = vmaMapMemory( device->GetVulkanAllocator(), nativeAllocation, &gpuData);
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to open memory map for buffer {}!", (int32)result );
+            EE_LOG_CRITICAL( "Failed to open memory map for buffer {}!", (int32)result );
             return;
         }
 
@@ -1882,7 +1884,7 @@ namespace EE
         VkResult result = vmaBindBufferMemory( device->GetVulkanAllocator(), nativeAllocation, buffer );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to bind buffer memory {}!", (int32)result );
+            EE_LOG_CRITICAL( "Failed to bind buffer memory {}!", (int32)result );
         }
     }
 
@@ -1919,7 +1921,7 @@ namespace EE
         VkResult result = vkCreateSampler( device_->GetVulkanDevice(), &samplerInfo, NULL, &sampler_ );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create sampler! {}", GetVKResultString( result ) );
+            EE_LOG_CRITICAL( "Failed to create sampler! {}", GetVKResultString( result ) );
         }
     }
 
@@ -1969,7 +1971,7 @@ namespace EE
         VkResult result = vkCreateImageView( device->GetVulkanDevice(), &viewInfo, nullptr, &imageView_ );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create texture image view! {}", GetVKResultString( result ) );
+            EE_LOG_CRITICAL( "Failed to create texture image view! {}", GetVKResultString( result ) );
         }
     }
 
@@ -2033,7 +2035,7 @@ namespace EE
         VkResult imageResult = vkCreateImage( device->GetVulkanDevice(), &imageInfo, VK_NULL_HANDLE, &image_ );
         if ( imageResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create image! {}", GetVKResultString( imageResult ) );
+            EE_LOG_CRITICAL( "Failed to create image! {}", GetVKResultString( imageResult ) );
             return;
         }
 
@@ -2052,7 +2054,7 @@ namespace EE
         VkResult memoryResult = vmaCreateImage( device->GetVulkanAllocator(), &imageInfo, &allocInfo, &image_, &memory_, NULL );
         if ( memoryResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to allocate image memory! {}", GetVKResultString( memoryResult ) );
+            EE_LOG_CRITICAL( "Failed to allocate image memory! {}", GetVKResultString( memoryResult ) );
             return;
         }
     }
@@ -2114,7 +2116,7 @@ namespace EE
 
         if ( contains == false )
         {
-            EE_LOG_CRITICAL( L"Surface format {}, {} is not supported!", (uint32)info.format, (uint32)info.colorSpace );
+            EE_LOG_CRITICAL( "Surface format {}, {} is not supported!", (uint32)info.format, (uint32)info.colorSpace );
             return;
         }
 
@@ -2164,7 +2166,7 @@ namespace EE
         else
         {
             createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-            EE_LOG_ERROR( L"Falied to create surface with composite alpha, valid formats {}", (uint32)surfaceDetails.capabilities.supportedCompositeAlpha );
+            EE_LOG_ERROR( "Falied to create surface with composite alpha, valid formats {}", (uint32)surfaceDetails.capabilities.supportedCompositeAlpha );
         }
 
         createInfo.preTransform = surfaceDetails.capabilities.currentTransform;
@@ -2175,7 +2177,7 @@ namespace EE
         VkResult result = vkCreateSwapchainKHR( device->GetVulkanDevice(), &createInfo, NULL, &swapChain );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed vkCreateSwapchainKHR! {}", GetVKResultString( result ) );
+            EE_LOG_CRITICAL( "Failed vkCreateSwapchainKHR! {}", GetVKResultString( result ) );
         }
 
         vkGetSwapchainImagesKHR( device->GetVulkanDevice(), swapChain, &imageCount, NULL );
@@ -2239,12 +2241,12 @@ namespace EE
         VkResult result = vkAcquireNextImageKHR( device->GetVulkanDevice(), swapChain, timeout, vulkanSemaphore, VK_NULL_HANDLE, &backImageIndex );
         if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR )
         {
-            EE_LOG_INFO( L"Swap chain out of date!" );
+            EE_LOG_INFO( "Swap chain out of date!" );
             return false;
         }
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed vkAcquireNextImageKHR! {}", GetVKResultString( result ) );
+            EE_LOG_CRITICAL( "Failed vkAcquireNextImageKHR! {}", GetVKResultString( result ) );
         }
 
         return true;
@@ -2261,7 +2263,7 @@ namespace EE
     {
         if ( SDL_Vulkan_CreateSurface( (SDL_Window*)window->GetWindowHandle(), instance->GetVulkanInstance(), VK_NULL_HANDLE, &surface ) == false )
         {
-            EE_LOG_CRITICAL( L"Failed SDL_Vulkan_CreateSurface! {}", Text::NarrowToWide( SDL_GetError() ) );
+            EE_LOG_CRITICAL( "Failed SDL_Vulkan_CreateSurface! {}", SDL_GetError() );
             return;
         }
 
@@ -2292,7 +2294,7 @@ namespace EE
         auto createResult = vkCreateFence( device->GetVulkanDevice(), &fenceCreateInfo, nullptr, &fence);
         if ( createResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to fence: {}", GetVKResultString( createResult ) );
+            EE_LOG_CRITICAL( "Failed to fence: {}", GetVKResultString( createResult ) );
         }
     }
 
@@ -2306,7 +2308,7 @@ namespace EE
         auto result = vkResetFences( device->GetVulkanDevice(), 1, &fence );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed reset fence: {}", GetVKResultString( result ) );
+            EE_LOG_CRITICAL( "Failed reset fence: {}", GetVKResultString( result ) );
         }
     }
 
@@ -2315,7 +2317,7 @@ namespace EE
         auto result = vkWaitForFences( device->GetVulkanDevice(), 1, &fence, VK_TRUE, timeout );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed wait fence: {}", GetVKResultString( result ) );
+            EE_LOG_CRITICAL( "Failed wait fence: {}", GetVKResultString( result ) );
         }
     }
 
@@ -2343,7 +2345,7 @@ namespace EE
         auto createResult = vkCreateSemaphore( device->GetVulkanDevice(), &createInfo, nullptr, &semaphore );
         if ( createResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create semaphore: {}", GetVKResultString( createResult ) );
+            EE_LOG_CRITICAL( "Failed to create semaphore: {}", GetVKResultString( createResult ) );
         }
     }
 
@@ -2380,7 +2382,7 @@ namespace EE
         auto createResult = vkCreateCommandPool( device->GetVulkanDevice(), &createInfo, NULL, &commandPool );
         if ( createResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create command pool: {}", GetVKResultString( createResult ) );
+            EE_LOG_CRITICAL( "Failed to create command pool: {}", GetVKResultString( createResult ) );
         }
     }
 
@@ -2405,7 +2407,7 @@ namespace EE
         VkResult result = vkAllocateCommandBuffers( device->GetVulkanDevice(), &allocateInfo, &commandBuffer );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Unable to allocate command buffer {}", GetVKResultString( result ) );
+            EE_LOG_CRITICAL( "Unable to allocate command buffer {}", GetVKResultString( result ) );
         }
     }
 
@@ -2427,7 +2429,7 @@ namespace EE
         auto result = vkBeginCommandBuffer( commandBuffer, &beginInfo );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to end command buffer {}", GetVKResultString( result ) );
+            EE_LOG_CRITICAL( "Failed to end command buffer {}", GetVKResultString( result ) );
         }
     }
 
@@ -2436,7 +2438,7 @@ namespace EE
         auto result = vkEndCommandBuffer( commandBuffer );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to end command buffer {}", GetVKResultString( result ) );
+            EE_LOG_CRITICAL( "Failed to end command buffer {}", GetVKResultString( result ) );
         }
     }
 
@@ -2665,7 +2667,7 @@ namespace EE
         VkResult result = vkCreateShaderModule( device->GetVulkanDevice(), &createInfo, nullptr, &shaderModule );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_ERROR( L"Failed to create shader module! {}", GetVKResultString( result ) );
+            EE_LOG_ERROR( "Failed to create shader module! {}", GetVKResultString( result ) );
             return;
         }
     }
@@ -2675,7 +2677,7 @@ namespace EE
         return shaderModule != VK_NULL_HANDLE;
     }
 
-    const NChar* VulkanRHIShaderStage::GetEntryPoint() const
+    const U8Char* VulkanRHIShaderStage::GetEntryPoint() const
     {
         return entryPoint;
     }
@@ -2826,13 +2828,13 @@ namespace EE
         VkResult result = vkCreateRenderPass( device->GetVulkanDevice(), &renderPassInfo, NULL, &renderPass );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create render pass {}", GetVKResultString( result ) );
+            EE_LOG_CRITICAL( "Failed to create render pass {}", GetVKResultString( result ) );
         }
     }
 
     void VulkanRHIRenderPass::SetAttachments( uint32 attachmentCount, const RHITextureView** textureViews )
     {
-        size_t hash = 0;
+        uint64 hash = 0;
         TArray<VkImageView> imageViews( attachmentCount );
         for ( uint32 i = 0; i < attachmentCount; i++ )
         {
@@ -2859,7 +2861,7 @@ namespace EE
             VkResult result = vkCreateFramebuffer( device->GetVulkanDevice(), &framebufferInfo, nullptr, &framebuffer );
             if ( result != VK_SUCCESS )
             {
-                EE_LOG_CRITICAL( L"Failed to create frame buffer! {}", GetVKResultString( result ) );
+                EE_LOG_CRITICAL( "Failed to create frame buffer! {}", GetVKResultString( result ) );
                 return;
             }
 
@@ -2955,7 +2957,7 @@ namespace EE
         VkResult descriptorResult = vkCreateDescriptorSetLayout( device->GetVulkanDevice(), &descriptorInfo, NULL, &descriptorSetLayout );
         if ( descriptorResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create descriptor set layout {}", GetVKResultString( descriptorResult ) );
+            EE_LOG_CRITICAL( "Failed to create descriptor set layout {}", GetVKResultString( descriptorResult ) );
         }
     }
 
@@ -2996,7 +2998,7 @@ namespace EE
         VkResult result = vkCreateDescriptorPool( device_->GetVulkanDevice(), &poolInfo, NULL, &pool_ );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create descriptor set pool {}", GetVKResultString( result ) );
+            EE_LOG_CRITICAL( "Failed to create descriptor set pool {}", GetVKResultString( result ) );
         }
     }
 
@@ -3020,7 +3022,7 @@ namespace EE
         VkResult allocateResult = vkAllocateDescriptorSets( device->GetVulkanDevice(), &allocInfo, &descriptorSet_ );
         if ( allocateResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to allocate descriptor set {}", GetVKResultString( allocateResult ) );
+            EE_LOG_CRITICAL( "Failed to allocate descriptor set {}", GetVKResultString( allocateResult ) );
         }
 
         const uint32 bindingCount = (uint32)info.bindings.size();
@@ -3087,7 +3089,7 @@ namespace EE
                 if ( ( binding.type == BindingType_Uniform || binding.type == BindingType_UniformDynamic) 
                     && ( binding.bufferRange > device->GetLimits().maxUniformBufferRange ) )
                 {
-                    EE_LOG_WARN( L"Uniform buffer binding has a range ({}), which is higher than the device limits ({}).",
+                    EE_LOG_WARN( "Uniform buffer binding has a range ({}), which is higher than the device limits ({}).",
                         binding.bufferRange, device->GetLimits().maxUniformBufferRange );
                 }
                 VkDescriptorBufferInfo bufferInfo
@@ -3389,7 +3391,7 @@ namespace EE
         VkResult layoutResult = vkCreatePipelineLayout( device->GetVulkanDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout );
         if ( layoutResult != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create pipeline layout {}", GetVKResultString( layoutResult ) );
+            EE_LOG_CRITICAL( "Failed to create pipeline layout {}", GetVKResultString( layoutResult ) );
         }
 
         VkPipelineRenderingCreateInfo pipelineRenderingCreateInfo
@@ -3431,7 +3433,7 @@ namespace EE
         VkResult result = vkCreateGraphicsPipelines( device->GetVulkanDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, NULL, &pipeline);
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create graphics pipeline {}", GetVKResultString( result ) );
+            EE_LOG_CRITICAL( "Failed to create graphics pipeline {}", GetVKResultString( result ) );
         }
     }
     
@@ -3465,7 +3467,7 @@ namespace EE
             }
         }
 
-        EE_LOG_CRITICAL( L"Failed to find suitable memory type!" );
+        EE_LOG_CRITICAL( "Failed to find suitable memory type!" );
         return -1;
     }
 
@@ -3484,7 +3486,7 @@ namespace EE
 
         if ( SDL_Vulkan_LoadLibrary( nullptr ) == false )
         {
-            EE_LOG_CRITICAL( L"Failed to load SDL Vulkan Library! {}", Text::NarrowToWide( SDL_GetError() ) );
+            EE_LOG_CRITICAL( "Failed to load SDL Vulkan Library! {}", SDL_GetError() );
         }
 
         uint32 layerCount;
@@ -3492,7 +3494,7 @@ namespace EE
         TArray<VkLayerProperties> availableLayers( layerCount );
         vkEnumerateInstanceLayerProperties( &layerCount, availableLayers.data() );
 
-        TArray<const NChar*> layers;
+        TArray<const U8Char*> layers;
 #if defined(EMPTYENGINE_CORE_LOG) && defined(EE_CORE_VULKAN_VALIDATION_LAYER)
         for ( uint32 i = 0; i < layerCount; i++ )
         {
@@ -3504,10 +3506,10 @@ namespace EE
 #endif
 
         uint32 extensionCount;
-        const NChar* const* extensionNames = NULL;
+        const U8Char* const* extensionNames = NULL;
         GetVulkanInstanceExtensions( &extensionCount, extensionNames );
 
-        TArray<const NChar*> extensions;
+        TArray<const U8Char*> extensions;
         for ( uint32 i = 0; i < extensionCount; i++ )
         {
             extensions.emplace_back( extensionNames[ i ] );
@@ -3550,7 +3552,7 @@ namespace EE
         vkCreateDebugUtilsMessenger = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr( GVulkanInstance->GetVulkanInstance(), "vkCreateDebugUtilsMessengerEXT");
         if ( vkCreateDebugUtilsMessenger == VK_NULL_HANDLE )
         {
-            EE_LOG_CRITICAL( L"Failed to find function vkCreateDebugUtilsMessengerEXT" );
+            EE_LOG_CRITICAL( "Failed to find function vkCreateDebugUtilsMessengerEXT" );
             return;
         }
         
@@ -3573,25 +3575,25 @@ namespace EE
         VkResult result = vkCreateDebugUtilsMessenger( GVulkanInstance->GetVulkanInstance(), &messageCreateInfo, NULL, &GVulkanDebugMessager );
         if ( result != VK_SUCCESS )
         {
-            EE_LOG_CRITICAL( L"Failed to create vulkan messenger {}", GetVKResultString( result ) );
+            EE_LOG_CRITICAL( "Failed to create vulkan messenger {}", GetVKResultString( result ) );
         }
 #endif
     }
 
-	void VulkanRHI::SetName( RHIResource* pResource, const NChar* name ) { }
+    void VulkanRHI::SetName( RHIResource* pResource, const U8Char* name ) { }
 
-	void VulkanRHI::WaitForDevice() const { }
+    void VulkanRHI::WaitForDevice() const { }
 
     const RHIDevice* VulkanRHI::GetRHIDevice() const
     {
         return GVulkanDevice;
     }
 
-    const WString& VulkanRHI::GetName() const
+    const U8String& VulkanRHI::GetName() const
     {
-        static WString const deviceName = L"Vulkan " 
-            + Text::FormatUnit( VK_API_VERSION_MAJOR( VK_HEADER_VERSION_COMPLETE ), 0 ) + L'.'
-            + Text::FormatUnit( VK_API_VERSION_MINOR( VK_HEADER_VERSION_COMPLETE ), 0 ) + L'.' 
+        static U8String const deviceName = "Vulkan " 
+            + Text::FormatUnit( VK_API_VERSION_MAJOR( VK_HEADER_VERSION_COMPLETE ), 0 ) + '.'
+            + Text::FormatUnit( VK_API_VERSION_MINOR( VK_HEADER_VERSION_COMPLETE ), 0 ) + '.' 
             + Text::FormatUnit( VK_API_VERSION_PATCH( VK_HEADER_VERSION_COMPLETE ), 0 );
         return deviceName;
     }

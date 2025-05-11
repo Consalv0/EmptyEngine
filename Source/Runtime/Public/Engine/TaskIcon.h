@@ -6,12 +6,12 @@ namespace EE
 
     struct TaskIconCreateInfo
     {
-        WString name = L"Empty Engine";
+        U8String name = "Empty Engine";
     };
 
     struct TaskIconMenuItemCreateInfo
     {
-        WString label = L"Label";
+        U8String label = "Label";
         void* userData;
         MenuItemCallback callback;
     };
@@ -23,12 +23,12 @@ namespace EE
         virtual ~TaskIcon() {};
 
         //* Rename the icon name
-        virtual void SetName( const WString& newName ) = 0;
+        virtual void SetName( const U8String& newName ) = 0;
 
         virtual void AddMenuItem( const TaskIconMenuItemCreateInfo& menu ) = 0;
 
         //* Get the icon name
-        virtual const WString& GetName() const = 0;
+        virtual const U8String& GetName() const = 0;
     };
 
     //* Creates a task menu icon

@@ -5,42 +5,32 @@ namespace EE
     class Name
     {
     private:
-       size_t number;
-       size_t id;
+       uint64 number;
+       uint64 id;
 
     private:
        Name() = delete;
 
     public:
-       Name( const WString& text );
+       Name( const U8String& text );
        
-       Name( const WChar* text );
+       Name( const U8Char* text );
        
-       Name( const NString& text );
-       
-       Name( const NChar* text );
-       
-       Name( size_t number );
+       Name( uint64 number );
 
-       Name( const WString& text, size_t number );
-
-       Name( const NChar* text, size_t number );
+       Name( const U8Char* text, uint64 number );
        
        ~Name();
        
-       const WString& GetName() const;
+       const U8String& GetName() const;
        
-       const NString& GetNarrowName() const;
+       U8String GetInstanceName() const;
        
-       WString GetInstanceName() const;
+       const uint64& GetNumber() const;
        
-       NString GetNarrowInstanceName() const;
+       uint64 GetInstanceID() const;
        
-       const size_t& GetNumber() const;
-       
-       size_t GetInstanceID() const;
-       
-       const size_t& GetID() const;
+       const uint64& GetID() const;
        
        bool operator<( const Name& other ) const;
        

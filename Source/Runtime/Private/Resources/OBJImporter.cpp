@@ -33,12 +33,12 @@ namespace EE
     {
         struct Subdivision
         {
-            NString name;
+            U8String name;
             size_t vertexIndicesPos = 0;
             size_t vertexIndicesCount = 0;
         };
 
-        NString name;
+        U8String name;
         Box3f bounding;
         TArray<Subdivision> subdivisions;
         bool hasNormals;
@@ -191,7 +191,7 @@ namespace EE
         case 'g':
         {
             line.remove_prefix( 2 );
-            NString name = NString( line );
+            U8String name = U8String( line );
             // Trim( name );
             
             if ( data.objects.empty() )
@@ -213,7 +213,7 @@ namespace EE
         case 'o':
         {
             line.remove_prefix( 2 );
-            NString name = NString( line );
+            U8String name = U8String( line );
             // Trim( name );
 
             ObjectData oData
@@ -266,59 +266,59 @@ namespace EE
             FileMap file( options.file );
             if ( file.GetError() != 0 )
             {
-                EE_LOG_ERROR( L"Error reading file '{}', returned code {}", options.file.GetPath(), file.GetError() );
+                EE_LOG_ERROR( "Error reading file '{}', returned code {}", options.file.GetPath(), file.GetError() );
                 return false;
             }
 
-            size_t fileSize = file.GetSize();
-            size_t offset = 0;
-            size_t bytesRead = kBufferBlockSize;
-            Memory::AlignedMemory<NChar> frontBuffer = Memory::AlignedMemory<NChar>( kBufferBlockSize + kMaxLineSize, kMaxLineSize );
-            // Memory::AlignedMemory<NChar> backBuffer = Memory::AlignedMemory<NChar>( kBufferBlockSize + kMaxLineSize, kMaxLineSize );
+            uint64 fileSize = file.GetSize();
+            uint64 offset = 0;
+            uint64 bytesRead = kBufferBlockSize;
+            Memory::AlignedMemory<U8Char> frontBuffer = Memory::AlignedMemory<U8Char>( kBufferBlockSize + kMaxLineSize, kMaxLineSize );
+            // Memory::AlignedMemory<U8Char> backBuffer = Memory::AlignedMemory<U8Char>( kBufferBlockSize + kMaxLineSize, kMaxLineSize );
 
             auto line = std::string_view();
             auto text = std::string_view();
 
-            size_t lineCount = 0;
-            size_t blockCount = 0;
+            uint32 lineCount = 0;
+            uint32 blockCount = 0;
 
             while ( bytesRead >= kBufferBlockSize )
             {
                 if ( file.ReadBlock( offset, kBufferBlockSize + kMaxLineSize, frontBuffer.GetData() ) != 0 )
                 {
-                    EE_LOG_ERROR( L"Error reading block of file '{}', returned code {}", options.file.GetPath(), file.GetError() );
+                    EE_LOG_ERROR( "Error reading block of file '{}', returned code {}", options.file.GetPath(), file.GetError() );
                     return false;
                 }
 
                 if ( file.WaitForResult( &bytesRead ) != 0 )
                 {
-                    EE_LOG_ERROR( L"Error reading result of block of file '{}', returned code {}", options.file.GetPath(), file.GetError() );
+                    EE_LOG_ERROR( "Error reading result of block of file '{}', returned code {}", options.file.GetPath(), file.GetError() );
                     return false;
                 }
 
                 text = std::string_view( frontBuffer.GetData(), bytesRead );
-                if ( const NChar* endLine = static_cast<const NChar*>(memchr( text.data(), '\n', kMaxLineSize )) )
+                if ( const U8Char* endLine = static_cast<const U8Char*>(memchr( text.data(), '\n', kMaxLineSize )) )
                 {
-                    size_t pos = static_cast<size_t>(endLine - text.data());
+                    uint64 pos = static_cast<uint64>(endLine - text.data());
                     text.remove_prefix( pos + 1 );
                 }
                 else
                 {
-                    EE_LOG_ERROR( L"Error reading file '{}', line is too log: \n{}", options.file.GetPath(), Text::NarrowToWide( NString( text, 0, kMaxLineSize ) ) );
+                    EE_LOG_ERROR( "Error reading file '{}', line is too log: \n{}", options.file.GetPath(), U8String( text, 0, kMaxLineSize ) );
                     return false;
                 }
 
                 bool isEndOfFile = bytesRead < (kBufferBlockSize + kMaxLineSize);
                 while ( text.size() >= kMaxLineSize || (text.size() > 0 && isEndOfFile) )
                 {
-                    if ( const NChar* endLine = static_cast<const NChar*>(memchr( text.data(), '\n', text.size() )) )
+                    if ( const U8Char* endLine = static_cast<const U8Char*>(memchr( text.data(), '\n', text.size() )) )
                     {
-                        size_t pos = static_cast<size_t>(endLine - text.data());
+                        uint64 pos = static_cast<uint64>(endLine - text.data());
                         ++lineCount;
 
                         if ( pos > kMaxLineSize )
                         {
-                            EE_LOG_ERROR( L"Error reading file '{}', line is too log: \n{}", options.file.GetPath(), Text::NarrowToWide( NString( text, 0, kMaxLineSize ) ) );
+                            EE_LOG_ERROR( "Error reading file '{}', line is too log: \n{}", options.file.GetPath(), U8String( text, 0, kMaxLineSize ) );
                             return false;
                         }
                         line = text.substr( 0, pos );
@@ -333,7 +333,7 @@ namespace EE
                     {
                         if ( text.size() > kMaxLineSize )
                         {
-                            EE_LOG_ERROR( L"Error reading file '{}', line is too log: \n{}", options.file.GetPath(), Text::NarrowToWide( NString( text, 0, kMaxLineSize ) ) );
+                            EE_LOG_ERROR( "Error reading file '{}', line is too log: \n{}", options.file.GetPath(), U8String( text, 0, kMaxLineSize ) );
                             return false;
                         }
                         break;
@@ -341,20 +341,20 @@ namespace EE
 
                     if ( ParseLine( line, parsedData ) == false )
                     {
-                        EE_LOG_ERROR( L"Error reading file '{}', error in line: \n{}", options.file.GetPath(), Text::NarrowToWide( NString( line, 0, kMaxLineSize ) ) );
+                        EE_LOG_ERROR( "Error reading file '{}', error in line: \n{}", options.file.GetPath(), U8String( line, 0, kMaxLineSize ) );
                         return false;
                     }
                 }
 
                 blockCount++;
 #ifdef EE_DEBUG
-                EE_LOG_DEBUG( L"Block [{}], Line [{}] %{}", blockCount, lineCount, (float)(offset + bytesRead) / (float)fileSize * 100 );
+                EE_LOG_DEBUG( "Block [{}], Line [{}] %{}", blockCount, lineCount, (float)(offset + bytesRead) / (float)fileSize * 100 );
 #endif
                 offset += kBufferBlockSize;
             }
             timer.Stop();
             EE_LOG_INFO(
-                L"\u250C> Parsed {0} vertices and {1} triangles in {2:.3f}ms",
+                "\u250C> Parsed {0} vertices and {1} triangles in {2:.3f}ms",
                 Text::FormatUnit( parsedData.vertexIndices.size(), 2 ),
                 Text::FormatUnit( parsedData.vertexIndices.size() / 3, 2 ),
                 timer.GetDeltaTime<Ticker::Mili>()
@@ -362,10 +362,10 @@ namespace EE
         }
 
         uint32* indices = new uint32[ parsedData.vertexIndices.size() ];
-        size_t count = 0;
+        uint32 count = 0;
 
-        size_t totalAllocatedSize = 0;
-        size_t totalUniqueVertices = 0;
+        uint32 totalAllocatedSize = 0;
+        uint32 totalUniqueVertices = 0;
 
         info.parentNode = ModelNode( "ParentNode" );
         Timestamp timer;
@@ -393,7 +393,7 @@ namespace EE
                 outMesh->materialsMap.emplace( (int32)outMesh->materialsMap.size(), materialIndex.name );
                 outMesh->subdivisionsMap.emplace( materialCount, Subdivision( { (uint32)materialCount, 0, indexCount, 0 } ) );
 
-                size_t initialCount = count;
+                uint32 initialCount = count;
                 for ( ; count < initialCount + materialIndex.vertexIndicesCount; ++count )
                 {
                     UIntVector3 vertexIndices = parsedData.vertexIndices[ count ];
@@ -447,11 +447,11 @@ namespace EE
 
 #ifdef EE_DEBUG
             EE_LOG_DEBUG(
-                L"\u251C> Parsed {0}	vertices in {1}	at [{2:d}]'{3}'",
+                "\u251C> Parsed {0}	vertices in {1}	at [{2:d}]'{3}'",
                 Text::FormatUnit( data.vertexIndicesCount, 2 ),
                 Text::FormatData( sizeof( MeshFaces ) * outMesh->faces.size() + sizeof( StaticVertex ) * outMesh->staticVertices.size(), 2 ),
                 info.meshes.size(),
-                Text::NarrowToWide( outMesh->name )
+                outMesh->name
             );
 #endif // EE_DEBUG
 
@@ -466,7 +466,7 @@ namespace EE
         delete[] indices;
 
         timer.Stop();
-        EE_LOG_INFO( L"\u2514> Allocated {0} in {1:.2f}ms", Text::FormatData( totalAllocatedSize, 2 ), timer.GetDeltaTime<Ticker::Mili>() );
+        EE_LOG_INFO( "\u2514> Allocated {0} in {1:.2f}ms", Text::FormatData( totalAllocatedSize, 2 ), timer.GetDeltaTime<Ticker::Mili>() );
 
         info.isValid = true;
         return true;

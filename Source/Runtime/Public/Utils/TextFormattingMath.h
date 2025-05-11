@@ -11,73 +11,73 @@ namespace EE
         
         int32 ParseInt( std::string_view* text );
 
-        inline WString FormatMath( const UIntVector2& value )
+        inline WString FormatMathW( const UIntVector2& value )
         {
-            return Formatted( L"{%u, %u}", value.x, value.y );
+            return FormattedW( L"{%u, %u}", value.x, value.y );
         }
 
-        inline WString FormatMath( const UIntVector3& value )
+        inline WString FormatMathW( const UIntVector3& value )
         {
-            return Formatted( L"{%u, %u, %u}", value.x, value.y, value.z );
+            return FormattedW( L"{%u, %u, %u}", value.x, value.y, value.z );
         }
 
-        inline WString FormatMath( const Vector2f& value )
+        inline WString FormatMathW( const Vector2f& value )
         {
-            return Formatted( L"{%.3f, %.3f}", value.x, value.y );
+            return FormattedW( L"{%.3f, %.3f}", value.x, value.y );
         }
 
-        inline WString FormatMath( const Vector3f& value )
+        inline WString FormatMathW( const Vector3f& value )
         {
-            return Formatted( L"{%.3f, %.3f, %.3f}", value.x, value.y, value.z );
+            return FormattedW( L"{%.3f, %.3f, %.3f}", value.x, value.y, value.z );
         }
 
-        inline WString FormatMath( const Vector4f& value )
+        inline WString FormatMathW( const Vector4f& value )
         {
-            return Formatted( L"{%.3f, %.3f, %.3f, %.3f}", value.x, value.y, value.z, value.w );
+            return FormattedW( L"{%.3f, %.3f, %.3f, %.3f}", value.x, value.y, value.z, value.w );
         }
 
-        inline WString FormatMath( const IntVector2& value )
+        inline WString FormatMathW( const IntVector2& value )
         {
-            return Formatted( L"{%d, %d}", value.x, value.y );
+            return FormattedW( L"{%d, %d}", value.x, value.y );
         }
 
-        inline WString FormatMath( const IntVector3& value )
+        inline WString FormatMathW( const IntVector3& value )
         {
-            return Formatted( L"{%d, %d, %d}", value.x, value.y, value.z );
+            return FormattedW( L"{%d, %d, %d}", value.x, value.y, value.z );
         }
 
-        inline WString FormatMath( const IntVector4& value )
+        inline WString FormatMathW( const IntVector4& value )
         {
-            return Formatted( L"{%d, %d, %d, %d}", value.x, value.y, value.z, value.w );
+            return FormattedW( L"{%d, %d, %d, %d}", value.x, value.y, value.z, value.w );
         }
 
-        inline WString FormatMath( const Vector2& value )
+        inline WString FormatMathW( const Vector2& value )
         {
-            return Formatted( L"{%.3f, %.3f}", value.x, value.y );
+            return FormattedW( L"{%.3f, %.3f}", value.x, value.y );
         }
 
-        inline WString FormatMath( const Vector3& value )
+        inline WString FormatMathW( const Vector3& value )
         {
-            return Formatted( L"{%.3f, %.3f, %.3f}", value.x, value.y, value.z );
+            return FormattedW( L"{%.3f, %.3f, %.3f}", value.x, value.y, value.z );
         }
 
-        inline WString FormatMath( const Vector4& value )
+        inline WString FormatMathW( const Vector4& value )
         {
-            return Formatted( L"{%.3f, %.3f, %.3f, %.3f}", value.x, value.y, value.z, value.w );
-        }
-
-        template <typename T>
-        inline WString FormatMath( const Math::TQuaternion<T>& value )
-        {
-            return Formatted( L"{%.3f, %.3f, %.3f, %.3f}", value.w, value.x, value.y, value.z );
+            return FormattedW( L"{%.3f, %.3f, %.3f, %.3f}", value.x, value.y, value.z, value.w );
         }
 
         template <typename T>
-        inline WString FormatMath( const Math::TMatrix4x4<T>& value, bool columnMajor = false )
+        inline WString FormatMathW( const Math::TQuaternion<T>& value )
+        {
+            return FormattedW( L"{%.3f, %.3f, %.3f, %.3f}", value.w, value.x, value.y, value.z );
+        }
+
+        template <typename T>
+        inline WString FormatMathW( const Math::TMatrix4x4<T>& value, bool columnMajor = false )
         {
             if ( columnMajor )
             {
-                return Formatted( L"{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
+                return FormattedW( L"{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
                     value.m00, value.m10, value.m20, value.m30,
                     value.m01, value.m11, value.m21, value.m31,
                     value.m02, value.m12, value.m22, value.m32,
@@ -86,7 +86,7 @@ namespace EE
             }
             else
             {
-                return Formatted( L"{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
+                return FormattedW( L"{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
                     value.m00, value.m01, value.m02, value.m03,
                     value.m10, value.m11, value.m12, value.m13,
                     value.m20, value.m21, value.m22, value.m23,
@@ -95,71 +95,76 @@ namespace EE
             }
         }
 
-        inline NString FormatMathN( const UIntVector2& value )
+        inline U8String FormatMath( const UIntVector2& value )
         {
-            return FormattedN( "{%u, %u}", value.x, value.y );
+            return Formatted( "{%u, %u}", value.x, value.y );
         }
 
-        inline NString FormatMathN( const UIntVector3& value )
+        inline U8String FormatMath( const UIntVector3& value )
         {
-            return FormattedN( "{%u, %u, %u}", value.x, value.y, value.z );
+            return Formatted( "{%u, %u, %u}", value.x, value.y, value.z );
         }
 
-        inline NString FormatMathN( const Vector2f& value )
+        inline U8String FormatMath( const Vector2f& value )
         {
-            return FormattedN( "{%.3f, %.3f}", value.x, value.y );
+            return Formatted( "{%.3f, %.3f}", value.x, value.y );
         }
 
-        inline NString FormatMathN( const Vector3f& value )
+        inline U8String FormatMath( const Vector3f& value )
         {
-            return FormattedN( "{%.3f, %.3f, %.3f}", value.x, value.y, value.z );
+            return Formatted( "{%.3f, %.3f, %.3f}", value.x, value.y, value.z );
         }
 
-        inline NString FormatMathN( const Vector4f& value )
+        inline U8String FormatMath( const Vector4f& value )
         {
-            return FormattedN( "{%.3f, %.3f, %.3f, %.3f}", value.x, value.y, value.z, value.w );
+            return Formatted( "{%.3f, %.3f, %.3f, %.3f}", value.x, value.y, value.z, value.w );
         }
 
-        inline NString FormatMathN( const IntVector2& value )
+        inline U8String FormatMath( const IntVector2& value )
         {
-            return FormattedN( "{%d, %d}", value.x, value.y );
+            return Formatted( "{%d, %d}", value.x, value.y );
         }
 
-        inline NString FormatMathN( const IntVector3& value )
+        inline U8String FormatMath( const IntVector3& value )
         {
-            return FormattedN( "{%d, %d, %d}", value.x, value.y, value.z );
+            return Formatted( "{%d, %d, %d}", value.x, value.y, value.z );
         }
 
-        inline NString FormatMathN( const IntVector4& value )
+        inline U8String FormatMath( const IntVector4& value )
         {
-            return FormattedN( "{%d, %d, %d, %d}", value.x, value.y, value.z, value.w );
+            return Formatted( "{%d, %d, %d, %d}", value.x, value.y, value.z, value.w );
         }
 
-        inline NString FormatMathN( const Vector2& value )
+        template <typename T>
+        inline U8String FormatMath( const Math::TVector2<T>& value )
         {
-            return FormattedN( "{%.3f, %.3f}", value.x, value.y );
+            return Formatted( "{%.3f, %.3f}", value.x, value.y );
         }
 
-        inline NString FormatMathN( const Vector3& value )
+        template <typename T>
+        inline U8String FormatMath( const Math::TVector3<T>& value )
         {
-            return FormattedN( "{%.3f, %.3f, %.3f}", value.x, value.y, value.z );
+            return Formatted( "{%.3f, %.3f, %.3f}", value.x, value.y, value.z );
         }
 
-        inline NString FormatMathN( const Vector4& value )
+        template <typename T>
+        inline U8String FormatMath( const Math::TVector4<T>& value )
         {
-            return FormattedN( "{%.3f, %.3f, %.3f, %.3f}", value.x, value.y, value.z, value.w );
+            return Formatted( "{%.3f, %.3f, %.3f, %.3f}", value.x, value.y, value.z, value.w );
         }
 
-        inline NString FormatMathN( const Quaternion& value )
+        template <typename T>
+        inline U8String FormatMath( const Math::TQuaternion<T>& value )
         {
-            return FormattedN( "{%.3f, %.3f, %.3f, %.3f}", value.w, value.x, value.y, value.z );
+            return Formatted( "{%.3f, %.3f, %.3f, %.3f}", value.w, value.x, value.y, value.z );
         }
 
-        inline NString FormatMathN( const Matrix4x4& value, bool columnMajor = false )
+        template <typename T>
+        inline U8String FormatMath( const Math::TMatrix4x4<T>& value, bool columnMajor = false )
         {
             if ( columnMajor )
             {
-                return FormattedN( "{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
+                return Formatted( "{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
                     value.m00, value.m10, value.m20, value.m30,
                     value.m01, value.m11, value.m21, value.m31,
                     value.m02, value.m12, value.m22, value.m32,
@@ -168,7 +173,7 @@ namespace EE
             }
             else
             {
-                return FormattedN( "{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
+                return Formatted( "{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
                     value.m00, value.m01, value.m02, value.m03,
                     value.m10, value.m11, value.m12, value.m13,
                     value.m20, value.m21, value.m22, value.m23,

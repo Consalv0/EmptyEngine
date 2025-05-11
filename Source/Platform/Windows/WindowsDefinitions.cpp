@@ -2,7 +2,9 @@
 #include "CoreMinimal.h"
 
 #include <Engine/Engine.h>
+#include "Platform/PrePlatform.h"
 #include <Platform/Platform.h>
+#include "Platform/PostPlatform.h"
 
 #include <Core/Log.h>
 

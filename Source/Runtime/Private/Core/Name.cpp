@@ -9,142 +9,105 @@
 
 namespace EE
 {
-    static TMap<size_t, WString> GWideNamesTable = TMap<size_t, WString>();
-    static TMap<size_t, NString> GNarrowNamesTable = TMap<size_t, NString>();
-    static TMap<size_t, size_t> GNameCountTable = TMap<size_t, size_t>();
+    static TMap<uint64, U8String> GNamesTable = TMap<uint64, U8String>();
+    static TMap<uint64, uint64> GNameCountTable = TMap<uint64, uint64>();
     
-    Name GEmptyName = { L"", 0 };
+    Name GEmptyName = { "", 0 };
 
-    Name::Name( const WString & text ) 
-        : id( WStringToHash( text ) )
+    Name::Name( const U8Char* text )
+        : id( ConstU8StringToHash( text ) )
         , number()
     {
-        if ( GWideNamesTable.try_emplace(id, text).second )
+        if ( GNamesTable.try_emplace(id, text).second )
         {
-			GNarrowNamesTable.emplace( id, Text::WideToNarrow( text ) );
+            GNamesTable.emplace( id, text );
             GNameCountTable.emplace( id, 0 );
             number = 0;
         }
-        else 
+        else
         {
-            number = ++GNameCountTable[ id ];
+            number = ++GNameCountTable[id];
         }
     }
 
-	Name::Name( const WChar* text )
-		: id( ConstWStringToHash( text ) )
-		, number()
-	{
-		if ( GWideNamesTable.try_emplace(id, text).second )
-		{
-			GNarrowNamesTable.emplace( id, Text::WideToNarrow( text ) );
-			GNameCountTable.emplace( id, 0 );
-			number = 0;
-		}
-		else
-		{
-			number = ++GNameCountTable[id];
-		}
-	}
+    Name::Name( const U8String& text )
+        : Name( text.c_str() )
+    {
+    }
 
-	Name::Name( const NString& text )
-		: Name( Text::NarrowToWide( text ) )
-	{
-	}
+    Name::Name( uint64 id )
+        : id()
+        , number()
+    {
+        if ( GNameCountTable.find( id ) == GNameCountTable.end() ) {
+            number = ++GNameCountTable[ GEmptyName.GetID() ];
+            id = GEmptyName.GetID();
+        }
+        else {
+            number = ++GNameCountTable[ id ];
+        }
+    }
+    
+    Name::Name( const U8Char* text, uint64 number )
+        : id ( ConstU8StringToHash( text ) )
+        , number( number )
+    {
+    }
 
-	Name::Name( const NChar* text )
-		: Name( Text::NarrowToWide( text ) )
-	{
-	}
+    Name::~Name() { }
 
-	Name::Name( size_t id )
-		: id()
-		, number()
-	{
-		if ( GNameCountTable.find( id ) == GNameCountTable.end() ) {
-			number = ++GNameCountTable[ GEmptyName.GetID() ];
-			id = GEmptyName.GetID();
-		}
-		else {
-			number = ++GNameCountTable[ id ];
-		}
-	}
-	
-	Name::Name( const WString& text, size_t number )
-		: id ( WStringToHash( text ) )
-		, number( number )
-	{
-	}
+    const U8String& Name::GetName() const
+    {
+        return GNamesTable[ id ];
+    }
 
-	Name::Name( const NChar* text, size_t number )
-		: Name( Text::NarrowToWide( text ), number )
-	{
-	}
+    U8String Name::GetInstanceName() const
+    {
+        return GNamesTable[ id ] + "_" + Text::ToUTF8( number );
+    }
 
-	Name::~Name() { }
+    const uint64& Name::GetNumber() const
+    {
+        return number;
+    }
 
-	const WString& Name::GetName() const
-	{
-		return GWideNamesTable[ id ];
-	}
+    uint64 Name::GetInstanceID() const
+    {
+        uint64 ret = 0;
+        EE::HashCombine( &ret, id, number );
+        return ret;
+    }
 
-	const NString& Name::GetNarrowName() const
-	{
-		return GNarrowNamesTable[ id ];
-	}
+    const uint64& Name::GetID() const
+    {
+        return id;
+    }
 
-	WString Name::GetInstanceName() const
-	{
-		return GWideNamesTable[ id ] + L"_" + Text::ToWide( number );
-	}
+    bool Name::operator<(const Name & other) const
+    {
+        uint32 i = 0;
+        const U8String& entryName = GetName();
+        const U8String& otherName = other.GetName();
+        const uint64& length = entryName.length();
+        const uint64& otherLength = otherName.length();
+        
+        while ((i < length) && (i < otherLength))
+        {
+            if (entryName[i] < otherName[i]) return true;
+            else if (entryName[i] > otherName[i]) return false;
+            ++i;
+        }
+        return (length + number < otherLength + other.number);
+    }
 
-	NString Name::GetNarrowInstanceName() const
-	{
-		return GNarrowNamesTable[ id ] + "_" + Text::ToNarrow( number );
-	}
+    bool Name::operator!=(const Name & other) const
+    {
+        return id != other.id || number != other.number;
+    }
 
-	const size_t& Name::GetNumber() const
-	{
-		return number;
-	}
-
-	size_t Name::GetInstanceID() const
-	{
-		size_t ret = 0;
-		EE::HashCombine( &ret, id, number );
-		return ret;
-	}
-
-	const size_t& Name::GetID() const
-	{
-		return id;
-	}
-
-	bool Name::operator<(const Name & other) const
-	{
-		uint32 i = 0;
-		const WString& entryName = GetName();
-		const WString& otherName = other.GetName();
-		const size_t& length = entryName.length();
-		const size_t& otherLength = otherName.length();
-		
-		while ((i < length) && (i < otherLength))
-		{
-			if (entryName[i] < otherName[i]) return true;
-			else if (entryName[i] > otherName[i]) return false;
-			++i;
-		}
-		return (length + number < otherLength + other.number);
-	}
-
-	bool Name::operator!=(const Name & other) const
-	{
-		return id != other.id || number != number;
-	}
-
-	bool Name::operator==(const Name & other) const
-	{
-		return id == other.id && number == number;
-	}
+    bool Name::operator==(const Name & other) const
+    {
+        return id == other.id && number == other.number;
+    }
 
 }

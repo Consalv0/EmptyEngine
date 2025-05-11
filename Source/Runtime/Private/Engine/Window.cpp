@@ -95,7 +95,7 @@ namespace EE
             }
             default:
             {
-                EE_LOG_DEBUG( L"SDL: Window Event: WindowID({}), Event({})", windowID, sdlEvent->type );
+                EE_LOG_DEBUG( "SDL: Window Event: WindowID({}), Event({})", windowID, sdlEvent->type );
                 break;
             }
             }
@@ -146,7 +146,7 @@ namespace EE
         if ( compositeAlpha_ )
             windowFlags |= SDL_WINDOW_TRANSPARENT;
 
-        SDL_SetStringProperty( windowProperties, SDL_PROP_WINDOW_CREATE_TITLE_STRING, Text::WideToNarrow( name_ ).c_str() );
+        SDL_SetStringProperty( windowProperties, SDL_PROP_WINDOW_CREATE_TITLE_STRING, name_.c_str() );
         SDL_SetNumberProperty( windowProperties, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, width_ );
         SDL_SetNumberProperty( windowProperties, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, height_ );
         SDL_SetNumberProperty( windowProperties, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, windowFlags );
@@ -156,7 +156,7 @@ namespace EE
         
         if ( windowHandle_ == NULL )
         {
-            EE_LOG_CRITICAL( L"Window: \"{0}\" could not be initialized: {1}", name_, Text::NarrowToWide( SDL_GetError() ) );
+            EE_LOG_CRITICAL( "Window: \"{0}\" could not be initialized: {1}", name_, SDL_GetError() );
             return false;
         }
 
@@ -261,10 +261,10 @@ namespace EE
         }
     }
 
-    void Window::SetName( const WString& newName )
+    void Window::SetName( const U8String& newName )
     {
         name_ = newName;
-        SDL_SetWindowTitle( (SDL_Window*)(windowHandle_), Text::WideToNarrow( name_ ).c_str() );
+        SDL_SetWindowTitle( (SDL_Window*)(windowHandle_), name_.c_str() );
     }
 
     void Window::SetWindowMode( const EWindowMode& mode )
@@ -316,7 +316,7 @@ namespace EE
     void Window::Terminate()
     {
 #ifdef EE_DEBUG
-        EE_LOG_DEBUG( L"Window: \"{}\" closed!", GetName() );
+        EE_LOG_DEBUG( "Window: \"{}\" closed!", GetName() );
 #endif // EE_DEBUG
 
         SDL_RemoveEventWatch( WindowEventsHandler, (void*)this );
@@ -346,7 +346,7 @@ namespace EE
         GDynamicRHI->GetRHIPresentContextOfWindow( this )->SetSwapChainDirty();
     }
 
-    const WString& Window::GetName() const
+    const U8String& Window::GetName() const
     {
         return name_;
     }

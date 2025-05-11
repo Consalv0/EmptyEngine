@@ -28,7 +28,7 @@ bool EE::PNGImporter::LoadImage( ImageImporter::ImageResult& result, const Image
 
 	if ( GPixelFormatInfo[ options.format ].supported == false )
 	{
-		EE_LOG_ERROR( L"Error importing image, format not supported '{}'", (int32)options.format );
+		EE_LOG_ERROR( "Error importing image, format not supported '{}'", (int32)options.format );
 		return false;
 	}
 
@@ -38,11 +38,11 @@ bool EE::PNGImporter::LoadImage( ImageImporter::ImageResult& result, const Image
     FileMap file( options.file );
     if ( file.GetError() != 0 )
     {
-        EE_LOG_ERROR( L"Error reading file '{}', returned code {}", options.file.GetPath(), file.GetError() );
+        EE_LOG_ERROR( "Error reading file '{}', returned code {}", options.file.GetPath(), file.GetError() );
         return false;
     }
 
-    const NString filename = Text::WideToNarrow( options.file.GetPath() );
+    const U8String filename = options.file.GetPath();
 
 	int32 width, height, comp;
 
@@ -52,13 +52,13 @@ bool EE::PNGImporter::LoadImage( ImageImporter::ImageResult& result, const Image
 
 	if ( file.ReadBlock( 0, blockSize, fileData ) != 0 )
 	{
-		EE_LOG_ERROR( L"Error reading block of file '{}', returned code {}", options.file.GetPath(), file.GetError() );
+		EE_LOG_ERROR( "Error reading block of file '{}', returned code {}", options.file.GetPath(), file.GetError() );
 		return false;
 	}
 
 	if ( file.WaitForResult( &bytesRead ) != 0 )
 	{
-		EE_LOG_ERROR( L"Error reading result of block of file '{}', returned code {}", options.file.GetPath(), file.GetError() );
+		EE_LOG_ERROR( "Error reading result of block of file '{}', returned code {}", options.file.GetPath(), file.GetError() );
 		return false;
 	}
 
@@ -71,7 +71,7 @@ bool EE::PNGImporter::LoadImage( ImageImporter::ImageResult& result, const Image
 	free( fileData );
 	if ( data == NULL )
 	{
-		EE_LOG_ERROR( L"Image '{}' couldn't be loaded: {}", options.file.GetFileName().c_str(), Text::NarrowToWide( stbi_failure_reason() ) );
+		EE_LOG_ERROR( "Image '{}' couldn't be loaded: {}", options.file.GetFileName().c_str(), stbi_failure_reason() );
 		return false;
 	}
 

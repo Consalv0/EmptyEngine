@@ -7,16 +7,16 @@ namespace EE
 {
     namespace Text
     {
-        NString ToNarrow( const int8& number );
-        NString ToNarrow( const int16& number );
-        NString ToNarrow( const int32& number );
-        NString ToNarrow( const int64& number );
-        NString ToNarrow( const uint8& number );
-        NString ToNarrow( const uint16& number );
-        NString ToNarrow( const uint32& number );
-        NString ToNarrow( const uint64& number );
-        NString ToNarrow( const float& number );
-        NString ToNarrow( const double& number );
+        U8String ToUTF8( const int8& number );
+        U8String ToUTF8( const int16& number );
+        U8String ToUTF8( const int32& number );
+        U8String ToUTF8( const int64& number );
+        U8String ToUTF8( const uint8& number );
+        U8String ToUTF8( const uint16& number );
+        U8String ToUTF8( const uint32& number );
+        U8String ToUTF8( const uint64& number );
+        U8String ToUTF8( const float& number );
+        U8String ToUTF8( const double& number );
 
         WString ToWide( const int8& number );
         WString ToWide( const int16& number );
@@ -29,13 +29,13 @@ namespace EE
         WString ToWide( const float& number );
         WString ToWide( const double& number );
 
-        NString WideToNarrow( const WChar* From );
+        U8String WideToUTF8( const WChar* From );
 
-        WString NarrowToWide( const NChar* From );
+        U8String WideToUTF8( const WString& From );
 
-        NString WideToNarrow( const WString& From );
+        WString UTF8ToWide( const U8Char* From );
 
-        WString NarrowToWide( const NString& From );
+        WString UTF8ToWide( const U8String& From );
 
         template<class T>
         inline bool CompareIgnoreCase( T A, T B )
@@ -139,7 +139,7 @@ namespace EE
         }
 
         template<typename ... Arguments>
-        WString Formatted( const WString& format, Arguments ... Args )
+        WString FormattedW( const WString& format, Arguments ... Args )
         {
             const WChar* formatBuffer = format.c_str();
             size_t size = sizeof( WChar ) * format.size();
@@ -167,11 +167,11 @@ namespace EE
         }
 
         template<typename ... Arguments>
-        NString FormattedN( const NString& format, Arguments ... Args )
+        U8String Formatted( const U8String& format, Arguments ... Args )
         {
-            const NChar* formatBuffer = format.c_str();
-            size_t size = sizeof( NChar ) * format.size();
-            NString result;
+            const U8Char* formatBuffer = format.c_str();
+            size_t size = sizeof( U8Char ) * format.size();
+            U8String result;
             result.resize( size );
 
             while ( true )
@@ -195,7 +195,7 @@ namespace EE
         }
 
         template<typename ... Arguments>
-        WString Formatted( const WChar* format, Arguments ... Args )
+        WString FormattedW( const WChar* format, Arguments ... Args )
         {
             size_t size = std::wcslen( format );
             WString result;
@@ -222,10 +222,10 @@ namespace EE
         }
 
         template<typename ... Arguments>
-        NString FormattedN( const NChar* format, Arguments ... Args )
+        U8String Formatted( const U8Char* format, Arguments ... Args )
         {
             size_t size = std::strlen( format );
-            NString result;
+            U8String result;
             result.resize( size );
 
             while ( true )
@@ -250,7 +250,7 @@ namespace EE
 
 
         template<class Num>
-        inline WString FormatUnit( const Num& number, const int& Decimals )
+        inline WString FormatUnitW( const Num& number, const int& Decimals )
         {
             double precisionNumber = (double)number;
             WString suffix = L"";
@@ -280,97 +280,97 @@ namespace EE
 
             if ( int( precisionNumber ) == precisionNumber )
             {
-                return Formatted( L"%d%s", (int)precisionNumber, suffix.c_str() );
+                return FormattedW( L"%d%s", (int)precisionNumber, suffix.c_str() );
             }
             else
             {
-                return Formatted( L"%." + std::to_wstring( Decimals ) + L"f%s", precisionNumber, suffix.c_str() );
+                return FormattedW( L"%." + std::to_wstring( Decimals ) + L"f%s", precisionNumber, suffix.c_str() );
             }
         }
 
         template<class Num>
-        inline NString FormatUnitN( const Num& number, const int& Decimals )
-        {
-            double PrecisionNumber = (double)number;
-            NString suffix{};
-            if ( PrecisionNumber > 1e3 && PrecisionNumber <= 1e6 )
-            {
-                suffix = 'k';
-                PrecisionNumber /= 1e3;
-            }
-            else
-                if ( PrecisionNumber > 1e6 && PrecisionNumber <= 1e9 )
-                {
-                    suffix = 'M';
-                    PrecisionNumber /= 1e6;
-                }
-                else
-                    if ( PrecisionNumber > 1e9 && PrecisionNumber <= 1e12 )
-                    {
-                        suffix = 'G';
-                        PrecisionNumber /= 1e9;
-                    }
-                    else
-                        if ( PrecisionNumber > 1e12 )
-                        {
-                            suffix = 'T';
-                            PrecisionNumber /= 1e12;
-                        }
-
-            if ( int( PrecisionNumber ) == PrecisionNumber )
-            {
-                return Formatted( "%d%s", (int)PrecisionNumber, suffix.c_str() );
-            }
-            else
-            {
-                return Formatted( "%." + std::to_string( Decimals ) + "f%s", PrecisionNumber, suffix.c_str() );
-            }
-        }
-
-        template<class Num>
-        inline WString FormatData( const Num& number, const int& MaxDecimals )
-        {
-            double PrecisionNumber = (double)number;
-            WString Suffix = L"b";
-            if ( PrecisionNumber > 1 << 10 && PrecisionNumber <= 1 << 20 )
-            {
-                Suffix = L"kb";
-                PrecisionNumber /= 1 << 10;
-            }
-            else
-                if ( PrecisionNumber > 1 << 20 && PrecisionNumber <= 1 << 30 )
-                {
-                    Suffix = L"Mb";
-                    PrecisionNumber /= 1 << 20;
-                }
-                else
-                    if ( PrecisionNumber > 1 << 30 && PrecisionNumber <= (size_t)1 << 40 )
-                    {
-                        Suffix = L"Gb";
-                        PrecisionNumber /= 1 << 30;
-                    }
-                    else
-                        if ( PrecisionNumber > (size_t)1 << 40 )
-                        {
-                            Suffix = L"Tb";
-                            PrecisionNumber /= (size_t)1 << 40;
-                        }
-
-            if ( int( PrecisionNumber ) == PrecisionNumber )
-            {
-                return Formatted( L"%d%s", (int)PrecisionNumber, Suffix.c_str() );
-            }
-            else
-            {
-                return Formatted( L"%." + std::to_wstring( MaxDecimals ) + L"f%s", PrecisionNumber, Suffix.c_str() );
-            }
-        }
-
-        template<class Num>
-        inline NString FormatDataN( const Num& number, const int& maxDecimals )
+        inline U8String FormatUnit( const Num& number, const int& decimals )
         {
             double precisionNumber = (double)number;
-            NString suffix = "b";
+            U8String suffix{};
+            if ( precisionNumber > 1e3 && precisionNumber <= 1e6 )
+            {
+                suffix = 'k';
+                precisionNumber /= 1e3;
+            }
+            else
+                if ( precisionNumber > 1e6 && precisionNumber <= 1e9 )
+                {
+                    suffix = 'M';
+                    precisionNumber /= 1e6;
+                }
+                else
+                    if ( precisionNumber > 1e9 && precisionNumber <= 1e12 )
+                    {
+                        suffix = 'G';
+                        precisionNumber /= 1e9;
+                    }
+                    else
+                        if ( precisionNumber > 1e12 )
+                        {
+                            suffix = 'T';
+                            precisionNumber /= 1e12;
+                        }
+
+            if ( int( precisionNumber ) == precisionNumber )
+            {
+                return Formatted( "%d%s", (int)precisionNumber, suffix.c_str() );
+            }
+            else
+            {
+                return Formatted( "%." + Text::ToUTF8( decimals ) + "f%s", precisionNumber, suffix.c_str() );
+            }
+        }
+
+        template<class Num>
+        inline WString FormatDataW( const Num& number, const int& MaxDecimals )
+        {
+            double precisionNumber = (double)number;
+            WString suffix = L"b";
+            if ( precisionNumber > 1 << 10 && precisionNumber <= 1 << 20 )
+            {
+                suffix = L"kb";
+                precisionNumber /= 1 << 10;
+            }
+            else
+                if ( precisionNumber > 1 << 20 && precisionNumber <= 1 << 30 )
+                {
+                    suffix = L"Mb";
+                    precisionNumber /= 1 << 20;
+                }
+                else
+                    if ( precisionNumber > 1 << 30 && precisionNumber <= 1ull << 40 )
+                    {
+                        suffix = L"Gb";
+                        precisionNumber /= 1 << 30;
+                    }
+                    else
+                        if ( precisionNumber > 1ull << 40 )
+                        {
+                            suffix = L"Tb";
+                            precisionNumber /= 1ull << 40;
+                        }
+
+            if ( int( precisionNumber ) == precisionNumber )
+            {
+                return FormattedW( L"%d%s", (int)precisionNumber, suffix.c_str() );
+            }
+            else
+            {
+                return FormattedW( L"%." + Text::ToWide( MaxDecimals ) + L"f%s", precisionNumber, suffix.c_str() );
+            }
+        }
+
+        template<class Num>
+        inline U8String FormatData( const Num& number, const int& maxDecimals )
+        {
+            double precisionNumber = (double)number;
+            U8String suffix = "b";
             if ( precisionNumber > 1 << 10 && precisionNumber <= 1 << 20 )
             {
                 suffix = "kb";
@@ -383,16 +383,16 @@ namespace EE
                     precisionNumber /= 1 << 20;
                 }
                 else
-                    if ( precisionNumber > 1 << 30 && precisionNumber <= (size_t)1 << 40 )
+                    if ( precisionNumber > 1 << 30 && precisionNumber <= 1ull << 40 )
                     {
                         suffix = "Gb";
                         precisionNumber /= 1 << 30;
                     }
                     else
-                        if ( precisionNumber > (size_t)1 << 40 )
+                        if ( precisionNumber > 1ull << 40 )
                         {
                             suffix = "Tb";
-                            precisionNumber /= (size_t)1 << 40;
+                            precisionNumber /= 1ull << 40;
                         }
 
             if ( int( precisionNumber ) == precisionNumber )
@@ -401,7 +401,7 @@ namespace EE
             }
             else
             {
-                return Formatted( "%." + std::to_string( maxDecimals ) + "f%s", precisionNumber, suffix.c_str() );
+                return Formatted( "%." + Text::ToUTF8( maxDecimals ) + "f%s", precisionNumber, suffix.c_str() );
             }
         }
     }

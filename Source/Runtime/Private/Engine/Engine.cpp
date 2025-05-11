@@ -20,18 +20,18 @@ namespace EE
 {
     bool GWantToTerminate = false;
 
-    bool GameEngine::Initialize( int argc, NChar* argv[] )
+    bool GameEngine::Initialize( int argc, U8Char* argv[] )
     {
         GMainApplication = CreateApplication( argc, argv );
         if ( GMainApplication->HasErrors() == false )
         {
-            EE_LOG_CRITICAL( L"Failed to initialize application!\n" );
+            EE_LOG_CRITICAL( "Failed to initialize application!\n" );
             return false;
         }
 
         if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK ) == false )
         {
-            EE_LOG_CRITICAL( L"Failed to initialize SDL3: {}\n", Text::NarrowToWide( SDL_GetError() ) );
+            EE_LOG_CRITICAL( "Failed to initialize SDL3: {}\n", SDL_GetError() );
             return false;
         }
 

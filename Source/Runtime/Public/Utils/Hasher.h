@@ -2,39 +2,27 @@
 
 namespace EE
 {
-	inline void HashCombine( size_t* seed ) { }
+    inline void HashCombine( uint64* seed ) {}
 
-	template <typename T, typename... Rest>
-	inline void HashCombine( size_t* seed, const T& v, Rest... rest )
+    template <typename T, typename... Rest>
+    inline void HashCombine( uint64* seed, const T& v, Rest... rest )
     {
-	    std::hash<T> hasher;
-        *seed ^= hasher(v) + 0x9e3779b9 + (*seed << 6) + (*seed >> 2);
-        HashCombine(seed, rest...);
-	}
+        std::hash<T> hasher;
+        *seed ^= hasher( v ) + 0x9e3779b9 + (*seed << 6) + (*seed >> 2);
+        HashCombine( seed, rest... );
+    }
 
-	inline size_t WStringToHash( const WString& name)
+    inline uint64 ConstU8StringToHash( const U8Char*& name )
     {
-		static const std::hash<WString> hasher;
-		return hasher(name);
-	}
+        static const std::hash<std::string_view> hasher;
+        return hasher( std::string_view( name, std::strlen( name ) ) );
+    }
 
-	inline size_t ConstNStringToHash( const NChar*& name )
-	{
-		static const std::hash<std::string_view> hasher;
-		return hasher( std::string_view( name, std::strlen( name ) ) );
-	}
-
-	inline size_t ConstWStringToHash( const WChar*& name )
-	{
-		static const std::hash<std::wstring_view> hasher;
-		return hasher( std::wstring_view( name, std::wcslen( name ) ) );
-	}
-
-	// Code taken from https://stackoverflow.com/a/28801005 by tux3
-	// Generate CRC lookup table
-	template <unsigned C, int K = 8>
-	struct GenCRCTable : GenCRCTable<((C & 1) ? 0xedb88320 : 0) ^ (C >> 1), K - 1> {};
-	template <unsigned C> struct GenCRCTable<C, 0> { enum { value = C }; };
+    // Code taken from https://stackoverflow.com/a/28801005 by tux3
+    // Generate CRC lookup table
+    template <unsigned C, int K = 8>
+    struct GenCRCTable : GenCRCTable<((C & 1) ? 0xedb88320 : 0) ^ (C >> 1), K - 1> {};
+    template <unsigned C> struct GenCRCTable<C, 0> { enum { value = C }; };
 
 #define HASH_A(x) HASH_B(x) HASH_B(x + 128)
 #define HASH_B(x) HASH_C(x) HASH_C(x +  64)
@@ -46,34 +34,38 @@ namespace EE
 #define HASH_H(x) HASH_I(x) HASH_I(x +   1)
 #define HASH_I(x) GenCRCTable<x>::value,
 
-	constexpr unsigned CRCTable[] = { HASH_A(0) };
+    constexpr unsigned CRCTable[] = { HASH_A( 0 ) };
 
-	// Constexpr implementation and helpers
-	constexpr uint32 CRC32Implementation(const uint8_t* p, size_t len, uint32 crc) {
-		return len ?
-			CRC32Implementation(p + 1, len - 1, (crc >> 8) ^ CRCTable[(crc & 0xFF) ^ *p])
-			: crc;
-	}
+    // Constexpr implementation and helpers
+    constexpr uint32 CRC32Implementation( const uint8* p, uint64 len, uint32 crc )
+    {
+        return len ?
+            CRC32Implementation( p + 1, len - 1, (crc >> 8) ^ CRCTable[ (crc & 0xFF) ^ *p ] )
+            : crc;
+    }
 
-	constexpr uint32 EncodeCRC32(const uint8_t* data, size_t length) {
-		return ~CRC32Implementation(data, length, ~0);
-	}
+    constexpr uint32 EncodeCRC32( const uint8* data, uint64 length )
+    {
+        return ~CRC32Implementation( data, length, ~0 );
+    }
 
-	constexpr size_t strlen_c(const char* str) {
-		return *str ? 1 + strlen_c(str + 1) : 0;
-	}
+    constexpr uint64 strlen_c( const U8Char* str )
+    {
+        return *str ? 1 + strlen_c( str + 1 ) : 0;
+    }
 
-	constexpr int WSID(const char* str) {
-		return EncodeCRC32((uint8_t*)str, strlen_c(str));
-	}
+    constexpr int WSID( const U8Char* str )
+    {
+        return EncodeCRC32( (uint8*)str, strlen_c( str ) );
+    }
 
 }
 
 #define EE_MAKE_HASHABLE(type, ...) \
 namespace std {\
     template<> struct hash<type> {\
-        size_t operator()(const type &t) const {\
-            size_t ret = 0;\
+        uint64 operator()(const type &t) const {\
+            uint64 ret = 0;\
             EE::HashCombine(&ret, __VA_ARGS__);\
             return ret;\
         }\

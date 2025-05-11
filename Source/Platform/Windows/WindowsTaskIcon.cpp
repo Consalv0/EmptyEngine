@@ -1,6 +1,8 @@
 
 #include <CoreMinimal.h>
 
+#include "Utils/TextFormatting.h"
+#include "Platform/PrePlatform.h"
 #include "Platform/Platform.h"
 
 #include <cstring>
@@ -16,7 +18,7 @@
 
 namespace EE
 {
-    const WChar CLASS_NAME[] = L"EE_TRAY_ICON_CLASS";
+    const WChar CLASS_NAME[] = TEXT("EE_TRAY_ICON_CLASS");
 
     LRESULT CALLBACK WndProc( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
     {
@@ -38,7 +40,7 @@ namespace EE
         case WM_ICON:
             if ( LOWORD( lParam ) == WM_LBUTTONDBLCLK )
             {
-                EE_LOG_INFO( L"Tray pressed" );
+                EE_LOG_INFO( "Tray pressed" );
                 // showWindow( context, lParam );
             }
             break;
@@ -82,12 +84,13 @@ namespace EE
 
         data_.iconData.cbSize = sizeof( NOTIFYICONDATA );
         data_.iconData.hWnd = data_.mainWindow;
-        data_.iconData.hIcon = static_cast<HICON>(LoadImage( hInstance, L"MAINICON", IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR | LR_SHARED | LR_DEFAULTSIZE ));
+        data_.iconData.hIcon = static_cast<HICON>(LoadImage( hInstance, TEXT("MAINICON"), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR | LR_SHARED | LR_DEFAULTSIZE ));
         data_.iconData.uFlags = NIF_ICON | NIF_TIP | NIF_SHOWTIP | NIF_MESSAGE;
         data_.iconData.uVersion = NOTIFYICON_VERSION_4;
         data_.iconData.uID = (UINT)(DWORD_PTR)data_.mainWindow;
         data_.iconData.uCallbackMessage = WM_OURICON;
-        wcscpy_s( data_.iconData.szTip, name_.c_str() );
+        WString nameW = Text::UTF8ToWide( name_ );
+        wcscpy_s( data_.iconData.szTip, nameW.c_str() );
         Shell_NotifyIcon( NIM_ADD, &data_.iconData );
         Shell_NotifyIcon( NIM_SETVERSION, &data_.iconData );
     }
@@ -99,14 +102,15 @@ namespace EE
         UnregisterClass( CLASS_NAME, hInstance );
     }
 
-    void WindowsTaskIcon::SetName( const WString& newName )
+    void WindowsTaskIcon::SetName( const U8String& newName )
     {
         name_ = newName;
-        wcscpy_s( data_.iconData.szTip, name_.c_str() );
+        WString nameW = Text::UTF8ToWide( name_ );
+        wcscpy_s( data_.iconData.szTip, nameW.c_str() );
         Shell_NotifyIcon( NIM_MODIFY, &data_.iconData );
     }
 
-    const WString& WindowsTaskIcon::GetName() const
+    const U8String& WindowsTaskIcon::GetName() const
     {
         return name_;
     }
@@ -131,7 +135,8 @@ namespace EE
         item.itemInfo.fMask = MIIM_STRING | MIIM_ID;
         item.itemInfo.fType = MFT_STRING;
         item.itemInfo.wID = 0x99 - (UINT)data_.menuItems.size();
-        item.itemInfo.dwTypeData = item.label.data();
+        WString itemLabelW = Text::UTF8ToWide( item.label );
+        item.itemInfo.dwTypeData = itemLabelW.data();
         item.itemInfo.cch = 5;
 
         InsertMenuItem( data_.popupMenu, 0, FALSE, &item.itemInfo );
@@ -142,3 +147,5 @@ namespace EE
         return new WindowsTaskIcon( info );
     }
 }
+
+#include "Platform/PostPlatform.h"

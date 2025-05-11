@@ -6,6 +6,7 @@
 
 #include "Utils/TextFormatting.h"
 
+#include "Platform/PrePlatform.h"
 #include "Platform/Windows/WindowsWindow.h"
 #include "Platform/Windows/WindowsInput.h"
 
@@ -14,6 +15,7 @@
 #include <SDL3/SDL.h>
 
 #include <dwmapi.h>
+#include "Platform/PostPlatform.h"
 
 namespace EE
 {

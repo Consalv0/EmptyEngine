@@ -8,20 +8,21 @@ namespace EE
     {
     public:
         File( const File& file );
-        File( const WString& path );
+        File( const U8String& path );
+        File( const std::u8string& path );
 
         ~File();
 
         virtual bool IsValid() const;
 
-        WString GetExtension() const;
-        WString GetFileName() const;
-        WString GetFileNameWithoutExtension() const;
-        const WString& GetPath() const;
-        WString GetShortPath() const;
+        U8String GetExtension() const;
+        U8String GetFileName() const;
+        U8String GetFileNameWithoutExtension() const;
+        const U8String& GetPath() const;
+        U8String GetShortPath() const;
 
     protected:
-        WString path_;
+        U8String path_;
     };
 
     typedef TList<File> FileList;
@@ -31,20 +32,18 @@ namespace EE
     private:
         static FileList files;
 
-        static FileList::iterator FindInFiles( const WString& filePath );
+        static FileList::iterator FindInFiles( const U8String& filePath );
 
     public:
-        static const File& GetFile( const WString& filePath );
+        static const File& GetFile( const U8String& filePath );
 
-        static WString GetFileExtension( const WString& path );
+        static U8String GetFileExtension( const U8String& path );
 
-        static WString GetFullPath( const WString& path );
+        static U8String GetFullPath( const U8String& path );
 
-        static WString GetAppDirectory();
+        static U8String GetAppDirectory();
 
-        static WString ReadStream( const File* file );
-
-        static NString ReadNarrowStream( const File* file );
+        static U8String ReadStream( const File* file );
 
         static TArray<char> ReadBinaryStream( const File* file );
     };

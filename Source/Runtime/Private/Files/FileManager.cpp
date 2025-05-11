@@ -1,6 +1,7 @@
 ﻿
 #include "CoreMinimal.h"
 
+#include "Platform/PrePlatform.h"
 #include "Platform/Platform.h"
 
 #include "Utils/TextFormatting.h"
@@ -22,9 +23,9 @@ namespace EE
 {
     FileList FileManager::files = FileList();
 
-    const File& FileManager::GetFile( const WString& filePath )
+    const File& FileManager::GetFile( const U8String& filePath )
     {
-        WString fullFilePath = GetFullPath( filePath );
+        U8String fullFilePath = GetFullPath( filePath );
         FileList::iterator found = FindInFiles( fullFilePath );
 
         if ( found != files.end() && found->IsValid() ) return *found;
@@ -33,9 +34,9 @@ namespace EE
         return files.back();
     }
 
-    WString FileManager::GetFileExtension( const WString& path )
+    U8String FileManager::GetFileExtension( const U8String& path )
     {
-        WString::size_type extensionIndex;
+        U8String::size_type extensionIndex;
 
         extensionIndex = path.rfind( '.' );
 
@@ -45,18 +46,18 @@ namespace EE
         }
         else
         {
-            return L"";
+            return "";
         }
     }
 
-    WString FileManager::GetFullPath( const WString& path )
+    U8String FileManager::GetFullPath( const U8String& path )
     {
 #ifdef EE_PLATFORM_WINDOWS
         WChar fullPath[ MAX_PATH + 1 ];
-        GetFullPathName( path.c_str(), MAX_PATH, fullPath, NULL );
-        return fullPath;
+        GetFullPathName( Text::UTF8ToWide( path ).c_str(), MAX_PATH, fullPath, NULL );
+        return Text::WideToUTF8( fullPath );
 #elif EE_PLATFORM_APPLE
-        WString resourcesPath = path;
+        WString resourcesPath = Text::UTF8ToWide( path );
         WString resourcesFolderName = L"Resources/";
         Text::Replace( resourcesPath, resourcesFolderName, WString( L"" ) );
         NSString* NSStringToResourcesPath = [[NSString alloc]initWithBytes:resourcesPath.data()
@@ -66,57 +67,47 @@ namespace EE
         NSStringEncoding Encode = CFStringConvertEncodingToNSStringEncoding( kCFStringEncodingUTF32LE );
         NSData* SData = [ filePath dataUsingEncoding : Encode ];
 
-        return WString( (wchar_t*)[ SData bytes ], [ SData length ] / sizeof( wchar_t ) );
+        WString fullPath( (wchar_t*)[ sData bytes ], [ sData length ] / sizeof( wchar_t ) );
+        return Text::WideToUTF8( fullPath );
 #else
-        Char fullPath[ PATH_MAX + 1 ];
-        Char* ptr = realpath( WStringToString( path ).c_str(), fullPath );
-        return CharToWChar( fullPath );
+        U8Char fullPath[ PATH_MAX + 1 ];
+        U8Char* ptr = realpath( path.c_str(), fullPath );
+        return U8String( fullPath );
 #endif
     }
 
-    WString FileManager::GetAppDirectory()
+    U8String FileManager::GetAppDirectory()
     {
 #ifdef EE_PLATFORM_WINDOWS
         WChar buffer[ MAX_PATH ];
         GetCurrentDirectory( _MAX_DIR, buffer );
-        WString currentDirectory( buffer );
+        U8String currentDirectory = Text::WideToUTF8( buffer );
 #elif EE_PLATFORM_APPLE
         NSStringEncoding encode = CFStringConvertEncodingToNSStringEncoding( kCFStringEncodingUTF32LE );
         NSData* sData = [[[NSBundle mainBundle]resourcePath] dataUsingEncoding:encode];
 
-        WString currentDirectory( (wchar_t*)[ sData bytes ], [ sData length ] / sizeof( wchar_t ) );
+        WString buffer( (wchar_t*)[ sData bytes ], [ sData length ] / sizeof( wchar_t ) );
+        U8String currentDirectory = Text::WideToUTF8( buffer );
 #else
-        WString currentDirectory{};
+        U8String currentDirectory{};
 #endif
         return currentDirectory;
     }
 
-    FileList::iterator FileManager::FindInFiles( const WString& filePath )
+    FileList::iterator FileManager::FindInFiles( const U8String& filePath )
     {
         return std::find_if( files.begin(), files.end(), [filePath]( File& file )
             -> bool
             {
-                return file.GetPath() == filePath;
+                return std::strcmp( file.GetPath().c_str(), filePath.c_str()) == 0;
             }
         );
     }
 
-    WString FileManager::ReadStream( const File* file )
+    U8String FileManager::ReadStream( const File* file )
     {
-        FileStream<WString> stream( *file );
-        WString str;
-        if ( stream.Open( std::ios::in, true ) )
-        {
-            stream.ReadStream( str );
-            stream.Close();
-        }
-        return str;
-    }
-
-    NString FileManager::ReadNarrowStream( const File* file )
-    {
-        FileStream<NString> stream( *file );
-        NString str;
+        FileStream<U8String> stream( *file );
+        U8String str;
         if ( stream.Open( std::ios::in, true ) )
         {
             stream.ReadStream( str );
@@ -127,7 +118,7 @@ namespace EE
 
     TArray<char> FileManager::ReadBinaryStream( const File* file )
     {
-        FileStream<NString> stream( *file );
+        FileStream<U8String> stream( *file );
         TArray<char> buffer;
         if ( stream.Open( std::ios::ate | std::ios::binary | std::ios::in, false ) )
         {
@@ -141,3 +132,5 @@ namespace EE
         return buffer;
     }
 }
+
+#include "Platform/PostPlatform.h"

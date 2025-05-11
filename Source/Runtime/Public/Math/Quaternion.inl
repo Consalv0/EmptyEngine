@@ -79,8 +79,8 @@ namespace EE::Math
 	inline TQuaternion<T> TQuaternion<T>::FromLookRotation( TVector3<T> const& forward, TVector3<T> const& up )
 	{
 		const TVector3<T> normal = forward.Normalized();
-		const TVector3<T> tangent = TVector3::Cross( up == normal ? up + T(0.001F) : up, normal ).Normalized();
-		const TVector3<T> bitangent = TVector3::Cross( normal, tangent );
+		const TVector3<T> tangent = TVector3<T>::Cross( up == normal ? up + T(0.001F) : up, normal ).Normalized();
+		const TVector3<T> bitangent = TVector3<T>::Cross( normal, tangent );
 
 		TMatrix3x3 lookSpace(
 			tangent, bitangent, normal

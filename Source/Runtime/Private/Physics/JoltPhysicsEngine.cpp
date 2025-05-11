@@ -37,7 +37,7 @@ namespace EE
         va_end( list );
 
         // Print to the TTY
-        EE_LOG_INFO( L"[Jolt] {}", Text::NarrowToWide( buffer ) );
+        EE_LOG_INFO( "[Jolt] {}", buffer );
     }
 
 #ifdef JPH_ENABLE_ASSERTS
@@ -47,7 +47,7 @@ namespace EE
         const char* inFile,
         uint32 inLine )
     {
-        EE_LOG_CRITICAL( L"[Jolt] Assertion Failed {} : {} : ({}) ", Text::NarrowToWide( inFile ), inLine, Text::NarrowToWide( inExpression ), (inMessage != NULL ? Text::NarrowToWide( inMessage ) : L"") );
+        EE_LOG_CRITICAL( "[Jolt] Assertion Failed {} : {} : ({}) ", inFile , inLine, inExpression, (inMessage != NULL ? inMessage : "") );
 
         // Breakpoint
         return true;
@@ -405,7 +405,7 @@ namespace EE
         bodyId_ = bodyInterface.CreateAndAddBody( sphereSettings, createInfo.activate ? JPH::EActivation::Activate : JPH::EActivation::DontActivate );
         if ( bodyId_.IsInvalid() )
         {
-            EE_LOG_ERROR( L"Failed to create Physics Body" );
+            EE_LOG_ERROR( "[Jolt] Failed to create Physics Body" );
         }
     }
 

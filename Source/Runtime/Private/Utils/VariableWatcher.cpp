@@ -16,7 +16,7 @@ namespace EE
         EE_CLASSNOCOPY( VariableWatcher_T )
 
     public:
-        VariableWatcher_T( const T& val, const NChar* name, const size_t& line, const NChar* file, const NChar* function, const uint64& lastChangeTime )
+        VariableWatcher_T( const T& val, const U8Char* name, const uint32& line, const U8Char* file, const U8Char* function, const uint64& lastChangeTime )
             : value( val )
             , VariableWatcher( line, name, file, function, lastChangeTime )
         {
@@ -25,7 +25,7 @@ namespace EE
         T value;
     };
 
-    static TMap<size_t, DebugVariableWatcher::Variable> GVariables{};
+    static TMap<uint64, DebugVariableWatcher::Variable> GVariables{};
 }
 
 namespace EE
@@ -39,8 +39,7 @@ namespace EE
     {
         switch ( type_ )
         {
-          case DebugVariableWatcher::VariableType_NString     : return &static_cast<VariableWatcher_T<     NString>*>(variableWatcher_)->value;
-          case DebugVariableWatcher::VariableType_WString     : return &static_cast<VariableWatcher_T<     WString>*>(variableWatcher_)->value;
+          case DebugVariableWatcher::VariableType_String      : return &static_cast<VariableWatcher_T<    U8String>*>(variableWatcher_)->value;
           case DebugVariableWatcher::VariableType_Float       : return &static_cast<VariableWatcher_T<       float>*>(variableWatcher_)->value;
           case DebugVariableWatcher::VariableType_Double      : return &static_cast<VariableWatcher_T<      double>*>(variableWatcher_)->value;
           case DebugVariableWatcher::VariableType_Int8        : return &static_cast<VariableWatcher_T<        int8>*>(variableWatcher_)->value;
@@ -67,22 +66,22 @@ namespace EE
         }
     }
 
-    const NChar* DebugVariableWatcher::Variable::GetName() const
+    const U8Char* DebugVariableWatcher::Variable::GetName() const
     {
         return GetWatcher().name;
     }
 
-    const size_t& DebugVariableWatcher::Variable::GetLine() const
+    const uint32& DebugVariableWatcher::Variable::GetLine() const
     {
         return GetWatcher().line;
     }
 
-    const NChar* DebugVariableWatcher::Variable::GeFile() const
+    const U8Char* DebugVariableWatcher::Variable::GeFile() const
     {
         return GetWatcher().file;
     }
 
-    const NChar* DebugVariableWatcher::Variable::GetFunction() const
+    const U8Char* DebugVariableWatcher::Variable::GetFunction() const
     {
         return GetWatcher().function;
     }
@@ -118,8 +117,7 @@ namespace EE
     {
         switch ( type_ )
         {
-          case DebugVariableWatcher::VariableType_NString     : delete static_cast<VariableWatcher_T<     NString>*>(variableWatcher_); break;
-          case DebugVariableWatcher::VariableType_WString     : delete static_cast<VariableWatcher_T<     WString>*>(variableWatcher_); break;
+          case DebugVariableWatcher::VariableType_String      : delete static_cast<VariableWatcher_T<    U8String>*>(variableWatcher_); break;
           case DebugVariableWatcher::VariableType_Float       : delete static_cast<VariableWatcher_T<       float>*>(variableWatcher_); break;
           case DebugVariableWatcher::VariableType_Double      : delete static_cast<VariableWatcher_T<      double>*>(variableWatcher_); break;
           case DebugVariableWatcher::VariableType_Int8        : delete static_cast<VariableWatcher_T<        int8>*>(variableWatcher_); break;
@@ -147,10 +145,10 @@ namespace EE
     }
 
     template<typename T>
-    void WatchImplementation( const T& x, const char* name, size_t line, const char* file, const char* function )
+    void WatchImplementation( const T& x, const char* name, uint32 line, const char* file, const char* function )
     {
         auto watcher = VariableWatcher_T<T>( x, name, line, file, function, 0 );
-        size_t hash = 0;
+        uint64 hash = 0;
         EE::HashCombine( &hash, watcher );
         if ( GVariables.contains( hash ) )
         {
@@ -174,10 +172,10 @@ namespace EE
     }
 
     template<typename T>
-    void WatchImplementation_Vector( const T& x, const char* name, size_t line, const char* file, const char* function )
+    void WatchImplementation_Vector( const T& x, const char* name, uint32 line, const char* file, const char* function )
     {
         auto watcher = VariableWatcher_T<T>( x, name, line, file, function, 0 );
-        size_t hash = 0;
+        uint64 hash = 0;
         EE::HashCombine( &hash, watcher );
         if ( GVariables.contains( hash ) )
         {
@@ -200,7 +198,7 @@ namespace EE
         }
     }
 
-    void DebugVariableWatcher::GetAllVariables( size_t* size, const DebugVariableWatcher::Variable** variables )
+    void DebugVariableWatcher::GetAllVariables( uint64* size, const DebugVariableWatcher::Variable** variables )
     {
         *size = GVariables.size();
         if ( variables == NULL )
@@ -208,8 +206,8 @@ namespace EE
             return;
         }
 
-        size_t index = 0;
-        for ( TMap<size_t, DebugVariableWatcher::Variable>::const_iterator it = GVariables.begin(); it != GVariables.end(); it++ )
+        uint64 index = 0;
+        for ( TMap<uint64, DebugVariableWatcher::Variable>::const_iterator it = GVariables.begin(); it != GVariables.end(); it++ )
         {
             variables[ index++ ] = &it->second;
         }
@@ -217,25 +215,24 @@ namespace EE
 }
 
 #define EE_IMPLEMENT_WATCHER( x )   EE_MAKE_HASHABLE( EE::VariableWatcher_T<x>, t.name, t.line, t.file, t.function ); \
-                                    void EE::DebugVariableWatcher::Watch( const x& val, const char* name, size_t line, const char* file, const char* function ) { \
+                                    void EE::DebugVariableWatcher::Watch( const x& val, const char* name, uint32 line, const char* file, const char* function ) { \
                                         EE::WatchImplementation( val, name, line, file, function ); }
 
 #define EE_IMPLEMENT_VECTOR_WATCHER( x )   EE_MAKE_HASHABLE( EE::VariableWatcher_T<x>, t.name, t.line, t.file, t.function ); \
-                                    void EE::DebugVariableWatcher::Watch( const x& val, const char* name, size_t line, const char* file, const char* function ) { \
+                                    void EE::DebugVariableWatcher::Watch( const x& val, const char* name, uint32 line, const char* file, const char* function ) { \
                                         EE::WatchImplementation_Vector( val, name, line, file, function ); }
 
-EE_IMPLEMENT_WATCHER( NString )
-EE_IMPLEMENT_WATCHER( WString )
-EE_IMPLEMENT_WATCHER(   float )
-EE_IMPLEMENT_WATCHER(  double )
-EE_IMPLEMENT_WATCHER(    int8 )
-EE_IMPLEMENT_WATCHER(   uint8 )
-EE_IMPLEMENT_WATCHER(   int16 )
-EE_IMPLEMENT_WATCHER(  uint16 )
-EE_IMPLEMENT_WATCHER(   int32 )
-EE_IMPLEMENT_WATCHER(  uint32 )
-EE_IMPLEMENT_WATCHER(   int64 )
-EE_IMPLEMENT_WATCHER(  uint64 )
+EE_IMPLEMENT_WATCHER( U8String )
+EE_IMPLEMENT_WATCHER(    float )
+EE_IMPLEMENT_WATCHER(   double )
+EE_IMPLEMENT_WATCHER(     int8 )
+EE_IMPLEMENT_WATCHER(    uint8 )
+EE_IMPLEMENT_WATCHER(    int16 )
+EE_IMPLEMENT_WATCHER(   uint16 )
+EE_IMPLEMENT_WATCHER(    int32 )
+EE_IMPLEMENT_WATCHER(   uint32 )
+EE_IMPLEMENT_WATCHER(    int64 )
+EE_IMPLEMENT_WATCHER(   uint64 )
 EE_IMPLEMENT_VECTOR_WATCHER( EE::   Vector2f )
 EE_IMPLEMENT_VECTOR_WATCHER( EE::   Vector3f )
 EE_IMPLEMENT_VECTOR_WATCHER( EE::   Vector4f )

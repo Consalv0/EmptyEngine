@@ -9,14 +9,14 @@ namespace EE
 {
     struct ModelNode
     {
-        NString name;
+        U8String name;
         Transform transform;
         bool hasMesh;
         size_t meshKey;
         ModelNode* parent;
         TArray<ModelNode*> children;
 
-        ModelNode( const NString& name ) : name( name ), transform(), hasMesh( false ), meshKey( 0 ), parent( NULL ), children() {};
+        ModelNode( const U8String& name ) : name( name ), transform(), hasMesh( false ), meshKey( 0 ), parent( NULL ), children() {};
 
         ModelNode& operator=( const ModelNode& other );
 
@@ -28,7 +28,7 @@ namespace EE
             }
         }
 
-        inline ModelNode* AddChild( const NString& name )
+        inline ModelNode* AddChild( const U8String& name )
         {
             ModelNode* child = new ModelNode( name );
             child->parent = this;

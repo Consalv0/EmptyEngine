@@ -7,7 +7,7 @@ namespace EE
 {
     struct WindowsMenuItem
     {
-        WString label;
+        U8String label;
         void* userData;
         MenuItemCallback callback;
         MENUITEMINFO itemInfo;
@@ -30,15 +30,15 @@ namespace EE
 
         ~WindowsTaskIcon() override;
         //* Rename the icon name
-        void SetName( const WString& newName ) override;
+        void SetName( const U8String& newName ) override;
 
         //* Get the icon name
-        const WString& GetName() const override;
+        const U8String& GetName() const override;
 
         void AddMenuItem( const TaskIconMenuItemCreateInfo& menu ) override;
 
     protected:
-        WString name_;
+        U8String name_;
         struct WindowsTaskIconData data_;
     };
 }

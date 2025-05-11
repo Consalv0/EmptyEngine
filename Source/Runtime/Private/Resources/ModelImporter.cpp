@@ -37,7 +37,7 @@ namespace EE
         return *this;
     }
 
-    bool FindNodeLevel( const NString& name, const ModelNode* node, int32& level )
+    bool FindNodeLevel( const U8String& name, const ModelNode* node, int32& level )
     {
         if ( node->name == name )
             return true;
@@ -55,8 +55,8 @@ namespace EE
 
     bool ModelImporter::RecognizeFileExtensionAndLoad( ModelResult& info, const Options& options )
     {
-        const WString extension = options.file.GetExtension();
-        if ( Text::CompareIgnoreCase( extension, WString( L"OBJ" ) ) )
+        const U8String extension = options.file.GetExtension();
+        if ( Text::CompareIgnoreCase( extension, U8String( "OBJ" ) ) )
         {
             return OBJImporter::LoadModel( info, options );
         }
@@ -67,7 +67,7 @@ namespace EE
     {
         if ( std::thread::hardware_concurrency() <= 1 )
         {
-            EE_LOG_WARN( L"The aviable cores ({:d}) are insuficient for asyncronus loaders", std::thread::hardware_concurrency() );
+            EE_LOG_WARN( "The aviable cores ({:d}) are insuficient for asyncronus loaders", std::thread::hardware_concurrency() );
             return false;
         }
 
@@ -130,7 +130,7 @@ namespace EE
         }
 
         TaskRunning = true;
-        EE_LOG_INFO( L"Reading File Model '{}'", options.file.GetShortPath() );
+        EE_LOG_INFO( "Reading File Model '{}'", options.file.GetShortPath() );
         RecognizeFileExtensionAndLoad( info, options );
         TaskRunning = false;
         return info.isValid;

@@ -13,7 +13,7 @@ namespace EE
     public:
         WindowsWindow( const WindowCreateDescription& parameters = WindowCreateDescription() );
 
-        ~WindowsWindow();
+        ~WindowsWindow() override;
 
         bool SetOpacity( const uint8& opacity ) override;
 

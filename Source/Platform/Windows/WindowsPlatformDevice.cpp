@@ -1,7 +1,10 @@
 
 #include "CoreMinimal.h"
+
+#include "Platform/PrePlatform.h"
 #include "Platform/Platform.h"
 #include "Platform/Windows/WindowsPlatformDevice.h"
+#include "Platform/PostPlatform.h"
 
 #ifdef EE_PLATFORM_NVML
 #include <nvml.h>

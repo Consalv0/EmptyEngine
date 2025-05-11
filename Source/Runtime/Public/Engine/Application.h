@@ -13,7 +13,7 @@ namespace EE
 
         virtual ~Application();
 
-        virtual enum class EDynamicRHI GetPreferedRHI() const = 0;
+        virtual EDynamicRHI GetPreferedRHI() const = 0;
 
         bool HasErrors() { return initializationError_; };
 
@@ -53,5 +53,5 @@ namespace EE
 
     extern Application* GMainApplication;
 
-    Application* CreateApplication( int argc, NChar* argv[] );
+    Application* CreateApplication( int argc, U8Char* argv[] );
 }

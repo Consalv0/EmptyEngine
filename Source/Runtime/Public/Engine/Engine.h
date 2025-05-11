@@ -22,7 +22,7 @@ namespace EE
         AudioDevice* audioDevice = NULL;
 
     public:
-        bool Initialize( int argc, NChar* argv[] );
+        bool Initialize( int argc, U8Char* argv[] );
 
         void Start();
 

@@ -227,6 +227,8 @@ namespace EE
         case PixelFormat_R16G16_UNORM:   FlipVertically<  FloatRG>( map.width_, map.height_, map.depth_, map.data_ ); break;
         case PixelFormat_R8G8B8A8_UINT:  FlipVertically<UCharRGBA>( map.width_, map.height_, map.depth_, map.data_ ); break;
         case PixelFormat_R8G8B8A8_UNORM: FlipVertically<FloatRGBA>( map.width_, map.height_, map.depth_, map.data_ ); break;
+        default:
+            break;
         }
     }
 

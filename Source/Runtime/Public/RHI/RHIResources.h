@@ -194,7 +194,7 @@ namespace EE
         EShaderFormat format;
         size_t codeLength;
         const void* code;
-        const NChar* entryPoint;
+        const U8Char* entryPoint;
     };
 
     class RHIShaderStage : public RHIResource
@@ -213,7 +213,7 @@ namespace EE
 
         FORCEINLINE const EShaderStageFlagsBit& GetStage() const { return stage; }
 
-        virtual const NChar* GetEntryPoint() const = 0;
+        virtual const U8Char* GetEntryPoint() const = 0;
     };
 
     struct RHIBufferCopyRegion

@@ -174,7 +174,7 @@ namespace EE
                 SDL_Joystick* joystick = SDL_GetGamepadJoystick( gamepad );
 
                 Name deviceName = Name(
-                    Text::NarrowToWide( SDL_GetJoystickName( SDL_GetGamepadJoystick( gamepad ) ) ),
+                    SDL_GetJoystickName( SDL_GetGamepadJoystick( gamepad ) ),
                     sdlEvent->jdevice.which
                 );
 
@@ -238,7 +238,7 @@ namespace EE
                 addedJoystickState->name = deviceName;
                 addedJoystickState->isConnected = true;
 
-                EE_LOG_INFO( L"Device {} Opened", addedJoystickState->name.GetInstanceName() );
+                EE_LOG_INFO( "Device {} Opened", addedJoystickState->name.GetInstanceName() );
 
             }
             break;
@@ -253,7 +253,7 @@ namespace EE
             if ( SDL_JoystickConnected( joystick ) )
             {
                 JoystickState* joystickState = NULL;
-                Name deviceName = Name( Text::NarrowToWide( SDL_GetJoystickName( joystick ) ), sdlEvent->jdevice.which );
+                Name deviceName = Name( SDL_GetJoystickName( joystick ), sdlEvent->jdevice.which );
                 for ( int i = 0; i < EE_MAX_GAMEPAD_COUNT; i++ )
                 {
                     if ( GJoystickDeviceStates[ i ].name.GetID() == deviceName.GetID() )
@@ -266,7 +266,7 @@ namespace EE
                 if ( joystickState == NULL ) break;
                 joystickState->isConnected = false;
 
-                EE_LOG_INFO( L"Device {} Closed", joystickState->name.GetInstanceName() );
+                EE_LOG_INFO( "Device {} Closed", joystickState->name.GetInstanceName() );
 
                 SDL_CloseHaptic( (SDL_Haptic*)joystickState->hapticDevice );
                 SDL_CloseJoystick( joystick );
@@ -281,7 +281,7 @@ namespace EE
             if ( SDL_JoystickConnected( joystick ) )
             {
                 JoystickState* joystickState = NULL;
-                Name deviceName = Name( Text::NarrowToWide( SDL_GetJoystickName( joystick ) ), sdlEvent->jdevice.which );
+                Name deviceName = Name( SDL_GetJoystickName( joystick ), sdlEvent->jdevice.which );
                 int index = 0;
                 for ( int i = 0; i < EE_MAX_GAMEPAD_COUNT; i++ )
                 {
@@ -314,7 +314,7 @@ namespace EE
             if ( SDL_JoystickConnected( joystick ) )
             {
                 JoystickState* joystickState = NULL;
-                Name deviceName = Name( Text::NarrowToWide( SDL_GetJoystickName( joystick ) ), sdlEvent->jdevice.which );
+                Name deviceName = Name( SDL_GetJoystickName( joystick ), sdlEvent->jdevice.which );
                 int index = 0;
                 for ( int i = 0; i < EE_MAX_GAMEPAD_COUNT; i++ )
                 {
@@ -441,7 +441,7 @@ namespace EE
             SDL_Gamepad* gamepad = SDL_OpenGamepad( ids[ i ] );
             SDL_Joystick* joystick = SDL_GetGamepadJoystick( gamepad );
 
-            Name deviceName = Name( Text::NarrowToWide( SDL_GetJoystickName( SDL_GetGamepadJoystick( gamepad ) ) ), ids[ i ] );
+            Name deviceName = Name( SDL_GetJoystickName( SDL_GetGamepadJoystick( gamepad ) ), ids[ i ] );
             JoystickState* connectedJoystick = NULL;
 
             for ( int i = 0; i < EE_MAX_GAMEPAD_COUNT; i++ )

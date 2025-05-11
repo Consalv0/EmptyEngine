@@ -24,6 +24,10 @@ project "EmptyEngine"
         "%{prj.location}/Source/**.inl",
         "%{prj.location}/Source/**.cpp",
     }
+    
+    removefiles {
+        "%{prj.location}/Source/Platform/**"
+    }
 
     includedirs {
         "%{prj.location}/Source",
@@ -45,9 +49,7 @@ project "EmptyEngine"
     links {
         "spdlog",
         "VMA",
-        "JoltPhysics",
-        "vulkan-1.lib",
-        "SDL3.lib",
+        "JoltPhysics"
     }
     
     flags { 
@@ -57,6 +59,39 @@ project "EmptyEngine"
     filter "system:emscripten"
         systemversion "latest"
         
+        removeincludedirs {
+            "%{IncludeDir.VulkanSDK}/include",
+            "%{IncludeDir.VMA}/include"
+        }
+
+        removefiles {
+            "%{prj.location}/Source/Runtime/Private/RHI/Vulkan/**",
+            "%{prj.location}/Source/Runtime/Public/RHI/Vulkan/**"
+        }
+
+        removelinks {
+            "VMA"
+        }
+
+        files {
+            "%{prj.location}/Source/Platform/Web/**.h",
+            "%{prj.location}/Source/Platform/Web/**.inl",
+            "%{prj.location}/Source/Platform/Web/**.cpp",
+        }
+
+        -- libdirs {
+        --     "%{LibrariesDir.SDL}/Build/%{cfg.system}/%{cfg.buildcfg}"
+        -- }
+-- 
+        -- links {
+        --     "libSDL3.a",
+        -- }
+        
+        prebuildcommands {
+            'emcmake cmake -DSDL_THREADS=ON -DCMAKE_BUILD_TYPE=%{cfg.buildcfg} -S %[%{LibrariesDir.SDL}] -B %[%{LibrariesDir.SDL}/Build/%{cfg.system}/%{cfg.buildcfg}] -G Ninja',
+            'pushd %[%{LibrariesDir.SDL}/Build/%{cfg.system}/%{cfg.buildcfg}] && ninja && popd'
+        }
+
         linkoptions{
             "-s USE_PTHREADS=1",
             "-s FULL_ES3=1",
@@ -70,15 +105,31 @@ project "EmptyEngine"
 
     filter "system:windows"
         systemversion "latest"
+        buildoptions{ "/utf-8" }
 
         libdirs { 
-            "%{LibrariesDir.SDL}/VisualC/SDL/%{outputdir}"
+            "%{LibrariesDir.SDL}/Build/%{cfg.system}/%{cfg.buildcfg}"
+        }
+
+        links {
+            "vulkan-1.lib",
+            "SDL3.lib",
+        }
+
+        files {
+            "%{prj.location}/Source/Platform/Windows/**.h",
+            "%{prj.location}/Source/Platform/Windows/**.inl",
+            "%{prj.location}/Source/Platform/Windows/**.cpp",
         }
         
         prelinkcommands  { 
-            "{MKDIR} %[%{LibrariesDir.SDL}/VisualC/SDL/%{outputdir}]",
-            "IF EXIST %[%{wks.location}/x64/%{cfg.buildcfg}/] ({MOVE} %[%{wks.location}/x64/%{cfg.buildcfg}/*.*] %[%{LibrariesDir.SDL}/VisualC/SDL/%{outputdir}/])",
-            "IF EXIST %[%{wks.location}/x64/] ({RMDIR} %[%{wks.location}/x64/])"
+        }
+
+        prebuildcommands {
+            'cmake -S %[%{LibrariesDir.SDL}] -B %[%{LibrariesDir.SDL}/Build/%{cfg.system}]',
+            'cmake --build %[%{LibrariesDir.SDL}/Build/%{cfg.system}] --config %[%{cfg.buildcfg}]',
+            "{MKDIR} %[%{cfg.targetdir}]",
+            "{COPY} %[%{LibrariesDir.SDL}/Build/%{cfg.system}/%{cfg.buildcfg}/*.dll] %[%{cfg.targetdir}/*.*]",
         }
 
         postbuildcommands {
@@ -143,7 +194,7 @@ project "VMA"
         systemversion "latest"
 
     filter "system:emscripten"
-        systemversion "latest"
+        kind "None"
 
     filter "configurations:Debug"
         runtime "Debug"
@@ -165,7 +216,6 @@ project "spdlog"
     objdir ("%{prj.location}/BinObjs/" .. outputdir)
     
     defines {
-        "SPDLOG_WCHAR_TO_UTF8_SUPPORT",
         "SPDLOG_NO_DATETIME",
         "SPDLOG_COMPILED_LIB"
     }
@@ -187,6 +237,7 @@ project "spdlog"
 
     filter "system:windows"
         systemversion "latest"
+        buildoptions{ "/utf-8" }
 
     filter "system:emscripten"
         systemversion "latest"
@@ -212,8 +263,7 @@ project "JoltPhysics"
     
     defines {
         "JOLT_PHYSICS_SRC_FILES=%{prj.location}/Jolt/Jolt.natvis",
-        "JPH_CROSS_PLATFORM_DETERMINISTIC",
-        "JPH_USE_AVX2"
+        "JPH_CROSS_PLATFORM_DETERMINISTIC"
     }
 
     files {
@@ -255,11 +305,11 @@ project "JoltPhysics"
     }
 
     filter "system:emscripten"
-        buildoptions{ "/arch:AVX2" }
         systemversion "latest"
 
     filter "system:windows"
         buildoptions{ "/arch:AVX2" }
+        defines{ "JPH_USE_AVX2" }
         systemversion "latest"
 
     filter "configurations:Debug"
@@ -272,8 +322,8 @@ project "JoltPhysics"
         runtime "Release"
         optimize "Speed"
 
-externalproject "SDL"
-    location "%{IncludeDir.SDL}/VisualC/SDL"
-    uuid "57940020-8E99-AEB6-271F-61E0F7F6B73B"
-    kind "SharedLib"
-    language "C++"
+-- externalproject "SDL"
+--     location "%{IncludeDir.SDL}/VisualC/SDL"
+--     uuid "57940020-8E99-AEB6-271F-61E0F7F6B73B"
+--     kind "SharedLib"
+--     language "C++"

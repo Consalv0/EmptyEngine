@@ -1,9 +1,10 @@
-#pragma once
 
 #include "CoreMinimal.h"
 
 #include "Engine/Engine.h"
+#include "Platform/PrePlatform.h"
 #include "Platform/Platform.h"
+#include "Platform/PostPlatform.h"
 
 static void mainloop( void )
 {
@@ -16,7 +17,7 @@ static void mainloop( void )
 
 #ifdef EE_DEBUG
         // _getch();
-#endif // EE_DEBUG
+#endif
         return;
     }
 

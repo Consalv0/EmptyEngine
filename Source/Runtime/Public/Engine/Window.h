@@ -26,7 +26,7 @@ namespace EE
 
     struct WindowCreateDescription
     {
-        WString name = L"Empty Engine";
+        U8String name = "Empty Engine";
         EWindowMode windowMode = WindowMode_Windowed;
         EPresentMode presentMode = PresentMode_VSync;
         uint32 width = 0;
@@ -63,7 +63,7 @@ namespace EE
     public:
         Window( const WindowCreateDescription& parameters );
 
-        ~Window();
+        virtual ~Window();
 
         //* Set the window display mode
         virtual void SetWindowMode( const EWindowMode& mode );
@@ -78,13 +78,13 @@ namespace EE
         void SetPosition( const int32& x, const int32& y );
 
         //* Rename the window title
-        void SetName( const WString& newName );
+        void SetName( const U8String& newName );
 
         //* Get the window display mode
         virtual const EWindowMode& GetWindowMode() const;
 
         //* Get the window title name
-        virtual const WString& GetName() const;
+        virtual const U8String& GetName() const;
 
         //* Get the width in pixels of the window
         virtual const uint32& GetWidth() const;
@@ -159,7 +159,7 @@ namespace EE
         bool closeRequested;
 
     protected:
-        WString name_;
+        U8String name_;
         EWindowMode mode_;
         WindowHandleRef windowHandle_;
         EWindowOptionFlags options_;

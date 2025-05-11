@@ -32,7 +32,7 @@ namespace EE
 
         virtual EShaderFormat GetShaderFormat() const = 0;
 
-        virtual WString const& GetName() const = 0;
+        virtual U8String const& GetName() const = 0;
 
         const RHIPresentContext* GetRHIPresentContextOfWindow( Window* window ) const;
 

@@ -57,9 +57,9 @@ namespace EE
         JoltPhysicsEngine();
         ~JoltPhysicsEngine() override;
 
-        void StartSimulation();
+        void StartSimulation() override;
 
-        bool UpdateSimulation( uint8 steps );
+        bool UpdateSimulation( uint8 steps ) override;
 
         PhysicsShapeBox* CreateBoxShape( const PhysicsShapeBoxCreateInfo& createInfo ) override;
         PhysicsShapeSphere* CreateSphereShape( const PhysicsShapeSphereCreateInfo& createInfo ) override;

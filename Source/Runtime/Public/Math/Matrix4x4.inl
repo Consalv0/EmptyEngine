@@ -585,10 +585,10 @@ namespace EE::Math
     {
         TMatrix4x4 result( *this );
 
-        result.m0 *= value;
-        result.m1 *= value;
-        result.m2 *= value;
-        result.m3 *= value;
+        result.c0 *= value;
+        result.c1 *= value;
+        result.c2 *= value;
+        result.c3 *= value;
 
         return result;
     }
@@ -598,10 +598,10 @@ namespace EE::Math
     {
         TMatrix4x4 result( *this );
 
-        result.m0 /= value;
-        result.m1 /= value;
-        result.m2 /= value;
-        result.m3 /= value;
+        result.c0 /= value;
+        result.c1 /= value;
+        result.c2 /= value;
+        result.c3 /= value;
 
         return result;
     }
