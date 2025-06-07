@@ -37,6 +37,7 @@ namespace EE
 
         WString UTF8ToWide( const U8String& From );
 
+        /// TODO this needs revision if it works with unicode
         template<class T>
         inline bool CompareIgnoreCase( T A, T B )
         {

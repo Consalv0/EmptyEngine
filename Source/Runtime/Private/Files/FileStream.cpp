@@ -17,17 +17,17 @@
 namespace EE
 {
     File::File( const File& file )
-        : File( file.path_ )
+        : File( file.mPath )
     {
     }
 
     File::File( const U8String& path )
-        : path_( path )
+        : mPath( path )
     {
     }
 
     File::File( const std::u8string& path )
-        : path_( (U8Char*)path.c_str() )
+        : mPath( (U8Char*)path.c_str() )
     {
     }
 
@@ -37,18 +37,18 @@ namespace EE
 
     bool File::IsValid() const
     {
-        return path_.empty() == false;
+        return mPath.empty() == false;
     }
 
     U8String File::GetExtension() const
     {
         U8String::size_type extensionIndex;
 
-        extensionIndex = path_.rfind( '.' );
+        extensionIndex = mPath.rfind( '.' );
 
         if ( extensionIndex != U8String::npos )
         {
-            return path_.substr( extensionIndex + 1 );
+            return mPath.substr( extensionIndex + 1 );
         }
         else
         {
@@ -64,10 +64,10 @@ namespace EE
         separator = '\\';
 #endif
 
-        size_t i = path_.rfind( separator, path_.length() );
+        size_t i = mPath.rfind( separator, mPath.length() );
         if ( i != U8String::npos )
         {
-            return(path_.substr( i + 1, path_.length() - i ));
+            return(mPath.substr( i + 1, mPath.length() - i ));
         }
 
         return "";
@@ -83,13 +83,13 @@ namespace EE
 
     const U8String& File::GetPath() const
     {
-        return path_;
+        return mPath;
     }
 
     U8String File::GetShortPath() const
     {
         U8String currentDirectory = FileManager::GetAppDirectory();
-        U8String returnValue = path_;
+        U8String returnValue = mPath;
         Text::Replace( returnValue, currentDirectory, ".." );
 
         return returnValue;

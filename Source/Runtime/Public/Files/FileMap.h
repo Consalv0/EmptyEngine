@@ -17,21 +17,21 @@ namespace EE
         int WaitForResult( uint64* bytesRead );
 
         explicit operator bool() const;
-        void* GetHandle() const { return handle_; }
-        uint64 GetSize() const { return size_; }
-        int GetError() const { return error_; }
-        uint32 NumRequests() const noexcept { return requestCount_; }
-        uint64 BytesRead() const noexcept { return bytesRead_; }
-        int Error() const noexcept { return errorCode_; }
+        void* GetHandle() const { return mHandle; }
+        uint64 GetSize() const { return mSize; }
+        int GetError() const { return mError; }
+        uint32 GetRequestsCount() const noexcept { return mRequestCount; }
+        uint64 GetBytesRead() const noexcept { return mBytesRead; }
+        int GetErrorCode() const noexcept { return mErrorCode; }
 
     protected:
-        uint32  requestCount_{};
-        uint64  bytesRead_{};
-        int     errorCode_{};
-        void*   handle_{};
-        uint64  size_{};
-        int     error_{};
-        uint64  offset_{};
-        void*   buffer_{};
+        uint32  mRequestCount{};
+        uint64  mBytesRead{};
+        int     mErrorCode{};
+        void*   mHandle{};
+        uint64  mSize{};
+        int     mError{};
+        uint64  mOffset{};
+        void*   mBuffer{};
     };
 }

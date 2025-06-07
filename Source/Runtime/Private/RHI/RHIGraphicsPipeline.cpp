@@ -22,7 +22,13 @@ namespace EE
         colorAttachmentReferences.emplace_back( atachmentIndex, layout );
     }
 
-    void RHIRenderSubpassDescription::AddDepthAttachment( uint32 atachmentIndex, ETextureLayout layout )
+    void RHIRenderSubpassDescription::SetResolveAttachment( uint32 atachmentIndex, ETextureLayout layout )
+    {
+        resolveAttachmentReferences = RHIAttachmentReference( atachmentIndex, layout );
+        hasResolve = true;
+    }
+
+    void RHIRenderSubpassDescription::SetDepthAttachment( uint32 atachmentIndex, ETextureLayout layout )
     {
         depthAttachment = RHIAttachmentReference( atachmentIndex, layout );
         usingDepth = true;

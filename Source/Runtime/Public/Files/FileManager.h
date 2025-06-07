@@ -22,7 +22,7 @@ namespace EE
         U8String GetShortPath() const;
 
     protected:
-        U8String path_;
+        U8String mPath;
     };
 
     typedef TList<File> FileList;

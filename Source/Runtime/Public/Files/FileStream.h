@@ -29,13 +29,13 @@ namespace EE
         template <typename T>
         inline const IStream& operator>>( T value )
         {
-            return (std::move( *stream_ ) >> value);
+            return (std::move( *mStream ) >> value);
         }
 
         template <typename T>
         inline const OStream& operator<<( T value )
         {
-            return (std::move( *stream_ ) << value);
+            return (std::move( *mStream ) << value);
         }
 
         inline float GetProgress() const;
@@ -55,33 +55,33 @@ namespace EE
         void ReadToStringBuffer( StringBuffer& buffer ) const;
 
     private:
-        FStream* stream_;
-        size_t length_;
+        FStream* mStream;
+        size_t mLength;
     };
 
     template<typename StringType>
     FileStream<StringType>::FileStream( const File& file ) : File( file )
     {
-        stream_ = new FStream();
+        mStream = new FStream();
     }
 
     template<typename StringType>
     FileStream<StringType>::~FileStream()
     {
-        delete stream_;
+        delete mStream;
     }
 
     template<typename StringType>
     inline float FileStream<StringType>::GetProgress() const
     {
-        size_t progress = size_t( stream_->tellg() );
-        return progress / float( length_ );
+        size_t progress = size_t( mStream->tellg() );
+        return progress / float( mLength );
     }
 
     template<typename StringType>
     inline size_t FileStream<StringType>::GetPosition() const
     {
-        return stream_->tellg();
+        return mStream->tellg();
     }
 
     template<typename StringType>
@@ -91,7 +91,7 @@ namespace EE
         {
             try
             {
-                stream_->read( output, length );
+                mStream->read( output, length );
                 return true;
             }
             catch ( ... )
@@ -101,7 +101,7 @@ namespace EE
         }
         else
         {
-            EE_LOG_ERROR( "File '{}' is not valid or do not exist", path_ );
+            EE_LOG_ERROR( "File '{}' is not valid or do not exist", mPath );
             return false;
         }
     }
@@ -125,7 +125,7 @@ namespace EE
         }
         else
         {
-            EE_LOG_ERROR( "File '{}' is not valid or do not exist", path_ );
+            EE_LOG_ERROR( "File '{}' is not valid or do not exist", mPath );
             return false;
         }
     }
@@ -134,14 +134,14 @@ namespace EE
     StringType FileStream<StringType>::GetLine()
     {
         WString string;
-        std::getline( *stream_, string );
+        std::getline( *mStream, string );
         return string;
     }
 
     template<typename StringType>
     bool FileStream<StringType>::IsValid() const
     {
-        return Super::IsValid() && stream_ != NULL && !stream_->fail() && stream_->good();
+        return Super::IsValid() && mStream != NULL && !mStream->fail() && mStream->good();
     }
 
     template<typename StringType>
@@ -150,7 +150,7 @@ namespace EE
         if ( localeFormat == NULL )
             localeFormat = "en_US.UTF-8";
         static std::locale locale( localeFormat );
-        stream_->imbue( locale );
+        mStream->imbue( locale );
     }
 
     template<typename StringType>
@@ -160,41 +160,41 @@ namespace EE
             LocaleToUTF8( NULL );
 
 #ifdef EE_PLATFORM_WINDOWS
-        stream_->open( path_, openFlags );
+        mStream->open( mPath, openFlags );
 #else
-        stream_->open( path_, openFlags );
+        mStream->open( mPath, openFlags );
 #endif
 
-        return stream_->is_open();
+        return mStream->is_open();
     }
 
     template<typename StringType>
     void FileStream<StringType>::Clean()
     {
-        if ( stream_->is_open() )
-            stream_->close();
+        if ( mStream->is_open() )
+            mStream->close();
 #ifdef EE_PLATFORM_WINDOWS
-        stream_->open( path_, std::ios::in | std::ios::out | std::ios::trunc );
+        mStream->open( mPath, std::ios::in | std::ios::out | std::ios::trunc );
 #else
-        stream_->open( path_, std::ios::in | std::ios::out | std::ios::trunc );
+        mStream->open( mPath, std::ios::in | std::ios::out | std::ios::trunc );
 #endif
     }
 
     template<typename StringType>
     void FileStream<StringType>::MoveCursor( size_t pos )
     {
-        stream_->seekg( pos );
+        mStream->seekg( pos );
     }
 
     template<typename StringType>
     void FileStream<StringType>::Close()
     {
-        stream_->close();
+        mStream->close();
     }
 
     template<typename StringType>
     void FileStream<StringType>::ReadToStringBuffer( FileStream<StringType>::StringBuffer& buffer ) const
     {
-        buffer << stream_->rdbuf();
+        buffer << mStream->rdbuf();
     }
 }

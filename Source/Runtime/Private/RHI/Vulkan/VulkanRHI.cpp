@@ -1372,6 +1372,7 @@ namespace EE
         VkPhysicalDeviceFeatures deviceFeatures
         {
             .geometryShader = VK_TRUE,
+            .sampleRateShading = VK_TRUE,
             .logicOp = VK_FALSE,
             .samplerAnisotropy = VK_TRUE,
         };
@@ -2021,15 +2022,15 @@ namespace EE
                 .height = extents_.y,
                 .depth = extents_.z
             },
-            . mipLevels = info.mipLevels,
-            . arrayLayers = info.arraySize,
-            . samples = (VkSampleCountFlagBits)info.sampleCount,
-            . tiling = ConvertTextureTiling( info.tiling ),
-            . usage = ConvertTextureUsage( info.usage ),
-            . sharingMode = ConvertSharingMode( info.sharing ),
-            . queueFamilyIndexCount = 1,
-            . pQueueFamilyIndices = device->GetFamilyIndices(),
-            . initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            .mipLevels = info.mipLevels,
+            .arrayLayers = info.arraySize,
+            .samples = ConvertSampleCountBits( info.sampleCount ),
+            .tiling = ConvertTextureTiling( info.tiling ),
+            .usage = ConvertTextureUsage( info.usage ),
+            .sharingMode = ConvertSharingMode( info.sharing ),
+            .queueFamilyIndexCount = 1,
+            .pQueueFamilyIndices = device->GetFamilyIndices(),
+            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         };
 
         VkResult imageResult = vkCreateImage( device->GetVulkanDevice(), &imageInfo, VK_NULL_HANDLE, &image_ );
@@ -2686,6 +2687,7 @@ namespace EE
     {
         TArray<VkAttachmentReference> input;
         TArray<VkAttachmentReference> color;
+        VkAttachmentReference resolve;
     };
 
     VulkanRHIRenderPass::~VulkanRHIRenderPass()
@@ -2749,6 +2751,16 @@ namespace EE
                 attachments.input[ inputAttachmentSize ] = depthStencilAttachment;
             }
 
+            if ( subpass.hasResolve )
+            {
+                VkAttachmentReference attachmentResolve
+                {
+                    .attachment = subpass.resolveAttachmentReferences.atachmentIndex,
+                    .layout = ConvertTextureLayout( subpass.resolveAttachmentReferences.textureLayout ),
+                };
+                attachments.resolve = attachmentResolve;
+            }
+
             subpasses[ i ] = VkSubpassDescription
             {
                 .flags = 0,
@@ -2757,7 +2769,7 @@ namespace EE
                 .pInputAttachments = attachments.input.data(),
                 .colorAttachmentCount = colorAttachmentSize,
                 .pColorAttachments = attachments.color.data(),
-                .pResolveAttachments = NULL,
+                .pResolveAttachments = subpass.hasResolve ? &attachments.resolve : NULL,
                 .pDepthStencilAttachment = subpass.usingDepth ? &attachments.input.back() : NULL,
                 .preserveAttachmentCount = 0,
                 .pPreserveAttachments = NULL
@@ -3290,9 +3302,9 @@ namespace EE
             .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
             .pNext = NULL,
             .flags = 0,
-            .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
-            .sampleShadingEnable = VK_FALSE,
-            .minSampleShading = 1.0F,           // Optional
+            .rasterizationSamples = ConvertSampleCountBits( info.sampleCount ),
+            .sampleShadingEnable = info.sampleCount != SampleCount_1_Bit,
+            .minSampleShading = .1F,            // Min fraction for sample shading; closer to one is smoot
             .pSampleMask = NULL,                // Optional
             .alphaToCoverageEnable = VK_FALSE,  // Optional
             .alphaToOneEnable = VK_FALSE,       // Optional

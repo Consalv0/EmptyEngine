@@ -35,8 +35,6 @@ project "EmptyEngine"
         "%{prj.location}/Source/Runtime/Public",
         "%{IncludeDir.JoltPhysics}",
         "%{IncludeDir.SDL}/include",
-        "%{IncludeDir.VulkanSDK}/include",
-        "%{IncludeDir.VMA}/include",
         "%{IncludeDir.spdlog}/include",
         "%{IncludeDir.stb}",
     }
@@ -56,13 +54,12 @@ project "EmptyEngine"
         "MultiProcessorCompile"
     }
 
-    filter "system:emscripten"
-        systemversion "latest"
-        
-        removeincludedirs {
-            "%{IncludeDir.VulkanSDK}/include",
-            "%{IncludeDir.VMA}/include"
+    filter "platforms:Web"
+        defines {
+             "__EMSCRIPTEN__"
         }
+        
+        systemversion "latest"
 
         removefiles {
             "%{prj.location}/Source/Runtime/Private/RHI/Vulkan/**",
@@ -77,6 +74,8 @@ project "EmptyEngine"
             "%{prj.location}/Source/Platform/Web/**.h",
             "%{prj.location}/Source/Platform/Web/**.inl",
             "%{prj.location}/Source/Platform/Web/**.cpp",
+            "%{prj.location}/Source/Public/RHI/WebGPU/**.h",
+            "%{prj.location}/Source/Private/RHI/WebGPU/**.cpp",
         }
 
         -- libdirs {
@@ -95,17 +94,22 @@ project "EmptyEngine"
         linkoptions{
             "-s USE_PTHREADS=1",
             "-s FULL_ES3=1",
-            "-s MIN_WEBGL_VERSION=2", 
-            "-s MAX_WEBGL_VERSION=2"
+            "-s USE_WEBGPU=1",
+            "-s ALLOW_MEMORY_GROWTH=1", 
         }
         
         defines {
             "EE_PLATFORM_WEB",
         }
 
-    filter "system:windows"
+    filter "platforms:Win64"
         systemversion "latest"
         buildoptions{ "/utf-8" }
+
+        includedirs {
+            "%{IncludeDir.VulkanSDK}/include",
+            "%{IncludeDir.VMA}/include"
+        }
 
         libdirs { 
             "%{LibrariesDir.SDL}/Build/%{cfg.system}/%{cfg.buildcfg}"
@@ -114,6 +118,11 @@ project "EmptyEngine"
         links {
             "vulkan-1.lib",
             "SDL3.lib",
+        }
+
+        removefiles {
+            "%{prj.location}/Source/Runtime/Private/RHI/WebGPU/**",
+            "%{prj.location}/Source/Runtime/Public/RHI/WebGPU/**"
         }
 
         files {
@@ -137,6 +146,33 @@ project "EmptyEngine"
 
         defines {
             "EE_PLATFORM_WINDOWS",
+        }
+
+    filter { "action:vs*" }
+        -- Replace this path with your actual emsdk path
+        local emscripten_sdk = "../emsdk/upstream/emscripten"
+        
+        function get_executable_path(executable)
+            local handle = io.popen("where " .. executable)
+            if handle then
+                local result = handle:read("*l") -- read the first line only
+                handle:close()
+                if result then
+                    local dir = result:match("^(.*)[\\/][^\\/]+$")
+                    return dir
+                end
+            end
+            return nil
+        end
+
+        local emsdk_path = get_executable_path("emsdk")
+        if emsdk_path then
+           emscripten_sdk = emsdk_path .. "/upstream/emscripten"
+        end
+
+        includedirs {
+           emscripten_sdk .. "/system/include",
+           emscripten_sdk .. "/system/include/webgpu"
         }
 
     filter "configurations:Debug"
@@ -190,10 +226,10 @@ project "VMA"
         "MultiProcessorCompile"
     }
 
-    filter "system:windows"
+    filter "platforms:Win64"
         systemversion "latest"
 
-    filter "system:emscripten"
+    filter "platforms:Web"
         kind "None"
 
     filter "configurations:Debug"
@@ -235,11 +271,11 @@ project "spdlog"
         "MultiProcessorCompile"
     }
 
-    filter "system:windows"
+    filter "platforms:Win64"
         systemversion "latest"
         buildoptions{ "/utf-8" }
 
-    filter "system:emscripten"
+    filter "platforms:Web"
         systemversion "latest"
 
     filter "configurations:Debug"
@@ -304,10 +340,10 @@ project "JoltPhysics"
         "MultiProcessorCompile"
     }
 
-    filter "system:emscripten"
+    filter "platforms:Web"
         systemversion "latest"
 
-    filter "system:windows"
+    filter "platforms:Win64"
         buildoptions{ "/arch:AVX2" }
         defines{ "JPH_USE_AVX2" }
         systemversion "latest"

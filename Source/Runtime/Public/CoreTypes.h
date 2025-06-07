@@ -4,5 +4,6 @@
 
 enum EDynamicRHI
 {
-    Vulkan
+    Vulkan,
+    WebGPU
 };

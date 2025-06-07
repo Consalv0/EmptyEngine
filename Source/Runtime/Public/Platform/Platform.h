@@ -22,6 +22,5 @@
 #include "Platform/Web/WebMinimal.h"
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #endif // EE_PLATFORM_WINDOWS

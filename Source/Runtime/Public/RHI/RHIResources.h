@@ -56,7 +56,7 @@ namespace EE
         EPixelFormat format = PixelFormat_Unknown;
         EColorSpace colorSpace = ColorSpace_Unknown;
         ETilingMode tiling = TilingMode_Default;
-        uint32 sampleCount = 1;
+        ESampleCountFlagsBit sampleCount = SampleCount_1_Bit;
         EUsageModeFlags usage = UsageMode_Color_Bit;
         ESharingMode sharing = SharingMode_Default;
         uint32 bindFlags = 0;
@@ -533,6 +533,8 @@ namespace EE
     {
         TArray<RHIAttachmentReference> colorAttachmentReferences;
         TArray<RHIAttachmentReference> inputAttachmentReferences;
+        RHIAttachmentReference resolveAttachmentReferences;
+        bool hasResolve;
         RHIAttachmentReference depthAttachment;
         bool usingDepth;
 
@@ -541,7 +543,9 @@ namespace EE
 
         void AddColorAttachment( uint32 atachmentIndex, ETextureLayout layout );
 
-        void AddDepthAttachment( uint32 atachmentIndex, ETextureLayout layout );
+        void SetDepthAttachment( uint32 atachmentIndex, ETextureLayout layout );
+
+        void SetResolveAttachment( uint32 atachmentIndex, ETextureLayout layout );
     };
 
     struct RHIRenderPassCreateInfo
@@ -640,6 +644,7 @@ namespace EE
         RHIShaderStageAttachment domainShader;
         RHIShaderStageAttachment hullShader;
 
+        ESampleCountFlagsBit sampleCount;
         TArray<RHIColorAttachmentState> colorAttachments;
         RHIDepthStencilState depthStencilState;
         TArray<const RHIBindLayout*> bindLayouts;
