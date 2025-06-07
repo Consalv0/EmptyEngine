@@ -52,15 +52,15 @@ namespace EE::Math
     }
 
     template <typename T>
-    inline T TVector2<T>::Magnitude() const
-    {
-        return Math::Sqrt( x * x + y * y );
-    }
-
-    template <typename T>
     inline T TVector2<T>::MagnitudeSquared() const
     {
         return x * x + y * y;
+    }
+
+    template <typename T>
+    inline T TVector2<T>::Magnitude() const
+    {
+        return Math::Sqrt( MagnitudeSquared() );
     }
 
     template <typename T>

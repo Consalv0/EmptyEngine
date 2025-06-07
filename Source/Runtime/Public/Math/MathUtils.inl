@@ -1,25 +1,25 @@
 
 namespace EE::Math
 {
-	//* The number is power of 2
+    //* The number is power of 2
     template<typename T>
-	inline T IsPow2( const T a )
-	{
-		return ((a & (a - 1)) == 0);
-	}
+    inline T IsPow2( const T a )
+    {
+        return ((a & (a - 1)) == 0);
+    }
 
-	//* Get the next power2 of the value
+    //* Get the next power2 of the value
     template<typename T>
-	inline T NextPow2( T x )
-	{
-		--x;
-		x |= x >> 1;
-		x |= x >> 2;
-		x |= x >> 4;
-		x |= x >> 8;
-		x |= x >> 16;
-		return ++x;
-	}
+    inline T NextPow2( T x )
+    {
+        --x;
+        x |= x >> 1;
+        x |= x >> 2;
+        x |= x >> 4;
+        x |= x >> 8;
+        x |= x >> 16;
+        return ++x;
+    }
 }
 
 namespace EE

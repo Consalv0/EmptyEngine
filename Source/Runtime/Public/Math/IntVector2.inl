@@ -63,16 +63,16 @@ namespace EE
         }
 
         template <typename T>
-        template <typename R>
-        inline R TIntVector2<T>::Magnitude() const
-        {
-            return sqrtf( x * R( x ) + y * R( y ) );
-        }
-
-        template <typename T>
         inline T TIntVector2<T>::MagnitudeSquared() const
         {
             return x * x + y * y;
+        }
+
+        template <typename T>
+        template <typename R>
+        inline R TIntVector2<T>::Magnitude() const
+        {
+            return Math::Sqrt( MagnitudeSquared() );
         }
 
         template <typename T>
