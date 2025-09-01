@@ -92,7 +92,7 @@ namespace EE::Math
     template <typename T>
 	inline TQuaternion<T> TQuaternion<T>::FromMatrix( TMatrix3x3<T> const& matrix )
 	{
-		const T tr = matrix.m00 + matrix.m11 + matrix.m22;
+		const T tr = matrix.c0r0 + matrix.c1r1 + matrix.c2r2;
 
 		if ( tr > T(0) )
 		{
@@ -100,40 +100,40 @@ namespace EE::Math
 			T num1 = T(.5) / num0;
 			return TQuaternion(
 				num0 * T(.5),
-				(matrix.m12 - matrix.m21) * num1,
-				(matrix.m20 - matrix.m02) * num1,
-				(matrix.m01 - matrix.m10) * num1
+				(matrix.c1r2 - matrix.c2r1) * num1,
+				(matrix.c2r0 - matrix.c0r2) * num1,
+				(matrix.c0r1 - matrix.c1r0) * num1
 			);
 		}
-		if ( (matrix.m00 >= matrix.m11) && (matrix.m00 >= matrix.m22) )
+		if ( (matrix.c0r0 >= matrix.c1r1) && (matrix.c0r0 >= matrix.c2r2) )
 		{
-            T num7 = Math::Sqrt( ((T(1) + matrix.m00) - matrix.m11) - matrix.m22 );
+            T num7 = Math::Sqrt( ((T(1) + matrix.c0r0) - matrix.c1r1) - matrix.c2r2 );
 			T num4 = T(.5) / num7;
 			return TQuaternion(
-				(matrix.m12 - matrix.m21) * num4,
+				(matrix.c1r2 - matrix.c2r1) * num4,
 				T(.5) * num7,
-				(matrix.m01 + matrix.m10) * num4,
-				(matrix.m02 + matrix.m20) * num4
+				(matrix.c0r1 + matrix.c1r0) * num4,
+				(matrix.c0r2 + matrix.c2r0) * num4
 			);
 		}
-		if ( matrix.m11 > matrix.m22 )
+		if ( matrix.c1r1 > matrix.c2r2 )
 		{
-			T num6 = Math::Sqrt( ((T(1) + matrix.m11) - matrix.m00) - matrix.m22 );
+			T num6 = Math::Sqrt( ((T(1) + matrix.c1r1) - matrix.c0r0) - matrix.c2r2 );
 			T num3 = T(.5) / num6;
 			return TQuaternion(
-				(matrix.m20 - matrix.m02) * num3,
-				(matrix.m10 + matrix.m01) * num3,
+				(matrix.c2r0 - matrix.c0r2) * num3,
+				(matrix.c1r0 + matrix.c0r1) * num3,
 				T(.5) * num6,
-				(matrix.m21 + matrix.m12) * num3
+				(matrix.c2r1 + matrix.c1r2) * num3
 			);
 		}
 
-		T num5 = Math::Sqrt( ((T(1) + matrix.m22) - matrix.m00) - matrix.m11 );
+		T num5 = Math::Sqrt( ((T(1) + matrix.c2r2) - matrix.c0r0) - matrix.c1r1 );
 		T num2 = T(.5) / num5;
 		return TQuaternion(
-			(matrix.m01 - matrix.m10) * num2,
-			(matrix.m20 + matrix.m02) * num2,
-			(matrix.m21 + matrix.m12) * num2,
+			(matrix.c0r1 - matrix.c1r0) * num2,
+			(matrix.c2r0 + matrix.c0r2) * num2,
+			(matrix.c2r1 + matrix.c1r2) * num2,
 			T(.5) * num5
 		);
 	}
@@ -245,17 +245,17 @@ namespace EE::Math
 		T wy( w * y );
 		T wz( w * z );
 
-		result.m00 = T(1) - T(2) * (yy + zz);
-		result.m01 = T(2) * (xy + wz);
-		result.m02 = T(2) * (xz - wy);
+		result.c0r0 = T(1) - T(2) * (yy + zz);
+		result.c0r1 = T(2) * (xy + wz);
+		result.c0r2 = T(2) * (xz - wy);
 
-		result.m10 = T(2) * (xy - wz);
-		result.m11 = T(1) - T(2) * (xx + zz);
-		result.m12 = T(2) * (yz + wx);
+		result.c1r0 = T(2) * (xy - wz);
+		result.c1r1 = T(1) - T(2) * (xx + zz);
+		result.c1r2 = T(2) * (yz + wx);
 
-		result.m20 = T(2) * (xz + wy);
-		result.m21 = T(2) * (yz - wx);
-		result.m22 = T(1) - T(2) * (xx + yy);
+		result.c2r0 = T(2) * (xz + wy);
+		result.c2r1 = T(2) * (yz - wx);
+		result.c2r2 = T(1) - T(2) * (xx + yy);
 		return result;
 	}
 

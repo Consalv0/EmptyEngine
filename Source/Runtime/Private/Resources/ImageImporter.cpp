@@ -8,10 +8,10 @@
 
 namespace EE
 {
-    bool ImageImporter::TaskRunning;
-    std::queue<ImageImporter::Task*> ImageImporter::pendingTasks = std::queue<Task*>();
-    std::future<bool> ImageImporter::currentFutureTask;
-    std::mutex ImageImporterQueueLock;
+    bool ImageImporter::sTaskRunning;
+    std::queue<ImageImporter::Task*> ImageImporter::sPendingTasks = std::queue<Task*>();
+    std::future<bool> ImageImporter::sCurrentFutureTask;
+    std::mutex sImageImporterQueueLock;
 
     bool ImageImporter::RecognizeFileExtensionAndLoad( ImageResult& info, const Options& options )
     {
@@ -36,16 +36,13 @@ namespace EE
 
     void ImageImporter::UpdateStatus()
     {
-        if ( !pendingTasks.empty() && currentFutureTask.valid() && !TaskRunning )
+        if ( !sTaskRunning )
         {
-            currentFutureTask.get();
-            pendingTasks.front()->finishTaskFunction( pendingTasks.front()->result );
-            delete pendingTasks.front();
-            pendingTasks.pop();
+            FinishCurrentAsyncTask();
         }
-        if ( !pendingTasks.empty() && !currentFutureTask.valid() && !TaskRunning )
+        if ( !sPendingTasks.empty() && !sCurrentFutureTask.valid() && !sTaskRunning )
         {
-            pendingTasks.front()->futureTask( pendingTasks.front()->result, pendingTasks.front()->options, currentFutureTask );
+            sPendingTasks.front()->Start( sCurrentFutureTask );
         }
     }
 
@@ -55,44 +52,44 @@ namespace EE
         {
             FinishCurrentAsyncTask();
             UpdateStatus();
-        } while ( !pendingTasks.empty() );
+        } while ( !sPendingTasks.empty() );
     }
 
     void ImageImporter::FinishCurrentAsyncTask()
     {
-        if ( !pendingTasks.empty() && currentFutureTask.valid() )
+        if ( !sPendingTasks.empty() && sCurrentFutureTask.valid() )
         {
-            currentFutureTask.get();
-            pendingTasks.front()->finishTaskFunction( pendingTasks.front()->result );
-            delete pendingTasks.front();
-            pendingTasks.pop();
+            sCurrentFutureTask.get();
+            sPendingTasks.front()->Finish();
+            delete sPendingTasks.front();
+            sPendingTasks.pop();
         }
     }
 
     size_t ImageImporter::GetAsyncTaskCount()
     {
-        return pendingTasks.size();
+        return sPendingTasks.size();
     }
 
     void ImageImporter::Exit()
     {
-        if ( currentFutureTask.valid() )
-            currentFutureTask.get();
+        if ( sCurrentFutureTask.valid() )
+            sCurrentFutureTask.get();
     }
 
     bool ImageImporter::Load( ImageResult& info, const Options& options )
     {
         if ( options.file.IsValid() == false ) return false;
 
-        if ( TaskRunning )
+        if ( sTaskRunning )
         {
             FinishCurrentAsyncTask();
         }
 
-        TaskRunning = true;
+        sTaskRunning = true;
         EE_LOG_INFO( "Reading File Image '{}'", options.file.GetShortPath() );
         RecognizeFileExtensionAndLoad( info, options );
-        TaskRunning = false;
+        sTaskRunning = false;
         return info.IsValid();
     }
 
@@ -100,7 +97,7 @@ namespace EE
     {
         if ( options.file.IsValid() == false ) return;
 
-        pendingTasks.push(
+        sPendingTasks.push(
             new Task{ options, then, []( ImageResult& data, const Options& options, std::future<bool>& futureTask )
             {
                 futureTask = std::async( std::launch::async, Load, std::ref( data ),  std::ref( options ) );
@@ -109,7 +106,7 @@ namespace EE
     }
 
     ImageImporter::ImageResult::ImageResult()
-        : pixelMap_(), isValid_( false )
+        : _pixelMap(), _isValid( false )
     {
     }
 
@@ -120,27 +117,37 @@ namespace EE
 
     void ImageImporter::ImageResult::Transfer( ImageResult& other )
     {
-        pixelMap_.Clear();
-        pixelMap_.Swap( other.pixelMap_ );
-        isValid_ = other.isValid_;
-        other.isValid_ = false;
+        _pixelMap.Clear();
+        _pixelMap.Swap( other._pixelMap );
+        _isValid = other._isValid;
+        other._isValid = false;
     }
 
     void ImageImporter::ImageResult::Clear()
     {
-        pixelMap_.Clear();
-        isValid_ = false;
+        _pixelMap.Clear();
+        _isValid = false;
     }
 
 
     void ImageImporter::ImageResult::Populate( const UIntVector3& extents, EPixelFormat format, const void* data )
     {
-        pixelMap_.SetData( extents.x, extents.y, extents.z, format, data );
-        isValid_ = true;
+        _pixelMap.SetData( extents.x, extents.y, extents.z, format, data );
+        _isValid = true;
     }
 
     ImageImporter::Task::Task( const Options& options, FinishTaskFunction finishTaskFunction, FutureTask futureTask ) :
-        result(), options( options ), finishTaskFunction( finishTaskFunction ), futureTask( futureTask )
+        _result(), _options( options ), _finishTaskFunction( finishTaskFunction ), _futureTask( futureTask )
     {
+    }
+
+    void ImageImporter::Task::Start( std::future<bool>& task )
+    {
+        _futureTask( _result, _options, task );
+    }
+
+    void ImageImporter::Task::Finish()
+    {
+        _finishTaskFunction( _result );
     }
 }

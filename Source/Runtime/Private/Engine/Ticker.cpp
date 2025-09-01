@@ -9,55 +9,55 @@
 
 namespace EE
 {
-    uint64 Ticker::sLastUpdateNano = GetEpochTimeNanoNow();
-    uint64 Ticker::sLastDeltaNano = 0;
+    uint64 Ticker::_sLastUpdateNano = GetEpochTimeNanoNow();
+    uint64 Ticker::_sLastDeltaNano = 0;
 
-    uint32 Ticker::sTickCount = 0;
-    uint64 Ticker::sTickBuffer[ sMaxTickSamples ];
-    uint64 Ticker::sTickAverage = 30;
+    uint32 Ticker::_sTickCount = 0;
+    uint64 Ticker::_sTickBuffer[ _sMaxTickSamples ];
+    uint64 Ticker::_sTickAverage = 30;
 
-    uint64 Ticker::sMaxUpdateDeltaMicro = 0;
+    uint64 Ticker::sMaxUpdateDeltaNano = 0;
     uint64 Ticker::sMaxRenderDeltaNano = 0;
 
-    bool Ticker::sSkipRender = false;
-    uint64 Ticker::sRenderDeltaTimeSum = 0;
+    bool Ticker::_sSkipRender = false;
+    uint64 Ticker::_sRenderDeltaTimeSum = 0;
 
     void Ticker::Tick()
     {
         uint64 tickTime = GetEpochTimeNanoNow();
-        sLastDeltaNano = tickTime - sLastUpdateNano;
+        _sLastDeltaNano = tickTime - _sLastUpdateNano;
 
-        if ( sLastDeltaNano < sMaxUpdateDeltaMicro )
+        if ( _sLastDeltaNano < sMaxUpdateDeltaNano )
         {
-            uint64 delta = sMaxUpdateDeltaMicro - sLastDeltaNano;
-            std::this_thread::sleep_for( std::chrono::nanoseconds( delta - 1000000 ) );
+            uint64 delta = sMaxUpdateDeltaNano - _sLastDeltaNano;
+            std::this_thread::sleep_for( std::chrono::nanoseconds( delta ) );
         }
 
-        sLastUpdateNano = GetEpochTimeNanoNow();
-        sLastDeltaNano += sLastUpdateNano - tickTime;
+        _sLastUpdateNano = GetEpochTimeNanoNow();
+        _sLastDeltaNano += _sLastUpdateNano - tickTime;
 
-        sRenderDeltaTimeSum += sLastDeltaNano;
-        sSkipRender = sRenderDeltaTimeSum < sMaxRenderDeltaNano;
-        if ( !sSkipRender )
+        _sRenderDeltaTimeSum += _sLastDeltaNano;
+        _sSkipRender = _sRenderDeltaTimeSum < sMaxRenderDeltaNano;
+        if ( !_sSkipRender )
         {
-            sRenderDeltaTimeSum = 0;
+            _sRenderDeltaTimeSum = 0;
         }
 
-        sTickBuffer[ sTickCount ] = sLastDeltaNano;
+        _sTickBuffer[ _sTickCount ] = _sLastDeltaNano;
 
-        sTickAverage = 0;
-        for ( int count = 0; count < sMaxTickSamples; count++ )
+        _sTickAverage = 0;
+        for ( int count = 0; count < _sMaxTickSamples; count++ )
         {
-            sTickAverage += sTickBuffer[ count ];
+            _sTickAverage += _sTickBuffer[ count ];
         }
-        sTickAverage = sTickAverage / sMaxTickSamples;
+        _sTickAverage = _sTickAverage / _sMaxTickSamples;
 
-        sTickCount = (sTickCount + 1) % sMaxTickSamples;
+        _sTickCount = (_sTickCount + 1) % _sMaxTickSamples;
     }
 
     Timestamp Ticker::GetTimeStamp()
     {
-        return Timestamp( sLastUpdateNano, sLastUpdateNano + sLastDeltaNano );
+        return Timestamp( _sLastUpdateNano, _sLastUpdateNano + _sLastDeltaNano );
     }
 
     uint64 Ticker::GetEpochTimeNanoNow()
@@ -69,16 +69,16 @@ namespace EE
 
     void Timestamp::Begin()
     {
-        mLastEpochTime = Ticker::GetEpochTimeNow<Ticker::Nano>();
+        _lastEpochTime = Ticker::GetEpochTimeNow<Ticker::Nano>();
     }
 
     void Timestamp::Stop()
     {
-        mNowEpochTime = Ticker::GetEpochTimeNow<Ticker::Nano>();
+        _nowEpochTime = Ticker::GetEpochTimeNow<Ticker::Nano>();
     }
 
     Timestamp Timestamp::operator+( const Timestamp& other )
     {
-        return Timestamp( Math::Max( mLastEpochTime, other.mLastEpochTime ), Math::Min( mNowEpochTime, other.mNowEpochTime ) );
+        return Timestamp( Math::Max( _lastEpochTime, other._lastEpochTime ), Math::Min( _nowEpochTime, other._nowEpochTime ) );
     }
 }

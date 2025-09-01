@@ -5,8 +5,8 @@ namespace EE
     class Name
     {
     private:
-       uint64 number;
-       uint64 id;
+       uint64 _number;
+       uint64 _id;
 
     private:
        Name() = delete;

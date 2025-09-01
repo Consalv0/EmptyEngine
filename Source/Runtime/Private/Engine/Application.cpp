@@ -14,7 +14,7 @@
 
 namespace EE
 {
-    Application::Application() : initialized_( false ), initializationError_( false )
+    Application::Application() : _initialized( false ), _initializationError( false )
     {
     }
 
@@ -32,16 +32,16 @@ namespace EE
 
     void Application::OnTerminate()
     {
-        initializationError_ = false;
+        _initializationError = false;
     }
 
     bool Application::Initialize()
     {
-        if ( initialized_ ) return false;
+        if ( _initialized ) return false;
 
-        initialized_ = OnInitialize();
+        _initialized = OnInitialize();
 
-        return initialized_;
+        return _initialized;
     }
 
     void Application::Awake()

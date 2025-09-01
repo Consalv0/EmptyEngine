@@ -12,7 +12,7 @@ namespace EE
         public:
             struct
             {
-                struct { T m00, m01, m02, m10, m11, m12, m20, m21, m22; };
+                struct { T c0r0, c0r1, c0r2, c1r0, c1r1, c1r2, c2r0, c2r1, c2r2; };
                 TVector3<T> c0, c1, c2;
             };
 
@@ -31,7 +31,7 @@ namespace EE
 
             HOST_DEVICE inline TVector3<T>& operator[]( unsigned char i );
             HOST_DEVICE inline TVector3<T> const& operator[]( unsigned char i ) const;
-            HOST_DEVICE inline const T* PointerToValue( void ) const;
+            HOST_DEVICE inline const T* PointerToValue() const;
 
             HOST_DEVICE FORCEINLINE TMatrix3x3 operator*( const TMatrix3x3& other ) const;
             HOST_DEVICE FORCEINLINE TVector3<T> operator*( const TVector3<T>& vector ) const;

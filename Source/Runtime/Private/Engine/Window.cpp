@@ -106,7 +106,7 @@ namespace EE
 
     bool Window::Initialize()
     {
-        if ( windowHandle_ != NULL ) 
+        if ( _windowHandle != NULL ) 
             return false;
 
         SDL_PropertiesID windowProperties = SDL_CreateProperties();
@@ -119,57 +119,57 @@ namespace EE
             windowFlags |= SDL_WINDOW_VULKAN;
         }
 
-        if ( options_ & WindowOption_Resizable_Bit )
+        if ( _options & WindowOption_Resizable_Bit )
         {
             windowFlags |= SDL_WINDOW_RESIZABLE;
         }
-        if ( options_ & WindowOption_Borderless_Bit )
+        if ( _options & WindowOption_Borderless_Bit )
         {
             windowFlags |= SDL_WINDOW_BORDERLESS;
         }
-        if ( options_ & WindowOption_AlwaysOnTop_Bit )
+        if ( _options & WindowOption_AlwaysOnTop_Bit )
         {
             windowFlags |= SDL_WINDOW_ALWAYS_ON_TOP;
         }
-        if ( options_ & WindowOption_SkipTaskbar_Bit )
+        if ( _options & WindowOption_SkipTaskbar_Bit )
         {
             windowFlags |= SDL_WINDOW_UTILITY;
         }
-        if ( mode_ == WindowMode_Fullscreen )
+        if ( _mode == WindowMode_Fullscreen )
         {
             windowFlags |= SDL_WINDOW_FULLSCREEN;
         }
-        if ( mode_ == WindowMode_Maximized )
+        if ( _mode == WindowMode_Maximized )
         {
             windowFlags |= SDL_WINDOW_MAXIMIZED;
         }
-        if ( compositeAlpha_ )
+        if ( _compositeAlpha )
             windowFlags |= SDL_WINDOW_TRANSPARENT;
 
-        SDL_SetStringProperty( windowProperties, SDL_PROP_WINDOW_CREATE_TITLE_STRING, name_.c_str() );
-        SDL_SetNumberProperty( windowProperties, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, width_ );
-        SDL_SetNumberProperty( windowProperties, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, height_ );
+        SDL_SetStringProperty( windowProperties, SDL_PROP_WINDOW_CREATE_TITLE_STRING, _name.c_str() );
+        SDL_SetNumberProperty( windowProperties, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, _width );
+        SDL_SetNumberProperty( windowProperties, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, _height );
         SDL_SetNumberProperty( windowProperties, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, windowFlags );
         
-        windowHandle_ = SDL_CreateWindowWithProperties( windowProperties );
+        _windowHandle = SDL_CreateWindowWithProperties( windowProperties );
         SDL_DestroyProperties( windowProperties );
         
-        if ( windowHandle_ == NULL )
+        if ( _windowHandle == NULL )
         {
-            EE_LOG_CRITICAL( "Window: \"{0}\" could not be initialized: {1}", name_, SDL_GetError() );
+            EE_LOG_CRITICAL( "Window: \"{0}\" could not be initialized: {1}", _name, SDL_GetError() );
             return false;
         }
 
-        SDL_GetWindowPosition( (SDL_Window*)windowHandle_, &positionX_, &positionY_ );
+        SDL_GetWindowPosition( (SDL_Window*)_windowHandle, &_positionX, &_positionY );
 
         GDynamicRHI->CreateRHIPresentContextOfWindow( this );
 
-        if ( compositeAlpha_ )
-            SetOpacity( opacity_ );
+        if ( _compositeAlpha )
+            SetOpacity( _opacity );
 
-        SDL_SetWindowKeyboardGrab( (SDL_Window*)windowHandle_, false );
+        SDL_SetWindowKeyboardGrab( (SDL_Window*)_windowHandle, false );
 
-        eventData_ = Window::EventData
+        _eventData = Window::EventData
         {
             .window = this,
             .resizeEvent = [this]( const uint32& width, const uint32& height ) constexpr { OnResize( width, height ); },
@@ -178,7 +178,7 @@ namespace EE
             .HDRChangedEvent = [this]( bool hdrEnabled ) constexpr { OnHDRChanged( hdrEnabled ); }
         };
 
-        SDL_AddEventWatch( WindowEventsHandler, (void*)&eventData_ );
+        SDL_AddEventWatch( WindowEventsHandler, (void*)&_eventData );
 
         return true;
     }
@@ -186,58 +186,70 @@ namespace EE
     Window::Window( const WindowCreateDescription& parameters )
     {
         closeRequested = false;
-        windowHandle_ = NULL;
-        width_ = parameters.width;
-        height_ = parameters.height;
-        positionX_ = parameters.positionX;
-        positionY_ = parameters.positionY;
-        name_ = parameters.name;
-        mode_ = parameters.windowMode;
-        pixelFormat_ = parameters.desiredPixelFormat;
-        colorSpace_ = parameters.desiredColorSpace;
-        whiteLevel_ = parameters.whiteLevel;
-        options_ = parameters.options;
-        presentMode_ = parameters.presentMode;
-        compositeAlpha_ = parameters.compositeAlpha;
-        opacity_ = 255;
-        passthrough_ = false;
+        _windowHandle = NULL;
+        _width = parameters.width;
+        _height = parameters.height;
+        _positionX = parameters.positionX;
+        _positionY = parameters.positionY;
+        _name = parameters.name;
+        _mode = parameters.windowMode;
+        _pixelFormat = parameters.desiredPixelFormat;
+        _colorSpace = parameters.desiredColorSpace;
+        _whiteLevel = parameters.whiteLevel;
+        _options = parameters.options;
+        _presentMode = parameters.presentMode;
+        _compositeAlpha = parameters.compositeAlpha;
+        _opacity = 255;
+        _passthrough = false;
         
-        if ( (options_ & WindowOption_CustomPosition_Bit) == 0 )
+        if ( (_options & WindowOption_CustomPosition_Bit) == 0 )
         {
-            positionX_ = SDL_WINDOWPOS_CENTERED;
-            positionY_ = SDL_WINDOWPOS_CENTERED;
+            _positionX = SDL_WINDOWPOS_CENTERED;
+            _positionY = SDL_WINDOWPOS_CENTERED;
         }
 
         int displayCount;
         SDL_DisplayID* displays = SDL_GetDisplays( &displayCount );
 
         // get display bounds for all displays
-        TMap<SDL_DisplayID, SDL_Rect> displayBounds;
+        TMap<SDL_DisplayID, DisplayProperties> displayProperties;
         for ( int i = 0; i < displayCount; i++ )
         {
+            DisplayProperties properties{};
             SDL_Rect rect;
+            SDL_GetDisplayBounds( displays[ i ], &rect );
+            properties.width = rect.w;
+            properties.height = rect.h;
+            properties.positionX = rect.x;
+            properties.positionY = rect.y;
             SDL_GetDisplayUsableBounds( displays[ i ], &rect );
-            displayBounds.emplace( displays[ i ], rect );
+            properties.usableWidth = rect.w;
+            properties.usableHeight = rect.h;
+            properties.usablePositionX = rect.x;
+            properties.usablePositionY = rect.y;
+
+            SDL_PropertiesID displayPropertiesID = SDL_GetDisplayProperties( i );
+            properties.hdrEnabled = SDL_GetBooleanProperty( displayPropertiesID, SDL_PROP_DISPLAY_HDR_ENABLED_BOOLEAN, false );
+
+            displayProperties.emplace( displays[ i ], properties );
         }
         SDL_free( displays );
 
         SDL_DisplayID displayID = SDL_GetPrimaryDisplay();
-        if ( (SDL_WINDOWPOS_ISUNDEFINED( positionX_ ) || SDL_WINDOWPOS_ISCENTERED( positionX_ )) && (positionX_ & 0xFFFF) )
+        if ( (SDL_WINDOWPOS_ISUNDEFINED( _positionX ) || SDL_WINDOWPOS_ISCENTERED( _positionX )) && (_positionX & 0xFFFF) )
         {
-            displayID = (positionX_ & 0xFFFF);
+            displayID = (_positionX & 0xFFFF);
         }
-        else if ( (SDL_WINDOWPOS_ISUNDEFINED( positionY_ ) || SDL_WINDOWPOS_ISCENTERED( positionY_ )) && (positionY_ & 0xFFFF) )
+        else if ( (SDL_WINDOWPOS_ISUNDEFINED( _positionY ) || SDL_WINDOWPOS_ISCENTERED( _positionY )) && (_positionY & 0xFFFF) )
         {
-            displayID = (positionY_ & 0xFFFF);
+            displayID = (_positionY & 0xFFFF);
         }
 
-        SDL_PropertiesID displayProperties = SDL_GetDisplayProperties( displayID );
-        hdrEnabled_ = SDL_GetBooleanProperty( displayProperties, SDL_PROP_DISPLAY_HDR_ENABLED_BOOLEAN, false );
-
-        if ( width_ == 0 )
-            width_ = displayBounds[ displayID ].w;
-        if ( height_ == 0 )
-            height_ = displayBounds[ displayID ].h;
+        _hdrEnabled = displayProperties[ displayID ].hdrEnabled;
+        if ( _width == 0 )
+            _width = displayProperties[ displayID ].width;
+        if ( _height == 0 )
+            _height = displayProperties[ displayID ].height;
     }
 
     Window::~Window()
@@ -247,57 +259,57 @@ namespace EE
 
     void Window::Resize( const uint32& width, const uint32& height )
     {
-        if ( this->width_ != width || this->height_ != height )
+        if ( this->_width != width || this->_height != height )
         {
-            SDL_SetWindowSize( (SDL_Window*)(windowHandle_), width, height );
+            SDL_SetWindowSize( (SDL_Window*)(_windowHandle), width, height );
         }
     }
 
     void Window::SetPosition( const int32& x, const int32& y )
     {
-        if ( this->positionX_ != x || this->positionY_ != y )
+        if ( this->_positionX != x || this->_positionY != y )
         {
-            SDL_SetWindowPosition( (SDL_Window*)(windowHandle_), x, y );
+            SDL_SetWindowPosition( (SDL_Window*)(_windowHandle), x, y );
         }
     }
 
     void Window::SetName( const U8String& newName )
     {
-        name_ = newName;
-        SDL_SetWindowTitle( (SDL_Window*)(windowHandle_), name_.c_str() );
+        _name = newName;
+        SDL_SetWindowTitle( (SDL_Window*)(_windowHandle), _name.c_str() );
     }
 
     void Window::SetWindowMode( const EWindowMode& mode )
     {
         if ( mode == WindowMode_Fullscreen )
-            SDL_SetWindowFullscreen( (SDL_Window*)(windowHandle_), true );
+            SDL_SetWindowFullscreen( (SDL_Window*)(_windowHandle), true );
         else if ( mode == WindowMode_Windowed )
         {
-            SDL_SetWindowFullscreen( (SDL_Window*)(windowHandle_), false );
+            SDL_SetWindowFullscreen( (SDL_Window*)(_windowHandle), false );
             if ( this->IsResizable() )
-                SDL_RestoreWindow( (SDL_Window*)(windowHandle_) );
+                SDL_RestoreWindow( (SDL_Window*)(_windowHandle) );
         }
         else if ( mode == WindowMode_Maximized )
         {
-            SDL_SetWindowFullscreen( (SDL_Window*)(windowHandle_), false );
+            SDL_SetWindowFullscreen( (SDL_Window*)(_windowHandle), false );
             if ( this->IsResizable() )
-                SDL_MaximizeWindow( (SDL_Window*)(windowHandle_) );
+                SDL_MaximizeWindow( (SDL_Window*)(_windowHandle) );
         }
     }
 
     const EWindowMode& Window::GetWindowMode() const
     {
-        return mode_;
+        return _mode;
     }
 
     const float& Window::GetWhiteLevel() const
     {
-        return whiteLevel_;
+        return _whiteLevel;
     }
 
     const bool& Window::HDREnabled() const
     {
-        return hdrEnabled_;
+        return _hdrEnabled;
     }
 
     void Window::SetIcon( PixelMap* Icon )
@@ -309,7 +321,7 @@ namespace EE
             (void*)Icon->GetData(),
             NULL
         );
-        SDL_SetWindowIcon( static_cast<SDL_Window*>(windowHandle_), Surface );
+        SDL_SetWindowIcon( static_cast<SDL_Window*>(_windowHandle), Surface );
         SDL_DestroySurface( Surface );
     }
 
@@ -321,78 +333,78 @@ namespace EE
 
         SDL_RemoveEventWatch( WindowEventsHandler, (void*)this );
         GDynamicRHI->FreeRHIPresentContextOfWindow( this );
-        SDL_DestroyWindow( (SDL_Window*)(windowHandle_) );
-        windowHandle_ = NULL;
+        SDL_DestroyWindow( (SDL_Window*)(_windowHandle) );
+        _windowHandle = NULL;
     }
 
     void Window::OnResize( const uint32& width, const uint32& height )
     {
-        width_ = width; height_ = height;
+        _width = width; _height = height;
     }
 
     void Window::OnPositionChange( const int32& x, const int32& y )
     {
-        positionX_ = x; positionY_ = y;
+        _positionX = x; _positionY = y;
     }
 
     void Window::OnWindowModeChanged( const EWindowMode& mode )
     {
-        mode_ = mode;
+        _mode = mode;
     }
 
     void Window::OnHDRChanged( bool hdrEnabled )
     {
-        hdrEnabled_ = hdrEnabled;
+        _hdrEnabled = hdrEnabled;
         GDynamicRHI->GetRHIPresentContextOfWindow( this )->SetSwapChainDirty();
     }
 
     const U8String& Window::GetName() const
     {
-        return name_;
+        return _name;
     }
 
     float Window::GetAspectRatio() const
     {
-        return (float)width_ / (float)height_;
+        return (float)_width / (float)_height;
     }
 
     const uint32& Window::GetWidth() const
     {
-        return width_;
+        return _width;
     }
 
     const uint32& Window::GetHeight() const
     {
-        return height_;
+        return _height;
     }
 
     const int32& Window::GetPositionX() const
     {
-        return positionX_;
+        return _positionX;
     }
 
     const int32& Window::GetPositionY() const
     {
-        return positionY_;
+        return _positionY;
     }
 
     const EPresentMode& Window::GetPresentMode() const
     {
-        return presentMode_;
+        return _presentMode;
     }
 
     void Window::GetSize( uint32& w, uint32& h ) const
     {
-        w = width_; h = height_;
+        w = _width; h = _height;
     }
 
     void Window::GetPosition( int32& x, int32& y ) const
     {
-        x = width_; y = height_;
+        x = _width; y = _height;
     }
 
     void Window::GetViewport( int& x, int& y, int& w, int& h ) const
     {
-        x = 0; y = 0; w = width_; h = height_;
+        x = 0; y = 0; w = _width; h = _height;
     }
 }

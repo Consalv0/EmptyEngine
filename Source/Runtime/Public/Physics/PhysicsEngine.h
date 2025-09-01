@@ -42,12 +42,12 @@ namespace EE
     {
     protected:
         PhysicsShapeSphere( const PhysicsShapeSphereCreateInfo& createInfo ) : PhysicsShape( PhysicsShape_Sphere )
-            , radius_( createInfo.radius )
+            , _radius( createInfo.radius )
         {
         }
 
     protected:
-        const float radius_;
+        const float _radius;
     };
 
     struct PhysicsShapeBoxCreateInfo

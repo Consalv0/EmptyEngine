@@ -78,19 +78,19 @@ namespace EE
             if ( columnMajor )
             {
                 return FormattedW( L"{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
-                    value.m00, value.m10, value.m20, value.m30,
-                    value.m01, value.m11, value.m21, value.m31,
-                    value.m02, value.m12, value.m22, value.m32,
-                    value.m03, value.m13, value.m23, value.m33
+                    value.c0r0, value.c1r0, value.c2r0, value.c3r0,
+                    value.c0r1, value.c1r1, value.c2r1, value.c3r1,
+                    value.c0r2, value.c1r2, value.c2r2, value.c3r2,
+                    value.c0r3, value.c1r3, value.c2r3, value.c3r3
                 );
             }
             else
             {
                 return FormattedW( L"{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
-                    value.m00, value.m01, value.m02, value.m03,
-                    value.m10, value.m11, value.m12, value.m13,
-                    value.m20, value.m21, value.m22, value.m23,
-                    value.m30, value.m31, value.m32, value.m33
+                    value.c0r0, value.c0r1, value.c0r2, value.c0r3,
+                    value.c1r0, value.c1r1, value.c1r2, value.c1r3,
+                    value.c2r0, value.c2r1, value.c2r2, value.c2r3,
+                    value.c3r0, value.c3r1, value.c3r2, value.c3r3
                 );
             }
         }
@@ -165,19 +165,19 @@ namespace EE
             if ( columnMajor )
             {
                 return Formatted( "{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
-                    value.m00, value.m10, value.m20, value.m30,
-                    value.m01, value.m11, value.m21, value.m31,
-                    value.m02, value.m12, value.m22, value.m32,
-                    value.m03, value.m13, value.m23, value.m33
+                    value.c0r0, value.c1r0, value.c2r0, value.c3r0,
+                    value.c0r1, value.c1r1, value.c2r1, value.c3r1,
+                    value.c0r2, value.c1r2, value.c2r2, value.c3r2,
+                    value.c0r3, value.c1r3, value.c2r3, value.c3r3
                 );
             }
             else
             {
                 return Formatted( "{{%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}, {%.3f, %.3f, %.3f, %.3f}}",
-                    value.m00, value.m01, value.m02, value.m03,
-                    value.m10, value.m11, value.m12, value.m13,
-                    value.m20, value.m21, value.m22, value.m23,
-                    value.m30, value.m31, value.m32, value.m33
+                    value.c0r0, value.c0r1, value.c0r2, value.c0r3,
+                    value.c1r0, value.c1r1, value.c1r2, value.c1r3,
+                    value.c2r0, value.c2r1, value.c2r2, value.c2r3,
+                    value.c3r0, value.c3r1, value.c3r2, value.c3r3
                 );
             }
         }

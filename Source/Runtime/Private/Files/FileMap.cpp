@@ -112,62 +112,62 @@ namespace EE
     int FileMap::ReadBlock( uint64 offset, uint64 size, void* buffer )
     {
 #ifdef _WIN32
-        EE_ASSERT( FileMapHandleValid( mHandle ) );
+        EE_ASSERT( FileMapHandleValid( _handle ) );
 
-        ++mRequestCount;
+        ++_requestCount;
 
-        FileHandle* fileHandle = static_cast<FileHandle*>(mHandle);
+        FileHandle* fileHandle = static_cast<FileHandle*>(_handle);
         fileHandle->overlapped.hEvent = fileHandle->readEvent;
         fileHandle->overlapped.Offset = static_cast<DWORD>(offset);
         fileHandle->overlapped.OffsetHigh = static_cast<DWORD>(offset >> 32);
 
-        mOffset = static_cast<DWORD>(offset);
-        mSize = static_cast<DWORD>(size);
-        mBuffer = buffer;
-        bool success = ReadFile( fileHandle->file, mBuffer, static_cast<DWORD>(size), nullptr, &fileHandle->overlapped );
+        _offset = static_cast<DWORD>(offset);
+        _size = static_cast<DWORD>(size);
+        _buffer = buffer;
+        bool success = ReadFile( fileHandle->file, _buffer, static_cast<DWORD>(size), nullptr, &fileHandle->overlapped );
 
         if ( !success )
         {
             if ( DWORD ec = GetLastError(); ec != ERROR_IO_PENDING )
             {
-                return mError = static_cast<int>(ec);
+                return _error = static_cast<int>(ec);
             }
         }
 #elif defined( __linux__ )
-        EE_ASSERT( mBuffer );
-        EE_ASSERT( FileMapHandleValid( mHandle ) );
-        EE_ASSERT( std::uintptr_t( mBuffer ) % 4096 == 0 );
+        EE_ASSERT( _buffer );
+        EE_ASSERT( FileMapHandleValid( _handle ) );
+        EE_ASSERT( std::uintptr_t( _buffer ) % 4096 == 0 );
 
-        ++mRequestCount;
+        ++_requestCount;
 
-        mOffset = offset;
-        mSize = size;
-        mBuffer = buffer;
+        _offset = offset;
+        _size = size;
+        _buffer = buffer;
 
-        auto result = readahead( (int)(uintptr_t)mHandle, mOffset, mSize );
+        auto result = readahead( (int)(uintptr_t)_handle, _offset, _size );
         if ( result == -1 )
         {
-            return mError = errno;
+            return _error = errno;
         }
 #elif defined( __APPLE__ )
-        EE_ASSERT( mBuffer );
-        EE_ASSERT( FileMapHandleValid( mHandle ) );
-        EE_ASSERT( std::uintptr_t( mBuffer ) % 4096 == 0 );
+        EE_ASSERT( _buffer );
+        EE_ASSERT( FileMapHandleValid( _handle ) );
+        EE_ASSERT( std::uintptr_t( _buffer ) % 4096 == 0 );
 
         ++m_num_requests;
 
-        mOffset = offset;
-        mSize = size;
-        mBuffer = buffer;
+        _offset = offset;
+        _size = size;
+        _buffer = buffer;
 
         radvisory args{};
-        args.ra_offset = static_cast<off_t>(mOffset);
-        args.ra_count = static_cast<int>(mSize);
+        args.ra_offset = static_cast<off_t>(_offset);
+        args.ra_count = static_cast<int>(_size);
 
-        auto result = fcntl( (int)(uintptr_t)mHandle, F_RDADVISE, &args );
+        auto result = fcntl( (int)(uintptr_t)_handle, F_RDADVISE, &args );
         if ( result == -1 )
         {
-            return mError = errno;
+            return _error = errno;
         }
 #endif
 
@@ -177,49 +177,49 @@ namespace EE
     int FileMap::WaitForResult( uint64* outBytesRead )
     {
 #ifdef _WIN32
-        EE_ASSERT( FileMapHandleValid( mHandle ) );
+        EE_ASSERT( FileMapHandleValid( _handle ) );
 
-        FileHandle* fileHandle = static_cast<FileHandle*>(mHandle);
+        FileHandle* fileHandle = static_cast<FileHandle*>(_handle);
 
         DWORD bytesRead = DWORD{};
-        bool success = GetOverlappedResult( mHandle, &fileHandle->overlapped, &bytesRead, TRUE );
+        bool success = GetOverlappedResult( _handle, &fileHandle->overlapped, &bytesRead, TRUE );
 
         if ( !success )
         {
             if ( DWORD ec = GetLastError(); ec != ERROR_HANDLE_EOF )
             {
                 *outBytesRead = 0;
-                return mError = static_cast<int>(ec);
+                return _error = static_cast<int>(ec);
             }
         }
 
-        mBytesRead += bytesRead;
+        _bytesRead += bytesRead;
         *outBytesRead = bytesRead;
 #elif defined( __linux__ )
-        auto result = pread64( (int)(uintptr_t)mHandle, mBuffer, mSize, mOffset );
+        auto result = pread64( (int)(uintptr_t)_handle, _buffer, _size, _offset );
 
         if ( result < 0 )
         {
             *outBytesRead = 0;
-            return mError = errno;
+            return _error = errno;
         }
 
         auto bytesRead = static_cast<size_t>(result);
 
-        mBytesRead += bytesRead;
+        _bytesRead += bytesRead;
         *outBytesRead = bytesRead;
 #elif defined( __APPLE__ )
-        auto result = pread( (int)(uintptr_t)mHandle, mBuffer, mSize, mOffset );
+        auto result = pread( (int)(uintptr_t)_handle, _buffer, _size, _offset );
 
         if ( result < 0 )
         {
             *outBytesRead = 0;
-            return mError = errno;
+            return _error = errno;
         }
 
         const size_t& bytesRead = static_cast<size_t>(result);
 
-        mBytesRead += bytesRead;
+        _bytesRead += bytesRead;
         *outBytesRead = bytesRead;
 #endif
 
@@ -227,17 +227,17 @@ namespace EE
     }
 
     FileMap::FileMap( const File& filePath ) : File( filePath ),
-        mHandle{}, mSize{}, mError{}
+        _handle{}, _size{}, _error{}
     {
-        mError = OpenFileMap( filePath, &mHandle, &mSize );
+        _error = OpenFileMap( filePath, &_handle, &_size );
     }
 
     FileMap::~FileMap() noexcept
     {
-        CloseFileMap( &mHandle );
+        CloseFileMap( &_handle );
     }
 
-    FileMap::operator bool() const { return FileMapHandleValid( mHandle ); }
+    FileMap::operator bool() const { return FileMapHandleValid( _handle ); }
 }
 
 #include "Platform/PostPlatform.h"

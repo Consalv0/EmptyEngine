@@ -66,17 +66,23 @@ namespace EE
         typedef std::function<void( ModelResult& )> FinishTaskFunction;
         typedef std::function<void( ModelResult&, const Options&, std::future<bool>& )> FutureTask;
 
-        static bool TaskRunning;
+        static bool sTaskRunning;
 
-        struct Task
+        class Task
         {
-            Options options;
-            ModelResult info;
-            FinishTaskFunction finishTaskFunction;
-            FutureTask futureTask;
-
-            Task( const Task& Other ) = delete;
+        public:
+            Task( const Task& other ) = delete;
             Task( const Options& options, FinishTaskFunction finishTaskFunction, FutureTask futureTask );
+
+        public:
+            void Start( std::future<bool>& task );
+            void Finish();
+
+        private:
+            Options _options;
+            ModelResult _result;
+            FinishTaskFunction _finishTaskFunction;
+            FutureTask _futureTask;
         };
 
         static bool RecognizeFileExtensionAndLoad( ModelResult& data, const Options& options );
@@ -84,8 +90,8 @@ namespace EE
         static void FinishCurrentAsyncTask();
 
         //* Mesh Loading Threads
-        static std::queue<Task*> pendingTasks;
-        static std::future<bool> currentFutureTask;
+        static std::queue<Task*> sPendingTasks;
+        static std::future<bool> sCurrentFutureTask;
 
     public:
         static bool Initialize();

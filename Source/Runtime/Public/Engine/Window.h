@@ -42,6 +42,19 @@ namespace EE
 
     typedef void* WindowHandleRef;
 
+    struct DisplayProperties
+    {
+        uint32 width = 0;
+        uint32 height = 0;
+        int32 positionX = 0;
+        int32 positionY = 0;
+        uint32 usableWidth = 0;
+        uint32 usableHeight = 0;
+        int32 usablePositionX = 0;
+        int32 usablePositionY = 0;
+        bool hdrEnabled = false;
+    };
+
     //* Cointains the properties and functions of a window
     class Window
     {
@@ -133,21 +146,21 @@ namespace EE
 
         //* OS specific window handle
         //* Get SDL_Window Pointer
-        FORCEINLINE WindowHandleRef GetWindowHandle() const { return windowHandle_; }
+        FORCEINLINE WindowHandleRef GetWindowHandle() const { return _windowHandle; }
 
-        FORCEINLINE bool IsResizable() const { return (options_ & WindowOption_Resizable_Bit) > 0; }
+        FORCEINLINE bool IsResizable() const { return (_options & WindowOption_Resizable_Bit) > 0; }
 
-        constexpr bool IsUsingCompositeAlpha() const { return compositeAlpha_; }
+        constexpr bool IsUsingCompositeAlpha() const { return _compositeAlpha; }
 
-        constexpr bool GetOpacity() const { return opacity_; }
+        constexpr bool GetOpacity() const { return _opacity; }
 
-        constexpr bool IsPassthrough() const { return passthrough_; }
+        constexpr bool IsPassthrough() const { return _passthrough; }
 
         //* Desired present pixel format
-        constexpr const EPixelFormat& GetDesiredPixelFormat() const { return pixelFormat_; };
+        constexpr const EPixelFormat& GetDesiredPixelFormat() const { return _pixelFormat; };
 
         //* Desired present color space
-        constexpr const EColorSpace& GetDesiredColorSpace() const { return colorSpace_; };
+        constexpr const EColorSpace& GetDesiredColorSpace() const { return _colorSpace; };
 
     protected:
         virtual void OnResize( const uint32& width, const uint32& height );
@@ -159,21 +172,21 @@ namespace EE
         bool closeRequested;
 
     protected:
-        U8String name_;
-        EWindowMode mode_;
-        WindowHandleRef windowHandle_;
-        EWindowOptionFlags options_;
-        uint32 width_, height_;
-        int32 positionX_, positionY_;
-        EPresentMode presentMode_;
-        float whiteLevel_;
-        bool hdrEnabled_;
-        EPixelFormat pixelFormat_;
-        EColorSpace colorSpace_;
-        EventData eventData_;
-        bool compositeAlpha_;
-        uint8 opacity_;
-        bool passthrough_;
+        U8String _name;
+        EWindowMode _mode;
+        WindowHandleRef _windowHandle;
+        EWindowOptionFlags _options;
+        uint32 _width, _height;
+        int32 _positionX, _positionY;
+        EPresentMode _presentMode;
+        float _whiteLevel;
+        bool _hdrEnabled;
+        EPixelFormat _pixelFormat;
+        EColorSpace _colorSpace;
+        EventData _eventData;
+        bool _compositeAlpha;
+        uint8 _opacity;
+        bool _passthrough;
     };
 
     //* Creates a window

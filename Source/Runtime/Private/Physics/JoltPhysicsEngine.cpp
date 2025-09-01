@@ -200,25 +200,25 @@ namespace EE
     };
 
     JoltPhysicsShapeSphere::JoltPhysicsShapeSphere( const PhysicsShapeSphereCreateInfo& createInfo ) : PhysicsShapeSphere( createInfo )
-        , shape_( NULL )
+        , _shape( NULL )
     {
-        shape_ = new JPH::SphereShape( radius_ );
+        _shape = new JPH::SphereShape( _radius );
     }
 
     JoltPhysicsShapeSphere::~JoltPhysicsShapeSphere()
     {
-        delete shape_;
+        delete _shape;
     }
 
     JoltPhysicsShapeBox::JoltPhysicsShapeBox( const PhysicsShapeBoxCreateInfo& createInfo ) : PhysicsShapeBox( createInfo )
-        , shape_( NULL )
+        , _shape( NULL )
     {
-        shape_ = new JPH::BoxShape( JPH::Vec3( extents_.x, extents_.y, extents_.z ) );
+        _shape = new JPH::BoxShape( JPH::Vec3( extents_.x, extents_.y, extents_.z ) );
     }
 
     JoltPhysicsShapeBox::~JoltPhysicsShapeBox()
     {
-        delete shape_;
+        delete _shape;
     }
 
     JoltPhysicsEngine::JoltPhysicsEngine()
@@ -260,31 +260,31 @@ namespace EE
 
         // Create mapping table from object layer to broadphase layer
         // Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
-        broadPhaseLayerInterface_ = new BPLayerInterfaceImpl();
+        _broadPhaseLayerInterface = new BPLayerInterfaceImpl();
 
         // Create class that filters object vs broadphase layers
         // Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
-        objectVsBroadphaseLayerFilter_ = new ObjectVsBroadPhaseLayerFilterImpl();
+        _objectVsBroadphaseLayerFilter = new ObjectVsBroadPhaseLayerFilterImpl();
 
         // Create class that filters object vs object layers
         // Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
-        objectVSObjectLayerFilter_ = new ObjectLayerPairFilterImpl();
+        _objectVSObjectLayerFilter = new ObjectLayerPairFilterImpl();
 
         // Now we can create the actual physics system.
-        physicsSystem_ = new JPH::PhysicsSystem();
-        physicsSystem_->Init( cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, *broadPhaseLayerInterface_, *objectVsBroadphaseLayerFilter_, *objectVSObjectLayerFilter_ );
+        _physicsSystem = new JPH::PhysicsSystem();
+        _physicsSystem->Init( cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, *_broadPhaseLayerInterface, *_objectVsBroadphaseLayerFilter, *_objectVSObjectLayerFilter );
 
         // A body activation listener gets notified when bodies activate and go to sleep
         // Note that this is called from a job so whatever you do here needs to be thread safe.
         // Registering one is entirely optional.
-        bodyActivationListener_ = new MyBodyActivationListener();
-        physicsSystem_->SetBodyActivationListener( bodyActivationListener_ );
+        _bodyActivationListener = new MyBodyActivationListener();
+        _physicsSystem->SetBodyActivationListener( _bodyActivationListener );
 
         // A contact listener gets notified when bodies (are about to) collide, and when they separate again.
         // Note that this is called from a job so whatever you do here needs to be thread safe.
         // Registering one is entirely optional.
-        contactListener_ = new MyContactListener();
-        physicsSystem_->SetContactListener( contactListener_ );
+        _contactListener = new MyContactListener();
+        _physicsSystem->SetContactListener( _contactListener );
     }
 
     JoltPhysicsEngine::~JoltPhysicsEngine()
@@ -296,12 +296,12 @@ namespace EE
         delete JPH::Factory::sInstance;
         JPH::Factory::sInstance = NULL;
 
-        delete physicsSystem_;
-        delete bodyActivationListener_;
-        delete contactListener_;
-        delete broadPhaseLayerInterface_;
-        delete objectVsBroadphaseLayerFilter_;
-        delete objectVSObjectLayerFilter_;
+        delete _physicsSystem;
+        delete _bodyActivationListener;
+        delete _contactListener;
+        delete _broadPhaseLayerInterface;
+        delete _objectVsBroadphaseLayerFilter;
+        delete _objectVSObjectLayerFilter;
     }
 
     void JoltPhysicsEngine::StartSimulation()
@@ -309,7 +309,7 @@ namespace EE
         // Optional step: Before starting the physics simulation you can optimize the broad phase. This improves collision detection performance (it's pointless here because we only have 2 bodies).
         // You should definitely not call this every frame or when e.g. streaming in a new level section as it is an expensive operation.
         // Instead insert all new objects in batches instead of 1 at a time to keep the broad phase efficient.
-        physicsSystem_->OptimizeBroadPhase();
+        _physicsSystem->OptimizeBroadPhase();
     }
 
     bool JoltPhysicsEngine::UpdateSimulation( uint8 steps )
@@ -338,7 +338,7 @@ namespace EE
         int cCollisionSteps = steps;
 
         // Step the world
-        JPH::EPhysicsUpdateError error = physicsSystem_->Update( cDeltaTime, cCollisionSteps, &tempAllocator, &jobSystem );
+        JPH::EPhysicsUpdateError error = _physicsSystem->Update( cDeltaTime, cCollisionSteps, &tempAllocator, &jobSystem );
 
         if ( error != JPH::EPhysicsUpdateError::None )
         {
@@ -364,26 +364,26 @@ namespace EE
     }
 
     JoltPhysicsBody::JoltPhysicsBody( const PhysicsBodyCreateInfo& createInfo, JoltPhysicsEngine* physicsEngine )
-        : physicsSystem_( physicsEngine->GetPhysicsSystem() )
-        , physicsShape_( createInfo.physicsShape )
-        , bodyId_()
+        : _physicsSystem( physicsEngine->GetPhysicsSystem() )
+        , _physicsShape( createInfo.physicsShape )
+        , _bodyId()
     {
         // The main way to interact with the bodies in the physics system is through the body interface. There is a locking and a non-locking
         // variant of this. We're going to use the locking version (even though we're not planning to access bodies from multiple threads)
-        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
+        JPH::BodyInterface& bodyInterface = _physicsSystem->GetBodyInterface();
 
         JPH::Shape* shape = NULL;
-        switch ( physicsShape_->shape )
+        switch ( _physicsShape->shape )
         {
         case PhysicsShape_Sphere:
         {
-            JoltPhysicsShapeSphere* sphereShape = static_cast<JoltPhysicsShapeSphere*>(physicsShape_);
+            JoltPhysicsShapeSphere* sphereShape = static_cast<JoltPhysicsShapeSphere*>(_physicsShape);
             shape = sphereShape->GetJoltShape();
         }
             break;
         case PhysicsShape_Box:
         {
-            JoltPhysicsShapeBox* boxShape = static_cast<JoltPhysicsShapeBox*>(physicsShape_);
+            JoltPhysicsShapeBox* boxShape = static_cast<JoltPhysicsShapeBox*>(_physicsShape);
             shape = boxShape->GetJoltShape();
         }
             break;
@@ -402,8 +402,8 @@ namespace EE
             Layers::Moving
         );
 
-        bodyId_ = bodyInterface.CreateAndAddBody( sphereSettings, createInfo.activate ? JPH::EActivation::Activate : JPH::EActivation::DontActivate );
-        if ( bodyId_.IsInvalid() )
+        _bodyId = bodyInterface.CreateAndAddBody( sphereSettings, createInfo.activate ? JPH::EActivation::Activate : JPH::EActivation::DontActivate );
+        if ( _bodyId.IsInvalid() )
         {
             EE_LOG_ERROR( "[Jolt] Failed to create Physics Body" );
         }
@@ -411,19 +411,19 @@ namespace EE
 
     JoltPhysicsBody::~JoltPhysicsBody()
     {
-        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
+        JPH::BodyInterface& bodyInterface = _physicsSystem->GetBodyInterface();
 
         // Remove the sphere from the physics system. Note that the sphere itself keeps all of its state and can be re-added at any time.
-        bodyInterface.RemoveBody( bodyId_ );
+        bodyInterface.RemoveBody( _bodyId );
 
         // Destroy the sphere. After this the sphere ID is no longer valid.
-        bodyInterface.DestroyBody( bodyId_ );
+        bodyInterface.DestroyBody( _bodyId );
     }
 
     void JoltPhysicsBody::GetPosition( Vector3f* outPosition ) const
     {
-        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
-        JPH::RVec3 position = bodyInterface.GetPosition( bodyId_ );
+        JPH::BodyInterface& bodyInterface = _physicsSystem->GetBodyInterface();
+        JPH::RVec3 position = bodyInterface.GetPosition( _bodyId );
 
         outPosition->x = position.GetX();
         outPosition->y = position.GetY();
@@ -432,14 +432,14 @@ namespace EE
 
     void JoltPhysicsBody::SetPosition( const Vector3f& position )
     {
-        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
-        bodyInterface.SetPosition( bodyId_, JPH::RVec3( position.x, position.y, position.z ), JPH::EActivation::DontActivate );
+        JPH::BodyInterface& bodyInterface = _physicsSystem->GetBodyInterface();
+        bodyInterface.SetPosition( _bodyId, JPH::RVec3( position.x, position.y, position.z ), JPH::EActivation::DontActivate );
     }
 
     void JoltPhysicsBody::GetRotation( Quaternionf* outRotation ) const
     {
-        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
-        JPH::Quat rotation = bodyInterface.GetRotation( bodyId_ );
+        JPH::BodyInterface& bodyInterface = _physicsSystem->GetBodyInterface();
+        JPH::Quat rotation = bodyInterface.GetRotation( _bodyId );
 
         outRotation->x = rotation.GetX();
         outRotation->y = rotation.GetY();
@@ -449,14 +449,14 @@ namespace EE
 
     void JoltPhysicsBody::SetRotation( const Quaternionf& rotation )
     {
-        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
-        bodyInterface.SetRotation( bodyId_, JPH::Quat( rotation.x, rotation.y, rotation.z, rotation.w ), JPH::EActivation::DontActivate );
+        JPH::BodyInterface& bodyInterface = _physicsSystem->GetBodyInterface();
+        bodyInterface.SetRotation( _bodyId, JPH::Quat( rotation.x, rotation.y, rotation.z, rotation.w ), JPH::EActivation::DontActivate );
     }
 
     void JoltPhysicsBody::GetLinearVelocity( Vector3f* outVelocity ) const
     {
-        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
-        JPH::Vec3 velocity = bodyInterface.GetLinearVelocity( bodyId_ );
+        JPH::BodyInterface& bodyInterface = _physicsSystem->GetBodyInterface();
+        JPH::Vec3 velocity = bodyInterface.GetLinearVelocity( _bodyId );
 
         outVelocity->x = velocity.GetX();
         outVelocity->y = velocity.GetY();
@@ -465,20 +465,20 @@ namespace EE
 
     void JoltPhysicsBody::SetLinearVelocity( const Vector3f& velocity )
     {
-        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
-        bodyInterface.SetLinearVelocity( bodyId_, JPH::Vec3( velocity.x, velocity.y, velocity.z ) );
-        bodyInterface.ActivateBody( bodyId_ );
+        JPH::BodyInterface& bodyInterface = _physicsSystem->GetBodyInterface();
+        bodyInterface.SetLinearVelocity( _bodyId, JPH::Vec3( velocity.x, velocity.y, velocity.z ) );
+        bodyInterface.ActivateBody( _bodyId );
     }
 
     void JoltPhysicsBody::GetFriction( float* friction ) const
     {
-        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
-        *friction = bodyInterface.GetFriction( bodyId_ );
+        JPH::BodyInterface& bodyInterface = _physicsSystem->GetBodyInterface();
+        *friction = bodyInterface.GetFriction( _bodyId );
     }
 
     void JoltPhysicsBody::SetFriction( const float& friction )
     {
-        JPH::BodyInterface& bodyInterface = physicsSystem_->GetBodyInterface();
-        bodyInterface.SetFriction( bodyId_, friction );
+        JPH::BodyInterface& bodyInterface = _physicsSystem->GetBodyInterface();
+        bodyInterface.SetFriction( _bodyId, friction );
     }
 }

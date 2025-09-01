@@ -35,14 +35,14 @@ namespace EE
         LONG exStyle = GetWindowLong( hWnd, GWL_EXSTYLE );
         if ( exStyle & WS_EX_TRANSPARENT )
         {
-            opacity_ = opacity;
+            _opacity = opacity;
             exStyle |= WS_EX_LAYERED;
             SetWindowLong( hWnd, GWL_EXSTYLE, exStyle );
-            return SetLayeredWindowAttributes( hWnd, 0, opacity_, LWA_ALPHA );
+            return SetLayeredWindowAttributes( hWnd, 0, _opacity, LWA_ALPHA );
         }
         else
         {
-            opacity_ = 255;
+            _opacity = 255;
             exStyle &= ~WS_EX_LAYERED;
             return SetWindowLong( hWnd, GWL_EXSTYLE, exStyle );
         }
@@ -74,7 +74,7 @@ namespace EE
             }
         }
 
-        passthrough_ = enable;
+        _passthrough = enable;
         return SetWindowLong( hWnd, GWL_EXSTYLE, exStyle );
     }
 

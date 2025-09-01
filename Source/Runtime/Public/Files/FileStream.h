@@ -29,13 +29,13 @@ namespace EE
         template <typename T>
         inline const IStream& operator>>( T value )
         {
-            return (std::move( *mStream ) >> value);
+            return (std::move( *_stream ) >> value);
         }
 
         template <typename T>
         inline const OStream& operator<<( T value )
         {
-            return (std::move( *mStream ) << value);
+            return (std::move( *_stream ) << value);
         }
 
         inline float GetProgress() const;
@@ -55,33 +55,33 @@ namespace EE
         void ReadToStringBuffer( StringBuffer& buffer ) const;
 
     private:
-        FStream* mStream;
-        size_t mLength;
+        FStream* _stream;
+        size_t _length;
     };
 
     template<typename StringType>
     FileStream<StringType>::FileStream( const File& file ) : File( file )
     {
-        mStream = new FStream();
+        _stream = new FStream();
     }
 
     template<typename StringType>
     FileStream<StringType>::~FileStream()
     {
-        delete mStream;
+        delete _stream;
     }
 
     template<typename StringType>
     inline float FileStream<StringType>::GetProgress() const
     {
-        size_t progress = size_t( mStream->tellg() );
-        return progress / float( mLength );
+        size_t progress = size_t( _stream->tellg() );
+        return progress / float( _length );
     }
 
     template<typename StringType>
     inline size_t FileStream<StringType>::GetPosition() const
     {
-        return mStream->tellg();
+        return _stream->tellg();
     }
 
     template<typename StringType>
@@ -91,7 +91,7 @@ namespace EE
         {
             try
             {
-                mStream->read( output, length );
+                _stream->read( output, length );
                 return true;
             }
             catch ( ... )
@@ -134,14 +134,14 @@ namespace EE
     StringType FileStream<StringType>::GetLine()
     {
         WString string;
-        std::getline( *mStream, string );
+        std::getline( *_stream, string );
         return string;
     }
 
     template<typename StringType>
     bool FileStream<StringType>::IsValid() const
     {
-        return Super::IsValid() && mStream != NULL && !mStream->fail() && mStream->good();
+        return Super::IsValid() && _stream != NULL && !_stream->fail() && _stream->good();
     }
 
     template<typename StringType>
@@ -150,7 +150,7 @@ namespace EE
         if ( localeFormat == NULL )
             localeFormat = "en_US.UTF-8";
         static std::locale locale( localeFormat );
-        mStream->imbue( locale );
+        _stream->imbue( locale );
     }
 
     template<typename StringType>
@@ -160,41 +160,41 @@ namespace EE
             LocaleToUTF8( NULL );
 
 #ifdef EE_PLATFORM_WINDOWS
-        mStream->open( mPath, openFlags );
+        _stream->open( mPath, openFlags );
 #else
-        mStream->open( mPath, openFlags );
+        _stream->open( mPath, openFlags );
 #endif
 
-        return mStream->is_open();
+        return _stream->is_open();
     }
 
     template<typename StringType>
     void FileStream<StringType>::Clean()
     {
-        if ( mStream->is_open() )
-            mStream->close();
+        if ( _stream->is_open() )
+            _stream->close();
 #ifdef EE_PLATFORM_WINDOWS
-        mStream->open( mPath, std::ios::in | std::ios::out | std::ios::trunc );
+        _stream->open( mPath, std::ios::in | std::ios::out | std::ios::trunc );
 #else
-        mStream->open( mPath, std::ios::in | std::ios::out | std::ios::trunc );
+        _stream->open( mPath, std::ios::in | std::ios::out | std::ios::trunc );
 #endif
     }
 
     template<typename StringType>
     void FileStream<StringType>::MoveCursor( size_t pos )
     {
-        mStream->seekg( pos );
+        _stream->seekg( pos );
     }
 
     template<typename StringType>
     void FileStream<StringType>::Close()
     {
-        mStream->close();
+        _stream->close();
     }
 
     template<typename StringType>
     void FileStream<StringType>::ReadToStringBuffer( FileStream<StringType>::StringBuffer& buffer ) const
     {
-        buffer << mStream->rdbuf();
+        buffer << _stream->rdbuf();
     }
 }

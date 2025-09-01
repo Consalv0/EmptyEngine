@@ -133,12 +133,12 @@ namespace EE::Math
     {
         TFrustrum fustrum;
 
-        fustrum.left   = { mvp.m03 + mvp.m00, mvp.m13 + mvp.m10, mvp.m23 + mvp.m20, mvp.m33 + mvp.m30 };
-        fustrum.right  = { mvp.m03 - mvp.m00, mvp.m13 - mvp.m10, mvp.m23 - mvp.m20, mvp.m33 - mvp.m30 };
-        fustrum.top    = { mvp.m03 - mvp.m01, mvp.m13 - mvp.m11, mvp.m23 - mvp.m21, mvp.m33 - mvp.m31 };
-        fustrum.bottom = { mvp.m03 + mvp.m01, mvp.m13 + mvp.m11, mvp.m23 + mvp.m21, mvp.m33 + mvp.m31 };
-        fustrum.near   = { mvp.m03 + mvp.m02, mvp.m13 + mvp.m12, mvp.m23 + mvp.m22, mvp.m33 + mvp.m32 };
-        fustrum.far    = { mvp.m03 - mvp.m02, mvp.m13 - mvp.m12, mvp.m23 - mvp.m22, mvp.m33 - mvp.m32 };
+        fustrum.left   = { mvp.c0r3 + mvp.c0r0, mvp.c1r3 + mvp.c1r0, mvp.c2r3 + mvp.c2r0, mvp.c3r3 + mvp.c3r0 };
+        fustrum.right  = { mvp.c0r3 - mvp.c0r0, mvp.c1r3 - mvp.c1r0, mvp.c2r3 - mvp.c2r0, mvp.c3r3 - mvp.c3r0 };
+        fustrum.top    = { mvp.c0r3 - mvp.c0r1, mvp.c1r3 - mvp.c1r1, mvp.c2r3 - mvp.c2r1, mvp.c3r3 - mvp.c3r1 };
+        fustrum.bottom = { mvp.c0r3 + mvp.c0r1, mvp.c1r3 + mvp.c1r1, mvp.c2r3 + mvp.c2r1, mvp.c3r3 + mvp.c3r1 };
+        fustrum.near   = { mvp.c0r3 + mvp.c0r2, mvp.c1r3 + mvp.c1r2, mvp.c2r3 + mvp.c2r2, mvp.c3r3 + mvp.c3r2 };
+        fustrum.far    = { mvp.c0r3 - mvp.c0r2, mvp.c1r3 - mvp.c1r2, mvp.c2r3 - mvp.c2r2, mvp.c3r3 - mvp.c3r2 };
         fustrum.left.Normalize();
         fustrum.right.Normalize();
         fustrum.top.Normalize();

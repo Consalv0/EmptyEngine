@@ -6,25 +6,25 @@ namespace EE
     class JoltPhysicsShapeSphere : public PhysicsShapeSphere
     {
     public:
-        JPH::Shape* GetJoltShape() { return shape_; };
+        JPH::Shape* GetJoltShape() { return _shape; };
 
         JoltPhysicsShapeSphere( const PhysicsShapeSphereCreateInfo& createInfo );
         ~JoltPhysicsShapeSphere( );
 
     private:
-        JPH::Shape* shape_;
+        JPH::Shape* _shape;
     };
 
     class JoltPhysicsShapeBox : public PhysicsShapeBox
     {
     public:
-        JPH::Shape* GetJoltShape() { return shape_; };
+        JPH::Shape* GetJoltShape() { return _shape; };
 
         JoltPhysicsShapeBox( const PhysicsShapeBoxCreateInfo& createInfo );
         ~JoltPhysicsShapeBox();
 
     private:
-        JPH::Shape* shape_;
+        JPH::Shape* _shape;
     };
 
     class JoltPhysicsBody : public PhysicsBody
@@ -46,9 +46,9 @@ namespace EE
         void SetFriction( const float& friction ) override;
 
     private:
-        JPH::BodyID bodyId_;
-        JPH::PhysicsSystem* physicsSystem_;
-        PhysicsShape* physicsShape_;
+        JPH::BodyID _bodyId;
+        JPH::PhysicsSystem* _physicsSystem;
+        PhysicsShape* _physicsShape;
     };
 
     class JoltPhysicsEngine : public PhysicsEngine
@@ -66,14 +66,14 @@ namespace EE
 
         PhysicsBody* CreateBody( const PhysicsBodyCreateInfo& createInfo ) override;
 
-        FORCEINLINE JPH::PhysicsSystem* GetPhysicsSystem() { return physicsSystem_; }
+        FORCEINLINE JPH::PhysicsSystem* GetPhysicsSystem() { return _physicsSystem; }
     
     private:
-        JPH::PhysicsSystem* physicsSystem_;
-        JPH::BroadPhaseLayerInterface* broadPhaseLayerInterface_;
-        JPH::ObjectVsBroadPhaseLayerFilter* objectVsBroadphaseLayerFilter_;
-        JPH::ObjectLayerPairFilter* objectVSObjectLayerFilter_;
-        JPH::BodyActivationListener* bodyActivationListener_;
-        JPH::ContactListener* contactListener_;
+        JPH::PhysicsSystem* _physicsSystem;
+        JPH::BroadPhaseLayerInterface* _broadPhaseLayerInterface;
+        JPH::ObjectVsBroadPhaseLayerFilter* _objectVsBroadphaseLayerFilter;
+        JPH::ObjectLayerPairFilter* _objectVSObjectLayerFilter;
+        JPH::BodyActivationListener* _bodyActivationListener;
+        JPH::ContactListener* _contactListener;
     };
 }

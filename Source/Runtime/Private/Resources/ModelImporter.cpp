@@ -14,9 +14,9 @@
 
 namespace EE
 {
-    bool ModelImporter::TaskRunning;
-    std::queue<ModelImporter::Task*> ModelImporter::pendingTasks = std::queue<Task*>();
-    std::future<bool> ModelImporter::currentFutureTask;
+    bool ModelImporter::sTaskRunning;
+    std::queue<ModelImporter::Task*> ModelImporter::sPendingTasks = std::queue<Task*>();
+    std::future<bool> ModelImporter::sCurrentFutureTask;
     std::mutex ModelImporterQueueLock;
 
     ModelNode& ModelNode::operator=( const ModelNode& other )
@@ -76,16 +76,13 @@ namespace EE
 
     void ModelImporter::UpdateStatus()
     {
-        if ( !pendingTasks.empty() && currentFutureTask.valid() && !TaskRunning )
+        if ( !sTaskRunning )
         {
-            currentFutureTask.get();
-            pendingTasks.front()->finishTaskFunction( pendingTasks.front()->info );
-            delete pendingTasks.front();
-            pendingTasks.pop();
+            FinishCurrentAsyncTask();
         }
-        if ( !pendingTasks.empty() && !currentFutureTask.valid() && !TaskRunning )
+        if ( !sPendingTasks.empty() && !sCurrentFutureTask.valid() && !sTaskRunning )
         {
-            pendingTasks.front()->futureTask( pendingTasks.front()->info, pendingTasks.front()->options, currentFutureTask );
+            sPendingTasks.front()->Start( sCurrentFutureTask );
         }
     }
 
@@ -95,44 +92,44 @@ namespace EE
         {
             FinishCurrentAsyncTask();
             UpdateStatus();
-        } while ( !pendingTasks.empty() );
+        } while ( !sPendingTasks.empty() );
     }
 
     void ModelImporter::FinishCurrentAsyncTask()
     {
-        if ( !pendingTasks.empty() && currentFutureTask.valid() )
+        if ( !sPendingTasks.empty() && sCurrentFutureTask.valid() )
         {
-            currentFutureTask.get();
-            pendingTasks.front()->finishTaskFunction( pendingTasks.front()->info );
-            delete pendingTasks.front();
-            pendingTasks.pop();
+            sCurrentFutureTask.get();
+            sPendingTasks.front()->Finish();
+            delete sPendingTasks.front();
+            sPendingTasks.pop();
         }
     }
 
     size_t ModelImporter::GetAsyncTaskCount()
     {
-        return pendingTasks.size();
+        return sPendingTasks.size();
     }
 
     void ModelImporter::Exit()
     {
-        if ( currentFutureTask.valid() )
-            currentFutureTask.get();
+        if ( sCurrentFutureTask.valid() )
+            sCurrentFutureTask.get();
     }
 
     bool ModelImporter::Load( ModelResult& info, const Options& options )
     {
         if ( options.file.IsValid() == false ) return false;
 
-        if ( TaskRunning )
+        if ( sTaskRunning )
         {
             FinishCurrentAsyncTask();
         }
 
-        TaskRunning = true;
+        sTaskRunning = true;
         EE_LOG_INFO( "Reading File Model '{}'", options.file.GetShortPath() );
         RecognizeFileExtensionAndLoad( info, options );
-        TaskRunning = false;
+        sTaskRunning = false;
         return info.isValid;
     }
 
@@ -140,11 +137,11 @@ namespace EE
     {
         if ( options.file.IsValid() == false ) return;
 
-        pendingTasks.push(
-            new Task { options, then, []( ModelResult& data, const Options& options, std::future<bool>& futureTask )
+        sPendingTasks.push(
+            new Task( options, then, []( ModelResult& data, const Options& options, std::future<bool>& futureTask )
             {
                 futureTask = std::async( std::launch::async, Load, std::ref( data ),  std::ref( options ) );
-            } }
+            })
         );
     }
 
@@ -164,7 +161,17 @@ namespace EE
     }
 
     ModelImporter::Task::Task( const Options& options, FinishTaskFunction finishTaskFunction, FutureTask futureTask ) :
-        info(), options( options ), finishTaskFunction( finishTaskFunction ), futureTask( futureTask )
+        _result(), _options( options ), _finishTaskFunction( finishTaskFunction ), _futureTask( futureTask )
     {
+    }
+
+    void ModelImporter::Task::Start( std::future<bool>& task )
+    {
+        _futureTask( _result, _options, task );
+    }
+
+    void ModelImporter::Task::Finish()
+    {
+        _finishTaskFunction( _result );
     }
 }

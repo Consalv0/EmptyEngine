@@ -31,31 +31,37 @@ namespace EE
 
             void Populate( const UIntVector3& extents, EPixelFormat format, const void* data );
 
-            constexpr const PixelMap& GetPixelMap() const { return pixelMap_; }
+            constexpr const PixelMap& GetPixelMap() const { return _pixelMap; }
 
-            constexpr const bool& IsValid() const { return isValid_; }
+            constexpr const bool& IsValid() const { return _isValid; }
 
         private:
-            PixelMap pixelMap_;
+            PixelMap _pixelMap;
             //* The image has been succesfully loaded
-            bool isValid_;
+            bool _isValid;
         };
 
     private:
         typedef std::function<void( ImageResult& )> FinishTaskFunction;
         typedef std::function<void( ImageResult&, const Options&, std::future<bool>& )> FutureTask;
 
-        static bool TaskRunning;
+        static bool sTaskRunning;
 
-        struct Task
+        class Task
         {
-            Options options;
-            ImageResult result;
-            FinishTaskFunction finishTaskFunction;
-            FutureTask futureTask;
-
-            Task( const Task& Other ) = delete;
+        public:
+            Task( const Task& other ) = delete;
             Task( const Options& options, FinishTaskFunction finishTaskFunction, FutureTask futureTask );
+
+        public:
+            void Start( std::future<bool>& task );
+            void Finish();
+
+        private:
+            Options _options;
+            ImageResult _result;
+            FinishTaskFunction _finishTaskFunction;
+            FutureTask _futureTask;
         };
 
         static bool RecognizeFileExtensionAndLoad( ImageResult& result, const Options& options );
@@ -63,8 +69,8 @@ namespace EE
         static void FinishCurrentAsyncTask();
 
         //* Mesh Loading Threads
-        static std::queue<Task*> pendingTasks;
-        static std::future<bool> currentFutureTask;
+        static std::queue<Task*> sPendingTasks;
+        static std::future<bool> sCurrentFutureTask;
 
     public:
         static bool Initialize();

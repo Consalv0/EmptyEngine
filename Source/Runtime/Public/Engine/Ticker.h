@@ -5,30 +5,30 @@ namespace EE
 	struct Timestamp
 	{
 	public:
-		Timestamp() : mLastEpochTime(), mNowEpochTime() {}
+		Timestamp() : _lastEpochTime(), _nowEpochTime() {}
 
 		Timestamp( uint64 last, uint64 now)
-			: mLastEpochTime(last), mNowEpochTime(now) { };
+			: _lastEpochTime(last), _nowEpochTime(now) { };
 
 	public:
 		template<typename T>
 		FORCEINLINE typename T::ReturnType GetDeltaTime() const
 		{ 
-			return (mNowEpochTime - mLastEpochTime) / (typename T::ReturnType)T::GetSizeInNano();
+			return (_nowEpochTime - _lastEpochTime) / (typename T::ReturnType)T::GetSizeInNano();
 		};
 
 		void Begin();
 
 		void Stop();
 
-		uint64 GetLastEpoch() const { return mLastEpochTime; };
-		uint64 GetNowEpoch() const { return mNowEpochTime; };
+		uint64 GetLastEpoch() const { return _lastEpochTime; };
+		uint64 GetNowEpoch() const { return _nowEpochTime; };
 
 		Timestamp operator+(const Timestamp& other);
 
 	private:
-		uint64 mLastEpochTime;
-		uint64 mNowEpochTime;
+		uint64 _lastEpochTime;
+		uint64 _nowEpochTime;
 	};
 
 	class Ticker
@@ -43,10 +43,10 @@ namespace EE
 		using Second = Duration<1000000000, double>;
 		using Minute = Duration<166666666667, double>;
 
-		static uint64 sMaxUpdateDeltaMicro;
+		static uint64 sMaxUpdateDeltaNano;
 		static uint64 sMaxRenderDeltaNano;
 
-		FORCEINLINE static bool IsSkippingRender() { return sSkipRender; };
+		FORCEINLINE static bool IsSkippingRender() { return _sSkipRender; };
 
 	private:
 		friend class Application;
@@ -59,18 +59,18 @@ namespace EE
 		// static void FixedTick();
 
 		// Time since the last tick callback
-		static uint64 sLastUpdateNano;
-		static uint64 sLastDeltaNano;
+		static uint64 _sLastUpdateNano;
+		static uint64 _sLastDeltaNano;
 
-		static bool sHasStarted;
+		static bool _sHasStarted;
 
-		static uint32 sTickCount;
-		static uint64 sTickAverage;
-		static const uint32 sMaxTickSamples = 25;
-		static uint64 sTickBuffer[sMaxTickSamples];
+		static uint32 _sTickCount;
+		static uint64 _sTickAverage;
+		static const uint32 _sMaxTickSamples = 25;
+		static uint64 _sTickBuffer[_sMaxTickSamples];
 		
-		static uint64 sRenderDeltaTimeSum;
-		static bool sSkipRender;
+		static uint64 _sRenderDeltaTimeSum;
+		static bool _sSkipRender;
 
         static uint64 GetEpochTimeNanoNow();
 
@@ -82,21 +82,21 @@ namespace EE
 		template<typename T>
 		static inline typename T::ReturnType GetDeltaTime()
 		{
-			return (sLastDeltaNano) / (typename T::ReturnType)T::GetSizeInNano();
+			return (_sLastDeltaNano) / (typename T::ReturnType)T::GetSizeInNano();
 		}
 
 		// Get the application tick average
 		template<typename T>
 		static inline typename T::ReturnType GetAverageDelta()
 		{
-			return (typename T::ReturnType)sTickAverage / (typename T::ReturnType)T::GetSizeInNano();
+			return (typename T::ReturnType)_sTickAverage / (typename T::ReturnType)T::GetSizeInNano();
 		}
 
 		// Get the application frame rate
 		template<typename T>
 		static inline typename T::ReturnType GetFrameRate()
 		{
-			return (typename T::ReturnType)(1) / ((typename T::ReturnType)sTickAverage / (typename T::ReturnType)T::GetSizeInNano());
+			return (typename T::ReturnType)(1) / ((typename T::ReturnType)_sTickAverage / (typename T::ReturnType)T::GetSizeInNano());
 		}
 
 		// Machine Time

@@ -395,7 +395,7 @@ namespace EE
 
         const UIntVector3& GetExtents() const override { return extents_; };
 
-        const EPixelFormat& GetFormat() const override { return pixelFormat_; };
+        const EPixelFormat& GetFormat() const override { return _pixelFormat; };
 
         bool IsValid() const override;
 
@@ -407,7 +407,7 @@ namespace EE
         VkFormat format_;
         bool ownership_;
 
-        EPixelFormat pixelFormat_;
+        EPixelFormat _pixelFormat;
     };
 
     class VulkanRHISwapChain final : public RHISwapChain

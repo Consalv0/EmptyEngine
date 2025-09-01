@@ -15,7 +15,7 @@ namespace EE
 
         virtual EDynamicRHI GetPreferedRHI() const = 0;
 
-        bool HasErrors() { return initializationError_; };
+        bool HasErrors() { return _initializationError; };
 
     protected:
         Application();
@@ -45,10 +45,10 @@ namespace EE
         void Terminate();
 
     private:
-        bool initialized_;
+        bool _initialized;
 
     protected:
-        bool initializationError_;
+        bool _initializationError;
     };
 
     extern Application* GMainApplication;

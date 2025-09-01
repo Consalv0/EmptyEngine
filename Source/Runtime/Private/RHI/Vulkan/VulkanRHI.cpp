@@ -1993,19 +1993,19 @@ namespace EE
         device_( device ),
         extents_( info.extents ),
         format_( ConvertPixelFormat( info.format ) ),
-        pixelFormat_( ConvertImageFormat( format_ ) ),
+        _pixelFormat( ConvertImageFormat( format_ ) ),
         memory_( VK_NULL_HANDLE ),
         image_( image ),
         ownership_( false )
     {
-        pixelFormat_ = ConvertImageFormat( format_ );
+        _pixelFormat = ConvertImageFormat( format_ );
     }
 
     VulkanRHITexture::VulkanRHITexture( const RHITextureCreateInfo& info, VulkanRHIDevice* device ) :
         device_( device ),
         extents_( info.extents ),
         format_( ConvertPixelFormat( info.format ) ),
-        pixelFormat_( ConvertImageFormat( format_ ) ),
+        _pixelFormat( ConvertImageFormat( format_ ) ),
         memory_( VK_NULL_HANDLE ), image_( VK_NULL_HANDLE ),
         ownership_( true )
     {

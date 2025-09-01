@@ -12,19 +12,18 @@ namespace EE
         public:
             union
             {
-                struct { T m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33; };
+                struct { T c0r0, c0r1, c0r2, c0r3, c1r0, c1r1, c1r2, c1r3, c2r0, c2r1, c2r2, c2r3, c3r0, c3r1, c3r2, c3r3; };
                 struct { TVector4<T> c0, c1, c2, c3; };
-                struct { TVector4<T> x, y, z, w; };
             };
 
             HOST_DEVICE FORCEINLINE constexpr TMatrix4x4();
             HOST_DEVICE FORCEINLINE constexpr TMatrix4x4( const TMatrix4x4& other );
-            HOST_DEVICE FORCEINLINE constexpr TMatrix4x4( const TVector4<T>& col0, const TVector4<T>& col1, const TVector4<T>& col2, const TVector4<T> col3 );
+            HOST_DEVICE FORCEINLINE constexpr TMatrix4x4( const TVector4<T>& column0, const TVector4<T>& column1, const TVector4<T>& column2, const TVector4<T> column3 );
             HOST_DEVICE FORCEINLINE constexpr TMatrix4x4(
-                T m00, T m01, T m02, T m03,
-                T m10, T m11, T m12, T m13,
-                T m20, T m21, T m22, T m23,
-                T m30, T m31, T m32, T m33
+                T c0r0, T c0r1, T c0r2, T c0r3,
+                T c1r0, T c1r1, T c1r2, T c1r3,
+                T c2r0, T c2r1, T c2r2, T c2r3,
+                T c3r0, T c3r1, T c3r2, T c3r3
             );
 
             HOST_DEVICE inline static TMatrix4x4 Identity();
@@ -49,22 +48,22 @@ namespace EE
             HOST_DEVICE inline TMatrix4x4 Inversed() const;
 
             HOST_DEVICE inline TVector4<T> GetRow( const unsigned char& i ) const;
-            HOST_DEVICE inline TVector4<T> GetColumn( const unsigned char& i ) const;
+            HOST_DEVICE inline TVector4<T>& GetColumn( const unsigned char& i ) const;
             HOST_DEVICE inline TVector3<T> ExtractScale() const;
             HOST_DEVICE inline TVector3<T> ExtractTranslation() const;
             HOST_DEVICE inline TQuaternion<T> ExtractRotation() const;
 
             HOST_DEVICE inline TVector4<T>& operator[]( unsigned char i );
             HOST_DEVICE inline TVector4<T> const& operator[]( unsigned char i ) const;
-            HOST_DEVICE inline const T* PointerToValue( void ) const;
+            HOST_DEVICE inline const T* PointerToValue() const;
 
             HOST_DEVICE inline TVector4<T> MultiplyPoint( const TVector3<T>& vector ) const;
             HOST_DEVICE inline TVector4<T> MultiplyPoint( const TVector4<T>& vector ) const;
-              HOST_DEVICE inline TVector4<T> MultiplyPointTransposed( const TVector4<T>& vector ) const;
-              HOST_DEVICE FORCEINLINE TMatrix4x4<T> Multiply( const TMatrix4x4<T>& vector ) const;
-              HOST_DEVICE FORCEINLINE TMatrix4x4<T> MultiplyTransposed( const TMatrix4x4<T>& vector ) const;
-              HOST_DEVICE inline TVector4<T> Multiply( const TVector4<T>& vector ) const;
-              HOST_DEVICE inline TVector4<T> MultiplyTransposed( const TVector4<T>& vector ) const;
+            HOST_DEVICE inline TVector4<T> MultiplyPointTransposed( const TVector4<T>& vector ) const;
+            HOST_DEVICE FORCEINLINE TMatrix4x4<T> Multiply( const TMatrix4x4<T>& vector ) const;
+            HOST_DEVICE FORCEINLINE TMatrix4x4<T> MultiplyTransposed( const TMatrix4x4<T>& vector ) const;
+            HOST_DEVICE inline TVector4<T> Multiply( const TVector4<T>& vector ) const;
+            HOST_DEVICE inline TVector4<T> MultiplyTransposed( const TVector4<T>& vector ) const;
             HOST_DEVICE inline TVector3<T> MultiplyVector( const TVector3<T>& vector ) const;
 
             HOST_DEVICE FORCEINLINE TMatrix4x4 operator*( const TMatrix4x4& other ) const;
@@ -75,10 +74,10 @@ namespace EE
 
             template<typename R>
             explicit TMatrix4x4<T>( const TMatrix4x4<R>& other ) : TMatrix4x4<T>( 
-                T( other.m00 ), T( other.m01 ), T( other.m02 ), T( other.m03 ),
-                T( other.m10 ), T( other.m11 ), T( other.m12 ), T( other.m13 ),
-                T( other.m20 ), T( other.m21 ), T( other.m22 ), T( other.m23 ),
-                T( other.m30 ), T( other.m31 ), T( other.m32 ), T( other.m33 ) ) {}
+                T( other.c0r0 ), T( other.c0r1 ), T( other.c0r2 ), T( other.c0r3 ),
+                T( other.c1r0 ), T( other.c1r1 ), T( other.c1r2 ), T( other.c1r3 ),
+                T( other.c2r0 ), T( other.c2r1 ), T( other.c2r2 ), T( other.c2r3 ),
+                T( other.c3r0 ), T( other.c3r1 ), T( other.c3r2 ), T( other.c3r3 ) ) {}
         };
     }
 }

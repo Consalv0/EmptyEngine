@@ -34,32 +34,32 @@ namespace EE
 		void SetData( int32 width, int32 height, int32 depth, EPixelFormat pixelFormat, const void* data );
 
 		//* Width in pixels. 
-		constexpr inline uint32 GetWidth() const { return width_; };
+		constexpr inline uint32 GetWidth() const { return _width; };
 
 		//* Height in pixels.
-		constexpr inline uint32 GetHeight() const { return height_; };
+		constexpr inline uint32 GetHeight() const { return _height; };
 
 		//* Depth in pixels.
-		constexpr inline uint32 GetDepth() const { return depth_; };
+		constexpr inline uint32 GetDepth() const { return _depth; };
 
-		constexpr inline UIntVector3 GetExtents() const { return { width_, height_, depth_ }; }
+		constexpr inline UIntVector3 GetExtents() const { return { _width, _height, _depth }; }
 
-		constexpr inline bool IsEmpty() const { return data_ == NULL; };
+		constexpr inline bool IsEmpty() const { return _data == NULL; };
 
 		size_t GetSize() const;
 
-		inline EPixelFormat GetFormat() const { return pixelFormat_; };
+		inline EPixelFormat GetFormat() const { return _pixelFormat; };
 
-		constexpr const void* GetData() const { return data_; }
+		constexpr const void* GetData() const { return _data; }
 
 		~PixelMap();
 
 	private:
 		friend class PixelMapUtility;
 
-		void* data_;
-		EPixelFormat pixelFormat_;
-		uint32 width_, height_, depth_;
+		void* _data;
+		EPixelFormat _pixelFormat;
+		uint32 _width, _height, _depth;
 	};
 
 	class PixelMapUtility
